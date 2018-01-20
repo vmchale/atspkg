@@ -1,0 +1,80 @@
+name:                ats-pkg
+version:             0.1.0.0
+synopsis:            Package manager for ATS
+description:         A collection of scripts to make building ATS projects easy.
+homepage:            https://github.com/vmchale/ats-pkg#readme
+license:             BSD3
+license-file:        LICENSE
+author:              Vanessa McHale
+maintainer:          vamchale@gmail.com
+copyright:           Copyright: (c) 2017 Vanessa McHale
+category:            Development
+build-type:          Simple
+extra-doc-files:     README.md
+data-files:          .travis.yml
+                   , appveyor.yml
+extra-source-files:  stack.yaml
+cabal-version:       >=1.18
+
+Flag development {
+  Description: Enable `-Werror`
+  manual: True
+  default: False
+}
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     Language.ATS.Package
+                     , Language.ATS.Package.Exec
+                     , Language.ATS.Package.Contents
+  build-depends:       base >= 4.7 && < 5
+                     , htoml-megaparsec
+                     , http-client
+                     , filemanip
+                     , bytestring
+                     , tar
+                     , zlib
+                     , http-client-tls
+                     , directory
+                     , optparse-applicative
+                     , process
+                     , unix
+  default-language:    Haskell2010
+  if flag(development)
+    ghc-options: -Werror
+  ghc-options:         -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat
+
+executable atspkg
+  hs-source-dirs:      app
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , ats-pkg
+  default-language:    Haskell2010
+  if flag(development)
+    ghc-options: -Werror
+  ghc-options:         -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat
+
+test-suite ats-pkg-test
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Spec.hs
+  build-depends:       base
+                     , ats-pkg
+                     , hspec
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat
+  default-language:    Haskell2010
+
+benchmark ats-pkg-bench
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      bench
+  main-is:             Bench.hs
+  build-depends:       base
+                     , ats-pkg
+                     , criterion
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -O3 -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat
+  default-language:    Haskell2010
+
+source-repository head
+  type:     git
+  location: https://github.com/vmchale/ats-pkg

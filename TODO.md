@@ -1,0 +1,2 @@
+- [ ] fix tarball issues
+- [ ] make paths portable for windows
