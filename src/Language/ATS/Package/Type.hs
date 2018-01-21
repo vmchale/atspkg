@@ -18,8 +18,12 @@ mkPkg :: IO ()
 mkPkg = shake shakeOptions
     (pkgToAction =<< liftIO (input auto "./atspkg.dhall"))
 
+-- TODO need @atspkg.dhall@
 pkgToAction :: Pkg -> Rules ()
-pkgToAction (Pkg bs ts) = mapM_ g (bs ++ ts) >> want (TL.unpack . target <$> bs)
+pkgToAction (Pkg bs ts) =
+    mapM_ g (bs ++ ts) >>
+    want (TL.unpack . target <$> bs)
+
     where g (Bin s t ls) = atsBin (TL.unpack <$> ls) (TL.unpack s) (TL.unpack t)
 
 data Bin = Bin { src :: Text, target :: Text, libs :: [Text] }
