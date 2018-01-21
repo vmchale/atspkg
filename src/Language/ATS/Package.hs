@@ -7,11 +7,11 @@ module Language.ATS.Package
     , setupCompiler
     ) where
 
-import Data.List (intercalate)
 import qualified Codec.Archive.Tar       as Tar
 import           Codec.Compression.GZip  (compress, decompress)
 import           Control.Monad           (void, when)
 import qualified Data.ByteString.Lazy    as BS
+import           Data.List               (intercalate)
 import           Network.HTTP.Client     hiding (decompress)
 import           Network.HTTP.Client.TLS (tlsManagerSettings)
 import           System.Directory
@@ -37,7 +37,7 @@ compilerDir = (++ "/.atspkg/compiler") <$> getEnv "HOME"
 
 packageCompiler :: FilePath -> IO ()
 packageCompiler directory = do
-    files <- find (return True) (return True) directory
+    files <- find (pure True) (pure True) directory
     bytes <- fmap Tar.write . Tar.pack directory $ fmap (drop $ length (directory :: String) + 1) files
     BS.writeFile (directory ++ ".tar.gz") (compress bytes)
 
@@ -65,10 +65,8 @@ setupCompiler = do
     let configurePath = cd ++ "/configure"
     setFileMode configurePath ownerModes
     setFileMode (cd ++ "/autogen.sh") ownerModes
-    o <- readCreateProcess ((proc (cd ++ "/autogen.sh") []) { cwd = Just cd }) ""
-    putStr o
-    o' <- readCreateProcess ((proc configurePath ["--prefix", cd]) { cwd = Just cd }) ""
-    putStr o'
+    void $ readCreateProcess ((proc (cd ++ "/autogen.sh") []) { cwd = Just cd }) ""
+    void $ readCreateProcess ((proc configurePath ["--prefix", cd]) { cwd = Just cd }) ""
 
     putStrLn "building compiler..."
-    void $ readCreateProcess ((proc "make" []) { cwd = Just cd }) ""
+    void $ readCreateProcess ((proc "make" []) { cwd = Just cd, std_err = CreatePipe }) ""

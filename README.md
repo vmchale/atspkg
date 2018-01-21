@@ -1,5 +1,3 @@
 # ats-pkg
 
-## Installation
-
-## Configuration
+Still under construction; can do a few trivial things already.
