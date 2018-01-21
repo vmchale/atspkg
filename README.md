@@ -9,7 +9,7 @@ is currently a work-in-progress. You can see a working example
 Currently, the best way to install is
 
 ```
-cabal new-install atspkg --symlink-bindor ~/.local/bin
+cabal new-install ats-pkg --symlink-bindir ~/.local/bin
 ```
 
 Make sure that `~/.local/bin` is on your `PATH`.
