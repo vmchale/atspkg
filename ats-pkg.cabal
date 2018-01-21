@@ -28,6 +28,7 @@ library
                      , Language.ATS.Package.Exec
                      , Language.ATS.Package.Contents
                      , Language.ATS.Package.Type
+                     , Language.ATS.Package.Dependency
   build-depends:       base >= 4.7 && < 5
                      , http-client
                      , filemanip
@@ -40,6 +41,7 @@ library
                      , directory
                      , optparse-applicative
                      , process
+                     , parallel-io
                      , unix
                      , dhall
                      , mtl
