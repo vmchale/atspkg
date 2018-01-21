@@ -1,8 +1,11 @@
 ---
-resolver: lts-9.17
+resolver: lts-10.3
 packages:
   - '.'
-extra-deps: []
+extra-deps:
+  - shake-ext-0.4.0.2
+  - composition-prelude-1.1.0.0
+  - language-ats-0.1.0.3
 flags:
   ats-pkg:
     development: false

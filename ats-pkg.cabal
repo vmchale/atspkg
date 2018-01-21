@@ -29,7 +29,6 @@ library
                      , Language.ATS.Package.Contents
                      , Language.ATS.Package.Type
   build-depends:       base >= 4.7 && < 5
-                     , htoml-megaparsec
                      , http-client
                      , filemanip
                      , bytestring
