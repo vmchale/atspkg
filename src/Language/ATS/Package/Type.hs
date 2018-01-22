@@ -20,11 +20,11 @@ import           Development.Shake.ATS
 import           Development.Shake.FilePath
 import           Development.Shake.Man
 import           Dhall
-import           GHC.Conc                   (numCapabilities)
+-- import           GHC.Conc                   (numCapabilities)
 
 options :: ShakeOptions
 options = shakeOptions { shakeFiles = ".atspkg"
-                       , shakeThreads = numCapabilities
+                       , shakeThreads = 4
                        }
 
 mkPkg :: IO ()
@@ -89,7 +89,7 @@ pkgToAction (Pkg bs ts mt) = do
         (Just m) -> want (manTarget m : bins)
         Nothing  -> want bins
 
-    where g (Bin s t ls gc') = atsBin gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack t)
+    where g (Bin s t ls gc') = atsBin (Version [0,3,8]) gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack t)
 
 -- TODO configuration for a library?
 

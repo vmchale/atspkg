@@ -39,13 +39,11 @@ library
                      , http-client-tls
                      , text
                      , directory
-                     , optparse-applicative
                      , process
                      , parallel-io
                      , unix
                      , dhall
-                     , mtl
-                     , shake-ext >= 0.4.2.0
+                     , shake-ext >= 0.5.0.0
                      , composition-prelude >= 1.1.0.1
   default-language:    Haskell2010
   if flag(development)
@@ -62,16 +60,6 @@ executable atspkg
   if flag(development)
     ghc-options: -Werror
   ghc-options:         -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat
-
-test-suite ats-pkg-test
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      test
-  main-is:             Spec.hs
-  build-depends:       base
-                     , ats-pkg
-                     , hspec
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat
-  default-language:    Haskell2010
 
 source-repository head
   type:     git
