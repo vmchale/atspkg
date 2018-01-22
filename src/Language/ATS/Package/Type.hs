@@ -88,9 +88,9 @@ pkgToAction (Pkg bs ts mt) = do
         (Just m) -> want (asTarget m : bins)
         Nothing  -> want bins
 
-    where g (Bin s t ls) = atsBin (TL.unpack <$> ls) (TL.unpack s) (TL.unpack t)
+    where g (Bin s t ls gc') = atsBin gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack t)
 
-data Bin = Bin { src :: Text, target :: Text, libs :: [Text] }
+data Bin = Bin { src :: Text, target :: Text, libs :: [Text], gc :: Bool }
     deriving (Show, Eq, Generic, Interpret)
 
 data Pkg = Pkg { bin :: [Bin], test :: [Bin], man :: Maybe Text }
