@@ -1,5 +1,5 @@
 name:                ats-pkg
-version:             0.3.0.0
+version:             0.3.0.1
 synopsis:            Package manager for ATS
 description:         A collection of scripts to make building ATS projects easy.
 homepage:            https://github.com/vmchale/ats-pkg#readme
@@ -43,7 +43,7 @@ library
                      , parallel-io
                      , unix
                      , dhall
-                     , shake-ext >= 0.5.0.0
+                     , shake-ext >= 0.5.0.1
                      , composition-prelude >= 1.1.0.1
   default-language:    Haskell2010
   if flag(development)
