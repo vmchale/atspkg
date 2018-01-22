@@ -1,7 +1,6 @@
 constraints: ats-pkg +development
 with-compiler: ghc-8.2.2
-tests: True
-benchmarks: True
+-- tests: True
 documentation: True
 haddock-hoogle: True
 haddock-internal: True
