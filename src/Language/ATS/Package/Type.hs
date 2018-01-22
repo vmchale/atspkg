@@ -20,7 +20,6 @@ import           Development.Shake.ATS
 import           Development.Shake.FilePath
 import           Development.Shake.Man
 import           Dhall
--- import           GHC.Conc                   (numCapabilities)
 
 options :: ShakeOptions
 options = shakeOptions { shakeFiles = ".atspkg"
@@ -81,7 +80,7 @@ mkTest =
         mapM_ cmd_ tests
 
 pkgToAction :: Pkg -> Rules ()
-pkgToAction (Pkg bs ts mt) = do
+pkgToAction (Pkg bs ts mt v) = do
     action (need ["atspkg.dhall"])
     mapM_ g (bs ++ ts)
     let bins = TL.unpack . target <$> bs
@@ -89,14 +88,14 @@ pkgToAction (Pkg bs ts mt) = do
         (Just m) -> want (manTarget m : bins)
         Nothing  -> want bins
 
-    where g (Bin s t ls gc') = atsBin (Version [0,3,8]) gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack t)
+    where g (Bin s t ls gc') = atsBin (Version v) gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack t)
 
 -- TODO configuration for a library?
 
 data Bin = Bin { src :: Text, target :: Text, libs :: [Text], gc :: Bool }
     deriving (Show, Eq, Generic, Interpret)
 
-data Pkg = Pkg { bin :: [Bin], test :: [Bin], man :: Maybe Text }
+data Pkg = Pkg { bin :: [Bin], test :: [Bin], man :: Maybe Text, version :: [Integer] }
     deriving (Show, Eq, Generic, Interpret)
 
 printConfig :: IO ()
