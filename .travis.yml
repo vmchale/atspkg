@@ -50,6 +50,7 @@ script:
       yamllint stack.yaml
       yamllint appveyor.yml
       yamllint .travis.yml
+      yamllint .yamllint
     else
       echo "skipping yaml verification..."
     fi
