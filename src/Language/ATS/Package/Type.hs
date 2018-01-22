@@ -20,10 +20,11 @@ import           Development.Shake.ATS
 import           Development.Shake.FilePath
 import           Development.Shake.Man
 import           Dhall
+import           GHC.Conc                   (numCapabilities)
 
 options :: ShakeOptions
 options = shakeOptions { shakeFiles = ".atspkg"
-                       , shakeThreads = 4
+                       , shakeThreads = numCapabilities
                        }
 
 mkPkg :: IO ()
@@ -44,8 +45,8 @@ mkManpage = do
 getConfig :: MonadIO m => m Pkg
 getConfig = liftIO (input auto "./atspkg.dhall")
 
-asTarget :: Text -> FilePath
-asTarget m = TL.unpack m -<.> "1"
+manTarget :: Text -> FilePath
+manTarget m = TL.unpack m -<.> "1"
 
 mkInstall :: Rules ()
 mkInstall =
@@ -58,7 +59,7 @@ mkInstall =
         void $ zipWithM copyFile' bins binDest
         case man config of
             Just mt -> do
-                let mt' = asTarget mt
+                let mt' = manTarget mt
                     manDest = (home <> "/.local/share/man/man1/") <> mt'
                 need [mt']
                 copyFile' mt' manDest
@@ -79,16 +80,18 @@ mkTest =
         need tests
         mapM_ cmd_ tests
 
--- TODO need @atspkg.dhall@
 pkgToAction :: Pkg -> Rules ()
 pkgToAction (Pkg bs ts mt) = do
+    action (need ["atspkg.dhall"])
     mapM_ g (bs ++ ts)
     let bins = TL.unpack . target <$> bs
     case mt of
-        (Just m) -> want (asTarget m : bins)
+        (Just m) -> want (manTarget m : bins)
         Nothing  -> want bins
 
     where g (Bin s t ls gc') = atsBin gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack t)
+
+-- TODO configuration for a library?
 
 data Bin = Bin { src :: Text, target :: Text, libs :: [Text], gc :: Bool }
     deriving (Show, Eq, Generic, Interpret)
