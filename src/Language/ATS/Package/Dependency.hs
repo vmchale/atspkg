@@ -1,18 +1,31 @@
+{-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Language.ATS.Package.Dependency ( fetchDeps
-                                       , fetchFastArithmeticDeps
+module Language.ATS.Package.Dependency ( -- * Functions
+                                         fetchDeps
+                                       -- * Types
+                                       , Dependency (..)
+                                       -- * Dependency constants
+                                       , atsPrelude
+                                       , atsIntinf
+                                       , atsGMP
                                        ) where
 
 import qualified Codec.Archive.Tar                    as Tar
 import           Codec.Compression.GZip               (decompress)
 import           Control.Concurrent.ParallelIO.Global
 import           Control.Monad
+import           Dhall
 import           Network.HTTP.Client                  hiding (decompress)
 import           Network.HTTP.Client.TLS              (tlsManagerSettings)
 import           System.Directory
 
-data Dependency = Dependency String FilePath String
+-- | Type for a dependency
+data Dependency = Dependency { _libName :: String -- ^ Library name, e.g.
+                             , _dir     :: FilePath -- ^ Directory we should unpack to
+                             , _url     :: String -- ^ Url pointing to tarball
+                             }
+    deriving (Eq, Show, Generic)
 
 atsPrelude :: Dependency
 atsPrelude = Dependency "ats2-postiats-0.3.8-prelude" ".atspkg/prelude" "https://downloads.sourceforge.net/project/ats2-lang/ats2-lang/ats2-postiats-0.3.8/ATS2-Postiats-include-0.3.8.tgz"
@@ -22,9 +35,6 @@ atsIntinf = Dependency "atscntrb-hs-intinf-1.0.6" ".atspkg/contrib/atscntrb-hx-i
 
 atsGMP :: Dependency
 atsGMP = Dependency "atscntrb-libgmp-1.0.4" ".atspkg/contrib/atscntrb-libgmp" "https://registry.npmjs.org/atscntrb-libgmp/-/atscntrb-libgmp-1.0.4.tgz"
-
-fetchFastArithmeticDeps :: IO ()
-fetchFastArithmeticDeps = fetchDeps [atsPrelude, atsIntinf, atsGMP]
 
 fetchDeps :: [Dependency] -> IO ()
 fetchDeps deps = do
