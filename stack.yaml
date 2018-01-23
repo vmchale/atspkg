@@ -3,7 +3,7 @@ resolver: lts-10.3
 packages:
   - '.'
 extra-deps:
-  - shake-ext-0.5.0.4
+  - shake-ext-1.0.0.0
   - composition-prelude-1.1.0.1
   - language-ats-0.1.0.3
 flags:
