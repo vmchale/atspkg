@@ -68,8 +68,9 @@ mkInstall =
         home <- fromMaybe "" <$> getEnv "HOME"
         let binDest = ((home <> "/.local/bin/") <>) . takeBaseName <$> bins
         void $ zipWithM copyFile' bins binDest
+        pa <- pandoc
         case man config of
-            Just mt -> do
+            Just mt -> if not pa then pure () else do
                 let mt' = manTarget mt
                     manDest = (home <> "/.local/share/man/man1/") <> mt'
                 need [mt']
