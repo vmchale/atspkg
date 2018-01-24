@@ -6,9 +6,9 @@ set pipefail
 function getTarget {
     if [ "$(uname)" = "Darwin" ]
     then
-        echo "atspkg-$(uname -m)-apple-darwin"
+        echo "ats-pkg-$(uname -m)-apple-darwin"
     else
-        echo "atspkg-$(uname -m)-unknown-linux"
+        echo "ats-pkg-$(uname -m)-unknown-linux"
     fi
 }
 
