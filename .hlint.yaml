@@ -20,7 +20,7 @@
 - functions:
   - {name: unsafePerformIO, within: []}  # unsafePerformIO can appear nowhere
   - {name: error, within: []}  # throw real errors
-  - {name: undefined, within: []}
+  - {name: undefined, within: [Language.ATS.Package.Exec]}
   - {name: fromJust, within: []}  # this is hell to track down
   - {name: foldl, within: []}  # foldl has bad properties
 
