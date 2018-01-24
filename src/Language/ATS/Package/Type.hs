@@ -11,15 +11,16 @@ module Language.ATS.Package.Type ( Pkg (..)
                                  ) where
 
 import           Control.Composition
-import           Control.Monad.IO.Class     (MonadIO)
-import           Data.Maybe                 (fromMaybe)
-import           Data.Semigroup             (Semigroup (..))
-import qualified Data.Text.Lazy             as TL
+import           Control.Monad.IO.Class          (MonadIO)
+import           Data.Maybe                      (fromMaybe)
+import           Data.Semigroup                  (Semigroup (..))
+import qualified Data.Text.Lazy                  as TL
 import           Development.Shake
 import           Development.Shake.ATS
 import           Development.Shake.FilePath
 import           Development.Shake.Man
 import           Dhall
+import           Language.ATS.Package.Dependency
 
 options :: ShakeOptions
 options = shakeOptions { shakeFiles = ".atspkg"
@@ -94,7 +95,7 @@ pkgToAction (Pkg bs ts mt v) = do
 data Bin = Bin { src :: Text, target :: Text, libs :: [Text], gc :: Bool }
     deriving (Show, Eq, Generic, Interpret)
 
-data Pkg = Pkg { bin :: [Bin], test :: [Bin], man :: Maybe Text, version :: [Integer] }
+data Pkg = Pkg { bin :: [Bin], test :: [Bin], man :: Maybe Text, version :: [Integer], dependencies :: [Dependency] }
     deriving (Show, Eq, Generic, Interpret)
 
 printConfig :: IO ()
