@@ -26,7 +26,6 @@ library
   hs-source-dirs:      src
   exposed-modules:     Language.ATS.Package
                      , Language.ATS.Package.Exec
-                     , Language.ATS.Package.Contents
                      , Language.ATS.Package.Type
                      , Language.ATS.Package.Dependency
   build-depends:       base >= 4.7 && < 5
