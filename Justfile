@@ -14,4 +14,4 @@ ci: test
 install:
     @sn c .
     @cabal new-build
-    @cp $(fd 'atspkg$' -IH dist-newstyle | tail -n1) ~/.local/bin
+    @cp -f $(fd 'atspkg$' -IH dist-newstyle | tail -n1) ~/.local/bin
