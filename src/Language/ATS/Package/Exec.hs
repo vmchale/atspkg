@@ -1,5 +1,5 @@
 module Language.ATS.Package.Exec ( exec
-                                 , compiler
+                                 , buildAll
                                  ) where
 
 import           Data.Bool                 (bool)
@@ -11,15 +11,15 @@ import           System.Environment        (getEnv)
 check :: IO Bool
 check = do
     home <- getEnv "HOME"
-    doesFileExist (home ++ "/.atspkg/compiler/bin/patsopt")
+    doesFileExist (home ++ "/.atspkg/bin/patsopt")
 
 exec :: IO ()
-exec = mkPkg
+exec = bool mkPkg mkPkg =<< check
 
-compiler :: IO ()
-compiler = bool buildAll printConfig =<< check
+latest :: Version
+latest = Version [0,3,9]
 
 buildAll :: IO ()
 buildAll =
-    fetchCompiler >>
-    setupCompiler
+    fetchCompiler latest >>
+    setupCompiler latest
