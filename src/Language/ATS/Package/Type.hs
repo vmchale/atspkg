@@ -24,6 +24,7 @@ import           Dhall
 options :: ShakeOptions
 options = shakeOptions { shakeFiles = ".atspkg"
                        , shakeThreads = 4
+                       , shakeProgress = progressSimple
                        }
 
 mkPkg :: IO ()
