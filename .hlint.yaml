@@ -44,6 +44,7 @@
 # - group: {name: generalise, enabled: true}
 
 
+- ignore: {name: Unnecessary hiding, within: [Language.ATS.Package.Exec]}
 # Ignore some builtin hints
 # - ignore: {name: Use let}
 # - ignore: {name: Use const, within: SpecialModule} # Only within certain modules

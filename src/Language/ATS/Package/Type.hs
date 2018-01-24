@@ -25,15 +25,18 @@ options :: ShakeOptions
 options = shakeOptions { shakeFiles = ".atspkg"
                        , shakeThreads = 4
                        , shakeProgress = progressSimple
+                       , shakeColor = True
                        }
 
-mkPkg :: IO ()
-mkPkg = shakeArgs options $
+-- TODO verbosity & coloring?
+mkPkg :: [String] -> IO ()
+mkPkg rs = shake options $
+    want rs >>
     mkTest >>
     mkClean >>
     mkManpage >>
     mkInstall >>
-    (pkgToAction =<< getConfig)
+    (pkgToAction rs =<< getConfig)
 
 mkManpage :: Rules ()
 mkManpage = do
@@ -80,15 +83,16 @@ mkTest =
         need tests
         mapM_ cmd_ tests
 
-pkgToAction :: Pkg -> Rules ()
-pkgToAction (Pkg bs ts mt v v' ds) = do
+pkgToAction :: [String] -> Pkg -> Rules ()
+pkgToAction rs (Pkg bs ts mt v v' ds) = do
     liftIO $ fetchDeps ds
     action (need ["atspkg.dhall"])
     mapM_ g (bs ++ ts)
     let bins = TL.unpack . target <$> bs
-    case mt of
-        (Just m) -> want (manTarget m : bins)
-        Nothing  -> want bins
+    when (null rs) $
+        case mt of
+            (Just m) -> want (manTarget m : bins)
+            Nothing  -> want bins
 
     where g (Bin s t ls gc') = atsBin (Version v) (Version v') gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack t)
 
@@ -97,6 +101,8 @@ data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
                , libs   :: [Text] -- ^ Libraries to link against (e.g. @[ "pthread" ]@)
                , gc     :: Bool } -- ^ Whether to use the garbage collector
          deriving (Show, Eq, Generic, Interpret)
+
+-- data RemotePkg = RemotePkg Pkg Text
 
 data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , test         :: [Bin] -- ^ List of test suites

@@ -28,6 +28,7 @@ library
                      , Language.ATS.Package.Exec
                      , Language.ATS.Package.Type
                      , Language.ATS.Package.Dependency
+  other-modules:       Paths_ats_pkg
   build-depends:       base >= 4.7 && < 5
                      , http-client
                      , filemanip
@@ -45,6 +46,7 @@ library
                      , dhall
                      , shake-ext >= 1.2.0.0
                      , composition-prelude >= 1.1.0.1
+                     , optparse-applicative
   default-language:    Haskell2010
   if flag(development)
     ghc-options: -Werror
