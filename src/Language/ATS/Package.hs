@@ -5,6 +5,7 @@ module Language.ATS.Package
     , nuke
     , fetchCompiler
     , setupCompiler
+    , Version (..)
     ) where
 
 import qualified Codec.Archive.Tar       as Tar
@@ -20,20 +21,21 @@ import           System.FilePath.Find    (find)
 import           System.Posix.Files
 import           System.Process
 
-nuke :: IO ()
-nuke = do
+nuke :: Version -> IO ()
+nuke v = do
     putStrLn "Cleaning everything..."
-    b <- doesDirectoryExist =<< compilerDir
+    b <- doesDirectoryExist =<< compilerDir v
     when b
-        (removeDirectoryRecursive =<< compilerDir)
+        (removeDirectoryRecursive =<< compilerDir v)
 
 newtype Version = Version [Integer]
 
 instance Show Version where
     show (Version is) = intercalate "." (show <$> is)
 
-compilerDir :: IO FilePath
-compilerDir = (++ "/.atspkg/compiler") <$> getEnv "HOME"
+-- TODO depend on version
+compilerDir :: Version -> IO FilePath
+compilerDir v = (++ ("/.atspkg/" ++ show v)) <$> getEnv "HOME"
 
 packageCompiler :: FilePath -> IO ()
 packageCompiler directory = do
@@ -41,27 +43,30 @@ packageCompiler directory = do
     bytes <- fmap Tar.write . Tar.pack directory $ fmap (drop $ length (directory :: String) + 1) files
     BS.writeFile (directory ++ ".tar.gz") (compress bytes)
 
-fetchCompiler :: IO ()
-fetchCompiler = do
+pkgUrl :: Version -> String
+pkgUrl v = "https://downloads.sourceforge.net/project/ats2-lang/ats2-lang/ats2-postiats-" ++ show v ++ "/ATS2-Postiats-" ++ show v ++ ".tgz"
 
-    cd <- compilerDir
+fetchCompiler :: Version -> IO ()
+fetchCompiler v = do
+
+    cd <- compilerDir v
     needsSetup <- not <$> doesDirectoryExist cd
 
     when needsSetup $ do
 
         putStrLn "Fetching compiler..."
         manager <- newManager tlsManagerSettings
-        initialRequest <- parseRequest "https://github.com/vmchale/fastcat/releases/download/0.1.5/ATS2-Postiats-0.3.8.tar.gz"
+        initialRequest <- parseRequest $ pkgUrl v -- "https://github.com/vmchale/fastcat/releases/download/0.1.5/ATS2-Postiats-0.3.8.tar.gz"
         response <- responseBody <$> httpLbs (initialRequest { method = "GET" }) manager
 
         putStrLn "Unpacking compiler..."
         Tar.unpack cd . Tar.read . decompress $ response
 
-setupCompiler :: IO ()
-setupCompiler = do
+setupCompiler :: Version -> IO ()
+setupCompiler v = do
 
     putStrLn "configuring compiler..."
-    cd <- compilerDir
+    cd <- compilerDir v
     let configurePath = cd ++ "/configure"
     setFileMode configurePath ownerModes
     setFileMode (cd ++ "/autogen.sh") ownerModes
@@ -70,3 +75,4 @@ setupCompiler = do
 
     putStrLn "building compiler..."
     void $ readCreateProcess ((proc "make" []) { cwd = Just cd, std_err = CreatePipe }) ""
+    void $ readCreateProcess ((proc "make" ["install"]) { cwd = Just cd, std_err = CreatePipe }) ""
