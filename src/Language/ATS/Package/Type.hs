@@ -11,16 +11,17 @@ module Language.ATS.Package.Type ( Pkg (..)
 
 import           Control.Composition
 import           Control.Monad.IO.Class          (MonadIO)
-import           Data.Maybe                      (fromMaybe)
+import           Data.Maybe                      (fromMaybe, isJust)
 import           Data.Semigroup                  (Semigroup (..))
 import qualified Data.Text.Lazy                  as TL
 import           Development.Shake
 import           Development.Shake.ATS
 import           Development.Shake.FilePath
 import           Development.Shake.Man
-import           Dhall
+import           Dhall                           hiding (bool)
 import           Language.ATS.Package.Dependency
-import           System.Directory                (getCurrentDirectory)
+import           System.Directory                (findExecutable,
+                                                  getCurrentDirectory)
 
 options :: ShakeOptions
 options = shakeOptions { shakeFiles = ".atspkg"
@@ -38,11 +39,16 @@ mkPkg rs = shake options $
     mkInstall >>
     (pkgToAction rs =<< getConfig)
 
+pandoc :: (MonadIO m) => m Bool
+pandoc = isJust <$> liftIO (findExecutable "pandoc")
+
+
 mkManpage :: Rules ()
 mkManpage = do
     c <- getConfig
+    b <- pandoc
     case man c of
-        Just _ -> manpages
+        Just _ -> bool (pure ()) manpages b
         _      -> pure ()
 
 getConfig :: MonadIO m => m Pkg
@@ -91,9 +97,10 @@ pkgToAction rs (Pkg bs ts mt v v' ds) = do
     action (need ["atspkg.dhall"])
     mapM_ g (bs ++ ts)
     let bins = TL.unpack . target <$> bs
+    pa <- pandoc
     when (null rs) $
         case mt of
-            (Just m) -> want (manTarget m : bins)
+            (Just m) -> want (bool bins (manTarget m : bins) pa)
             Nothing  -> want bins
 
     where g (Bin s t ls gc') = atsBin (Version v) (Version v') gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack t)

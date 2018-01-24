@@ -4,7 +4,7 @@ packages:
   - '.'
 extra-deps:
   - shake-ext-1.2.0.3
-  - composition-prelude-1.1.0.1
+  - composition-prelude-1.1.0.2
   - language-ats-0.1.0.6
 flags:
   ats-pkg:
