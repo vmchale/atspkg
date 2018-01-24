@@ -3,9 +3,9 @@ resolver: lts-10.3
 packages:
   - '.'
 extra-deps:
-  - shake-ext-1.2.0.0
+  - shake-ext-1.2.0.1
   - composition-prelude-1.1.0.1
-  - language-ats-0.1.0.3
+  - language-ats-0.1.0.4
 flags:
   ats-pkg:
     development: false
