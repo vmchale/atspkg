@@ -44,9 +44,7 @@ packageCompiler directory = do
     BS.writeFile (directory ++ ".tar.gz") (compress bytes)
 
 pkgUrl :: Version -> String
-pkgUrl v = "https://github.com/vmchale/fastcat/releases/download/0.1.5/ATS2-Postiats-" ++ show v ++ ".tar.gz"
-
--- "https://downloads.sourceforge.net/project/ats2-lang/ats2-lang/ats2-postiats-" ++ show v ++ "/ATS2-Postiats-" ++ show v ++ ".tgz"
+pkgUrl v = "https://github.com/vmchale/atspkg/raw/master/pkgs/ATS2-Postiats-" ++ show v ++ ".tar.gz"
 
 fetchCompiler :: Version -> IO ()
 fetchCompiler v = do
