@@ -87,7 +87,7 @@ mkTest =
 
 pkgToAction :: [String] -> Pkg -> Rules ()
 pkgToAction rs (Pkg bs ts mt v v' ds) = do
-    liftIO $ fetchDeps ds
+    liftIO $ fetchDeps False ds
     action (need ["atspkg.dhall"])
     mapM_ g (bs ++ ts)
     let bins = TL.unpack . target <$> bs
