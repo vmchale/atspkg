@@ -74,8 +74,8 @@ mkClean :: Rules ()
 mkClean =
     "clean" ~> do
     removeFilesAfter "." ["//*.1","//*.c", "tags"]
-    removeFilesAfter ".shake" ["//*"]
     removeFilesAfter "target" ["//*"]
+    removeFilesAfter ".atspkg" ["//*"]
 
 mkTest :: Rules ()
 mkTest =

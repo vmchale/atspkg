@@ -1,5 +1,5 @@
 name:                ats-pkg
-version:             1.2.0.1
+version:             1.2.0.2
 synopsis:            Package manager for ATS
 description:         A collection of scripts to make building ATS projects easy.
 homepage:            https://github.com/vmchale/ats-pkg#readme
