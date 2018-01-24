@@ -8,16 +8,16 @@ import           Language.ATS.Package.Type
 import           System.Directory          (doesFileExist)
 import           System.Environment        (getEnv)
 
-check :: IO Bool
-check = do
+check :: Version -> IO Bool
+check v = do
     home <- getEnv "HOME"
-    doesFileExist (home ++ "/.atspkg/0.3.8/bin/patscc") -- FIXME version
+    doesFileExist (home ++ "/.atspkg/" ++ show v ++ "/bin/patscc") -- FIXME version
 
 exec :: IO ()
-exec = bool (buildAll >> mkPkg) mkPkg =<< check
+exec = bool (buildAll >> mkPkg) mkPkg =<< check latest
 
 latest :: Version
-latest = Version [0,3,8]
+latest = Version [0,3,9]
 
 buildAll :: IO ()
 buildAll =
