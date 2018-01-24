@@ -41,6 +41,7 @@ library
                      , process
                      , parallel-io
                      , unix
+                     , lens
                      , dhall
                      , shake-ext >= 1.1.0.0
                      , composition-prelude >= 1.1.0.1

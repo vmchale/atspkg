@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveAnyClass    #-}
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -5,36 +6,27 @@ module Language.ATS.Package.Dependency ( -- * Functions
                                          fetchDeps
                                        -- * Types
                                        , Dependency (..)
-                                       -- * Dependency constants
-                                       , atsPrelude
-                                       , atsIntinf
-                                       , atsGMP
                                        ) where
 
 import qualified Codec.Archive.Tar                    as Tar
 import           Codec.Compression.GZip               (decompress)
 import           Control.Concurrent.ParallelIO.Global
+import           Control.Lens
 import           Control.Monad
+import qualified Data.Text.Lazy                       as TL
 import           Dhall
 import           Network.HTTP.Client                  hiding (decompress)
 import           Network.HTTP.Client.TLS              (tlsManagerSettings)
 import           System.Directory
 
 -- | Type for a dependency
-data Dependency = Dependency { _libName :: String -- ^ Library name, e.g.
-                             , _dir     :: FilePath -- ^ Directory we should unpack to
-                             , _url     :: String -- ^ Url pointing to tarball
+data Dependency = Dependency { libName :: Text -- ^ Library name, e.g.
+                             , dir     :: Text -- ^ Directory we should unpack to
+                             , url     :: Text -- ^ Url pointing to tarball
                              }
-    deriving (Eq, Show, Generic)
+    deriving (Eq, Show, Generic, Interpret)
 
-atsPrelude :: Dependency
-atsPrelude = Dependency "ats2-postiats-0.3.8-prelude" ".atspkg/prelude" "https://downloads.sourceforge.net/project/ats2-lang/ats2-lang/ats2-postiats-0.3.8/ATS2-Postiats-include-0.3.8.tgz"
-
-atsIntinf :: Dependency
-atsIntinf = Dependency "atscntrb-hs-intinf-1.0.6" ".atspkg/contrib/atscntrb-hx-intinf" "https://registry.npmjs.org/atscntrb-hx-intinf/-/atscntrb-hx-intinf-1.0.6.tgz"
-
-atsGMP :: Dependency
-atsGMP = Dependency "atscntrb-libgmp-1.0.4" ".atspkg/contrib/atscntrb-libgmp" "https://registry.npmjs.org/atscntrb-libgmp/-/atscntrb-libgmp-1.0.4.tgz"
+-- https://github.com/vmchale/polyglot/archive/0.3.27.tar.gz
 
 fetchDeps :: [Dependency] -> IO ()
 fetchDeps deps = do
@@ -46,21 +38,23 @@ fetchDeps deps = do
     parallel_ libs >> stopGlobalPool
 
 buildHelper :: Dependency -> IO ()
-buildHelper (Dependency libName dirName url) = do
+buildHelper (Dependency lib' dirName' url'') = do
+
+    let (lib, dirName, url') = (lib', dirName', url'') & each %~ TL.unpack
 
     needsSetup <- not <$> doesDirectoryExist dirName
 
     when needsSetup $ do
 
-        putStrLn ("Fetching library " ++ libName ++ "...")
+        putStrLn ("Fetching library " ++ lib ++ "...")
         manager <- newManager tlsManagerSettings
-        initialRequest <- parseRequest url
+        initialRequest <- parseRequest url'
         response <- responseBody <$> httpLbs (initialRequest { method = "GET" }) manager
 
-        putStrLn ("Unpacking library " ++ libName ++ "...")
+        putStrLn ("Unpacking library " ++ lib ++ "...")
         Tar.unpack dirName . Tar.read . decompress $ response
 
-        putStrLn ("Setting up library " ++ libName ++ "...")
+        putStrLn ("Setting up library " ++ lib ++ "...")
         needsMove <- doesDirectoryExist (dirName ++ "/package")
         when needsMove $ do
             renameDirectory (dirName ++ "/package") "tempdir"

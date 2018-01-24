@@ -65,7 +65,7 @@ fetchCompiler v = do
 setupCompiler :: Version -> IO ()
 setupCompiler v = do
 
-    putStrLn "configuring compiler..."
+    putStrLn "Configuring compiler..."
     cd <- compilerDir v
     let configurePath = cd ++ "/configure"
     setFileMode configurePath ownerModes
@@ -73,6 +73,7 @@ setupCompiler v = do
     void $ readCreateProcess ((proc (cd ++ "/autogen.sh") []) { cwd = Just cd }) ""
     void $ readCreateProcess ((proc configurePath ["--prefix", cd]) { cwd = Just cd }) ""
 
-    putStrLn "building compiler..."
+    putStrLn "Building compiler..."
     void $ readCreateProcess ((proc "make" []) { cwd = Just cd, std_err = CreatePipe }) ""
+    putStrLn "Installing compiler..."
     void $ readCreateProcess ((proc "make" ["install"]) { cwd = Just cd, std_err = CreatePipe }) ""
