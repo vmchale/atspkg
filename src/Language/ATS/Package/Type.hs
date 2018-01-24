@@ -82,7 +82,7 @@ mkTest =
         mapM_ cmd_ tests
 
 pkgToAction :: Pkg -> Rules ()
-pkgToAction (Pkg bs ts mt v _) = do
+pkgToAction (Pkg bs ts mt v v' _) = do
     action (need ["atspkg.dhall"])
     mapM_ g (bs ++ ts)
     let bins = TL.unpack . target <$> bs
@@ -90,12 +90,12 @@ pkgToAction (Pkg bs ts mt v _) = do
         (Just m) -> want (manTarget m : bins)
         Nothing  -> want bins
 
-    where g (Bin s t ls gc') = atsBin (Version v) gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack t)
+    where g (Bin s t ls gc') = atsBin (Version v) (Version v') gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack t)
 
 data Bin = Bin { src :: Text, target :: Text, libs :: [Text], gc :: Bool }
     deriving (Show, Eq, Generic, Interpret)
 
-data Pkg = Pkg { bin :: [Bin], test :: [Bin], man :: Maybe Text, version :: [Integer], dependencies :: [Dependency] }
+data Pkg = Pkg { bin :: [Bin], test :: [Bin], man :: Maybe Text, version :: [Integer], compiler :: [Integer], dependencies :: [Dependency] }
     deriving (Show, Eq, Generic, Interpret)
 
 printConfig :: IO ()
