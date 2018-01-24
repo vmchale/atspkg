@@ -20,12 +20,12 @@ import           Development.Shake.FilePath
 import           Development.Shake.Man
 import           Dhall
 import           Language.ATS.Package.Dependency
+import           System.Directory                (getCurrentDirectory)
 
 options :: ShakeOptions
 options = shakeOptions { shakeFiles = ".atspkg"
                        , shakeThreads = 4
                        , shakeProgress = progressSimple
-                       , shakeColor = True
                        }
 
 -- TODO verbosity & coloring?
@@ -46,7 +46,9 @@ mkManpage = do
         _      -> pure ()
 
 getConfig :: MonadIO m => m Pkg
-getConfig = liftIO (input auto "./atspkg.dhall")
+getConfig = liftIO $ do
+    d <- getCurrentDirectory
+    input auto (TL.pack d <> "/atspkg.dhall")
 
 manTarget :: Text -> FilePath
 manTarget m = TL.unpack m -<.> "1"
