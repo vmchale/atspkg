@@ -29,7 +29,7 @@ data Dependency = Dependency { libName :: Text -- ^ Library name, e.g.
 fetchDeps :: [Dependency] -> IO ()
 fetchDeps deps =
     unless (null deps) $ do
-        putStrLn "Setting up ATS dependencies..."
+        putStrLn "Checking ATS dependencies..."
         let libs = fmap buildHelper deps
         parallel_ libs >> stopGlobalPool
 
@@ -38,8 +38,7 @@ buildHelper (Dependency lib' dirName' url'') = do
 
     let (lib, dirName, url') = (lib', dirName', url'') & each %~ TL.unpack
 
-    print dirName
-    needsSetup <- not <$> doesDirectoryExist (dirName ++ "/atspkg.dhall")
+    needsSetup <- not <$> doesDirectoryExist dirName -- ++ "/atspkg.dhall")
 
     when needsSetup $ do
 
