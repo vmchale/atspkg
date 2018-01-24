@@ -43,7 +43,6 @@ install:
 
 script:
   - stack --no-terminal build --haddock --no-haddock-deps
-  - stack test --no-run-tests
   - |
     if [ `uname` = "Linux" ]
     then
@@ -54,7 +53,6 @@ script:
     else
       echo "skipping yaml verification..."
     fi
-  - stack bench --no-bench
   - curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s .
   - curl -sL https://raw.github.com/ndmitchell/weeder/master/misc/travis.sh | sh -s .
   - |
@@ -62,7 +60,7 @@ script:
     then
       export BINPATH="$(find . -name atspkg -perm 755 | tail -n1)"
     else
-      export BINPATH="$(find -name atspkg -executable | tail -n2 | head -n1)"
+      export BINPATH="$(find -name atspkg -executable | tail -n4 | head -n1)"
     fi
   - echo $BINPATH
   - mv $BINPATH ats-pkg-$TARGET
