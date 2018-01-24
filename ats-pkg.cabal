@@ -43,7 +43,7 @@ library
                      , unix
                      , lens
                      , dhall
-                     , shake-ext >= 1.2.0.1
+                     , shake-ext >= 1.2.0.2
                      , composition-prelude >= 1.1.0.1
                      , optparse-applicative
                      , temporary
