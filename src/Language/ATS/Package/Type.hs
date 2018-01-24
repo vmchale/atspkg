@@ -91,8 +91,6 @@ pkgToAction (Pkg bs ts mt v) = do
 
     where g (Bin s t ls gc') = atsBin (Version v) gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack t)
 
--- TODO configuration for a library?
-
 data Bin = Bin { src :: Text, target :: Text, libs :: [Text], gc :: Bool }
     deriving (Show, Eq, Generic, Interpret)
 
