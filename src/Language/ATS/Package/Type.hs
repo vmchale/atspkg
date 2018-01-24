@@ -82,7 +82,7 @@ mkTest =
         mapM_ cmd_ tests
 
 pkgToAction :: Pkg -> Rules ()
-pkgToAction (Pkg bs ts mt v) = do
+pkgToAction (Pkg bs ts mt v _) = do
     action (need ["atspkg.dhall"])
     mapM_ g (bs ++ ts)
     let bins = TL.unpack . target <$> bs
