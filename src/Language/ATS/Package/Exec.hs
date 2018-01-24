@@ -60,10 +60,10 @@ fetch = Fetch <$>
     (metavar "URL"
     <> help "URL pointing to a tarball containing the package to be installed.")
 
-check :: IO Bool
-check = do
+check :: FilePath -> IO Bool
+check p = do
     home <- getEnv "HOME"
-    v <- want
+    v <- want p
     doesFileExist (home ++ "/.atspkg/" ++ show v ++ "/bin/patscc")
 
 fetchPkg :: String -> IO ()
@@ -72,7 +72,8 @@ fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
     fetchDeps [Dependency lib dirName url']
     ps <- fmap ((p ++ "/") ++) <$> listDirectory p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
-    withCurrentDirectory (takeDirectory pkgDir) (mkPkg ["install"])
+    let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg ["install"])
+    bool (buildAll pkgDir >> a) a =<< check pkgDir
 
 exec :: IO ()
 exec = execParser wrapper >>= run
@@ -80,7 +81,7 @@ exec = execParser wrapper >>= run
 -- https://github.com/vmchale/polyglot/archive/0.3.27.tar.gz
 run :: Command -> IO ()
 run (Fetch u) = fetchPkg u
-run c = bool (buildAll >> mkPkg rs) (mkPkg rs) =<< check
+run c = bool (buildAll "./atspkg.dhall" >> mkPkg rs) (mkPkg rs) =<< check "./atspkg.dhall"
     where rs = g c
           g Install    = ["install"]
           g Clean      = ["clean"]
@@ -88,8 +89,8 @@ run c = bool (buildAll >> mkPkg rs) (mkPkg rs) =<< check
           g Test       = ["test"]
           g _          = undefined
 
-want :: IO Version
-want = Version . compiler <$> input auto "./atspkg.dhall"
+want :: FilePath -> IO Version
+want p = Version . compiler <$> input auto (TL.pack p)
 
-buildAll :: IO ()
-buildAll = on (>>) (=<< want) fetchCompiler setupCompiler
+buildAll :: FilePath -> IO ()
+buildAll p = on (>>) (=<< want p) fetchCompiler setupCompiler
