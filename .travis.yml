@@ -63,8 +63,8 @@ script:
       export BINPATH="$(find -name atspkg -executable | tail -n4 | head -n1)"
     fi
   - echo $BINPATH
-  - mv $BINPATH ats-pkg-$TARGET
-  - ls ats-pkg-$TARGET
+  - mv $BINPATH atspkg-$TARGET
+  - ls atspkg-$TARGET
 
 deploy:
   api_key:
