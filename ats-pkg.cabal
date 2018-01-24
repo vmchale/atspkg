@@ -7,14 +7,13 @@ license:             BSD3
 license-file:        LICENSE
 author:              Vanessa McHale
 maintainer:          vamchale@gmail.com
-copyright:           Copyright: (c) 2017 Vanessa McHale
+copyright:           Copyright: (c) 2018 Vanessa McHale
 category:            Development
 build-type:          Simple
 extra-doc-files:     README.md
-data-files:          .travis.yml
-                   , appveyor.yml
 extra-source-files:  stack.yaml
-cabal-version:       >=1.18
+                   , cabal.project.local
+cabal-version:       1.18
 
 Flag development {
   Description: Enable `-Werror`
