@@ -11,13 +11,13 @@ import           System.Environment        (getEnv)
 check :: IO Bool
 check = do
     home <- getEnv "HOME"
-    doesFileExist (home ++ "/.atspkg/bin/patsopt")
+    doesFileExist (home ++ "/.atspkg/0.3.8/bin/patscc") -- FIXME version
 
 exec :: IO ()
-exec = bool mkPkg mkPkg =<< check
+exec = bool (buildAll >> mkPkg) mkPkg =<< check
 
 latest :: Version
-latest = Version [0,3,9]
+latest = Version [0,3,8]
 
 buildAll :: IO ()
 buildAll =
