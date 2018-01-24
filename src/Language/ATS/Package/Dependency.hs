@@ -38,6 +38,7 @@ buildHelper (Dependency lib' dirName' url'') = do
 
     let (lib, dirName, url') = (lib', dirName', url'') & each %~ TL.unpack
 
+    print dirName
     needsSetup <- not <$> doesDirectoryExist (dirName ++ "/atspkg.dhall")
 
     when needsSetup $ do
