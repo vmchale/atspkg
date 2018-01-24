@@ -4,6 +4,7 @@ module Language.ATS.Package.Exec ( exec
                                  , buildAll
                                  ) where
 
+import           Control.Composition
 import           Data.Bool                 (bool)
 import           Dhall                     hiding (bool)
 import           Language.ATS.Package
@@ -20,13 +21,8 @@ check = do
 exec :: IO ()
 exec = bool (buildAll >> mkPkg) mkPkg =<< check
 
-latest :: Version
-latest = Version [0,3,9]
-
 want :: IO Version
 want = Version . compiler <$> input auto "./atspkg.dhall"
 
 buildAll :: IO ()
-buildAll =
-    (fetchCompiler =<< want) >>
-    setupCompiler latest
+buildAll = on (>>) (=<< want) fetchCompiler setupCompiler
