@@ -1,4 +1,5 @@
 test: install
+    rm -rf polyglot
     git clone git\@github.com:vmchale/polyglot.git
     cd polyglot && atspkg test
 
