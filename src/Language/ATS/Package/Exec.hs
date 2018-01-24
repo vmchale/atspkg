@@ -16,7 +16,7 @@ check :: IO Bool
 check = do
     home <- getEnv "HOME"
     v <- want
-    doesFileExist (home ++ "/.atspkg/" ++ show v ++ "/bin/patscc") -- FIXME version
+    doesFileExist (home ++ "/.atspkg/" ++ show v ++ "/bin/patscc")
 
 exec :: IO ()
 exec = bool (buildAll >> mkPkg) mkPkg =<< check

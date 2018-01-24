@@ -26,16 +26,12 @@ data Dependency = Dependency { libName :: Text -- ^ Library name, e.g.
                              }
     deriving (Eq, Show, Generic, Interpret)
 
--- https://github.com/vmchale/polyglot/archive/0.3.27.tar.gz
-
 fetchDeps :: [Dependency] -> IO ()
-fetchDeps deps = do
-
-    putStrLn "Setting up ATS dependencies..."
-
-    let libs = fmap buildHelper deps
-
-    parallel_ libs >> stopGlobalPool
+fetchDeps deps =
+    unless (null deps) $ do
+        putStrLn "Setting up ATS dependencies..."
+        let libs = fmap buildHelper deps
+        parallel_ libs >> stopGlobalPool
 
 buildHelper :: Dependency -> IO ()
 buildHelper (Dependency lib' dirName' url'') = do

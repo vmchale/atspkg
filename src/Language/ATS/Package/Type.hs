@@ -4,7 +4,6 @@
 
 module Language.ATS.Package.Type ( Pkg (..)
                                  , Bin (..)
-                                 , printConfig
                                  , pkgToAction
                                  , mkPkg
                                  , mkManpage
@@ -56,7 +55,7 @@ mkInstall =
         bins <- fmap (TL.unpack . target) . bin <$> getConfig
         need bins
         home <- fromMaybe "" <$> getEnv "HOME"
-        let binDest = fmap (((home <> "/.local/bin/") <>) . takeBaseName) bins
+        let binDest = ((home <> "/.local/bin/") <>) . takeBaseName <$> bins
         void $ zipWithM copyFile' bins binDest
         case man config of
             Just mt -> do
@@ -82,7 +81,8 @@ mkTest =
         mapM_ cmd_ tests
 
 pkgToAction :: Pkg -> Rules ()
-pkgToAction (Pkg bs ts mt v v' _) = do
+pkgToAction (Pkg bs ts mt v v' ds) = do
+    liftIO $ fetchDeps ds
     action (need ["atspkg.dhall"])
     mapM_ g (bs ++ ts)
     let bins = TL.unpack . target <$> bs
@@ -92,13 +92,17 @@ pkgToAction (Pkg bs ts mt v v' _) = do
 
     where g (Bin s t ls gc') = atsBin (Version v) (Version v') gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack t)
 
-data Bin = Bin { src :: Text, target :: Text, libs :: [Text], gc :: Bool }
-    deriving (Show, Eq, Generic, Interpret)
+data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
+               , target :: Text -- ^ Binary to be built
+               , libs   :: [Text] -- ^ Libraries to link against (e.g. @[ "pthread" ]@)
+               , gc     :: Bool } -- ^ Whether to use the garbage collector
+         deriving (Show, Eq, Generic, Interpret)
 
-data Pkg = Pkg { bin :: [Bin], test :: [Bin], man :: Maybe Text, version :: [Integer], compiler :: [Integer], dependencies :: [Dependency] }
-    deriving (Show, Eq, Generic, Interpret)
-
-printConfig :: IO ()
-printConfig = do
-    x <- input auto "./atspkg.dhall"
-    print (x :: Pkg)
+data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
+               , test         :: [Bin] -- ^ List of test suites
+               , man          :: Maybe Text -- ^ Optional (markdown) manpages to be converted using @pandoc@.
+               , version      :: [Integer] -- ^ Library version
+               , compiler     :: [Integer] -- ^ Compiler version
+               , dependencies :: [Dependency] -- ^ List of dependencies
+               }
+         deriving (Show, Eq, Generic, Interpret)

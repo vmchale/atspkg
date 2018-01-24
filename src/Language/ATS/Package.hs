@@ -29,6 +29,7 @@ nuke v = do
         (removeDirectoryRecursive =<< compilerDir v)
 
 newtype Version = Version [Integer]
+    deriving (Eq)
 
 instance Show Version where
     show (Version is) = intercalate "." (show <$> is)
