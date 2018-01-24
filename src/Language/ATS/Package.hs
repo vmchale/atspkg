@@ -56,7 +56,7 @@ fetchCompiler v = do
 
         putStrLn "Fetching compiler..."
         manager <- newManager tlsManagerSettings
-        initialRequest <- parseRequest $ pkgUrl v -- "https://github.com/vmchale/fastcat/releases/download/0.1.5/ATS2-Postiats-0.3.8.tar.gz"
+        initialRequest <- parseRequest $ pkgUrl v
         response <- responseBody <$> httpLbs (initialRequest { method = "GET" }) manager
 
         putStrLn "Unpacking compiler..."
