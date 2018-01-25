@@ -8,6 +8,8 @@ let pkg
     , compiler = [0,3,9]
     , dependencies = []
       : List { libName : Text, dir : Text, url : Text }
+    , clib = []
+      : List { libName : Text, dir : Text, url : Text }
     }
 
 in pkg
