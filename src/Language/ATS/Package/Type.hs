@@ -92,9 +92,9 @@ mkTest =
         mapM_ cmd_ tests
 
 pkgToAction :: [String] -> Pkg -> Rules ()
-pkgToAction rs (Pkg bs ts mt v v' ds) = do
+pkgToAction rs (Pkg bs ts mt v v' ds cds) = do
     unless (rs == ["clean"]) $
-        liftIO $ fetchDeps False ds []
+        liftIO $ fetchDeps False ds cds
     action (need ["atspkg.dhall"])
     mapM_ g (bs ++ ts)
     let bins = TL.unpack . target <$> bs
