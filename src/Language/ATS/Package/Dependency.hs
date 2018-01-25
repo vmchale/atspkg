@@ -31,7 +31,7 @@ data Dependency = Dependency { libName :: Text -- ^ Library name, e.g.
                              }
     deriving (Eq, Show, Generic, Interpret)
 
-makeLensesFor [("dir", "dirLens")] ''Dependency
+makeLensesFor [("dir", "dirLens"), ("libName", "libNameLens")] ''Dependency
 
 fetchDeps :: Bool -- ^ Set to 'False' if unsure.
           -> [Dependency] -- ^ ATS dependencies
@@ -42,8 +42,8 @@ fetchDeps b deps cdeps =
         putStrLn "Checking ATS dependencies..."
         d <- pkgHome
         let libs = fmap (buildHelper b) deps
-            unpacked = fmap (over dirLens (TL.pack d <>)) cdeps
-            clibs = fmap (buildHelper b) unpacked
+            unpacked = fmap (over dirLens (\x -> TL.pack d <> x <> "/" <> x)) cdeps
+            clibs = fmap (buildHelper b . over libNameLens (const "")) unpacked
         parallel_ (libs ++ clibs) >> stopGlobalPool
         mapM_ setup unpacked
 
@@ -55,7 +55,7 @@ clibSetup p = do
     let configurePath = p ++ "/configure"
     setFileMode configurePath ownerModes
     putStrLn "configuring..."
-    void $ readCreateProcess ((proc p ["--prefix", p]) { cwd = Just p, std_err = CreatePipe }) ""
+    void $ readCreateProcess ((proc configurePath ["--prefix", p]) { cwd = Just p, std_err = CreatePipe }) ""
     putStrLn "building..."
     void $ readCreateProcess ((proc "make" []) { cwd = Just p, std_err = CreatePipe }) ""
     putStrLn "installing..."
