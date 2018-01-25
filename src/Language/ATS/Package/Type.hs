@@ -94,7 +94,7 @@ mkTest =
 pkgToAction :: [String] -> Pkg -> Rules ()
 pkgToAction rs (Pkg bs ts mt v v' ds) = do
     unless (rs == ["clean"]) $
-        liftIO $ fetchDeps False ds
+        liftIO $ fetchDeps False ds []
     action (need ["atspkg.dhall"])
     mapM_ g (bs ++ ts)
     let bins = TL.unpack . target <$> bs
@@ -120,5 +120,6 @@ data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , version      :: [Integer] -- ^ Library version
                , compiler     :: [Integer] -- ^ Compiler version
                , dependencies :: [Dependency] -- ^ List of dependencies
+               , clib         :: [Dependency] -- ^ List of C dependencies
                }
          deriving (Show, Eq, Generic, Interpret)
