@@ -41,7 +41,6 @@ mkPkg rs = shake options $
 pandoc :: (MonadIO m) => m Bool
 pandoc = isJust <$> liftIO (findExecutable "pandoc")
 
-
 mkManpage :: Rules ()
 mkManpage = do
     c <- getConfig

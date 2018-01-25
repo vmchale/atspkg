@@ -26,12 +26,12 @@ import           System.Process
 
 -- | Type for a dependency
 data Dependency = Dependency { libName :: Text -- ^ Library name, e.g.
-                             , _dir    :: Text -- ^ Directory we should unpack to
+                             , dir     :: Text -- ^ Directory we should unpack to
                              , url     :: Text -- ^ Url pointing to tarball
                              }
     deriving (Eq, Show, Generic, Interpret)
 
-makeLenses ''Dependency
+makeLensesFor [("dir", "dirLens")] ''Dependency
 
 fetchDeps :: Bool -- ^ Set to 'False' if unsure.
           -> [Dependency] -- ^ ATS dependencies
@@ -42,7 +42,7 @@ fetchDeps b deps cdeps =
         putStrLn "Checking ATS dependencies..."
         d <- pkgHome
         let libs = fmap (buildHelper b) deps
-            unpacked = fmap (over dir (TL.pack d <>)) cdeps
+            unpacked = fmap (over dirLens (TL.pack d <>)) cdeps
             clibs = fmap (buildHelper b) unpacked
         parallel_ (libs ++ clibs) >> stopGlobalPool
         mapM_ setup unpacked
@@ -54,9 +54,12 @@ clibSetup :: FilePath -> IO ()
 clibSetup p = do
     let configurePath = p ++ "/configure"
     setFileMode configurePath ownerModes
-    void $ readCreateProcess ((proc p ["--prefix", p]) { cwd = Just p }) ""
-    void $ readCreateProcess ((proc "make" []) { cwd = Just p}) ""
-    void $ readCreateProcess ((proc "make" ["install"]) { cwd = Just p }) ""
+    putStrLn "configuring..."
+    void $ readCreateProcess ((proc p ["--prefix", p]) { cwd = Just p, std_err = CreatePipe }) ""
+    putStrLn "building..."
+    void $ readCreateProcess ((proc "make" []) { cwd = Just p, std_err = CreatePipe }) ""
+    putStrLn "installing..."
+    void $ readCreateProcess ((proc "make" ["install"]) { cwd = Just p, std_err = CreatePipe }) ""
 
 setup :: Dependency -> IO ()
 setup (Dependency _ dirName' _) =
