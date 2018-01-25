@@ -20,8 +20,7 @@ import           Development.Shake.FilePath
 import           Development.Shake.Man
 import           Dhall                           hiding (bool)
 import           Language.ATS.Package.Dependency
-import           System.Directory                (findExecutable,
-                                                  getCurrentDirectory)
+import           System.Directory                (findExecutable, getCurrentDirectory)
 
 options :: ShakeOptions
 options = shakeOptions { shakeFiles = ".atspkg"
@@ -94,7 +93,8 @@ mkTest =
 
 pkgToAction :: [String] -> Pkg -> Rules ()
 pkgToAction rs (Pkg bs ts mt v v' ds) = do
-    liftIO $ fetchDeps False ds
+    unless (rs == ["clean"]) $
+        liftIO $ fetchDeps False ds
     action (need ["atspkg.dhall"])
     mapM_ g (bs ++ ts)
     let bins = TL.unpack . target <$> bs

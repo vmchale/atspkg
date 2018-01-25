@@ -18,9 +18,7 @@ import           Language.ATS.Package.Dependency
 import           Language.ATS.Package.Type       hiding (test, version)
 import           Options.Applicative             hiding (auto)
 import           Paths_ats_pkg
-import           System.Directory                (doesFileExist, findFile,
-                                                  listDirectory,
-                                                  withCurrentDirectory)
+import           System.Directory                (doesFileExist, findFile, listDirectory, withCurrentDirectory)
 import           System.Environment              (getEnv)
 import           System.IO.Temp                  (withSystemTempDirectory)
 
@@ -81,10 +79,10 @@ exec = execParser wrapper >>= run
 -- https://github.com/vmchale/polyglot/archive/0.3.27.tar.gz
 run :: Command -> IO ()
 run (Fetch u) = fetchPkg u
+run Clean = mkPkg ["clean"]
 run c = bool (buildAll "./atspkg.dhall" >> mkPkg rs) (mkPkg rs) =<< check "./atspkg.dhall"
     where rs = g c
           g Install    = ["install"]
-          g Clean      = ["clean"]
           g (Build ts) = ts
           g Test       = ["test"]
           g _          = undefined
