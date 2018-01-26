@@ -60,23 +60,27 @@ allSubdirs d = do
     ds' <- mapM allSubdirs ds
     pure $ join (ds : ds')
 
-clibSetup :: FilePath -> IO ()
-clibSetup p = do
+clibSetup :: String -> FilePath -> IO ()
+clibSetup lib' p = do
     subdirs <- allSubdirs p
     configurePath <- fromMaybe (p <> "/configure") <$> findFile subdirs "configure"
     setFileMode configurePath ownerModes
     h <- pkgHome
-    let procEnv = Just [("CFLAGS" :: String, "-I" <> h)]
-    putStrLn "configuring..."
-    void $ readCreateProcess ((proc configurePath ["--prefix", p]) { cwd = Just p, env = procEnv, std_err = CreatePipe }) ""
-    putStrLn "building..."
+    let procEnv = Just [("CFLAGS" :: String, "-I" <> h), ("PATH", "/usr/bin:/bin")]
+    putStrLn $ "configuring " ++ lib' ++ "..."
+    void $ readCreateProcess ((proc configurePath ["--prefix", p]) { cwd = Just p, env = procEnv}) ""
+    putStrLn $ "building " ++ lib' ++ "..."
     void $ readCreateProcess ((proc "make" []) { cwd = Just p, std_err = CreatePipe }) ""
-    putStrLn "installing..."
+    putStrLn $ "installing " ++ lib' ++ "..."
     void $ readCreateProcess ((proc "make" ["install"]) { cwd = Just p, std_err = CreatePipe }) ""
 
 setup :: Dependency -> IO ()
-setup (Dependency _ dirName' _) =
-    clibSetup (TL.unpack dirName')
+setup (Dependency lib' dirName' _) = do
+    let lib'' = "./.atspkg/" <> TL.unpack lib'
+    b <- doesFileExist lib''
+    unless b $ do
+        clibSetup (TL.unpack lib') (TL.unpack dirName')
+        writeFile lib'' ""
 
 buildHelper :: Bool -> Dependency -> IO ()
 buildHelper b (Dependency lib' dirName' url'') = do
