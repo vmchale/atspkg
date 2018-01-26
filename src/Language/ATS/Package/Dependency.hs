@@ -41,7 +41,7 @@ fetchDeps :: Bool -- ^ Set to 'False' if unsure.
 fetchDeps b deps cdeps =
     unless (null deps) $ do
         putStrLn "Checking ATS dependencies..."
-        d <- pkgHome
+        d <- (<> "lib/") <$> pkgHome
         let libs = fmap (buildHelper b) deps
             unpacked = fmap (over dirLens (TL.pack d <>)) cdeps
             clibs = fmap (buildHelper b . over libNameLens (const "")) unpacked
@@ -49,7 +49,7 @@ fetchDeps b deps cdeps =
         mapM_ setup unpacked
 
 pkgHome :: IO FilePath
-pkgHome = (++ "/.atspkg/lib/") <$> getEnv "HOME"
+pkgHome = (++ "/.atspkg/") <$> getEnv "HOME"
 
 allSubdirs :: FilePath -> IO [FilePath]
 allSubdirs [] = pure mempty
@@ -66,9 +66,9 @@ clibSetup lib' p = do
     configurePath <- fromMaybe (p <> "/configure") <$> findFile subdirs "configure"
     setFileMode configurePath ownerModes
     h <- pkgHome
-    let procEnv = Just [("CFLAGS" :: String, "-I" <> h), ("PATH", "/usr/bin:/bin")]
+    let procEnv = Just [("CFLAGS" :: String, "-I" <> h <> "include"), ("PATH", "/usr/bin:/bin")]
     putStrLn $ "configuring " ++ lib' ++ "..."
-    void $ readCreateProcess ((proc configurePath ["--prefix", p]) { cwd = Just p, env = procEnv}) ""
+    void $ readCreateProcess ((proc configurePath ["--prefix", h]) { cwd = Just p, env = procEnv, std_err = CreatePipe }) ""
     putStrLn $ "building " ++ lib' ++ "..."
     void $ readCreateProcess ((proc "make" []) { cwd = Just p, std_err = CreatePipe }) ""
     putStrLn $ "installing " ++ lib' ++ "..."
@@ -76,7 +76,7 @@ clibSetup lib' p = do
 
 setup :: Dependency -> IO ()
 setup (Dependency lib' dirName' _) = do
-    let lib'' = "./.atspkg/" <> TL.unpack lib'
+    lib'' <- (<> TL.unpack lib') <$> pkgHome
     b <- doesFileExist lib''
     unless b $ do
         clibSetup (TL.unpack lib') (TL.unpack dirName')
