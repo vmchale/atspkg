@@ -24,9 +24,10 @@ library
   hs-source-dirs:      src
   exposed-modules:     Language.ATS.Package
                      , Language.ATS.Package.Exec
+  other-modules:       Paths_ats_pkg
+                     , Language.ATS.Package.Error
                      , Language.ATS.Package.Type
                      , Language.ATS.Package.Dependency
-  other-modules:       Paths_ats_pkg
   build-depends:       base >= 4.7 && < 5
                      , http-client
                      , filemanip
@@ -47,6 +48,8 @@ library
                      , composition-prelude >= 1.1.0.2
                      , optparse-applicative
                      , temporary
+                     , lzma
+                     , ansi-wl-pprint
   default-language:    Haskell2010
   if flag(development)
     ghc-options: -Werror
