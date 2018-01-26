@@ -99,7 +99,6 @@ buildHelper b (Dependency lib' dirName' url'') = do
         putStrLn ("Unpacking library " ++ lib ++ "...")
         Tar.unpack dirName . Tar.read . decompress $ response
 
-        putStrLn ("Setting up library " ++ lib ++ "...")
         needsMove <- doesDirectoryExist (dirName ++ "/package")
         when needsMove $ do
             renameDirectory (dirName ++ "/package") "tempdir"
