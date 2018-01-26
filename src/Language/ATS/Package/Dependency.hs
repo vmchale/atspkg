@@ -42,7 +42,7 @@ fetchDeps :: Bool -- ^ Set to 'False' if unsure.
           -> [Dependency] -- ^ C Dependencies
           -> IO ()
 fetchDeps b deps cdeps =
-    unless (null deps) $ do
+    unless (null deps && null cdeps) $ do
         putStrLn "Checking ATS dependencies..."
         d <- (<> "lib/") <$> pkgHome
         let libs = fmap (buildHelper b) deps
@@ -62,6 +62,9 @@ allSubdirs d = do
     ds <- filterM doesDirectoryExist d''
     ds' <- mapM allSubdirs ds
     pure $ join (ds : ds')
+
+-- runAutoconf :: FilePath -> IO ()
+-- runAutoconf p = do
 
 clibSetup :: String -> FilePath -> IO ()
 clibSetup lib' p = do
