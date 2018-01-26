@@ -10,15 +10,18 @@ module Language.ATS.Package.Dependency ( -- * Functions
                                        ) where
 
 import qualified Codec.Archive.Tar                    as Tar
-import           Codec.Compression.GZip               (decompress)
+import qualified Codec.Compression.GZip               as Gzip
+import qualified Codec.Compression.Lzma               as Lzma
 import           Control.Concurrent.ParallelIO.Global
 import           Control.Lens
 import           Control.Monad
+import           Data.ByteString.Lazy                 (ByteString)
 import           Data.Maybe                           (fromMaybe)
 import           Data.Semigroup                       (Semigroup (..))
 import qualified Data.Text.Lazy                       as TL
 import           Dhall
-import           Network.HTTP.Client                  hiding (decompress)
+import           Language.ATS.Package.Error
+import           Network.HTTP.Client
 import           Network.HTTP.Client.TLS              (tlsManagerSettings)
 import           System.Directory
 import           System.Environment                   (getEnv)
@@ -82,6 +85,13 @@ setup (Dependency lib' dirName' _) = do
         clibSetup (TL.unpack lib') (TL.unpack dirName')
         writeFile lib'' ""
 
+getCompressor :: Text -> IO (ByteString -> ByteString)
+getCompressor s
+    | ".tar.gz" `TL.isSuffixOf` s = pure Gzip.decompress
+    | ".tar.xz" `TL.isSuffixOf` s = pure Lzma.decompress
+    | ".tar" `TL.isSuffixOf` s = pure id
+    | otherwise = unrecognized (TL.unpack s)
+
 buildHelper :: Bool -> Dependency -> IO ()
 buildHelper b (Dependency lib' dirName' url'') = do
 
@@ -97,7 +107,8 @@ buildHelper b (Dependency lib' dirName' url'') = do
         response <- responseBody <$> httpLbs (initialRequest { method = "GET" }) manager
 
         putStrLn ("Unpacking library " ++ lib ++ "...")
-        Tar.unpack dirName . Tar.read . decompress $ response
+        compress <- getCompressor url''
+        Tar.unpack dirName . Tar.read . compress $ response
 
         needsMove <- doesDirectoryExist (dirName ++ "/package")
         when needsMove $ do
