@@ -14,6 +14,7 @@ import           Codec.Compression.GZip               (decompress)
 import           Control.Concurrent.ParallelIO.Global
 import           Control.Lens
 import           Control.Monad
+import           Data.Maybe                           (fromMaybe)
 import           Data.Semigroup                       (Semigroup (..))
 import qualified Data.Text.Lazy                       as TL
 import           Dhall
@@ -42,7 +43,7 @@ fetchDeps b deps cdeps =
         putStrLn "Checking ATS dependencies..."
         d <- pkgHome
         let libs = fmap (buildHelper b) deps
-            unpacked = fmap (over dirLens (\x -> TL.pack d <> x <> "/" <> x)) cdeps
+            unpacked = fmap (over dirLens (TL.pack d <>)) cdeps
             clibs = fmap (buildHelper b . over libNameLens (const "")) unpacked
         parallel_ (libs ++ clibs) >> stopGlobalPool
         mapM_ setup unpacked
@@ -50,10 +51,22 @@ fetchDeps b deps cdeps =
 pkgHome :: IO FilePath
 pkgHome = (++ "/.atspkg/lib/") <$> getEnv "HOME"
 
+allSubdirs :: FilePath -> IO [FilePath]
+allSubdirs [] = pure mempty
+allSubdirs d = do
+    d' <- listDirectory d
+    let d'' = ((d <> "/") <>) <$> d'
+    ds <- filterM doesDirectoryExist d''
+    ds' <- mapM allSubdirs ds
+    pure $ join (ds : ds')
+
 clibSetup :: FilePath -> IO ()
 clibSetup p = do
-    let configurePath = p ++ "/configure"
+    subdirs <- allSubdirs p
+    configurePath <- fromMaybe (p <> "/configure") <$> findFile subdirs "configure"
     setFileMode configurePath ownerModes
+    h <- pkgHome
+    let procEnv = Just [("CFLAGS", "-I" <> h)]
     putStrLn "configuring..."
     void $ readCreateProcess ((proc configurePath ["--prefix", p]) { cwd = Just p, std_err = CreatePipe }) ""
     putStrLn "building..."
