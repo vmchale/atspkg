@@ -66,9 +66,9 @@ clibSetup p = do
     configurePath <- fromMaybe (p <> "/configure") <$> findFile subdirs "configure"
     setFileMode configurePath ownerModes
     h <- pkgHome
-    let procEnv = Just [("CFLAGS", "-I" <> h)]
+    let procEnv = Just [("CFLAGS" :: String, "-I" <> h)]
     putStrLn "configuring..."
-    void $ readCreateProcess ((proc configurePath ["--prefix", p]) { cwd = Just p, std_err = CreatePipe }) ""
+    void $ readCreateProcess ((proc configurePath ["--prefix", p]) { cwd = Just p, env = procEnv, std_err = CreatePipe }) ""
     putStrLn "building..."
     void $ readCreateProcess ((proc "make" []) { cwd = Just p, std_err = CreatePipe }) ""
     putStrLn "installing..."
