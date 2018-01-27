@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat #-}
+
 import           Distribution.CommandLine
 import           Distribution.Simple
 import           Distribution.Types.HookedBuildInfo

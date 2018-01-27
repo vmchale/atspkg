@@ -2,7 +2,7 @@
 
 module Language.ATS.Package.Compiler
     ( packageCompiler
-    , nuke
+    , cleanAll
     , fetchCompiler
     , setupCompiler
     , Version (..)
@@ -20,6 +20,13 @@ import           System.Environment      (getEnv)
 import           System.FilePath.Find    (find)
 import           System.Posix.Files
 import           System.Process
+
+cleanAll :: IO ()
+cleanAll = do
+    d <- (++ "/.atspkg") <$> getEnv "HOME"
+    b <- doesDirectoryExist d
+    when b $
+        removeDirectoryRecursive d
 
 nuke :: Version -> IO ()
 nuke v = do
