@@ -12,6 +12,8 @@ let pkg
       : List { libName : Text, dir : Text, url : Text }
     , ccompiler = "gcc"
     , cflags = [ "-O2", "-flto" ]
+    , atsSource = ([] : List Text)
+    , cDir = "cbits"
     }
 
 in pkg
