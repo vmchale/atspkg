@@ -35,7 +35,7 @@ data Dependency = Dependency { libName :: Text -- ^ Library name, e.g.
                              }
     deriving (Eq, Show, Generic, Interpret)
 
-makeLensesFor [("dir", "dirLens"), ("libName", "libNameLens")] ''Dependency
+makeLensesFor [("dir", "dirLens")] ''Dependency
 
 fetchDeps :: Bool -- ^ Set to 'False' if unsure.
           -> [Dependency] -- ^ ATS dependencies
@@ -47,8 +47,8 @@ fetchDeps b deps cdeps =
         d <- (<> "lib/") <$> pkgHome
         let libs = fmap (buildHelper b) deps
             unpacked = fmap (over dirLens (TL.pack d <>)) cdeps
-            clibs = fmap (buildHelper b . over libNameLens (const "")) unpacked
-        parallel_ (libs ++ clibs) >> stopGlobalPool
+            clibs = fmap (buildHelper b) unpacked
+        parallel_ (libs ++ clibs)
         mapM_ setup unpacked
 
 pkgHome :: IO FilePath
@@ -90,7 +90,7 @@ setup (Dependency lib' dirName' _) = do
 
 getCompressor :: Text -> IO (ByteString -> ByteString)
 getCompressor s
-    | ".tar.gz" `TL.isSuffixOf` s = pure Gzip.decompress
+    | ".tar.gz" `TL.isSuffixOf` s || ".tgz" `TL.isSuffixOf` s = pure Gzip.decompress
     | ".tar.xz" `TL.isSuffixOf` s = pure Lzma.decompress
     | ".tar" `TL.isSuffixOf` s = pure id
     | otherwise = unrecognized (TL.unpack s)

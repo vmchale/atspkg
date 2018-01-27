@@ -13,7 +13,7 @@ import qualified Data.Text.Lazy                  as TL
 import           Data.Version                    hiding (Version (..))
 import           Development.Shake.FilePath
 import           Dhall                           hiding (bool)
-import           Language.ATS.Package
+import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Dependency
 import           Language.ATS.Package.Type       hiding (test, version)
 import           Options.Applicative             hiding (auto)
@@ -45,7 +45,7 @@ command' = hsubparser
     <> command "remote" (info fetch (progDesc "Fetch and install a binary package"))
     <> command "build" (info build (progDesc "Build current package targets"))
     <> command "test" (info (pure Test) (progDesc "Test current package"))
-    <> command "nuke" (info (pure Nuke) (progDesc "Uninstall all locally installed libraries"))
+    <> command "nuke" (info (pure Nuke) (progDesc "Uninstall all globally installed libraries"))
     )
 
 cleanAll :: IO ()
