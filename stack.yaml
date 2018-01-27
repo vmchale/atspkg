@@ -4,9 +4,10 @@ packages:
   - '.'
 extra-deps:
   - shake-ext-1.4.0.1
-  - shake-ats-0.1.0.4
+  - shake-ats-0.2.0.0
   - composition-prelude-1.1.0.2
   - language-ats-0.1.1.5
+  - cli-setup-0.1.0.3
 flags:
   ats-pkg:
     development: false

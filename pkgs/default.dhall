@@ -11,7 +11,7 @@ let pkg
     , clib = []
       : List { libName : Text, dir : Text, url : Text }
     , ccompiler = "gcc"
-    , cflags = [ "-O2", "-flto", "-mtune=native" ]
+    , cflags = [ "-O2", "-flto" ]
     }
 
 in pkg
