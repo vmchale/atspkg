@@ -24,7 +24,7 @@ Alternately, you can download
 
 ### Building a Binary Package
 
-To build a binary package from source, run
+To build a binary package from a source tarball:
 
 ```bash
  $ atspkg remote https://github.com/vmchale/polyglot/archive/0.3.34.tar.gz

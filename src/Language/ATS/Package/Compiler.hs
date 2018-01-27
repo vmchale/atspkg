@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+-- | This module contains scripts to fetch the compiler.
 module Language.ATS.Package.Compiler
     ( packageCompiler
     , cleanAll
@@ -8,16 +9,16 @@ module Language.ATS.Package.Compiler
     , Version (..)
     ) where
 
-import qualified Codec.Archive.Tar       as Tar
-import           Codec.Compression.GZip  (compress, decompress)
-import           Control.Monad           (void, when)
-import qualified Data.ByteString.Lazy    as BS
-import           Data.List               (intercalate)
-import           Network.HTTP.Client     hiding (decompress)
-import           Network.HTTP.Client.TLS (tlsManagerSettings)
+import qualified Codec.Archive.Tar         as Tar
+import           Codec.Compression.GZip    (compress, decompress)
+import           Control.Monad             (void, when)
+import qualified Data.ByteString.Lazy      as BS
+import           Language.ATS.Package.Type
+import           Network.HTTP.Client       hiding (decompress)
+import           Network.HTTP.Client.TLS   (tlsManagerSettings)
 import           System.Directory
-import           System.Environment      (getEnv)
-import           System.FilePath.Find    (find)
+import           System.Environment        (getEnv)
+import           System.FilePath.Find      (find)
 import           System.Posix.Files
 import           System.Process
 
@@ -31,12 +32,6 @@ cleanAll = do
     when b $ do
         putStrLn "Cleaning everything..."
         removeDirectoryRecursive d
-
-newtype Version = Version [Integer]
-    deriving (Eq)
-
-instance Show Version where
-    show (Version is) = intercalate "." (show <$> is)
 
 -- TODO depend on version
 compilerDir :: Version -> IO FilePath

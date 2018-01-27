@@ -1,27 +1,41 @@
-{-# OPTIONS_GHC -fno-warn-unused-top-binds #-}
+{-# OPTIONS_GHC -fno-warn-unused-top-binds -fno-warn-orphans #-}
 
-{-# LANGUAGE DeriveAnyClass    #-}
-{-# LANGUAGE DeriveGeneric     #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE DeriveAnyClass             #-}
+{-# LANGUAGE DeriveGeneric              #-}
+{-# LANGUAGE DerivingStrategies         #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE StandaloneDeriving         #-}
+{-# LANGUAGE TemplateHaskell            #-}
 
 module Language.ATS.Package.Type ( -- * Types
                                    Pkg (..)
                                  , Dependency (..)
                                  , Bin (..)
+                                 , Constraint (..)
+                                 , Version (..)
                                  -- * Lenses
                                  , dirLens
                                  ) where
 
 import           Control.Lens
+import           Development.Shake.ATS
 import           Dhall
+
+deriving newtype instance Interpret Version
+
+data Constraint = Constraint { libDepends :: Text
+                             , upper      :: Version
+                             , lower      :: Version
+                             }
+                deriving (Eq, Show, Generic, Interpret)
 
 -- | Type for a dependency
 data Dependency = Dependency { libName :: Text -- ^ Library name, e.g.
                              , dir     :: Text -- ^ Directory we should unpack to
                              , url     :: Text -- ^ Url pointing to tarball
                              }
-    deriving (Eq, Show, Generic, Interpret)
+                deriving (Eq, Show, Generic, Interpret)
 
 makeLensesFor [("dir", "dirLens")] ''Dependency
 
@@ -35,8 +49,8 @@ data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
 data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , test         :: [Bin] -- ^ List of test suites
                , man          :: Maybe Text -- ^ Optional (markdown) manpages to be converted using @pandoc@.
-               , version      :: [Integer] -- ^ Library version
-               , compiler     :: [Integer] -- ^ Compiler version
+               , version      :: Version -- ^ Library version
+               , compiler     :: Version -- ^ Compiler version
                , dependencies :: [Dependency] -- ^ List of dependencies
                , clib         :: [Dependency] -- ^ List of C dependencies
                , ccompiler    :: Text -- ^ The C compiler we should use

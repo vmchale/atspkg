@@ -91,7 +91,7 @@ run c = bool (buildAll "./atspkg.dhall" >> mkPkg rs) (mkPkg rs) =<< check "./ats
           g _          = undefined
 
 want :: FilePath -> IO Version
-want p = Version . compiler <$> input auto (TL.pack p)
+want p = compiler <$> input auto (TL.pack p)
 
 buildAll :: FilePath -> IO ()
 buildAll p = on (>>) (=<< want p) fetchCompiler setupCompiler
