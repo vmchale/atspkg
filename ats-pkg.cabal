@@ -9,7 +9,7 @@ author:              Vanessa McHale
 maintainer:          vamchale@gmail.com
 copyright:           Copyright: (c) 2018 Vanessa McHale
 category:            Development
-build-type:          Simple
+build-type:          Custom
 extra-doc-files:     README.md
 extra-source-files:  stack.yaml
 cabal-version:       1.18
@@ -20,9 +20,14 @@ Flag development {
   default: False
 }
 
+custom-setup
+  setup-depends:     base
+                   , Cabal >= 2.0
+                   , cli-setup >= 0.1.0.2
+
 library
   hs-source-dirs:      src
-  exposed-modules:     Language.ATS.Package
+  exposed-modules:     Language.ATS.Package.Compiler
                      , Language.ATS.Package.Exec
   other-modules:       Paths_ats_pkg
                      , Language.ATS.Package.Error

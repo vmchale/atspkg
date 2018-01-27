@@ -10,6 +10,8 @@ let pkg
       : List { libName : Text, dir : Text, url : Text }
     , clib = []
       : List { libName : Text, dir : Text, url : Text }
+    , ccompiler = "gcc"
+    , cflags = [ "-O2", "-flto", "-mtune=native" ]
     }
 
 in pkg

@@ -10,17 +10,20 @@ module Language.ATS.Package.Type ( Pkg (..)
                                  ) where
 
 import           Control.Composition
-import           Control.Monad.IO.Class          (MonadIO)
-import           Data.Maybe                      (fromMaybe, isJust)
-import           Data.Semigroup                  (Semigroup (..))
-import qualified Data.Text.Lazy                  as TL
+import           Control.Concurrent.ParallelIO.Global
+import           Control.Monad.IO.Class               (MonadIO)
+import           Data.Maybe                           (fromMaybe, isJust)
+import           Data.Semigroup                       (Semigroup (..))
+import qualified Data.Text.Lazy                       as TL
 import           Development.Shake
 import           Development.Shake.ATS
 import           Development.Shake.FilePath
 import           Development.Shake.Man
-import           Dhall                           hiding (bool)
+import           Dhall                                hiding (bool)
 import           Language.ATS.Package.Dependency
-import           System.Directory                (findExecutable, getCurrentDirectory)
+import           System.Directory                     (findExecutable, getCurrentDirectory)
+
+-- TODO custom c compiler
 
 options :: ShakeOptions
 options = shakeOptions { shakeFiles = ".atspkg"
@@ -90,10 +93,11 @@ mkTest =
         need tests
         mapM_ cmd_ tests
 
+-- TODO infer dependencies on gc/atomic gc based on boolean flag.
 pkgToAction :: [String] -> Pkg -> Rules ()
 pkgToAction rs (Pkg bs ts mt v v' ds cds) = do
     unless (rs == ["clean"]) $
-        liftIO $ fetchDeps False ds cds
+        liftIO $ fetchDeps False ds cds >> stopGlobalPool
     action (need ["atspkg.dhall"])
     mapM_ g (bs ++ ts)
     let bins = TL.unpack . target <$> bs
@@ -120,5 +124,7 @@ data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , compiler     :: [Integer] -- ^ Compiler version
                , dependencies :: [Dependency] -- ^ List of dependencies
                , clib         :: [Dependency] -- ^ List of C dependencies
+               , ccompiler    :: Text -- ^ The C compiler we should use
+               , cflags       :: [Text] -- ^ List of flags to pass to the C compiler
                }
          deriving (Show, Eq, Generic, Interpret)
