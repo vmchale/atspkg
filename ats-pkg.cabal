@@ -50,7 +50,7 @@ library
                      , lens
                      , dhall
                      , shake-ats
-                     , shake-ext
+                     , shake-ext >= 1.4.0.2
                      , composition-prelude >= 1.1.0.2
                      , optparse-applicative
                      , temporary
