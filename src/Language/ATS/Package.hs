@@ -3,5 +3,5 @@ module Language.ATS.Package ( packageCompiler
                             , Version (..)
                             ) where
 
-import           Language.ATS.Compiler
-import           Language.ATS.Type
+import           Language.ATS.Package.Compiler
+import           Language.ATS.Package.Type
