@@ -25,15 +25,9 @@ cleanAll :: IO ()
 cleanAll = do
     d <- (++ "/.atspkg") <$> getEnv "HOME"
     b <- doesDirectoryExist d
-    when b $
+    when b $ do
+        putStrLn "Cleaning everything..."
         removeDirectoryRecursive d
-
-nuke :: Version -> IO ()
-nuke v = do
-    putStrLn "Cleaning everything..."
-    b <- doesDirectoryExist =<< compilerDir v
-    when b
-        (removeDirectoryRecursive =<< compilerDir v)
 
 newtype Version = Version [Integer]
     deriving (Eq)
