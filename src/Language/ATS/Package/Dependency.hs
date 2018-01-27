@@ -1,7 +1,4 @@
-{-# LANGUAGE DeriveAnyClass    #-}
-{-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell   #-}
 
 module Language.ATS.Package.Dependency ( -- * Functions
                                          fetchDeps
@@ -11,7 +8,6 @@ module Language.ATS.Package.Dependency ( -- * Functions
 
 import qualified Codec.Archive.Tar                    as Tar
 import qualified Codec.Compression.GZip               as Gzip
--- import qualified Codec.Compression.Lzma               as Lzma
 import           Control.Concurrent.ParallelIO.Global
 import           Control.Lens
 import           Control.Monad
@@ -21,21 +17,13 @@ import           Data.Semigroup                       (Semigroup (..))
 import qualified Data.Text.Lazy                       as TL
 import           Dhall
 import           Language.ATS.Package.Error
+import           Language.ATS.Package.Type
 import           Network.HTTP.Client
 import           Network.HTTP.Client.TLS              (tlsManagerSettings)
 import           System.Directory
 import           System.Environment                   (getEnv)
 import           System.Posix.Files
 import           System.Process
-
--- | Type for a dependency
-data Dependency = Dependency { libName :: Text -- ^ Library name, e.g.
-                             , dir     :: Text -- ^ Directory we should unpack to
-                             , url     :: Text -- ^ Url pointing to tarball
-                             }
-    deriving (Eq, Show, Generic, Interpret)
-
-makeLensesFor [("dir", "dirLens")] ''Dependency
 
 fetchDeps :: Bool -- ^ Set to 'False' if unsure.
           -> [Dependency] -- ^ ATS dependencies
@@ -45,10 +33,10 @@ fetchDeps b deps cdeps =
     unless (null deps && null cdeps) $ do
         putStrLn "Checking ATS dependencies..."
         d <- (<> "lib/") <$> pkgHome
-        let libs = fmap (buildHelper b) deps
+        let libs' = fmap (buildHelper b) deps
             unpacked = fmap (over dirLens (TL.pack d <>)) cdeps
             clibs = fmap (buildHelper b) unpacked
-        parallel_ (libs ++ clibs)
+        parallel_ (libs' ++ clibs)
         mapM_ setup unpacked
 
 pkgHome :: IO FilePath
@@ -92,7 +80,6 @@ getCompressor :: Text -> IO (ByteString -> ByteString)
 getCompressor s
     | ".tar.gz" `TL.isSuffixOf` s || ".tgz" `TL.isSuffixOf` s = pure Gzip.decompress
     | ".tar" `TL.isSuffixOf` s = pure id
-    -- | ".tar.xz" `TL.isSuffixOf` s = pure Lzma.decompress
     | otherwise = unrecognized (TL.unpack s)
 
 buildHelper :: Bool -> Dependency -> IO ()
