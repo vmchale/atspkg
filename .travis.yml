@@ -46,6 +46,7 @@ script:
   - |
     if [ `uname` = "Linux" ]
     then
+      pip install yamllint
       yamllint stack.yaml
       yamllint appveyor.yml
       yamllint .travis.yml
