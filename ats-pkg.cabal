@@ -27,12 +27,12 @@ custom-setup
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Language.ATS.Package.Compiler
-                     , Language.ATS.Package.Exec
+  exposed-modules:     Language.ATS.Package.Exec
   other-modules:       Paths_ats_pkg
                      , Language.ATS.Package.Error
                      , Language.ATS.Package.Type
                      , Language.ATS.Package.Dependency
+                     , Language.ATS.Package.Compiler
   build-depends:       base >= 4.7 && < 5
                      , http-client
                      , filemanip

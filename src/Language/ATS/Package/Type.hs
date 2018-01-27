@@ -111,7 +111,8 @@ pkgToAction rs (Pkg bs ts mt v v' ds cds cc cf) = do
 data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
                , target :: Text -- ^ Binary to be built
                , libs   :: [Text] -- ^ Libraries to link against (e.g. @[ "pthread" ]@)
-               , gc     :: Bool } -- ^ Whether to use the garbage collector
+               , gc     :: Bool -- ^ Whether to use the garbage collector
+               }
          deriving (Show, Eq, Generic, Interpret)
 
 -- data RemotePkg = RemotePkg Pkg Text

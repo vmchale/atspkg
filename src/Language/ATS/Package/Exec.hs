@@ -48,11 +48,6 @@ command' = hsubparser
     <> command "nuke" (info (pure Nuke) (progDesc "Uninstall all globally installed libraries"))
     )
 
-cleanAll :: IO ()
-cleanAll = do
-    d <- getEnv "HOME"
-    removeDirectoryRecursive $ d ++ "/.atspkg"
-
 build :: Parser Command
 build = Build <$> many
     (argument str
