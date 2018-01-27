@@ -85,17 +85,20 @@ mkPkg rs = shake options $
 
 -- TODO infer dependencies on gc/atomic gc based on boolean flag.
 pkgToAction :: [String] -> Pkg -> Rules ()
-pkgToAction rs (Pkg bs ts mt v v' ds cds cc cf) = do
+pkgToAction rs (Pkg bs ts mt v v' ds cds cc cf as cdir) = do
     unless (rs == ["clean"]) $
         liftIO $ fetchDeps False ds cds >> stopGlobalPool
     action (need ["atspkg.dhall"])
     mapM_ g (bs ++ ts)
     let bins = TL.unpack . target <$> bs
     pa <- pandoc
+    cDeps
     when (null rs) $
         case mt of
             (Just m) -> want (bool bins (manTarget m : bins) pa)
             Nothing  -> want bins
 
     where g (Bin s t ls gc') = atsBin (TL.unpack cc) (TL.unpack <$> cf) (Version v) (Version v') gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack t)
-
+          cDeps = unless (null as) $ do
+            want $ fmap ((-<.> "c") . takeBaseName . TL.unpack) as
+            cgen (Version v) (Version v') (TL.unpack cdir)
