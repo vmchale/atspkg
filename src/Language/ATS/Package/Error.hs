@@ -1,9 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Language.ATS.Package.Error ( PackageError (..)
-                                  , printErr
-                                  -- * Helper functions
-                                  , unrecognized
+module Language.ATS.Package.Error ( -- * Helper functions
+                                    unrecognized
                                   ) where
 
 import           System.Exit

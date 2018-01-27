@@ -1,12 +1,11 @@
+{-# OPTIONS_GHC -fno-warn-unused-top-binds #-}
+
 {-# LANGUAGE DeriveAnyClass    #-}
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Language.ATS.Package.Type ( Pkg (..)
-                                 , Bin (..)
-                                 , pkgToAction
                                  , mkPkg
-                                 , mkManpage
                                  ) where
 
 import           Control.Composition
@@ -95,7 +94,7 @@ mkTest =
 
 -- TODO infer dependencies on gc/atomic gc based on boolean flag.
 pkgToAction :: [String] -> Pkg -> Rules ()
-pkgToAction rs (Pkg bs ts mt v v' ds cds) = do
+pkgToAction rs (Pkg bs ts mt v v' ds cds cc cf) = do
     unless (rs == ["clean"]) $
         liftIO $ fetchDeps False ds cds >> stopGlobalPool
     action (need ["atspkg.dhall"])
@@ -107,7 +106,7 @@ pkgToAction rs (Pkg bs ts mt v v' ds cds) = do
             (Just m) -> want (bool bins (manTarget m : bins) pa)
             Nothing  -> want bins
 
-    where g (Bin s t ls gc') = atsBin (Version v) (Version v') gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack t)
+    where g (Bin s t ls gc') = atsBin (TL.unpack cc) (TL.unpack <$> cf) (Version v) (Version v') gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack t)
 
 data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
                , target :: Text -- ^ Binary to be built
