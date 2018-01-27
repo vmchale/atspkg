@@ -5,6 +5,7 @@ module Language.ATS.Package.Build ( mkPkg ) where
 import           Control.Composition
 import           Control.Concurrent.ParallelIO.Global
 import           Control.Monad.IO.Class               (MonadIO)
+import           Data.List                            (nub)
 import           Data.Maybe                           (fromMaybe)
 import           Data.Semigroup                       (Semigroup (..))
 import qualified Data.Text.Lazy                       as TL
@@ -92,13 +93,16 @@ pkgToAction rs (Pkg bs ts mt v v' ds cds cc cf as cdir) = do
     mapM_ g (bs ++ ts)
     let bins = TL.unpack . target <$> bs
     pa <- pandoc
-    cDeps
-    when (null rs) $
+    when (null rs) $ do
+        cDeps
         case mt of
             (Just m) -> want (bool bins (manTarget m : bins) pa)
             Nothing  -> want bins
 
     where g (Bin s t ls gc') = atsBin (TL.unpack cc) (TL.unpack <$> cf) (Version v) (Version v') gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack t)
           cDeps = unless (null as) $ do
-            want $ fmap ((-<.> "c") . takeBaseName . TL.unpack) as
-            cgen (Version v) (Version v') (TL.unpack cdir)
+            let cedar = TL.unpack cdir
+                atsSourceDirs = nub (takeDirectory . TL.unpack <$> as)
+                targets = fmap (((cedar <> "/") <>) . (-<.> "c") . takeBaseName . TL.unpack) as
+            want targets
+            mapM_ (cgen (Version v) (Version v')) atsSourceDirs

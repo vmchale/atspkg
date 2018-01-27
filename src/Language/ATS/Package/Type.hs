@@ -41,7 +41,7 @@ data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , clib         :: [Dependency] -- ^ List of C dependencies
                , ccompiler    :: Text -- ^ The C compiler we should use
                , cflags       :: [Text] -- ^ List of flags to pass to the C compiler
-               , atsSource    :: [Text] -- ^ ATS files that should be compiled to C
+               , atsSource    :: [Text] -- ^ Directory containing ATS source to be compile to C.
                , cDir         :: Text -- ^ Directory for generated C.
                }
          deriving (Show, Eq, Generic, Interpret)
