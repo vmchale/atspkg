@@ -25,6 +25,10 @@ data Dependency = Dependency { libName :: Text -- ^ Library name, e.g.
 
 makeLensesFor [("dir", "dirLens")] ''Dependency
 
+data CTarget = CTarget { src :: Text -- ^ The ATS source file
+                       , dir :: Text -- ^ Directory for generate C files
+                       }
+
 data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
                , target :: Text -- ^ Binary to be built
                , libs   :: [Text] -- ^ Libraries to link against (e.g. @[ "pthread" ]@)
@@ -41,5 +45,7 @@ data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , clib         :: [Dependency] -- ^ List of C dependencies
                , ccompiler    :: Text -- ^ The C compiler we should use
                , cflags       :: [Text] -- ^ List of flags to pass to the C compiler
+               , atsSource    :: [Text] -- ^ ATS files that should be compiled to C
+               , cDir         :: Text -- ^ Directory for generated C.
                }
          deriving (Show, Eq, Generic, Interpret)
