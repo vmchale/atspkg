@@ -25,10 +25,6 @@ data Dependency = Dependency { libName :: Text -- ^ Library name, e.g.
 
 makeLensesFor [("dir", "dirLens")] ''Dependency
 
-data CTarget = CTarget { src :: Text -- ^ The ATS source file
-                       , dir :: Text -- ^ Directory for generate C files
-                       }
-
 data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
                , target :: Text -- ^ Binary to be built
                , libs   :: [Text] -- ^ Libraries to link against (e.g. @[ "pthread" ]@)
