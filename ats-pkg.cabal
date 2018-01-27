@@ -33,6 +33,7 @@ library
                      , Language.ATS.Package.Type
                      , Language.ATS.Package.Dependency
                      , Language.ATS.Package.Compiler
+                     , Language.ATS.Package.Build
   build-depends:       base >= 4.7 && < 5
                      , http-client
                      , filemanip
@@ -53,7 +54,6 @@ library
                      , composition-prelude >= 1.1.0.2
                      , optparse-applicative
                      , temporary
-                     -- , lzma
                      , ansi-wl-pprint
   default-language:    Haskell2010
   if flag(development)
