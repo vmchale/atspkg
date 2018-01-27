@@ -11,7 +11,7 @@ module Language.ATS.Package.Dependency ( -- * Functions
 
 import qualified Codec.Archive.Tar                    as Tar
 import qualified Codec.Compression.GZip               as Gzip
-import qualified Codec.Compression.Lzma               as Lzma
+-- import qualified Codec.Compression.Lzma               as Lzma
 import           Control.Concurrent.ParallelIO.Global
 import           Control.Lens
 import           Control.Monad
@@ -91,8 +91,8 @@ setup (Dependency lib' dirName' _) = do
 getCompressor :: Text -> IO (ByteString -> ByteString)
 getCompressor s
     | ".tar.gz" `TL.isSuffixOf` s || ".tgz" `TL.isSuffixOf` s = pure Gzip.decompress
-    | ".tar.xz" `TL.isSuffixOf` s = pure Lzma.decompress
     | ".tar" `TL.isSuffixOf` s = pure id
+    -- | ".tar.xz" `TL.isSuffixOf` s = pure Lzma.decompress
     | otherwise = unrecognized (TL.unpack s)
 
 buildHelper :: Bool -> Dependency -> IO ()

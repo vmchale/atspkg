@@ -4,14 +4,6 @@
 
 This is a build system for ATS written in Haskell and configured with Dhall.
 
-## Example
-
-To build a binary package from source, run
-
-```bash
- $ atspkg remote https://github.com/vmchale/polyglot/archive/0.3.34.tar.gz
-```
-
 ## Installation
 
 The easiest way to install is via a script, viz.
@@ -26,4 +18,14 @@ Alternately, you can download
 
 ```bash
  $ cabal new-install ats-pkg --symlink-bindir ~/.local/bin
+```
+
+## Examples
+
+### Building a Binary Package
+
+To build a binary package from source, run
+
+```bash
+ $ atspkg remote https://github.com/vmchale/polyglot/archive/0.3.34.tar.gz
 ```

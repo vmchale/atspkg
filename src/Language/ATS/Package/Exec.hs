@@ -78,7 +78,6 @@ fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
 exec :: IO ()
 exec = execParser wrapper >>= run
 
--- https://github.com/vmchale/polyglot/archive/0.3.27.tar.gz
 run :: Command -> IO ()
 run Nuke = cleanAll
 run (Fetch u) = fetchPkg u
