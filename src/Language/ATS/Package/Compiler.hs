@@ -21,6 +21,9 @@ import           System.FilePath.Find    (find)
 import           System.Posix.Files
 import           System.Process
 
+-- request to https://github.com/vmchale/atspkg/releases/latest/ for latest
+-- version, then we can upgrade
+
 cleanAll :: IO ()
 cleanAll = do
     d <- (++ "/.atspkg") <$> getEnv "HOME"
