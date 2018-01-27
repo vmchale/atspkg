@@ -1,5 +1,7 @@
 # ats-pkg
 
+[![Build Status](https://travis-ci.org/vmchale/atspkg.svg?branch=master)](https://travis-ci.org/vmchale/atspkg)
+
 This is a build system for ATS written in Haskell and configured with Dhall.
 
 ## Example
