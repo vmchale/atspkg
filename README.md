@@ -67,7 +67,7 @@ in dep
 You can see an example [here](https://github.com/vmchale/fast-arithmetic). You
 can
 
-``
+```
 let pkg = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default.dhall
 
 in pkg //
