@@ -27,6 +27,25 @@ Alternately, you can download
 may wish to read the Dhall tutorial first, but you do not need to fully
 understand everything to get started.
 
+### Project Templates
+
+You can use [pi](https://github.com/vmchale/project-init) with the builtin `ats`
+template as follows:
+
+```
+pi new ats cool-project
+```
+
+You can then build with `atspkg build` or install with `atspkg install`.
+
+Alternately, you can start with a templated Haskell library calling ATS code:
+
+```
+pi git vmchale/haskell-ats ambitious-project
+```
+
+which can be built with `atspkg build` followed by `cabal new-build`.
+
 ### Building a Binary Package
 
 The minimal configuration for a package with a binary target is as follows:
@@ -62,6 +81,32 @@ let dep =
 
 in dep
 ```
+
+This defines a dependency by pointing to its tarball. Unlike
+[cabal](https://www.haskell.org/cabal/) or other sophisticated package managers,
+`atspkg` does not allow transitive dependencies and it does not do any
+constraint solving. Let's look at a simple example:
+
+```
+let pkg = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default.dhall
+
+in pkg //
+  { bin =
+    [
+      { src = "src/compat.dats"
+      , target = "target/poly"
+      , libs = ([] : List Text)
+      , gc = True
+      }
+    ]
+  , dependencies = [ https://raw.githubusercontent.com/vmchale/ats-concurrency/master/atspkg.dhall ]
+  }
+```
+
+As Dhall is distributed, you can simply point to the package configuration URL
+to add a dependency. You can find several preconfigured packages
+[here](https://github.com/vmchale/atspkg/tree/master/pkgs), or you can write
+your own configurations (feel free to open a PR to add your own!)
 
 ### Building a Haskell Library
 
