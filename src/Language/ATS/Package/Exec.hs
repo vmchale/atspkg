@@ -70,7 +70,7 @@ check p = do
 fetchPkg :: String -> IO ()
 fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
     let (lib, dirName, url') = ("atspkg", p, pkg) & each %~ TL.pack
-    fetchDeps True [Dependency lib dirName url' undefined undefined] []
+    fetchDeps True [Dependency lib dirName url' undefined] []
     ps <- fmap ((p ++ "/") ++) <$> listDirectory p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
     let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg ["install"])
