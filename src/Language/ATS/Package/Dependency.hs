@@ -4,6 +4,9 @@ module Language.ATS.Package.Dependency ( -- * Functions
                                          fetchDeps
                                        -- * Types
                                        , Dependency (..)
+                                       -- * Constants
+                                       , libcAtomicOps
+                                       , libcGC
                                        ) where
 
 import qualified Codec.Archive.Tar                    as Tar
@@ -24,6 +27,12 @@ import           System.Directory
 import           System.Environment                   (getEnv)
 import           System.Posix.Files
 import           System.Process
+
+libcAtomicOps :: Dependency
+libcAtomicOps = Dependency "atomic-ops" "atomic-ops-7.6.2" "https://github.com/ivmai/libatomic_ops/releases/download/v7.6.2/libatomic_ops-7.6.2.tar.gz" (Version [7,6,2])
+
+libcGC :: Dependency
+libcGC = Dependency "gc" "gc-7.4.10" "https://github.com/ivmai/bdwgc/releases/download/v7.4.10/gc-7.4.10.tar.gz" (Version [7,4,10])
 
 fetchDeps :: Bool -- ^ Set to 'False' if unsure.
           -> [Dependency] -- ^ ATS dependencies

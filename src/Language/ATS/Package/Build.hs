@@ -89,7 +89,8 @@ mkPkg rs = shake options $
 pkgToAction :: [String] -> Pkg -> Rules ()
 pkgToAction rs (Pkg bs ts mt v v' ds cds cc cf as cdir) = do
     unless (rs == ["clean"]) $
-        liftIO $ fetchDeps False ds cds >> stopGlobalPool
+        let cdps = if any gc bs then libcAtomicOps : libcGC : cds else cds in
+        liftIO $ fetchDeps False ds cdps >> stopGlobalPool
     action (need ["atspkg.dhall"])
     mapM_ g (bs ++ ts)
     let bins = TL.unpack . target <$> bs
