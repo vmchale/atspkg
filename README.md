@@ -65,7 +65,7 @@ in pkg //
 ```
 
 You need only specify the source file and the target; `atspkg` will parse your
-ATS source files and track them.
+ATS source files and track them (it will not track included C however).
 
 ### Depending on a Library
 
@@ -106,7 +106,7 @@ in pkg //
 As Dhall is distributed, you can simply point to the package configuration URL
 to add a dependency. You can find several preconfigured packages
 [here](https://github.com/vmchale/atspkg/tree/master/pkgs), or you can write
-your own configurations (feel free to open a PR to add your own!)
+your own configurations.
 
 ### Building a Haskell Library
 
