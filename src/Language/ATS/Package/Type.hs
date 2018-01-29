@@ -33,6 +33,7 @@ data Constraint = Constraint { pkgName :: Text
 
 deriving newtype instance Interpret Version
 
+-- TODO make this a map from versions to tarballs etc.
 -- | Type for a dependency
 data Dependency = Dependency { libName    :: Text -- ^ Library name, e.g.
                              , dir        :: Text -- ^ Directory we should unpack to
