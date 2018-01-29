@@ -60,9 +60,7 @@ allSubdirs d = do
     ds' <- mapM allSubdirs ds
     pure $ join (ds : ds')
 
--- runAutoconf :: FilePath -> IO ()
--- runAutoconf p = do
-
+-- TODO? autoconf
 clibSetup :: String -> FilePath -> IO ()
 clibSetup lib' p = do
     subdirs <- allSubdirs p
