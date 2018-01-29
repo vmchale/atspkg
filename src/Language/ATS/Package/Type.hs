@@ -5,6 +5,7 @@
 {-# LANGUAGE DerivingStrategies         #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE ScopedTypeVariables        #-}
 {-# LANGUAGE StandaloneDeriving         #-}
 {-# LANGUAGE TemplateHaskell            #-}
 
@@ -12,31 +13,44 @@ module Language.ATS.Package.Type ( -- * Types
                                    Pkg (..)
                                  , Dependency (..)
                                  , Bin (..)
-                                 , Constraint (..)
                                  , Version (..)
                                  -- * Lenses
                                  , dirLens
                                  ) where
 
 import           Control.Lens
+import           Control.Monad
+import qualified Data.Map              as M
 import           Development.Shake.ATS
 import           Dhall
+import           Dhall.Core            hiding (Type)
 
 deriving newtype instance Interpret Version
 
-data Constraint = Constraint { libDepends :: Text
-                             , upper      :: Version
-                             , lower      :: Version
-                             }
-                deriving (Eq, Show, Generic, Interpret)
-
 -- | Type for a dependency
 data Dependency = Dependency { libName    :: Text -- ^ Library name, e.g.
-                             , libVersion :: Version
                              , dir        :: Text -- ^ Directory we should unpack to
                              , url        :: Text -- ^ Url pointing to tarball
+                             , libVersion :: Version
+                             , libDepends :: [Dependency] -- ^ Library dependencies
                              }
-                deriving (Eq, Show, Generic, Interpret)
+                deriving (Eq, Show, Generic)
+
+dependency :: Type Dependency
+dependency = Type et ep
+    where et (RecordLit m) = do
+            ln <- g "libName" m
+            d <- g "dir" m
+            u <- g "url "m
+            lv <- g "libVersion" m
+            ld <- g "libDepends" m
+            pure $ Dependency ln d u lv ld
+          et _             = Nothing
+          ep = RecordLit mempty
+          g s = extract auto <=< M.lookup s
+
+instance Interpret Dependency where
+    autoWith _ = dependency
 
 makeLensesFor [("dir", "dirLens")] ''Dependency
 

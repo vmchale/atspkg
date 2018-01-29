@@ -3,7 +3,6 @@ module Language.ATS.Package ( packageCompiler
                             , Version (..)
                             , Pkg (..)
                             , Bin (..)
-                            , Constraint (..)
                             ) where
 
 import           Language.ATS.Package.Compiler

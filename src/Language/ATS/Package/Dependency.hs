@@ -69,7 +69,7 @@ clibSetup lib' p = do
     void $ readCreateProcess ((proc "make" ["install"]) { cwd = Just p, std_err = CreatePipe }) ""
 
 setup :: Dependency -> IO ()
-setup (Dependency lib' dirName' _) = do
+setup (Dependency lib' dirName' _ _ _) = do
     lib'' <- (<> TL.unpack lib') <$> pkgHome
     b <- doesFileExist lib''
     unless b $ do
@@ -83,7 +83,7 @@ getCompressor s
     | otherwise = unrecognized (TL.unpack s)
 
 buildHelper :: Bool -> Dependency -> IO ()
-buildHelper b (Dependency lib' dirName' url'') = do
+buildHelper b (Dependency lib' dirName' url'' _ _) = do
 
     let (lib, dirName, url') = (lib', dirName', url'') & each %~ TL.unpack
 
