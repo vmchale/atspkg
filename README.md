@@ -111,11 +111,20 @@ your own configurations.
 ### Building a Haskell Library
 
 You can see an example [here](https://github.com/vmchale/fast-arithmetic). You
-can
+can configure the ATS side of things as follows:
 
 ```
 let pkg = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default.dhall
 
 in pkg //
-  { atsSource = [ "ats-src/{{ project }}.dats" ] }
+  { atsSource = [ "ats-src/ambitious-project.dats" ] }
 ```
+
+This just tells `atspkg` to look for a source file called
+`ats-src/ambitious-project.dats`, which will be compiled to
+`ambitious-project.c` in the default directory (i.e. `cbits`). You can then
+call the generated code just as you would call C.
+
+You may wish to consider
+[ats-setup](http://hackage.haskell.org/package/ats-setup) as well if you are
+packaging the Haskell for distribution.
