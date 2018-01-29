@@ -4,6 +4,8 @@ module Language.ATS.Package ( packageCompiler
                             , Pkg (..)
                             , Bin (..)
                             , Constraint (..)
+                            -- * Lenses
+                            , dirLens
                             ) where
 
 import           Language.ATS.Package.Compiler

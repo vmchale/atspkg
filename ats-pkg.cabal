@@ -37,7 +37,6 @@ library
                      , Language.ATS.Package.Build
   build-depends:       base >= 4.7 && < 5
                      , http-client
-                     , containers
                      , filemanip
                      , bytestring
                      , shake
