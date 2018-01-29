@@ -14,6 +14,7 @@ module Language.ATS.Package.Type ( -- * Types
                                  , Dependency (..)
                                  , Bin (..)
                                  , Version (..)
+                                 , Constraint (..)
                                  -- * Lenses
                                  , dirLens
                                  ) where
@@ -23,6 +24,12 @@ import           Development.Shake.ATS
 import           Dhall
 
 -- TODO constraints?
+
+data Constraint = Constraint { pkgName :: Text
+                             , lower   :: Maybe Version
+                             , upper   :: Maybe Version
+                             }
+                deriving (Eq, Show, Generic, Interpret)
 
 deriving newtype instance Interpret Version
 
