@@ -22,6 +22,8 @@ import           Control.Lens
 import           Development.Shake.ATS
 import           Dhall
 
+-- TODO constraints?
+
 deriving newtype instance Interpret Version
 
 -- | Type for a dependency
@@ -31,19 +33,6 @@ data Dependency = Dependency { libName    :: Text -- ^ Library name, e.g.
                              , libVersion :: Version
                              }
                 deriving (Eq, Show, Generic, Interpret)
-
-{- dependency :: Type Dependency -}
-{- dependency = Type et ep -}
-    {- where et (RecordLit m) = do -}
-            {- ln <- g "libName" m -}
-            {- d <- g "dir" m -}
-            {- u <- g "url "m -}
-            {- lv <- Just (Version mempty) -- g "libVersion" m -}
-            {- ld <- Just mempty -- g "libDepends" m -}
-            {- pure $ Dependency ln d u lv ld -}
-          {- et _             = Nothing -}
-          {- ep = Record $ M.fromList [("libName", Text), ("dir", Text), ("url", Text), ("libVersion", List), ("libDepends", ep)] -}
-          {- g s = extract auto <=< M.lookup s -}
 
 makeLensesFor [("dir", "dirLens")] ''Dependency
 
