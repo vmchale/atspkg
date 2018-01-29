@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Language.ATS.Package.Build ( mkPkg ) where
+module Language.ATS.Package.Build ( mkPkg
+                                  , pkgToAction
+                                  ) where
 
 import           Control.Composition
 import           Control.Concurrent.ParallelIO.Global
