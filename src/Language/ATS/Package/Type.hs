@@ -31,9 +31,10 @@ data Constraint = Constraint { libDepends :: Text
                 deriving (Eq, Show, Generic, Interpret)
 
 -- | Type for a dependency
-data Dependency = Dependency { libName :: Text -- ^ Library name, e.g.
-                             , dir     :: Text -- ^ Directory we should unpack to
-                             , url     :: Text -- ^ Url pointing to tarball
+data Dependency = Dependency { libName    :: Text -- ^ Library name, e.g.
+                             , libVersion :: Version
+                             , dir        :: Text -- ^ Directory we should unpack to
+                             , url        :: Text -- ^ Url pointing to tarball
                              }
                 deriving (Eq, Show, Generic, Interpret)
 
