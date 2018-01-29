@@ -1,7 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Language.ATS.Package.Exec ( exec
-                                 , buildAll
                                  ) where
 
 import           Control.Composition
