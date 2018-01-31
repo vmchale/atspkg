@@ -2,7 +2,7 @@ let pkg
   = { bin = []
       : List { src : Text, target : Text, libs : List Text, hsDeps : List Text, hs2ats : List { hs : Text, ats : Text }, gc : Bool }
     , test = []
-      : List { src : Text, target : Text, libs : List Text, hsDeps : List Text, hs2ats : List { hs : Text, ats : Text }, Text), gc : Bool }
+      : List { src : Text, target : Text, libs : List Text, hsDeps : List Text, hs2ats : List { hs : Text, ats : Text }, gc : Bool }
     , man = ([] : Optional Text)
     , version = [0,3,9]
     , compiler = [0,3,9]
