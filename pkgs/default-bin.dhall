@@ -3,7 +3,7 @@ let bin =
   , target = "target/project" 
   , libs = ([] : List Text)
   , hsDeps = ([] : List Text)
-  , hs2ats = ([] : List (Text, Text))
+  , hs2ats = ([] : List { src : Text, target : Text }))
   , gc = False
   }
 
