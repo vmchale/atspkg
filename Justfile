@@ -3,9 +3,9 @@ install:
 
 test: install
     atspkg nuke
-    atspkg remote https://github.com/vmchale/polyglot/archive/0.3.35.tar.gz
+    atspkg remote https://github.com/vmchale/polyglot/archive/0.3.36.tar.gz
 
-ci: test
+ci:
     stack build
     hlint .
     weeder .
