@@ -1,5 +1,5 @@
 name:                ats-pkg
-version:             2.0.0.2
+version:             2.0.0.4
 synopsis:            Package manager for ATS
 description:         A collection of scripts to make building ATS projects easy.
 homepage:            https://github.com/vmchale/ats-pkg#readme
@@ -50,7 +50,7 @@ library
                      , unix
                      , lens
                      , dhall
-                     , shake-ats >= 0.3.0.3
+                     , shake-ats >= 0.3.0.4
                      , shake-ext >= 1.4.0.2
                      , composition-prelude >= 1.1.0.2
                      , optparse-applicative

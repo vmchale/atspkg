@@ -13,7 +13,9 @@
 - [ ] versioning
 - [ ] package naming
 - [ ] shell completions should list targets (?)
+- [ ] better handling of Haskell dependencies in dependencies
 # Deficiencies
 - [ ] Better tracking of C dependencies
+- [ ] Allow use of `cabal` for Haskell libraries.
 # Bugs
 - [ ] make paths portable for windows
