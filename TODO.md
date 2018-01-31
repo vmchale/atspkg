@@ -1,4 +1,5 @@
 # Features
+- [ ] install ghc??? lol
 - [ ] `fetching...` should include version number.
 - [ ] manpage
 - [ ] warn if parser fails
