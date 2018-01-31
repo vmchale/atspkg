@@ -128,3 +128,9 @@ call the generated code just as you would call C.
 You may wish to consider
 [ats-setup](http://hackage.haskell.org/package/ats-setup) as well if you are
 packaging the Haskell for distribution.
+
+### Calling Haskell from ATS
+
+You can see a demo [here](https://github.com/vmchale/fast-arithmetic).
+Currently, there is not generic `Storable` instance for ATS, so the process is
+a bit more involved than I'd like it to be.
