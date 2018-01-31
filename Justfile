@@ -2,7 +2,8 @@ install:
     cd ../ && just install
 
 test: install
-    atspkg remote https://github.com/vmchale/polyglot/archive/0.3.34.tar.gz
+    atspkg nuke
+    atspkg remote https://github.com/vmchale/polyglot/archive/0.3.35.tar.gz
 
 ci: test
     stack build
