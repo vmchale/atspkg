@@ -21,6 +21,7 @@ import           Language.ATS.Package.Dependency
 import           Language.ATS.Package.Type
 import           System.Directory                     (getCurrentDirectory)
 
+-- TODO clean generated ATS
 mkClean :: Rules ()
 mkClean =
     "clean" ~> do
