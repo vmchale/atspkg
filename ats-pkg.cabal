@@ -50,7 +50,7 @@ library
                      , unix
                      , lens
                      , dhall
-                     , shake-ats
+                     , shake-ats >= 0.3.0.0
                      , shake-ext >= 1.4.0.2
                      , composition-prelude >= 1.1.0.2
                      , optparse-applicative

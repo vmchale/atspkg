@@ -3,11 +3,12 @@ resolver: lts-10.4
 packages:
   - '.'
 extra-deps:
-  - shake-ext-1.4.0.3
-  - shake-ats-0.2.0.4
+  - shake-ext-1.4.0.8
+  - shake-ats-0.3.0.2
   - composition-prelude-1.1.0.2
-  - language-ats-0.1.1.7
+  - language-ats-0.1.1.8
   - cli-setup-0.1.0.3
+  - hs2ats-0.1.0.0
 flags:
   ats-pkg:
     development: false
