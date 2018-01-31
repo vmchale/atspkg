@@ -7,14 +7,15 @@
 - [ ] run valgrind
   - [ ] `ftp://sourceware.org/pub/valgrind/valgrind-3.13.0.tar.bz2`
 - [ ] intmin builds?
-- [ ] better support for multiple compilers
 - [ ] dependency resolution (lol)
   - [ ] Dhall recursive types
 - [ ] versioning
 - [ ] package naming
 - [ ] shell completions should list targets (?)
 - [ ] better handling of Haskell dependencies in dependencies
+- [ ] custom build scripts in ATS
 # Deficiencies
+- [ ] Cache package reads when dhall is not new
 - [ ] Better tracking of C dependencies
 - [ ] Allow use of `cabal` for Haskell libraries.
 # Bugs

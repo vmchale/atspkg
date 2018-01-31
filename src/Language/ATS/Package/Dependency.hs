@@ -36,17 +36,18 @@ libcGC v = Dependency "gc" ("gc-" <> g v) ("https://github.com/ivmai/bdwgc/relea
     where g = TL.pack . show
 
 fetchDeps :: Bool -- ^ Set to 'False' if unsure.
+          -> [IO ()] -- ^ Setup steps that can be performed concurrently
           -> [Dependency] -- ^ ATS dependencies
           -> [Dependency] -- ^ C Dependencies
           -> IO ()
-fetchDeps b deps cdeps =
+fetchDeps b setup' deps cdeps =
     unless (null deps && null cdeps) $ do
         putStrLn "Checking ATS dependencies..."
         d <- (<> "lib/") <$> pkgHome
         let libs' = fmap (buildHelper b) deps
             unpacked = fmap (over dirLens (TL.pack d <>)) cdeps
             clibs = fmap (buildHelper b) unpacked
-        parallel_ (libs' ++ clibs)
+        parallel_ (setup' ++ libs' ++ clibs)
         mapM_ setup unpacked
 
 pkgHome :: IO FilePath

@@ -21,6 +21,7 @@ module Language.ATS.Package.Type ( -- * Types
                                  ) where
 
 import           Control.Lens
+import           Data.Binary           (Binary (..))
 import           Development.Shake.ATS
 import           Dhall
 
@@ -41,13 +42,13 @@ data Dependency = Dependency { libName    :: Text -- ^ Library name, e.g.
                              , url        :: Text -- ^ Url pointing to tarball
                              , libVersion :: Version
                              }
-                deriving (Eq, Show, Generic, Interpret)
+                deriving (Eq, Show, Generic, Interpret, Binary)
 
 makeLensesFor [("dir", "dirLens")] ''Dependency
 
 data TargetPair = TargetPair { hs  :: Text
                              , ats :: Text
-                             } deriving (Eq, Show, Generic, Interpret)
+                             } deriving (Eq, Show, Generic, Interpret, Binary)
 
 data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
                , target :: Text -- ^ Binary to be built
@@ -56,7 +57,7 @@ data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
                , hs2ats :: [TargetPair] -- ^ List of sources and targets for @hs2ats@
                , gc     :: Bool -- ^ Whether to use the garbage collector
                }
-         deriving (Show, Eq, Generic, Interpret)
+         deriving (Show, Eq, Generic, Interpret, Binary)
 
 data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , test         :: [Bin] -- ^ List of test suites
@@ -70,4 +71,4 @@ data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , atsSource    :: [Text] -- ^ Directory containing ATS source to be compile to C.
                , cDir         :: Text -- ^ Directory for generated C.
                }
-         deriving (Show, Eq, Generic, Interpret)
+         deriving (Show, Eq, Generic, Interpret, Binary)
