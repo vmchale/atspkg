@@ -15,6 +15,7 @@ module Language.ATS.Package.Type ( -- * Types
                                  , Bin (..)
                                  , Version (..)
                                  , Constraint (..)
+                                 , TargetPair (..)
                                  -- * Lenses
                                  , dirLens
                                  ) where
