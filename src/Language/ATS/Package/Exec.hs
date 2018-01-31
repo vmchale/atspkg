@@ -5,13 +5,13 @@ module Language.ATS.Package.Exec ( exec
 
 import           Control.Composition
 import           Control.Lens                    hiding (argument)
+import           Control.Monad
 import           Data.Bool                       (bool)
 import           Data.Maybe                      (fromMaybe)
 import           Data.Semigroup                  (Semigroup (..))
 import qualified Data.Text.Lazy                  as TL
 import           Data.Version                    hiding (Version (..))
 import           Development.Shake.FilePath
-import           Dhall                           hiding (bool)
 import           Language.ATS.Package.Build
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Dependency
@@ -32,7 +32,7 @@ versionInfo :: Parser (a -> a)
 versionInfo = infoOption ("atspkg version: " ++ showVersion version) (short 'v' <> long "version" <> help "Show version")
 
 data Command = Install
-             | Build { _targets :: [String] }
+             | Build { _targets :: [String], _recache :: Bool }
              | Clean
              | Test
              | Fetch { _url :: String }
@@ -49,10 +49,14 @@ command' = hsubparser
     )
 
 build :: Parser Command
-build = Build <$> many
-    (argument str
-    (metavar "TARGET"
-    <> help "Targets to build"))
+build = Build
+    <$> many
+        (argument str
+        (metavar "TARGET"
+        <> help "Targets to build"))
+    <*> switch
+        (long "no-cache"
+        <> help "Turn off configuration caching")
 
 fetch :: Parser Command
 fetch = Fetch <$>
@@ -60,20 +64,27 @@ fetch = Fetch <$>
     (metavar "URL"
     <> help "URL pointing to a tarball containing the package to be installed.")
 
-check :: FilePath -> IO Bool
+check :: Maybe FilePath -> IO Bool
 check p = do
     home <- getEnv "HOME"
     v <- want p
     doesFileExist (home ++ "/.atspkg/" ++ show v ++ "/bin/patscc")
 
+getSubdirs :: FilePath -> IO [FilePath]
+getSubdirs p = do
+    ds <- listDirectory p
+    case ds of
+        [] -> pure []
+        xs -> filterM doesDirectoryExist (((p <> "/") <>) <$> xs)
+
 fetchPkg :: String -> IO ()
 fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
     let (lib, dirName, url') = ("atspkg", p, pkg) & each %~ TL.pack
-    fetchDeps True [Dependency lib dirName url' undefined] []
-    ps <- fmap ((p ++ "/") ++) <$> listDirectory p
+    fetchDeps True mempty [Dependency lib dirName url' undefined] []
+    ps <- getSubdirs p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
-    let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg ["install"])
-    bool (buildAll pkgDir >> a) a =<< check pkgDir
+    let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg mempty ["install"])
+    bool (buildAll (Just pkgDir) >> a) a =<< check (Just pkgDir)
 
 exec :: IO ()
 exec = execParser wrapper >>= run
@@ -81,16 +92,16 @@ exec = execParser wrapper >>= run
 run :: Command -> IO ()
 run Nuke = cleanAll
 run (Fetch u) = fetchPkg u
-run Clean = mkPkg ["clean"]
-run c = bool (buildAll "./atspkg.dhall" >> mkPkg rs) (mkPkg rs) =<< check "./atspkg.dhall"
+run Clean = mkPkg mempty ["clean"]
+run c = bool (mkPkg [buildAll Nothing] rs) (mkPkg mempty rs) =<< check Nothing
     where rs = g c
-          g Install    = ["install"]
-          g (Build ts) = ts
-          g Test       = ["test"]
-          g _          = undefined
+          g Install      = ["install"]
+          g (Build ts _) = ts
+          g Test         = ["test"]
+          g _            = undefined
 
-want :: FilePath -> IO Version
-want p = compiler <$> input auto (TL.pack p)
+want :: Maybe FilePath -> IO Version
+want p = compiler <$> getConfig p
 
-buildAll :: FilePath -> IO ()
+buildAll :: Maybe FilePath -> IO ()
 buildAll p = on (>>) (=<< want p) fetchCompiler setupCompiler
