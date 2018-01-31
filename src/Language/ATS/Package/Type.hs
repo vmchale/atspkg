@@ -48,6 +48,7 @@ data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
                , target :: Text -- ^ Binary to be built
                , libs   :: [Text] -- ^ Libraries to link against (e.g. @[ "pthread" ]@)
                , hsDeps :: [Text] -- ^ Haskell source files to link against final generated ATS
+               , hs2ats :: [(Text, Text)] -- ^ List of sources and targets for @hs2ats@
                , gc     :: Bool -- ^ Whether to use the garbage collector
                }
          deriving (Show, Eq, Generic, Interpret)

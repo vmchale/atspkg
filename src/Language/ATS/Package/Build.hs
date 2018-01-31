@@ -103,7 +103,7 @@ pkgToAction rs (Pkg bs ts mt v v' ds cds cc cf as cdir) = do
             (Just m) -> want (bool bins (manTarget m : bins) pa)
             Nothing  -> want bins
 
-    where g (Bin s t ls hs gc') = atsBin (TL.unpack cc) (TL.unpack <$> cf) v v' gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack <$> hs) (TL.unpack t)
+    where g (Bin s t ls hs atg gc') = atsBin (TL.unpack cc) (TL.unpack <$> cf) v v' gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack <$> hs) (both TL.unpack <$> atg) (TL.unpack t)
           cDeps = unless (null as) $ do
             let cedar = TL.unpack cdir
                 atsSourceDirs = nub (takeDirectory . TL.unpack <$> as)
