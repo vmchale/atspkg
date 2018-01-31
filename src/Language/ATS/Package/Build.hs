@@ -87,6 +87,9 @@ mkPkg rs = shake options $
     mkInstall >>
     (pkgToAction rs =<< getConfig)
 
+asTuple :: TargetPair -> (Text, Text)
+asTuple (TargetPair s t) = (s, t)
+
 -- TODO infer dependencies on gc/atomic gc based on boolean flag.
 pkgToAction :: [String] -> Pkg -> Rules ()
 pkgToAction rs (Pkg bs ts mt v v' ds cds cc cf as cdir) = do
@@ -103,7 +106,7 @@ pkgToAction rs (Pkg bs ts mt v v' ds cds cc cf as cdir) = do
             (Just m) -> want (bool bins (manTarget m : bins) pa)
             Nothing  -> want bins
 
-    where g (Bin s t ls hs atg gc') = atsBin (TL.unpack cc) (TL.unpack <$> cf) v v' gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack <$> hs) (both TL.unpack <$> atg) (TL.unpack t)
+    where g (Bin s t ls hs atg gc') = atsBin (TL.unpack cc) (TL.unpack <$> cf) v v' gc' (TL.unpack <$> ls) (TL.unpack s) (TL.unpack <$> hs) (both TL.unpack . asTuple <$> atg) (TL.unpack t)
           cDeps = unless (null as) $ do
             let cedar = TL.unpack cdir
                 atsSourceDirs = nub (takeDirectory . TL.unpack <$> as)
