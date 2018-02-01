@@ -47,7 +47,7 @@ buildAll p = on (>>) (=<< wants p) fetchCompiler setupCompiler
 -- | Build a set of targets
 build :: [String] -- ^ Targets
       -> IO ()
-build rs = bool (mkPkg [buildAll Nothing] rs) (mkPkg mempty rs) =<< check Nothing
+build rs = bool (mkPkg False [buildAll Nothing] rs) (mkPkg False mempty rs) =<< check Nothing
 
 -- TODO clean generated ATS
 mkClean :: Rules ()
@@ -108,22 +108,23 @@ mkTest =
         need tests
         mapM_ cmd_ tests
 
-options :: ShakeOptions
-options = shakeOptions { shakeFiles = ".atspkg"
-                       , shakeThreads = 4
-                       , shakeProgress = progressSimple
-                       , shakeLint = Just LintBasic
-                       , shakeColor = True
-                       , shakeVersion = showVersion version
-                       }
+options :: Bool -> ShakeOptions
+options rb = shakeOptions { shakeFiles = ".atspkg"
+                          , shakeThreads = 4
+                          , shakeProgress = progressSimple
+                          , shakeLint = Just LintBasic
+                          , shakeColor = True
+                          , shakeVersion = showVersion version
+                          , shakeRebuild = bool mempty [(RebuildNow, ".atspkg/config")] rb
+                          }
 
 cleanConfig :: (MonadIO m) => [String] -> m Pkg
 cleanConfig ["clean"] = pure undefined
 cleanConfig _         = getConfig Nothing
 
 -- TODO verbosity & coloring?
-mkPkg :: [IO ()] -> [String] -> IO ()
-mkPkg setup rs = shake options $
+mkPkg :: Bool -> [IO ()] -> [String] -> IO ()
+mkPkg rb setup rs = shake (options rb) $
     want rs >>
     mkClean >>
     (pkgToAction setup rs =<< cleanConfig rs)
