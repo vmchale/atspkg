@@ -16,6 +16,7 @@ import           Data.List                            (nub)
 import           Data.Maybe                           (fromMaybe)
 import           Data.Semigroup                       (Semigroup (..))
 import qualified Data.Text.Lazy                       as TL
+import           Data.Version                         hiding (Version (..))
 import           Development.Shake                    hiding (doesFileExist)
 import           Development.Shake.ATS
 import           Development.Shake.Check
@@ -25,7 +26,8 @@ import           Development.Shake.Man
 import           Dhall                                hiding (bool)
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Dependency
-import           Language.ATS.Package.Type
+import           Language.ATS.Package.Type            hiding (version)
+import           Paths_ats_pkg
 import           System.Directory                     (doesFileExist, getCurrentDirectory)
 import qualified System.Environment                   as SE
 
@@ -110,6 +112,9 @@ options :: ShakeOptions
 options = shakeOptions { shakeFiles = ".atspkg"
                        , shakeThreads = 4
                        , shakeProgress = progressSimple
+                       , shakeLint = Just LintBasic
+                       , shakeColor = True
+                       , shakeVersion = showVersion version
                        }
 
 cleanConfig :: (MonadIO m) => [String] -> m Pkg
