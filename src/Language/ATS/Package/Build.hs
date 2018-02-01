@@ -143,8 +143,9 @@ setTargets rs bins mt = when (null rs) $
 pkgToAction :: [IO ()] -> [String] -> Pkg -> Rules ()
 pkgToAction setup rs (Pkg bs ts mt v v' ds cds cc cf as cdir) = do
 
-    unless (rs == ["clean"]) $
-        let cdps = if any gc bs then libcAtomicOps : libcGC (Version [7,6,4]) : cds else cds in
+    unless (rs == ["clean"]) $ do
+        want [".atspkg/config"]
+        let cdps = if any gc bs then libcAtomicOps : libcGC (Version [7,6,4]) : cds else cds
         liftIO $ fetchDeps False setup ds cdps (null as) >> stopGlobalPool
 
     mapM_ g (bs ++ ts)
@@ -163,7 +164,7 @@ pkgToAction setup rs (Pkg bs ts mt v v' ds cds cc cf as cdir) = do
                 gc'
                 (TL.unpack <$> ls)
                 (TL.unpack s)
-                (".atspkg/config" : (TL.unpack <$> hs'))
+                (TL.unpack <$> hs')
                 (both TL.unpack . asTuple <$> atg)
                 (TL.unpack t)
 
