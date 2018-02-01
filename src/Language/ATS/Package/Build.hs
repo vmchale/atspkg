@@ -146,6 +146,14 @@ setTargets rs bins mt = when (null rs) $
         (Just m) -> want . bool bins (manTarget m : bins) =<< pandoc
         Nothing  -> want bins
 
+bits :: Rules ()
+bits = foldr (>>) (pure ())
+    [ mkTest
+    , mkManpage
+    , mkInstall
+    , mkConfig
+    ]
+
 pkgToAction :: [IO ()] -> [String] -> Pkg -> Rules ()
 pkgToAction setup rs ~(Pkg bs ts mt v v' ds cds cc cf as cdir) =
 
@@ -153,20 +161,18 @@ pkgToAction setup rs ~(Pkg bs ts mt v v' ds cds cc cf as cdir) =
 
         want [".atspkg/config"]
 
-        let cdps = if any gc bs then libcAtomicOps : libcGC (Version [7,6,4]) : cds else cds
+        let gcV = Version [7,6,4]
+            atomicV = Version [7,6,2]
+            cdps = if any gc bs then libcAtomicOps atomicV : libcGC gcV : cds else cds
+
         liftIO $ fetchDeps False setup ds cdps False >> stopGlobalPool
 
         let bins = TL.unpack . target <$> bs
         setTargets rs bins mt
 
-        cDeps
+        cDeps >> bits
 
         mapM_ g (bs ++ ts)
-
-        mkTest
-        mkManpage
-        mkInstall
-        mkConfig
 
     where g (Bin s t ls hs' atg gc') =
             atsBin

@@ -46,6 +46,7 @@ data Dependency = Dependency { libName    :: Text -- ^ Library name, e.g.
 
 makeLensesFor [("dir", "dirLens")] ''Dependency
 
+-- | This is just a tuple, except I can figure out how to use it with Dhall.
 data TargetPair = TargetPair { hs  :: Text
                              , ats :: Text
                              } deriving (Eq, Show, Generic, Interpret, Binary)
@@ -59,6 +60,7 @@ data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
                }
          deriving (Show, Eq, Generic, Interpret, Binary)
 
+-- | Data type associated with @atspkg.dhall@ file.
 data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , test         :: [Bin] -- ^ List of test suites
                , man          :: Maybe Text -- ^ Optional (markdown) manpages to be converted using @pandoc@.
