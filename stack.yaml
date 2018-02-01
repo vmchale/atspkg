@@ -4,9 +4,9 @@ packages:
   - '.'
 extra-deps:
   - shake-ext-1.5.0.0
-  - shake-ats-0.3.0.5
+  - shake-ats-0.3.0.6
   - composition-prelude-1.1.0.2
-  - language-ats-0.1.1.8
+  - language-ats-0.1.1.9
   - cli-setup-0.1.0.3
   - hs2ats-0.2.0.0
 flags:

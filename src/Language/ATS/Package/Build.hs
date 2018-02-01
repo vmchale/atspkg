@@ -2,7 +2,9 @@
 
 module Language.ATS.Package.Build ( mkPkg
                                   , pkgToAction
-                                  , getConfig
+                                  , build
+                                  , buildAll
+                                  , check
                                   ) where
 
 import           Control.Composition
@@ -21,9 +23,29 @@ import           Development.Shake.Clean
 import           Development.Shake.FilePath
 import           Development.Shake.Man
 import           Dhall                                hiding (bool)
+import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Dependency
 import           Language.ATS.Package.Type
 import           System.Directory                     (doesFileExist, getCurrentDirectory)
+import qualified System.Environment                   as SE
+
+check :: Maybe FilePath -> IO Bool
+check p = do
+    home <- SE.getEnv "HOME"
+    v <- wants p
+    doesFileExist (home ++ "/.atspkg/" ++ show v ++ "/bin/patscc")
+
+wants :: Maybe FilePath -> IO Version
+wants p = compiler <$> getConfig p
+
+-- | Build in current directory or indicated directory
+buildAll :: Maybe FilePath -> IO ()
+buildAll p = on (>>) (=<< wants p) fetchCompiler setupCompiler
+
+-- | Build a set of targets
+build :: [String] -- ^ Targets
+      -> IO ()
+build rs = bool (mkPkg [buildAll Nothing] rs) (mkPkg mempty rs) =<< check Nothing
 
 -- TODO clean generated ATS
 mkClean :: Rules ()
@@ -123,7 +145,7 @@ pkgToAction setup rs (Pkg bs ts mt v v' ds cds cc cf as cdir) = do
 
     unless (rs == ["clean"]) $
         let cdps = if any gc bs then libcAtomicOps : libcGC (Version [7,6,4]) : cds else cds in
-        liftIO $ fetchDeps False setup ds cdps >> stopGlobalPool
+        liftIO $ fetchDeps False setup ds cdps (null as) >> stopGlobalPool
 
     mapM_ g (bs ++ ts)
     let bins = TL.unpack . target <$> bs

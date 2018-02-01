@@ -15,11 +15,9 @@ import           Development.Shake.FilePath
 import           Language.ATS.Package.Build
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Dependency
-import           Language.ATS.Package.Type       hiding (test, version)
 import           Options.Applicative             hiding (auto)
 import           Paths_ats_pkg
 import           System.Directory
-import           System.Environment              (getEnv)
 import           System.IO.Temp                  (withSystemTempDirectory)
 
 wrapper :: ParserInfo Command
@@ -43,13 +41,13 @@ command' = hsubparser
     (command "install" (info (pure Install) (progDesc "Install all binaries to $HOME/.local/bin"))
     <> command "clean" (info (pure Clean) (progDesc "Clean current project directory"))
     <> command "remote" (info fetch (progDesc "Fetch and install a binary package"))
-    <> command "build" (info build (progDesc "Build current package targets"))
+    <> command "build" (info build' (progDesc "Build current package targets"))
     <> command "test" (info (pure Test) (progDesc "Test current package"))
     <> command "nuke" (info (pure Nuke) (progDesc "Uninstall all globally installed libraries"))
     )
 
-build :: Parser Command
-build = Build
+build' :: Parser Command
+build' = Build
     <$> many
         (argument str
         (metavar "TARGET"
@@ -64,12 +62,6 @@ fetch = Fetch <$>
     (metavar "URL"
     <> help "URL pointing to a tarball containing the package to be installed.")
 
-check :: Maybe FilePath -> IO Bool
-check p = do
-    home <- getEnv "HOME"
-    v <- want p
-    doesFileExist (home ++ "/.atspkg/" ++ show v ++ "/bin/patscc")
-
 getSubdirs :: FilePath -> IO [FilePath]
 getSubdirs p = do
     ds <- listDirectory p
@@ -80,7 +72,7 @@ getSubdirs p = do
 fetchPkg :: String -> IO ()
 fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
     let (lib, dirName, url') = ("atspkg", p, pkg) & each %~ TL.pack
-    fetchDeps True mempty [Dependency lib dirName url' undefined] []
+    fetchDeps True mempty [Dependency lib dirName url' undefined] [] True
     ps <- getSubdirs p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
     let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg mempty ["install"])
@@ -99,9 +91,3 @@ run c = bool (mkPkg [buildAll Nothing] rs) (mkPkg mempty rs) =<< check Nothing
           g (Build ts _) = ts
           g Test         = ["test"]
           g _            = undefined
-
-want :: Maybe FilePath -> IO Version
-want p = compiler <$> getConfig p
-
-buildAll :: Maybe FilePath -> IO ()
-buildAll p = on (>>) (=<< want p) fetchCompiler setupCompiler
