@@ -54,6 +54,7 @@ build' = Build
         <> help "Targets to build"))
     <*> switch
         (long "no-cache"
+        <> short 'c'
         <> help "Turn off configuration caching")
 
 fetch :: Parser Command
@@ -75,7 +76,7 @@ fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
     fetchDeps True mempty [Dependency lib dirName url' undefined] [] True
     ps <- getSubdirs p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
-    let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg mempty ["install"])
+    let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg False mempty ["install"])
     bool (buildAll (Just pkgDir) >> a) a =<< check (Just pkgDir)
 
 exec :: IO ()
@@ -84,10 +85,13 @@ exec = execParser wrapper >>= run
 run :: Command -> IO ()
 run Nuke = cleanAll
 run (Fetch u) = fetchPkg u
-run Clean = mkPkg mempty ["clean"]
-run c = bool (mkPkg [buildAll Nothing] rs) (mkPkg mempty rs) =<< check Nothing
+run Clean = mkPkg False mempty ["clean"]
+run c = bool (mkPkg rb [buildAll Nothing] rs) (mkPkg rb mempty rs) =<< check Nothing
     where rs = g c
           g Install      = ["install"]
           g (Build ts _) = ts
           g Test         = ["test"]
           g _            = undefined
+          rb = h c
+          h (Build _ True) = True
+          h _              = False
