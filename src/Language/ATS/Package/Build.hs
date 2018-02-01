@@ -147,13 +147,13 @@ pkgToAction setup rs (Pkg bs ts mt v v' ds cds cc cf as cdir) = do
         want [".atspkg/config"]
         let cdps = if any gc bs then libcAtomicOps : libcGC (Version [7,6,4]) : cds else cds
         liftIO $ fetchDeps False setup ds cdps (null as) >> stopGlobalPool
+        let bins = TL.unpack . target <$> bs
+        setTargets rs bins mt
 
     mapM_ g (bs ++ ts)
-    let bins = TL.unpack . target <$> bs
 
     cDeps
 
-    setTargets rs bins mt
 
     where g (Bin s t ls hs' atg gc') =
             atsBin
