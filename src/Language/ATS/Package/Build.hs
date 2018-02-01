@@ -112,16 +112,16 @@ options = shakeOptions { shakeFiles = ".atspkg"
                        , shakeProgress = progressSimple
                        }
 
+cleanConfig :: (MonadIO m) => [String] -> m Pkg
+cleanConfig ["clean"] = pure undefined
+cleanConfig _         = getConfig Nothing
+
 -- TODO verbosity & coloring?
 mkPkg :: [IO ()] -> [String] -> IO ()
 mkPkg setup rs = shake options $
     want rs >>
-    mkTest >>
     mkClean >>
-    mkManpage >>
-    mkInstall >>
-    mkConfig >>
-    (pkgToAction setup rs =<< getConfig Nothing)
+    (pkgToAction setup rs =<< cleanConfig rs)
 
 asTuple :: TargetPair -> (Text, Text)
 asTuple (TargetPair s t) = (s, t)
@@ -141,19 +141,26 @@ setTargets rs bins mt = when (null rs) $
         Nothing  -> want bins
 
 pkgToAction :: [IO ()] -> [String] -> Pkg -> Rules ()
-pkgToAction setup rs (Pkg bs ts mt v v' ds cds cc cf as cdir) = do
+pkgToAction setup rs ~(Pkg bs ts mt v v' ds cds cc cf as cdir) =
 
     unless (rs == ["clean"]) $ do
+
         want [".atspkg/config"]
+
         let cdps = if any gc bs then libcAtomicOps : libcGC (Version [7,6,4]) : cds else cds
         liftIO $ fetchDeps False setup ds cdps (null as) >> stopGlobalPool
+
         let bins = TL.unpack . target <$> bs
         setTargets rs bins mt
 
-    mapM_ g (bs ++ ts)
+        cDeps
 
-    cDeps
+        mapM_ g (bs ++ ts)
 
+        mkTest
+        mkManpage
+        mkInstall
+        mkConfig
 
     where g (Bin s t ls hs' atg gc') =
             atsBin
