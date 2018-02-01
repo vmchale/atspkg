@@ -18,7 +18,7 @@ Alternately, you can download
 [GHC](https://www.haskell.org/ghc/download.html) and install with
 
 ```bash
-cabal new-install ats-pkg --symlink-bindir ~/.local/bin --happy-options='-gcsa' --alex-options='-g'
+cabal new-install ats-pkg ~/.local/bin --happy-options='-gcsa' --alex-options='-g'
 ```
 
 Note that `$HOME/.local/bin` will need to be on your `PATH`.
@@ -55,13 +55,14 @@ The minimal configuration for a package with a binary target is as follows:
 
 ```dhall
 let pkg = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default.dhall
+in
+let dbin = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default-bin.dhall
 
 in pkg //
   { bin =
-    [
+    [ dbin //
       { src = "src/program.dats"
       , target = "target/program"
-      , gc = True
       }
     ]
   }
@@ -85,10 +86,8 @@ let dep =
 in dep
 ```
 
-This defines a dependency by pointing to its tarball. Unlike
-[cabal](https://www.haskell.org/cabal/) or other sophisticated package managers,
-`atspkg` does not allow transitive dependencies and it does not do any
-constraint solving. Let's look at a simple example:
+This defines a dependency by pointing to its tarball. Let's look at a simple
+example:
 
 ```
 let pkg = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default.dhall
@@ -109,7 +108,8 @@ in pkg //
 As Dhall is distributed, you can simply point to the package configuration URL
 to add a dependency. You can find several preconfigured packages
 [here](https://github.com/vmchale/atspkg/tree/master/pkgs), or you can write
-your own configurations.
+your own configurations. You can even make package lists that are later filtered
+if you so choose.
 
 ### Building a Haskell Library
 
@@ -128,7 +128,7 @@ This just tells `atspkg` to look for a source file called
 `ambitious-project.c` in the default directory (i.e. `cbits`). You can then
 call the generated code just as you would call C.
 
-You may wish to consider
+You may want to consider
 [ats-setup](http://hackage.haskell.org/package/ats-setup) as well if you are
 packaging the Haskell for distribution.
 
@@ -136,4 +136,4 @@ packaging the Haskell for distribution.
 
 You can see a demo [here](https://github.com/vmchale/fast-arithmetic).
 Currently, there is not generic `Storable` instance for ATS, so the process is
-a bit more involved than I'd like it to be.
+a bit more involved than is ideal.

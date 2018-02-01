@@ -10,6 +10,7 @@ module Language.ATS.Package ( packageCompiler
                             , Bin (..)
                             , Constraint (..)
                             , Dependency (..)
+                            , TargetPair (..)
                             -- * Lenses
                             , dirLens
                             ) where

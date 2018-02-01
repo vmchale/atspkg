@@ -1,8 +1,8 @@
 name:                ats-pkg
-version:             2.0.0.11
+version:             2.0.0.12
 synopsis:            Package manager for ATS
 description:         A collection of scripts to make building ATS projects easy.
-homepage:            https://github.com/vmchale/ats-pkg#readme
+homepage:            https://github.com/vmchale/atspkg#readme
 license:             BSD3
 license-file:        LICENSE
 author:              Vanessa McHale
