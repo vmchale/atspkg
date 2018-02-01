@@ -10,7 +10,7 @@ is not yet stable.
 The easiest way to install is via a script, viz.
 
 ```bash
- $ curl -sSl https://raw.githubusercontent.com/vmchale/atspkg/master/bash/install.sh | bash -s
+curl -sSl https://raw.githubusercontent.com/vmchale/atspkg/master/bash/install.sh | bash -s
 ```
 
 Alternately, you can download
@@ -18,7 +18,7 @@ Alternately, you can download
 [GHC](https://www.haskell.org/ghc/download.html) and install with
 
 ```bash
- $ cabal new-install ats-pkg --symlink-bindir ~/.local/bin
+cabal new-install ats-pkg --symlink-bindir ~/.local/bin
 ```
 
 ## Examples

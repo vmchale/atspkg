@@ -39,9 +39,10 @@ fetchDeps :: Bool -- ^ Set to 'False' if unsure.
           -> [IO ()] -- ^ Setup steps that can be performed concurrently
           -> [Dependency] -- ^ ATS dependencies
           -> [Dependency] -- ^ C Dependencies
+          -> Bool -- ^ Whether to perform setup anyhow.
           -> IO ()
-fetchDeps b setup' deps cdeps =
-    unless (null deps && null cdeps) $ do
+fetchDeps b setup' deps cdeps b' =
+    unless (null deps && null cdeps && b') $ do
         putStrLn "Checking ATS dependencies..."
         d <- (<> "lib/") <$> pkgHome
         let libs' = fmap (buildHelper b) deps

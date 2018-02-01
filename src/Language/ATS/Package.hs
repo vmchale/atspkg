@@ -2,6 +2,8 @@ module Language.ATS.Package ( packageCompiler
                             , pkgToAction
                             , fetchCompiler
                             , setupCompiler
+                            , build
+                            , buildAll
                             -- * Types
                             , Version (..)
                             , Pkg (..)
