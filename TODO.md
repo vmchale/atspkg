@@ -14,6 +14,7 @@
 - [ ] shell completions should list targets (?)
 - [ ] better handling of Haskell dependencies in dependencies
 - [ ] custom build scripts in ATS
+- [ ] Set number of threads manually
 # Deficiencies
 - [ ] Cache package reads when dhall is not new
 - [ ] Better tracking of C dependencies

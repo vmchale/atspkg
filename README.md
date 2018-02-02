@@ -91,14 +91,14 @@ example:
 
 ```
 let pkg = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default.dhall
+in
+let dbin = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default-bin.dhall
 
 in pkg //
   { bin =
-    [
+    [ dbin //
       { src = "src/compat.dats"
       , target = "target/poly"
-      , libs = ([] : List Text)
-      , gc = True
       }
     ]
   , dependencies = [ https://raw.githubusercontent.com/vmchale/ats-concurrency/master/atspkg.dhall ]
