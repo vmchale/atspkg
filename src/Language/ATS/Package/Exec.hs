@@ -24,7 +24,7 @@ wrapper :: ParserInfo Command
 wrapper = info (helper <*> versionInfo <*> command')
     (fullDesc
     <> progDesc "The atspkg build tool for ATS-Postiats."
-    <> header "atspkg - a build tool for ATS")
+    <> header "atspkg - a build tool for ATS\nsee 'man atspkg' for more detailed help")
 
 versionInfo :: Parser (a -> a)
 versionInfo = infoOption ("atspkg version: " ++ showVersion version) (short 'v' <> long "version" <> help "Show version")
