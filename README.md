@@ -69,7 +69,7 @@ in pkg //
 ```
 
 You need only specify the source file and the target; `atspkg` will parse your
-ATS source files and track them (it will not track included C however).
+ATS source files and track them (it will not track included C).
 
 ### Depending on a Library
 

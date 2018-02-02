@@ -181,7 +181,7 @@ pkgToAction setup rs ~(Pkg bs ts mt v v' ds cds cc cf as cdir) =
                 gc'
                 (TL.unpack <$> ls)
                 (TL.unpack s)
-                (TL.unpack <$> hs')
+                hs'
                 (both TL.unpack . asTuple <$> atg)
                 (TL.unpack t)
 

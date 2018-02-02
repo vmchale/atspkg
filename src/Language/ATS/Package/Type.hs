@@ -51,10 +51,16 @@ data TargetPair = TargetPair { hs  :: Text
                              , ats :: Text
                              } deriving (Eq, Show, Generic, Interpret, Binary)
 
+deriving instance Show ForeignCabal
+deriving instance Eq ForeignCabal
+deriving instance Generic ForeignCabal
+deriving instance Interpret ForeignCabal
+deriving instance Binary ForeignCabal
+
 data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
                , target :: Text -- ^ Binary to be built
                , libs   :: [Text] -- ^ Libraries to link against (e.g. @[ "pthread" ]@)
-               , hsDeps :: [Text] -- ^ Haskell source files to link against final generated ATS
+               , hsDeps :: [ForeignCabal] -- ^ Haskell @.cabal@ files associated with the final library we want to make
                , hs2ats :: [TargetPair] -- ^ List of sources and targets for @hs2ats@
                , gc     :: Bool -- ^ Whether to use the garbage collector
                }
