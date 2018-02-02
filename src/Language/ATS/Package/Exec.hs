@@ -5,12 +5,12 @@ module Language.ATS.Package.Exec ( exec
 
 import           Control.Composition
 import           Control.Lens                    hiding (argument)
-import           Control.Monad
 import           Data.Bool                       (bool)
 import           Data.Maybe                      (fromMaybe)
 import           Data.Semigroup                  (Semigroup (..))
 import qualified Data.Text.Lazy                  as TL
 import           Data.Version                    hiding (Version (..))
+import           Development.Shake.ATS
 import           Development.Shake.FilePath
 import           Language.ATS.Package.Build
 import           Language.ATS.Package.Compiler
@@ -62,13 +62,6 @@ fetch = Fetch <$>
     argument str
     (metavar "URL"
     <> help "URL pointing to a tarball containing the package to be installed.")
-
-getSubdirs :: FilePath -> IO [FilePath]
-getSubdirs p = do
-    ds <- listDirectory p
-    case ds of
-        [] -> pure []
-        xs -> filterM doesDirectoryExist (((p <> "/") <>) <$> xs)
 
 fetchPkg :: String -> IO ()
 fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
