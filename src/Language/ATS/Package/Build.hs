@@ -111,9 +111,7 @@ mkTest =
 options :: Bool -> ShakeOptions
 options rb = shakeOptions { shakeFiles = ".atspkg"
                           , shakeThreads = 4
-                          , shakeProgress = progressSimple
                           , shakeLint = Just LintBasic
-                          , shakeColor = True
                           , shakeVersion = showVersion version
                           , shakeRebuild = bool mempty [(RebuildNow, ".atspkg/config")] rb
                           }
