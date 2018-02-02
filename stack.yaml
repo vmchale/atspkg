@@ -3,8 +3,8 @@ resolver: lts-10.4
 packages:
   - '.'
 extra-deps:
-  - shake-ext-2.0.0.0
-  - shake-ats-1.0.0.0
+  - shake-ext-2.1.0.1
+  - shake-ats-1.0.0.2
   - composition-prelude-1.1.0.2
   - language-ats-0.1.1.11
   - cli-setup-0.1.0.3
