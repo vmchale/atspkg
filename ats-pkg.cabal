@@ -1,5 +1,5 @@
 name:                ats-pkg
-version:             2.1.0.0
+version:             2.1.0.3
 synopsis:            Package manager for ATS
 description:         A collection of scripts to make building ATS projects easy.
 homepage:            https://github.com/vmchale/atspkg#readme
@@ -12,6 +12,7 @@ category:            Development
 build-type:          Custom
 extra-doc-files:     README.md
 extra-source-files:  stack.yaml
+                   , man/atspkg.1
 cabal-version:       1.18
 
 Flag development {
@@ -23,7 +24,7 @@ Flag development {
 custom-setup
   setup-depends:     base
                    , Cabal >= 2.0
-                   , cli-setup >= 0.1.0.2
+                   , cli-setup >= 0.2.0.1
 
 library
   hs-source-dirs:      src
@@ -50,7 +51,7 @@ library
                      , unix
                      , lens
                      , dhall
-                     , shake-ats >= 1.0.0.2
+                     , shake-ats >= 1.1.0.0
                      , shake-ext >= 2.0.0.0
                      , composition-prelude >= 1.1.0.2
                      , optparse-applicative

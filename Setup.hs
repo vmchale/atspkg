@@ -6,4 +6,4 @@ import           Distribution.Types.HookedBuildInfo
 
 main :: IO ()
 main = defaultMainWithHooks $
-    simpleUserHooks { preConf = \_ _ -> writeBashCompletions "atspkg" >> pure emptyHookedBuildInfo }
+    simpleUserHooks { preConf = \_ _ -> writeTheFuck >> writeBashCompletions "atspkg" >> pure emptyHookedBuildInfo }

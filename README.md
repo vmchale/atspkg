@@ -136,4 +136,28 @@ packaging the Haskell for distribution.
 
 You can see a demo [here](https://github.com/vmchale/fast-arithmetic).
 Currently, there is not generic `Storable` instance for ATS, so the process is
-a bit more involved than is ideal.
+a bit more involved than is ideal. `atspkg` has abilities similar to
+[hs2ats](http://hackage.haskell.org/package/hs2ats), which means that you can
+usually generate ATS types based on the Haskell types.
+
+The following is a minimal example of a configuration file:
+
+```dhall
+let pkg = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default.dhall
+in
+let dbin = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default-bin.dhall
+
+in pkg //
+  { bin =
+    [
+      dbin //
+      { src = "src/project.dats"
+      , target = "target/project"
+      , hsDeps = [ { cabalFile = "hs/foreign.cabal", objectFile = "hs/Foreign.o" } ]
+      , hs2ats = [ { hs = "hs/Foreign.hs", ats = ".atspkg/hs2ats/gen.sats" } ]
+      }
+    ]
+    , ccompiler = "ghc-8.2.2"
+    , cflags = ["-package-db", "hs/dist-newstyle/packagedb/ghc-8.2.2/", "-optc-O2", "-optc-flto", "-optc-mtune=native", "hs/Foreign"]
+  }
+```
