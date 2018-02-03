@@ -72,7 +72,7 @@ mkInstall =
         case man config of
             Just mt -> if not pa then pure () else do
                 let mt' = manTarget mt
-                    manDest = (home <> "/.local/share/man/man1/") <> mt'
+                    manDest = home <> "/.local/share/man/man1/" <> takeFileName mt'
                 need [mt']
                 copyFile' mt' manDest
             Nothing -> pure ()
