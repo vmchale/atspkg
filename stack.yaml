@@ -6,7 +6,7 @@ extra-deps:
   - shake-ext-2.1.0.1
   - shake-ats-1.1.0.0
   - composition-prelude-1.1.0.2
-  - language-ats-0.1.1.14
+  - language-ats-0.1.1.15
   - cli-setup-0.2.0.1
   - hs2ats-0.2.0.1
 flags:
