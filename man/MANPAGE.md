@@ -50,6 +50,9 @@ to $HOME/.local/share/man/man1
 **-c** **-\-no-cache**
 :   Ignore cached configuration file
 
+**-r**, **-\-rebuild**
+:   Rebuild all binary targets.
+
 # CONFIGURATION
 
 **atspkg** is configured with Dhall, in an atspkg.dhall file. **atspkg** can be
