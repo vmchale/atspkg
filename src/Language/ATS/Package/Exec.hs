@@ -30,7 +30,11 @@ versionInfo :: Parser (a -> a)
 versionInfo = infoOption ("atspkg version: " ++ showVersion version) (short 'v' <> long "version" <> help "Show version")
 
 data Command = Install
-             | Build { _targets :: [String], _recache :: Bool }
+             | Build { _targets    :: [String]
+                     , _recache    :: Bool
+                     , _archTarget :: Maybe String
+                     , _rebuildAll :: Bool
+                     }
              | Clean
              | Test
              | Fetch { _url :: String }
@@ -56,6 +60,15 @@ build' = Build
         (long "no-cache"
         <> short 'c'
         <> help "Turn off configuration caching")
+    <*> optional
+        (strOption
+        (long "target"
+        <> short 't'
+        <> help "Set target by using its triple"))
+    <*> switch
+        (long "rebuild"
+        <> short 'r'
+        <> help "Force rebuild of all targets")
 
 fetch :: Parser Command
 fetch = Fetch <$>
@@ -69,22 +82,25 @@ fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
     fetchDeps True mempty [Dependency lib dirName url' undefined] [] True
     ps <- getSubdirs p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
-    let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg False mempty ["install"])
+    let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg False False mempty ["install"] Nothing)
     bool (buildAll (Just pkgDir) >> a) a =<< check (Just pkgDir)
 
 exec :: IO ()
 exec = execParser wrapper >>= run
 
+runHelper :: Bool -> Bool -> [String] -> Maybe String -> IO ()
+runHelper rb rba rs tgt = bool
+    (mkPkg rb rba [buildAll Nothing] rs tgt)
+    (mkPkg rb rba mempty rs tgt)
+    =<< check Nothing
+
 run :: Command -> IO ()
 run Nuke = cleanAll
 run (Fetch u) = fetchPkg u
-run Clean = mkPkg False mempty ["clean"]
-run c = bool (mkPkg rb [buildAll Nothing] rs) (mkPkg rb mempty rs) =<< check Nothing
+run Clean = mkPkg False False mempty ["clean"] Nothing
+run (Build rs rb tgt rba) = runHelper rb rba rs tgt
+run c = runHelper False False rs Nothing
     where rs = g c
-          g Install      = ["install"]
-          g (Build ts _) = ts
-          g Test         = ["test"]
-          g _            = undefined
-          rb = h c
-          h (Build _ True) = True
-          h _              = False
+          g Install = ["install"]
+          g Test    = ["test"]
+          g _       = undefined

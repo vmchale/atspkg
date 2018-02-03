@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TupleSections     #-}
 
 module Language.ATS.Package.Build ( mkPkg
                                   , pkgToAction
@@ -23,7 +24,7 @@ import           Development.Shake.Check
 import           Development.Shake.Clean
 import           Development.Shake.FilePath
 import           Development.Shake.Man
-import           Dhall                                hiding (bool)
+import           Dhall                                hiding (bool, maybe)
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Dependency
 import           Language.ATS.Package.Type            hiding (version)
@@ -47,7 +48,8 @@ buildAll p = on (>>) (=<< wants p) fetchCompiler setupCompiler
 -- | Build a set of targets
 build :: [String] -- ^ Targets
       -> IO ()
-build rs = bool (mkPkg False [buildAll Nothing] rs) (mkPkg False mempty rs) =<< check Nothing
+build rs = bool (mkPkgEmpty [buildAll Nothing]) (mkPkgEmpty mempty) =<< check Nothing
+    where mkPkgEmpty ts = mkPkg False False ts rs Nothing
 
 -- TODO clean generated ATS
 mkClean :: Rules ()
@@ -108,24 +110,37 @@ mkTest =
         need tests
         mapM_ cmd_ tests
 
-options :: Bool -> ShakeOptions
-options rb = shakeOptions { shakeFiles = ".atspkg"
+options :: Bool -> Bool -> [String] -> ShakeOptions
+options rb rba rs = shakeOptions { shakeFiles = ".atspkg"
                           , shakeThreads = 4
                           , shakeLint = Just LintBasic
                           , shakeVersion = showVersion version
-                          , shakeRebuild = bool mempty [(RebuildNow, ".atspkg/config")] rb
+                          , shakeRebuild = foldMap g [ (rb, [(RebuildNow, ".atspkg/config")])
+                                                     , (rba, (RebuildNow ,) <$> rs)
+                                                     ]
                           }
+    where g (b, ts) = bool mempty ts b
 
 cleanConfig :: (MonadIO m) => [String] -> m Pkg
 cleanConfig ["clean"] = pure undefined
 cleanConfig _         = getConfig Nothing
 
--- TODO verbosity & coloring?
-mkPkg :: Bool -> [IO ()] -> [String] -> IO ()
-mkPkg rb setup rs = shake (options rb) $
-    want rs >>
-    mkClean >>
-    (pkgToAction setup rs =<< cleanConfig rs)
+-- TODO verbosity?
+mkPkg :: Bool -- ^ Whether to ignore cached package config
+      -> Bool -- ^ Rebuild all targets
+      -> [IO ()] -- ^ Setup
+      -> [String] -- ^ Targets
+      -> Maybe String -- ^ Target triple
+      -> IO ()
+mkPkg rb rba setup rs tgt = do
+    cfg <- cleanConfig rs
+    let opt = options rb rba $ pkgToTargets cfg rs
+    shake opt $
+        foldr (>>) (pure ())
+            [ want rs
+            , mkClean
+            , pkgToAction setup rs tgt =<< cleanConfig rs
+            ]
 
 asTuple :: TargetPair -> (Text, Text)
 asTuple (TargetPair s t) = (s, t)
@@ -152,8 +167,16 @@ bits = foldr (>>) (pure ())
     , mkConfig
     ]
 
-pkgToAction :: [IO ()] -> [String] -> Pkg -> Rules ()
-pkgToAction setup rs ~(Pkg bs ts mt v v' ds cds cc cf as cdir) =
+pkgToTargets :: Pkg -> [FilePath] -> [FilePath]
+pkgToTargets ~(Pkg bs _ _ _ _ _ _ _ _ _ _) [] = TL.unpack . target <$> bs
+pkgToTargets _ ts                             = ts
+
+pkgToAction :: [IO ()] -- ^ Setup actions to be performed
+            -> [String] -- ^ Targets
+            -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
+            -> Pkg -- ^ Package data type
+            -> Rules ()
+pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds cc cf as cdir) =
 
     unless (rs == ["clean"]) $ do
 
@@ -174,7 +197,7 @@ pkgToAction setup rs ~(Pkg bs ts mt v v' ds cds cc cf as cdir) =
 
     where g (Bin s t ls hs' atg gc') =
             atsBin
-                (TL.unpack cc)
+                cc'
                 (TL.unpack <$> cf)
                 v
                 v'
@@ -191,3 +214,5 @@ pkgToAction setup rs ~(Pkg bs ts mt v v' ds cds cc cf as cdir) =
                 targets = fmap (((cedar <> "/") <>) . (-<.> "c") . takeBaseName . TL.unpack) as
             want targets
             mapM_ (cgen v v') atsSourceDirs
+
+          cc' = maybe (TL.unpack cc) (<> "-gcc") tgt
