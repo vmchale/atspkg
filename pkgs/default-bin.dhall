@@ -5,6 +5,7 @@ let bin =
   , hsDeps = ([] : List { cabalFile : Text, objectFile : Text })
   , hs2ats = ([] : List { hs : Text, ats : Text })
   , gcBin = False
+  , cSources = ([] : List Text)
   }
 
 in bin
