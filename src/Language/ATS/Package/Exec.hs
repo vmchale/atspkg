@@ -15,6 +15,7 @@ import           Development.Shake.FilePath
 import           Language.ATS.Package.Build
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Dependency
+import           Language.ATS.Package.Upgrade
 import           Options.Applicative             hiding (auto)
 import           Paths_ats_pkg
 import           System.Directory
@@ -39,6 +40,7 @@ data Command = Install
              | Test
              | Fetch { _url :: String }
              | Nuke
+             | Upgrade
 
 command' :: Parser Command
 command' = hsubparser
@@ -48,6 +50,7 @@ command' = hsubparser
     <> command "build" (info build' (progDesc "Build current package targets"))
     <> command "test" (info (pure Test) (progDesc "Test current package"))
     <> command "nuke" (info (pure Nuke) (progDesc "Uninstall all globally installed libraries"))
+    <> command "upgrade" (info (pure Upgrade) (progDesc "Upgrade to the latest version of atspkg"))
     )
 
 build' :: Parser Command
@@ -95,6 +98,7 @@ runHelper rb rba rs tgt = bool
     =<< check Nothing
 
 run :: Command -> IO ()
+run Upgrade = upgradeAtsPkg
 run Nuke = cleanAll
 run (Fetch u) = fetchPkg u
 run Clean = mkPkg False False mempty ["clean"] Nothing

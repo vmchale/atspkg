@@ -36,6 +36,7 @@ library
                      , Language.ATS.Package.Dependency
                      , Language.ATS.Package.Compiler
                      , Language.ATS.Package.Build
+                     , Language.ATS.Package.Upgrade
   build-depends:       base >= 4.7 && < 5
                      , http-client
                      , filemanip

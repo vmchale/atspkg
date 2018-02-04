@@ -6,7 +6,6 @@ module Language.ATS.Package.Compiler
     , cleanAll
     , fetchCompiler
     , setupCompiler
-    , Version (..)
     ) where
 
 import qualified Codec.Archive.Tar         as Tar
@@ -21,6 +20,9 @@ import           System.Environment        (getEnv)
 import           System.FilePath.Find      (find)
 import           System.Posix.Files
 import           System.Process
+
+-- HOPEFULLY only linux or darwin?
+-- isDigit
 
 -- request to https://github.com/vmchale/atspkg/releases/latest/ for latest
 -- version, then we can upgrade this tool as well.
