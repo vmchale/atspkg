@@ -8,7 +8,7 @@ function getTarget {
     then
         echo "atspkg-$(uname -m)-apple-darwin"
     else
-        echo "atspkg-$(uname -m)-unkown-linux"
+        echo "atspkg-$(uname -m)-unknown-linux"
     fi
 }
 

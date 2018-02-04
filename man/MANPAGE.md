@@ -15,11 +15,7 @@ atspkg - a build tool for ATS
 
   atspkg install
 
-  atspkg remote \<url\>
-
   atspkg clean
-
-  atspkg nuke
 
   atspkg test
 
@@ -38,6 +34,8 @@ targets
 
 **install** - Install binary targets to $HOME/.local/bin and relevant manpages
 to $HOME/.local/share/man/man1
+
+**upgrade** - Download the latest binary release of **atspkg**, if available
 
 ## OPTIONS
 

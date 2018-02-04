@@ -15,11 +15,7 @@ atspkg build
 .PP
 atspkg install
 .PP
-atspkg remote <url>
-.PP
 atspkg clean
-.PP
-atspkg nuke
 .PP
 atspkg test
 .SH SUBCOMMANDS
@@ -37,6 +33,9 @@ build its binary targets
 .PP
 \f[B]install\f[] \- Install binary targets to $HOME/.local/bin and
 relevant manpages to $HOME/.local/share/man/man1
+.PP
+\f[B]upgrade\f[] \- Download the latest binary release of
+\f[B]atspkg\f[], if available
 .SS OPTIONS
 .TP
 .B \f[B]\-h\f[] \f[B]\-\-help\f[]
