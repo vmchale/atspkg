@@ -1,7 +1,7 @@
 # Features
 - [ ] install ghc??? lol
 - [ ] `fetching...` should include version number.
-- [ ] manpage
+- [ ] install `.usage` files?
 - [ ] warn if parser fails
 - [ ] warn if GC should be used.
 - [ ] run valgrind
