@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections     #-}
 
+-- | This module holds various functions for turning a package into a set of rules
+-- or an 'IO ()'.
 module Language.ATS.Package.Build ( mkPkg
                                   , pkgToAction
                                   , build
@@ -53,13 +55,12 @@ build rs = bool (mkPkgEmpty [buildAll Nothing]) (mkPkgEmpty mempty) =<< check No
 
 -- TODO clean generated ATS
 mkClean :: Rules ()
-mkClean =
-    "clean" ~> do
-        cleanHaskell
-        removeFilesAfter "." ["//*.1", "//*.c", "tags"]
-        removeFilesAfter "target" ["//*"]
-        removeFilesAfter ".atspkg" ["//*"]
-        removeFilesAfter "ats-deps" ["//*"]
+mkClean = "clean" ~> do
+    cleanHaskell
+    removeFilesAfter "." ["//*.1", "//*.c", "tags"]
+    removeFilesAfter "target" ["//*"]
+    removeFilesAfter ".atspkg" ["//*"]
+    removeFilesAfter "ats-deps" ["//*"]
 
 mkInstall :: Rules ()
 mkInstall =
