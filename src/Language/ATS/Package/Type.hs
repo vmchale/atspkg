@@ -62,7 +62,7 @@ data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
                , libs   :: [Text] -- ^ Libraries to link against (e.g. @[ "pthread" ]@)
                , hsDeps :: [ForeignCabal] -- ^ Haskell @.cabal@ files associated with the final library we want to make
                , hs2ats :: [TargetPair] -- ^ List of sources and targets for @hs2ats@
-               , gc     :: Bool -- ^ Whether to use the garbage collector
+               , gcBin  :: Bool -- ^ Whether to use the garbage collector
                }
          deriving (Show, Eq, Generic, Interpret, Binary)
 

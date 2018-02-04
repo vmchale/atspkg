@@ -23,7 +23,7 @@ import           System.Posix.Files
 import           System.Process
 
 -- request to https://github.com/vmchale/atspkg/releases/latest/ for latest
--- version, then we can upgrade
+-- version, then we can upgrade this tool as well.
 
 cleanAll :: IO ()
 cleanAll = do
