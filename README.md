@@ -71,46 +71,6 @@ in pkg //
 You need only specify the source file and the target; `atspkg` will parse your
 ATS source files and track them (it will not track included C).
 
-### Depending on a Library
-
-Library specifications are also written in Dhall. Let's look at an example:
-
-```dhall
-let dep =
-  { libName = "atscntrb-concurrency-0.1.0"
-  , dir = ".atspkg/contrib"
-  , url = "https://github.com/vmchale/ats-concurrency/archive/0.1.0.tar.gz"
-  , libVersion = [0,1,0]
-  }
-
-in dep
-```
-
-This defines a dependency by pointing to its tarball. Let's look at a simple
-example:
-
-```
-let pkg = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default.dhall
-in
-let dbin = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default-bin.dhall
-
-in pkg //
-  { bin =
-    [ dbin //
-      { src = "src/compat.dats"
-      , target = "target/poly"
-      }
-    ]
-  , dependencies = [ https://raw.githubusercontent.com/vmchale/ats-concurrency/master/atspkg.dhall ]
-  }
-```
-
-As Dhall is distributed, you can simply point to the package configuration URL
-to add a dependency. You can find several preconfigured packages
-[here](https://github.com/vmchale/atspkg/tree/master/pkgs), or you can write
-your own configurations. You can even make package lists that are later filtered
-if you so choose.
-
 ### Building a Haskell Library
 
 You can see an example [here](https://github.com/vmchale/fast-arithmetic). You
