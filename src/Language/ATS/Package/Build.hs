@@ -87,10 +87,10 @@ mkManpage = do
         Just _ -> bool (pure ()) manpages b
         _      -> pure ()
 
+-- TODO allow it to be called in parent directory
 -- getParents :: FilePath -> IO [FilePath]
 -- getParents p = do
 
--- findFile
 getConfig :: MonadIO m => Maybe FilePath -> m Pkg
 getConfig dir' = liftIO $ do
     d <- fromMaybe <$> fmap (<> "/atspkg.dhall") getCurrentDirectory <*> pure dir'
@@ -176,7 +176,7 @@ pkgToAction :: [IO ()] -- ^ Setup actions to be performed
             -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
             -> Pkg -- ^ Package data type
             -> Rules ()
-pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds cc cf as cdir) =
+pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
 
     unless (rs == ["clean"]) $ do
 
@@ -184,7 +184,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds cc cf as cdir) =
 
         let gcV = Version [7,6,4]
             atomicV = Version [7,6,2]
-            cdps = if any gc bs then libcAtomicOps atomicV : libcGC gcV : cds else cds
+            cdps = if any gcBin bs then libcAtomicOps atomicV : libcGC gcV : cds else cds
 
         liftIO $ fetchDeps False setup ds cdps False >> stopGlobalPool
 
@@ -197,16 +197,18 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds cc cf as cdir) =
 
     where g (Bin s t ls hs' atg gc') =
             atsBin
-                cc'
-                (TL.unpack <$> cf)
-                v
-                v'
-                gc'
-                (TL.unpack <$> ls)
-                (TL.unpack s)
-                hs'
-                (both TL.unpack . asTuple <$> atg)
-                (TL.unpack t)
+                (BinaryTarget
+                    cc'
+                    (TL.unpack <$> cf)
+                    v
+                    v'
+                    gc'
+                    (TL.unpack <$> ls)
+                    (TL.unpack s)
+                    hs'
+                    (both TL.unpack . asTuple <$> atg)
+                    (TL.unpack t)
+                )
 
           cDeps = unless (null as) $ do
             let cedar = TL.unpack cdir
@@ -215,4 +217,4 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds cc cf as cdir) =
             want targets
             mapM_ (cgen v v') atsSourceDirs
 
-          cc' = maybe (TL.unpack cc) (<> "-gcc") tgt
+          cc' = maybe (TL.unpack ccLocal) (<> "-gcc") tgt
