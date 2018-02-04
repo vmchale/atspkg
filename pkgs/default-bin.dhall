@@ -4,7 +4,7 @@ let bin =
   , libs = ([] : List Text)
   , hsDeps = ([] : List { cabalFile : Text, objectFile : Text })
   , hs2ats = ([] : List { hs : Text, ats : Text })
-  , gc = False
+  , gcBin = False
   }
 
 in bin
