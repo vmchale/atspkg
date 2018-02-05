@@ -51,11 +51,7 @@ data TargetPair = TargetPair { hs  :: Text
                              , ats :: Text
                              } deriving (Eq, Show, Generic, Interpret, Binary)
 
-deriving instance Show ForeignCabal
-deriving instance Eq ForeignCabal
-deriving instance Generic ForeignCabal
 deriving instance Interpret ForeignCabal
-deriving instance Binary ForeignCabal
 
 data Bin = Bin { src      :: Text -- ^ Source file (should end with @.dats@)
                , target   :: Text -- ^ Binary to be built
