@@ -14,6 +14,7 @@ import           Control.Composition
 import           Control.Concurrent.ParallelIO.Global
 import           Control.Monad.IO.Class               (MonadIO)
 import           Data.Binary                          (decode, encode)
+import qualified Data.ByteString                      as BS
 import qualified Data.ByteString.Lazy                 as BSL
 import           Data.List                            (nub)
 import           Data.Maybe                           (fromMaybe)
@@ -98,7 +99,7 @@ getConfig dir' = liftIO $ do
     b <- not <$> doesFileExist ".atspkg/config"
     if b
         then input auto (TL.pack d)
-        else fmap decode . BSL.readFile $ ".atspkg/config"
+        else fmap (decode . BSL.fromStrict) . BS.readFile $ ".atspkg/config"
 
 manTarget :: Text -> FilePath
 manTarget m = TL.unpack m -<.> "1"
