@@ -27,9 +27,7 @@ import           Data.Dependency
 import           Development.Shake.ATS
 import           Dhall
 
--- TODO constraints?
-
-newtype PackageIndex = PackageIndex [ATSDependency]
+newtype PackageIndex = PackageIndex { pkgIndex :: [ATSDependency] }
     deriving (Eq, Show, Generic)
     deriving newtype (Interpret, Binary)
 
