@@ -2,8 +2,6 @@
 
 module Language.ATS.Package.Dependency ( -- * Functions
                                          fetchDeps
-                                       -- * Types
-                                       , Dependency (..)
                                        -- * Constants
                                        , libcAtomicOps
                                        , libcGC
@@ -18,6 +16,7 @@ import           Data.ByteString.Lazy                 (ByteString)
 import           Data.Maybe                           (fromMaybe)
 import           Data.Semigroup                       (Semigroup (..))
 import qualified Data.Text.Lazy                       as TL
+import           Development.Shake.ATS
 import           Dhall
 import           Language.ATS.Package.Error
 import           Language.ATS.Package.Type
@@ -28,18 +27,18 @@ import           System.Environment                   (getEnv)
 import           System.Posix.Files
 import           System.Process
 
-libcAtomicOps :: Version -> Dependency
-libcAtomicOps v = Dependency "atomic-ops" ("atomic-ops-" <> g v) ("https://github.com/ivmai/libatomic_ops/releases/download/v" <> g v <> "/libatomic_ops-" <> g v <> ".tar.gz") v
+libcAtomicOps :: Version -> ATSDependency
+libcAtomicOps v = ATSDependency "atomic-ops" ("atomic-ops-" <> g v) ("https://github.com/ivmai/libatomic_ops/releases/download/v" <> g v <> "/libatomic_ops-" <> g v <> ".tar.gz") v
     where g = TL.pack . show
 
-libcGC :: Version -> Dependency
-libcGC v = Dependency "gc" ("gc-" <> g v) ("https://github.com/ivmai/bdwgc/releases/download/v" <> g v <> "/gc-" <> g v <> ".tar.gz") v
+libcGC :: Version -> ATSDependency
+libcGC v = ATSDependency "gc" ("gc-" <> g v) ("https://github.com/ivmai/bdwgc/releases/download/v" <> g v <> "/gc-" <> g v <> ".tar.gz") v
     where g = TL.pack . show
 
 fetchDeps :: Bool -- ^ Set to 'False' if unsure.
           -> [IO ()] -- ^ Setup steps that can be performed concurrently
-          -> [Dependency] -- ^ ATS dependencies
-          -> [Dependency] -- ^ C Dependencies
+          -> [ATSDependency] -- ^ ATS dependencies
+          -> [ATSDependency] -- ^ C Dependencies
           -> Bool -- ^ Whether to perform setup anyhow.
           -> IO ()
 fetchDeps b setup' deps cdeps b' =
@@ -50,7 +49,7 @@ fetchDeps b setup' deps cdeps b' =
             unpacked = fmap (over dirLens (TL.pack d <>)) cdeps
             clibs = fmap (buildHelper b) unpacked
         parallel_ (setup' ++ libs' ++ clibs)
-        mapM_ (setup undefined) unpacked
+        mapM_ (setup (GCC Nothing Nothing)) unpacked
 
 pkgHome :: IO FilePath
 pkgHome = (++ "/.atspkg/") <$> getEnv "HOME"
@@ -65,16 +64,16 @@ allSubdirs d = do
     pure $ join (ds : ds')
 
 -- TODO? autoconf
-clibSetup :: String -- ^ C compiler
+clibSetup :: CCompiler -- ^ C compiler
           -> String -- ^ Library name
           -> FilePath -- ^ Filepath to unpack to
           -> IO ()
-clibSetup _ lib' p = do
+clibSetup cc' lib' p = do
     subdirs <- allSubdirs p
     configurePath <- fromMaybe (p <> "/configure") <$> findFile subdirs "configure"
     setFileMode configurePath ownerModes
     h <- pkgHome
-    let procEnv = Just [("CFLAGS" :: String, "-I" <> h <> "include"), ("PATH", "/usr/bin:/bin")]
+    let procEnv = Just [("CC", ccToString cc'), ("CFLAGS" :: String, "-I" <> h <> "include"), ("PATH", "/usr/bin:/bin")]
     putStrLn $ "configuring " ++ lib' ++ "..."
     void $ readCreateProcess ((proc configurePath ["--prefix", h]) { cwd = Just p, env = procEnv, std_err = CreatePipe }) ""
     putStrLn $ "building " ++ lib' ++ "..."
@@ -82,14 +81,14 @@ clibSetup _ lib' p = do
     putStrLn $ "installing " ++ lib' ++ "..."
     void $ readCreateProcess ((proc "make" ["install"]) { cwd = Just p, std_err = CreatePipe }) ""
 
-setup :: String -- ^ C compiler to use
-      -> Dependency -- ^ Dependency itself
+setup :: CCompiler -- ^ C compiler to use
+      -> ATSDependency -- ^ ATSDependency itself
       -> IO ()
-setup cc (Dependency lib' dirName' _ _) = do
+setup cc' (ATSDependency lib' dirName' _ _) = do
     lib'' <- (<> TL.unpack lib') <$> pkgHome
     b <- doesFileExist lib''
     unless b $ do
-        clibSetup cc (TL.unpack lib') (TL.unpack dirName')
+        clibSetup cc' (TL.unpack lib') (TL.unpack dirName')
         writeFile lib'' ""
 
 getCompressor :: Text -> IO (ByteString -> ByteString)
@@ -98,8 +97,8 @@ getCompressor s
     | ".tar" `TL.isSuffixOf` s = pure id
     | otherwise = unrecognized (TL.unpack s)
 
-buildHelper :: Bool -> Dependency -> IO ()
-buildHelper b (Dependency lib' dirName' url'' _) = do
+buildHelper :: Bool -> ATSDependency -> IO ()
+buildHelper b (ATSDependency lib' dirName' url'' _) = do
 
     let (lib, dirName, url') = (lib', dirName', url'') & each %~ TL.unpack
 

@@ -4,12 +4,17 @@ module Language.ATS.Package ( packageCompiler
                             , setupCompiler
                             , build
                             , buildAll
+                            , check
+                            , mkPkg
+                            , cleanAll
+                            , upgradeAtsPkg
+                            , fetchDeps
                             -- * Types
                             , Version (..)
                             , Pkg (..)
                             , Bin (..)
-                            , Constraint (..)
-                            , Dependency (..)
+                            , ATSConstraint (..)
+                            , ATSDependency (..)
                             , TargetPair (..)
                             -- * Lenses
                             , dirLens
@@ -17,4 +22,6 @@ module Language.ATS.Package ( packageCompiler
 
 import           Language.ATS.Package.Build
 import           Language.ATS.Package.Compiler
+import           Language.ATS.Package.Dependency
 import           Language.ATS.Package.Type
+import           Language.ATS.Package.Upgrade
