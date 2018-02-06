@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE TupleSections     #-}
 
 -- | This module holds various functions for turning a package into a set of rules
@@ -173,15 +174,15 @@ bits = foldr (>>) (pure ())
     ]
 
 pkgToTargets :: Pkg -> [FilePath] -> [FilePath]
-pkgToTargets ~(Pkg bs _ _ _ _ _ _ _ _ _ _) [] = TL.unpack . target <$> bs
-pkgToTargets _ ts                             = ts
+pkgToTargets ~Pkg{..} [] = TL.unpack . target <$> bin
+pkgToTargets _ ts        = ts
 
 pkgToAction :: [IO ()] -- ^ Setup actions to be performed
             -> [String] -- ^ Targets
             -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
             -> Pkg -- ^ Package data type
             -> Rules ()
-pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
+pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir _) =
 
     unless (rs == ["clean"]) $ do
 

@@ -4,22 +4,19 @@ module Language.ATS.Package.Exec ( exec
                                  ) where
 
 import           Control.Composition
-import           Control.Lens                    hiding (argument)
-import           Data.Bool                       (bool)
-import           Data.Maybe                      (fromMaybe)
-import           Data.Semigroup                  (Semigroup (..))
-import qualified Data.Text.Lazy                  as TL
-import           Data.Version                    hiding (Version (..))
+import           Control.Lens               hiding (argument)
+import           Data.Bool                  (bool)
+import           Data.Maybe                 (fromMaybe)
+import           Data.Semigroup             (Semigroup (..))
+import qualified Data.Text.Lazy             as TL
+import           Data.Version               hiding (Version (..))
 import           Development.Shake.ATS
 import           Development.Shake.FilePath
-import           Language.ATS.Package.Build
-import           Language.ATS.Package.Compiler
-import           Language.ATS.Package.Dependency
-import           Language.ATS.Package.Upgrade
-import           Options.Applicative             hiding (auto)
+import           Language.ATS.Package       hiding (version)
+import           Options.Applicative        hiding (auto)
 import           Paths_ats_pkg
 import           System.Directory
-import           System.IO.Temp                  (withSystemTempDirectory)
+import           System.IO.Temp             (withSystemTempDirectory)
 
 wrapper :: ParserInfo Command
 wrapper = info (helper <*> versionInfo <*> command')
@@ -82,7 +79,7 @@ fetch = Fetch <$>
 fetchPkg :: String -> IO ()
 fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
     let (lib, dirName, url') = ("atspkg", p, pkg) & each %~ TL.pack
-    fetchDeps True mempty [Dependency lib dirName url' undefined] [] True
+    fetchDeps True mempty [ATSDependency lib dirName url' undefined] [] True
     ps <- getSubdirs p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
     let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg False False mempty ["install"] Nothing)

@@ -11,10 +11,10 @@
 
 module Language.ATS.Package.Type ( -- * Types
                                    Pkg (..)
-                                 , Dependency (..)
+                                 , ATSDependency (..)
                                  , Bin (..)
                                  , Version (..)
-                                 , Constraint (..)
+                                 , ATSConstraint (..)
                                  , TargetPair (..)
                                  , CCompiler (..)
                                  -- * Lenses
@@ -23,29 +23,34 @@ module Language.ATS.Package.Type ( -- * Types
 
 import           Control.Lens
 import           Data.Binary           (Binary (..))
+import           Data.Dependency
 import           Development.Shake.ATS
 import           Dhall
 
 -- TODO constraints?
 
-data Constraint = Constraint { pkgName :: Text
-                             , lower   :: Maybe Version
-                             , upper   :: Maybe Version
-                             }
+newtype PackageIndex = PackageIndex [ATSDependency]
+    deriving (Eq, Show, Generic)
+    deriving newtype (Interpret, Binary)
+
+data ATSConstraint = ATSConstraint { pkgName :: Text
+                                   , lower   :: Maybe Version
+                                   , upper   :: Maybe Version
+                                   }
                 deriving (Eq, Show, Generic, Interpret)
 
 deriving newtype instance Interpret Version
 
 -- TODO make this a map from versions to tarballs etc.
 -- | Type for a dependency
-data Dependency = Dependency { libName    :: Text -- ^ Library name, e.g.
-                             , dir        :: Text -- ^ Directory we should unpack to
-                             , url        :: Text -- ^ Url pointing to tarball
-                             , libVersion :: Version
-                             }
+data ATSDependency = ATSDependency { libName    :: Text -- ^ Library name, e.g.
+                                   , dir        :: Text -- ^ Directory we should unpack to
+                                   , url        :: Text -- ^ Url pointing to tarball
+                                   , libVersion :: Version
+                                   }
                 deriving (Eq, Show, Generic, Interpret, Binary)
 
-makeLensesFor [("dir", "dirLens")] ''Dependency
+makeLensesFor [("dir", "dirLens")] ''ATSDependency
 
 -- | This is just a tuple, except I can figure out how to use it with Dhall.
 data TargetPair = TargetPair { hs  :: Text
@@ -71,11 +76,12 @@ data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , man          :: Maybe Text -- ^ Optional (markdown) manpages to be converted using @pandoc@.
                , version      :: Version -- ^ Library version
                , compiler     :: Version -- ^ Compiler version
-               , dependencies :: [Dependency] -- ^ List of dependencies
-               , clib         :: [Dependency] -- ^ List of C dependencies
+               , dependencies :: [ATSDependency] -- ^ List of dependencies
+               , clib         :: [ATSDependency] -- ^ List of C dependencies
                , ccompiler    :: Text -- ^ The C compiler we should use
                , cflags       :: [Text] -- ^ List of flags to pass to the C compiler
                , atsSource    :: [Text] -- ^ Directory containing ATS source to be compile to C.
                , cDir         :: Text -- ^ Directory for generated C.
+               , defaultPkg   :: PackageIndex
                }
          deriving (Show, Eq, Generic, Interpret, Binary)
