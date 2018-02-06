@@ -16,6 +16,7 @@ module Language.ATS.Package.Type ( -- * Types
                                  , Version (..)
                                  , Constraint (..)
                                  , TargetPair (..)
+                                 , CCompiler (..)
                                  -- * Lenses
                                  , dirLens
                                  ) where
@@ -63,6 +64,7 @@ data Bin = Bin { src      :: Text -- ^ Source file (should end with @.dats@)
                }
          deriving (Show, Eq, Generic, Interpret, Binary)
 
+-- TODO make binaries optional
 -- | Data type associated with @atspkg.dhall@ file.
 data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , test         :: [Bin] -- ^ List of test suites

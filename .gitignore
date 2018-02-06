@@ -1,3 +1,7 @@
+*.toc
+*.aux
+*.log
+*.out
 tags
 dist
 dist-*

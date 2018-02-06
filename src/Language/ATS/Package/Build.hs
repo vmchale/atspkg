@@ -112,7 +112,10 @@ mkTest =
         need tests
         mapM_ cmd_ tests
 
-options :: Bool -> Bool -> [String] -> ShakeOptions
+options :: Bool -- ^ Whether to rebuild config
+        -> Bool -- ^ Whether to rebuild all targets
+        -> [String] -- ^ A list of targets
+        -> ShakeOptions
 options rb rba rs = shakeOptions { shakeFiles = ".atspkg"
                           , shakeThreads = 4
                           , shakeLint = Just LintBasic
