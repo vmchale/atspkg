@@ -14,8 +14,7 @@ let pkg
     , cflags = [ "-O2", "-flto" ]
     , atsSource = ([] : List Text)
     , cDir = "cbits"
-    , defaultPkg = { pkgIndex : 
-        ([] : List { lib : Text, dir : Text, url : Text, libVersion : List Integer })}
+    , defaultPkg = { pkgIndex = [] : List { lib : Text, dir : Text, url : Text, libVersion : List Integer }}
     }
 
 in pkg
