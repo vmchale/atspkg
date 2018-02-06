@@ -1,0 +1,49 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{appendix}
+\usepackage{hyperref}
+\usepackage{siunitx}
+
+\usepackage[english]{babel}
+
+\begin{document}
+
+\title{ATSPackage user manual}
+\author{Vanessa McHale}
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+
+ATSpackage is a collection of build scripts written in Haskell. There are three
+things it accomplishes:
+
+\begin{enumerate}
+  \item Distributed builds. ATSPackage allows users depend on libraries that are
+    hosted elsewhere.
+  \item Simplified builds. As ATSPackage contains scripts to download the
+    compiler, builds are easier for potential contributors.
+  \item Haskell integration. ATSPackage has first-class support for building ATS
+    code that depends on Haskell libraries. 
+\end{enumerate}
+
+With that in mind, it is worthwhile to enumerate some things that it does
+\textit{not} accomplish:
+
+\begin{enumerate}
+  \item Package management. ATSPackage does allow for \textit{reproducible}
+    builds, but it does not resolve dependencies. Future support for package
+    management is planned.
+  \item Full flexibility of C. As ATSPackage is intended to simplify builds, it
+    does not expose everything. This will likely not cause problems, provided
+    that the libraries dependend on are written in C, ATS, or Haskell.
+\end{enumerate}
+
+\section{Builds}
+
+ATSPackage supports three build types: binary, dynamic library, and static
+library.
+
+\end{document}

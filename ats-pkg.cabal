@@ -11,6 +11,7 @@ copyright:           Copyright: (c) 2018 Vanessa McHale
 category:            Development
 build-type:          Custom
 extra-doc-files:     README.md
+                   , docs/manual.tex
 extra-source-files:  stack.yaml
                    , man/atspkg.1
 cabal-version:       1.18
@@ -37,6 +38,7 @@ library
                      , Language.ATS.Package.Compiler
                      , Language.ATS.Package.Build
                      , Language.ATS.Package.Upgrade
+                     , Language.ATS.Package.Tools
   build-depends:       base >= 4.7 && < 5
                      , http-client
                      , filemanip

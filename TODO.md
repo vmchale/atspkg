@@ -15,9 +15,16 @@
 - [ ] better handling of Haskell dependencies in dependencies
 - [ ] custom build scripts in ATS
 - [ ] Set number of threads manually
+- [ ] Install GHC/Cabal? (see:
+  `https://downloads.haskell.org/~ghc/8.2.2/ghc-8.2.2-src.tar.xz`)
+- [ ] Install `pi`? Possibly nice.
 # Deficiencies
 - [ ] Cache package reads when dhall is not new
 - [ ] Better tracking of C dependencies
 - [ ] Allow use of `cabal` for Haskell libraries.
 # Bugs
 - [ ] make paths portable for windows
+# Documentation
+- [ ] User manual
+# Code Quality
+- [ ] Benchmark/test suite

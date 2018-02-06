@@ -1,4 +1,4 @@
-# ats-pkg
+# ATSPackage
 
 [![Build Status](https://travis-ci.org/vmchale/atspkg.svg?branch=master)](https://travis-ci.org/vmchale/atspkg)
 

@@ -50,7 +50,7 @@ fetchDeps b setup' deps cdeps b' =
             unpacked = fmap (over dirLens (TL.pack d <>)) cdeps
             clibs = fmap (buildHelper b) unpacked
         parallel_ (setup' ++ libs' ++ clibs)
-        mapM_ setup unpacked
+        mapM_ (setup undefined) unpacked
 
 pkgHome :: IO FilePath
 pkgHome = (++ "/.atspkg/") <$> getEnv "HOME"
@@ -65,8 +65,11 @@ allSubdirs d = do
     pure $ join (ds : ds')
 
 -- TODO? autoconf
-clibSetup :: String -> FilePath -> IO ()
-clibSetup lib' p = do
+clibSetup :: String -- ^ C compiler
+          -> String -- ^ Library name
+          -> FilePath -- ^ Filepath to unpack to
+          -> IO ()
+clibSetup _ lib' p = do
     subdirs <- allSubdirs p
     configurePath <- fromMaybe (p <> "/configure") <$> findFile subdirs "configure"
     setFileMode configurePath ownerModes
@@ -79,12 +82,14 @@ clibSetup lib' p = do
     putStrLn $ "installing " ++ lib' ++ "..."
     void $ readCreateProcess ((proc "make" ["install"]) { cwd = Just p, std_err = CreatePipe }) ""
 
-setup :: Dependency -> IO ()
-setup (Dependency lib' dirName' _ _) = do
+setup :: String -- ^ C compiler to use
+      -> Dependency -- ^ Dependency itself
+      -> IO ()
+setup cc (Dependency lib' dirName' _ _) = do
     lib'' <- (<> TL.unpack lib') <$> pkgHome
     b <- doesFileExist lib''
     unless b $ do
-        clibSetup (TL.unpack lib') (TL.unpack dirName')
+        clibSetup cc (TL.unpack lib') (TL.unpack dirName')
         writeFile lib'' ""
 
 getCompressor :: Text -> IO (ByteString -> ByteString)
