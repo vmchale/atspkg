@@ -9,6 +9,7 @@ module Language.ATS.Package ( packageCompiler
                             , cleanAll
                             , upgradeAtsPkg
                             , fetchDeps
+                            , getCCompiler
                             -- * Types
                             , Version (..)
                             , Pkg (..)
@@ -23,5 +24,6 @@ module Language.ATS.Package ( packageCompiler
 import           Language.ATS.Package.Build
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Dependency
+import           Language.ATS.Package.Tools
 import           Language.ATS.Package.Type
 import           Language.ATS.Package.Upgrade

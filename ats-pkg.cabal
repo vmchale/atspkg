@@ -1,7 +1,7 @@
 name:                ats-pkg
-version:             2.2.0.10
+version:             2.2.0.11
 synopsis:            Package manager for ATS
-description:         A collection of scripts to make building ATS projects easy.
+description:         A collection of scripts to simplify building ATS projects.
 homepage:            https://github.com/vmchale/atspkg#readme
 license:             BSD3
 license-file:        LICENSE
@@ -48,7 +48,6 @@ library
                      , zlib
                      , http-client-tls
                      , text
-                     , containers
                      , directory
                      , process
                      , parallel-io
