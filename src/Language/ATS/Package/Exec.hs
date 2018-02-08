@@ -32,12 +32,15 @@ data Command = Install
                      , _recache    :: Bool
                      , _archTarget :: Maybe String
                      , _rebuildAll :: Bool
+                     , _verbosity  :: Int
                      }
              | Clean
-             | Test
+             | Test { _targets :: [String] }
              | Fetch { _url :: String }
              | Nuke
              | Upgrade
+             | Valgrind { _targets :: [String] }
+             | Run { _targets :: [String] }
 
 command' :: Parser Command
 command' = hsubparser
@@ -45,17 +48,31 @@ command' = hsubparser
     <> command "clean" (info (pure Clean) (progDesc "Clean current project directory"))
     <> command "remote" (info fetch (progDesc "Fetch and install a binary package"))
     <> command "build" (info build' (progDesc "Build current package targets"))
-    <> command "test" (info (pure Test) (progDesc "Test current package"))
+    <> command "test" (info test' (progDesc "Test current package"))
     <> command "nuke" (info (pure Nuke) (progDesc "Uninstall all globally installed libraries"))
     <> command "upgrade" (info (pure Upgrade) (progDesc "Upgrade to the latest version of atspkg"))
+    <> command "valgrind" (info valgrind (progDesc "Run generated binaries through valgrind"))
+    <> command "run" (info run' (progDesc "Run generated binaries"))
     )
+
+run' :: Parser Command
+run' = Run <$> targets "run"
+
+test' :: Parser Command
+test' = Test <$> targets "test"
+
+valgrind :: Parser Command
+valgrind = Valgrind <$> targets "run with valgrind"
+
+targets :: String -> Parser [String]
+targets s = many
+    (argument str
+    (metavar "TARGET"
+    <> help ("Targets to " <> s)))
 
 build' :: Parser Command
 build' = Build
-    <$> many
-        (argument str
-        (metavar "TARGET"
-        <> help "Targets to build"))
+    <$> targets "build"
     <*> switch
         (long "no-cache"
         <> short 'c'
@@ -69,6 +86,8 @@ build' = Build
         (long "rebuild"
         <> short 'r'
         <> help "Force rebuild of all targets")
+    <*> (length <$>
+        many (flag' () (short 't' <> long "verbose")))
 
 fetch :: Parser Command
 fetch = Fetch <$>
@@ -82,26 +101,28 @@ fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
     fetchDeps True mempty [ATSDependency lib dirName url' undefined] [] True
     ps <- getSubdirs p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
-    let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg False False mempty ["install"] Nothing)
+    let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg False False mempty ["install"] Nothing 0)
     bool (buildAll (Just pkgDir) >> a) a =<< check (Just pkgDir)
 
 exec :: IO ()
 exec = execParser wrapper >>= run
 
-runHelper :: Bool -> Bool -> [String] -> Maybe String -> IO ()
-runHelper rb rba rs tgt = bool
-    (mkPkg rb rba [buildAll Nothing] rs tgt)
-    (mkPkg rb rba mempty rs tgt)
+runHelper :: Bool -> Bool -> [String] -> Maybe String -> Int -> IO ()
+runHelper rb rba rs tgt v = bool
+    (mkPkg rb rba [buildAll Nothing] rs tgt v)
+    (mkPkg rb rba mempty rs tgt v)
     =<< check Nothing
 
 run :: Command -> IO ()
 run Upgrade = upgradeAtsPkg
 run Nuke = cleanAll
 run (Fetch u) = fetchPkg u
-run Clean = mkPkg False False mempty ["clean"] Nothing
-run (Build rs rb tgt rba) = runHelper rb rba rs tgt
-run c = runHelper False False rs Nothing
+run Clean = mkPkg False False mempty ["clean"] Nothing 0
+run (Build rs rb tgt rba v) = runHelper rb rba rs tgt v
+run c = runHelper False False rs Nothing 0
     where rs = g c
-          g Install = ["install"]
-          g Test    = ["test"]
-          g _       = undefined
+          g Install       = ["install"]
+          g (Test  ts)    = "test" : ts
+          g (Valgrind ts) = "valgrind" : ts
+          g (Run ts)      = "run" : ts
+          g _             = undefined
