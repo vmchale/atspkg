@@ -53,7 +53,7 @@ buildAll p = on (>>) (=<< wants p) fetchCompiler setupCompiler
 build :: [String] -- ^ Targets
       -> IO ()
 build rs = bool (mkPkgEmpty [buildAll Nothing]) (mkPkgEmpty mempty) =<< check Nothing
-    where mkPkgEmpty ts = mkPkg False False ts rs Nothing
+    where mkPkgEmpty ts = mkPkg False False ts rs Nothing 1
 
 -- TODO clean generated ATS
 mkClean :: Rules ()
@@ -105,13 +105,22 @@ getConfig dir' = liftIO $ do
 manTarget :: Text -> FilePath
 manTarget m = TL.unpack m -<.> "1"
 
-mkTest :: Rules ()
-mkTest =
-    "test" ~> do
+mkPhony :: String -> (String -> String) -> (Pkg -> [Bin]) -> [String] -> Rules ()
+mkPhony cmdStr f select rs =
+    cmdStr ~> do
         config <- getConfig Nothing
-        let tests = fmap (TL.unpack . target) . test $ config
-        need tests
-        mapM_ cmd_ tests
+        let runs = bool (filter (/= cmdStr) rs) (fmap (TL.unpack . target) . select $ config) (rs == [cmdStr])
+        need runs
+        mapM_ cmd_ (f <$> runs)
+
+mkValgrind :: [String] -> Rules ()
+mkValgrind = mkPhony "valgrind" ("valgrind " <>) bin
+
+mkTest :: [String] -> Rules ()
+mkTest = mkPhony "test" id test
+
+mkRun :: [String] -> Rules ()
+mkRun = mkPhony "run" id bin
 
 options :: Bool -- ^ Whether to rebuild config
         -> Bool -- ^ Whether to rebuild all targets
@@ -131,18 +140,18 @@ cleanConfig :: (MonadIO m) => [String] -> m Pkg
 cleanConfig ["clean"] = pure undefined
 cleanConfig _         = getConfig Nothing
 
--- TODO verbosity?
 mkPkg :: Bool -- ^ Whether to ignore cached package config
       -> Bool -- ^ Rebuild all targets
       -> [IO ()] -- ^ Setup
       -> [String] -- ^ Targets
       -> Maybe String -- ^ Target triple
+      -> Int -- ^ Verbosity
       -> IO ()
-mkPkg rb rba setup rs tgt = do
+mkPkg rb rba setup rs tgt _ = do
     cfg <- cleanConfig rs
     let opt = options rb rba $ pkgToTargets cfg rs
     shake opt $
-        foldr (>>) (pure ())
+        mconcat
             [ want rs
             , mkClean
             , pkgToAction setup rs tgt =<< cleanConfig rs
@@ -165,13 +174,9 @@ setTargets rs bins mt = when (null rs) $
         (Just m) -> want . bool bins (manTarget m : bins) =<< pandoc
         Nothing  -> want bins
 
-bits :: Rules ()
-bits = foldr (>>) (pure ())
-    [ mkTest
-    , mkManpage
-    , mkInstall
-    , mkConfig
-    ]
+bits :: [String] -> Rules ()
+bits rs = mconcat $ [ mkManpage, mkInstall, mkConfig ] <>
+    sequence [ mkRun, mkTest, mkValgrind ] rs
 
 pkgToTargets :: Pkg -> [FilePath] -> [FilePath]
 pkgToTargets ~Pkg{..} [] = TL.unpack . target <$> bin
@@ -197,7 +202,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
         let bins = TL.unpack . target <$> bs
         setTargets rs bins mt
 
-        cDepsRules >> bits
+        cDepsRules >> bits rs
 
         mapM_ g (bs ++ ts)
 
