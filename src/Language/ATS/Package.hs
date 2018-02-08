@@ -1,5 +1,4 @@
-module Language.ATS.Package ( packageCompiler
-                            , pkgToAction
+module Language.ATS.Package ( pkgToAction
                             , fetchCompiler
                             , setupCompiler
                             , build
