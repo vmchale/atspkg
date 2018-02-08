@@ -67,7 +67,7 @@ pi new ats project
 ```
 
 ```
-pi fetch vmchale/haskell-ats ambitious-project
+pi git vmchale/haskell-ats ambitious-project
 ```
 
 # BUGS
