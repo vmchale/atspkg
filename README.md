@@ -18,7 +18,7 @@ Alternately, you can download
 [GHC](https://www.haskell.org/ghc/download.html) and install with
 
 ```bash
-cabal new-install ats-pkg ~/.local/bin --happy-options='-gcsa' --alex-options='-g'
+cabal new-install ats-pkg --symlink-bindir ~/.local/bin --happy-options='-gcsa' --alex-options='-g'
 ```
 
 Note that `$HOME/.local/bin` will need to be on your `PATH`.

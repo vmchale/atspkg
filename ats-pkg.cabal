@@ -1,5 +1,5 @@
 name:                ats-pkg
-version:             2.2.0.15
+version:             2.2.0.16
 synopsis:            A build tool for ATS
 description:         A collection of scripts to simplify building ATS projects.
 homepage:            https://github.com/vmchale/atspkg#readme
@@ -41,7 +41,6 @@ library
                      , Language.ATS.Package.Tools
   build-depends:       base >= 4.7 && < 5
                      , http-client
-                     , filemanip
                      , bytestring
                      , shake
                      , tar
