@@ -11,7 +11,7 @@ import           Data.Semigroup
 import           Development.Shake.FilePath
 import           Network.HTTP.Client
 import           Network.HTTP.Client.TLS    (tlsManagerSettings)
-import           System.Directory           (createDirectoryIfMissing)
+import           System.Directory           (createDirectoryIfMissing, renameFile)
 import           System.Environment
 import           System.Info
 import           System.Posix.Files
@@ -48,5 +48,6 @@ upgradeAtsPkg = do
 
     atsPath <- atspkgPath
     createDirectoryIfMissing True (takeDirectory atsPath)
-    BSL.writeFile atsPath binBytes
+    BSL.writeFile (atsPath ++ "-new") binBytes
+    renameFile (atsPath ++ "-new") atsPath
     setFileMode atsPath ownerModes
