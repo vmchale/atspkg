@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE RecordWildCards            #-}
 
-module Language.ATS.Package.PackageSet ( ATSPackageSet
+module Language.ATS.Package.PackageSet ( ATSPackageSet (..)
                                        , setBuildPlan
                                        , mkBuildPlan
                                        ) where
