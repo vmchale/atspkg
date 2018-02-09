@@ -1,7 +1,6 @@
-{-# LANGUAGE DeriveAnyClass    #-}
-{-# LANGUAGE DeriveGeneric     #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE RecordWildCards            #-}
 
 module Language.ATS.Package.PackageSet ( ATSPackageSet
                                        , setBuildPlan
@@ -17,7 +16,7 @@ import           Language.ATS.Package.Error
 import           Language.ATS.Package.Type
 
 newtype ATSPackageSet = ATSPackageSet [ ATSDependency ]
-    deriving (Generic, Interpret)
+    deriving (Interpret)
 
 setBuildPlan :: [ATSDependency] -> IO [[ATSDependency]]
 setBuildPlan deps = do
