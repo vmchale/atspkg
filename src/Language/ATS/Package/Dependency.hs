@@ -45,7 +45,7 @@ fetchDeps :: Bool -- ^ Set to 'False' if unsure.
           -> IO ()
 fetchDeps b setup' deps cdeps b' =
     unless (null deps && null cdeps && b') $ do
-        deps' <- join <$> setBuildPlan deps
+        deps' <- join <$> setBuildPlan "ats" deps
         putStrLn "Checking ATS dependencies..."
         d <- (<> "lib/") <$> pkgHome
         let libs' = fmap (buildHelper b) deps'

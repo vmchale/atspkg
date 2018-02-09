@@ -22,12 +22,13 @@ import           System.Directory           (doesFileExist)
 newtype ATSPackageSet = ATSPackageSet [ ATSDependency ]
     deriving (Interpret)
 
-setBuildPlan :: [ATSDependency] -> IO [[ATSDependency]]
-setBuildPlan deps = do
-    b <- doesFileExist ".atspkg/buildplan"
-    bool setBuildPlan' (decode <$> BSL.readFile ".atspkg/buildplan") b
+setBuildPlan :: FilePath -> [ATSDependency] -> IO [[ATSDependency]]
+setBuildPlan p deps = do
+    b <- doesFileExist depCache
+    bool setBuildPlan' (decode <$> BSL.readFile depCache) b
 
-    where setBuildPlan' = do
+    where depCache = ".atspkg/" ++ p
+          setBuildPlan' = do
             pkgSet <- input auto "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
             case mkBuildPlan pkgSet deps of
                 Just x  -> pure x
