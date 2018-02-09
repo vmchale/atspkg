@@ -20,6 +20,7 @@ import qualified Data.Text.Lazy                       as TL
 import           Development.Shake.ATS
 import           Dhall
 import           Language.ATS.Package.Error
+import           Language.ATS.Package.PackageSet
 import           Language.ATS.Package.Type
 import           Network.HTTP.Client
 import           Network.HTTP.Client.TLS              (tlsManagerSettings)
@@ -44,9 +45,10 @@ fetchDeps :: Bool -- ^ Set to 'False' if unsure.
           -> IO ()
 fetchDeps b setup' deps cdeps b' =
     unless (null deps && null cdeps && b') $ do
+        deps' <- concat <$> setBuildPlan deps
         putStrLn "Checking ATS dependencies..."
         d <- (<> "lib/") <$> pkgHome
-        let libs' = fmap (buildHelper b) deps
+        let libs' = fmap (buildHelper b) deps'
             unpacked = fmap (over dirLens (TL.pack d <>)) cdeps
             clibs = fmap (buildHelper b) unpacked
         parallel_ (setup' ++ libs' ++ clibs)
