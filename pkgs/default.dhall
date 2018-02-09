@@ -7,9 +7,9 @@ let pkg
     , version = [0,3,9]
     , compiler = [0,3,9]
     , dependencies = []
-      : List { libName : Text, dir : Text, url : Text, libVersion : List Integer }
+      : List { libName : Text, dir : Text, url : Text, libVersion : List Integer, libDeps : List Text }
     , clib = []
-      : List { libName : Text, dir : Text, url : Text, libVersion : List Integer }
+      : List { libName : Text, dir : Text, url : Text, libVersion : List Integer, libDeps : List Text }
     , ccompiler = "gcc"
     , cflags = [ "-O2", "-flto" ]
     , atsSource = ([] : List Text)
