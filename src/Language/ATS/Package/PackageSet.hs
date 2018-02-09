@@ -7,23 +7,31 @@ module Language.ATS.Package.PackageSet ( ATSPackageSet
                                        , mkBuildPlan
                                        ) where
 
+import           Data.Binary                (decode)
+import           Data.Bool                  (bool)
+import qualified Data.ByteString.Lazy       as BSL
 import           Data.Dependency
 import qualified Data.Map                   as M
 import qualified Data.Set                   as S
 import qualified Data.Text.Lazy             as TL
-import           Dhall
+import           Dhall                      hiding (bool)
 import           Language.ATS.Package.Error
 import           Language.ATS.Package.Type
+import           System.Directory           (doesFileExist)
 
 newtype ATSPackageSet = ATSPackageSet [ ATSDependency ]
     deriving (Interpret)
 
 setBuildPlan :: [ATSDependency] -> IO [[ATSDependency]]
 setBuildPlan deps = do
-    pkgSet <- input auto "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
-    case mkBuildPlan pkgSet deps of
-        Just x  -> pure x
-        Nothing -> resolutionFailed
+    b <- doesFileExist ".atspkg/buildplan"
+    bool setBuildPlan' (decode <$> BSL.readFile ".atspkg/buildplan") b
+
+    where setBuildPlan' = do
+            pkgSet <- input auto "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
+            case mkBuildPlan pkgSet deps of
+                Just x  -> pure x
+                Nothing -> resolutionFailed
 
 mkBuildPlan :: ATSPackageSet -> [ATSDependency] -> Maybe [[ATSDependency]]
 mkBuildPlan aps = finalize . resolve . buildSequence . fmap asDep
