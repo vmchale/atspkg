@@ -37,6 +37,10 @@ to $HOME/.local/share/man/man1
 
 **upgrade** - Download the latest binary release of **atspkg**, if available
 
+**valgrind** - Run **valgrind** on the generated binary
+
+**run** - Run the generated binary
+
 ## OPTIONS
 
 **-h** **-\-help**
