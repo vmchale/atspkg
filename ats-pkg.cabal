@@ -39,6 +39,7 @@ library
                      , Language.ATS.Package.Build
                      , Language.ATS.Package.Upgrade
                      , Language.ATS.Package.Tools
+                     , Language.ATS.Package.PackageSet
   build-depends:       base >= 4.7 && < 5
                      , http-client
                      , bytestring
@@ -49,6 +50,7 @@ library
                      , text
                      , directory
                      , process
+                     , containers
                      , parallel-io
                      , unix
                      , lens
