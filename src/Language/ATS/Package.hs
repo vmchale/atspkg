@@ -9,6 +9,7 @@ module Language.ATS.Package ( pkgToAction
                             , upgradeAtsPkg
                             , fetchDeps
                             , getCCompiler
+                            , mkBuildPlan
                             -- * Types
                             , Version (..)
                             , Pkg (..)
@@ -16,6 +17,7 @@ module Language.ATS.Package ( pkgToAction
                             , ATSConstraint (..)
                             , ATSDependency (..)
                             , TargetPair (..)
+                            , ATSPackageSet (..)
                             -- * Lenses
                             , dirLens
                             ) where

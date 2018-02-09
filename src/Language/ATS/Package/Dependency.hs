@@ -30,11 +30,11 @@ import           System.Posix.Files
 import           System.Process
 
 libcAtomicOps :: Version -> ATSDependency
-libcAtomicOps v = ATSDependency "atomic-ops" ("atomic-ops-" <> g v) ("https://github.com/ivmai/libatomic_ops/releases/download/v" <> g v <> "/libatomic_ops-" <> g v <> ".tar.gz") v
+libcAtomicOps v = ATSDependency "atomic-ops" ("atomic-ops-" <> g v) ("https://github.com/ivmai/libatomic_ops/releases/download/v" <> g v <> "/libatomic_ops-" <> g v <> ".tar.gz") v mempty
     where g = TL.pack . show
 
 libcGC :: Version -> ATSDependency
-libcGC v = ATSDependency "gc" ("gc-" <> g v) ("https://github.com/ivmai/bdwgc/releases/download/v" <> g v <> "/gc-" <> g v <> ".tar.gz") v
+libcGC v = ATSDependency "gc" ("gc-" <> g v) ("https://github.com/ivmai/bdwgc/releases/download/v" <> g v <> "/gc-" <> g v <> ".tar.gz") v ["atomic-ops"]
     where g = TL.pack . show
 
 fetchDeps :: Bool -- ^ Set to 'False' if unsure.
@@ -87,7 +87,7 @@ clibSetup cc' lib' p = do
 setup :: CCompiler -- ^ C compiler to use
       -> ATSDependency -- ^ ATSDependency itself
       -> IO ()
-setup cc' (ATSDependency lib' dirName' _ _) = do
+setup cc' (ATSDependency lib' dirName' _ _ _) = do
     lib'' <- (<> TL.unpack lib') <$> pkgHome
     b <- doesFileExist lib''
     unless b $ do
@@ -112,7 +112,7 @@ zipResponse dirName response = do
     extractFilesFromArchive [options] (toArchive response)
 
 buildHelper :: Bool -> ATSDependency -> IO ()
-buildHelper b (ATSDependency lib' dirName' url'' _) = do
+buildHelper b (ATSDependency lib' dirName' url'' _ _) = do
 
     let (lib, dirName, url') = (lib', dirName', url'') & each %~ TL.unpack
 
