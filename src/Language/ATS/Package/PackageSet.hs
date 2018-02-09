@@ -7,7 +7,7 @@ module Language.ATS.Package.PackageSet ( ATSPackageSet
                                        , mkBuildPlan
                                        ) where
 
-import           Data.Binary                (decode)
+import           Data.Binary                (decode, encode)
 import           Data.Bool                  (bool)
 import qualified Data.ByteString.Lazy       as BSL
 import           Data.Dependency
@@ -17,21 +17,24 @@ import qualified Data.Text.Lazy             as TL
 import           Dhall                      hiding (bool)
 import           Language.ATS.Package.Error
 import           Language.ATS.Package.Type
-import           System.Directory           (doesFileExist)
+import           System.Directory           (createDirectoryIfMissing, doesFileExist)
 
 newtype ATSPackageSet = ATSPackageSet [ ATSDependency ]
     deriving (Interpret)
 
-setBuildPlan :: FilePath -> [ATSDependency] -> IO [[ATSDependency]]
+setBuildPlan :: FilePath -- ^ Filepath for cache inside @.atspkg@
+             -> [ATSDependency] -- ^
+             -> IO [[ATSDependency]]
 setBuildPlan p deps = do
+    putStrLn "Resolving dependencies..."
     b <- doesFileExist depCache
     bool setBuildPlan' (decode <$> BSL.readFile depCache) b
 
-    where depCache = ".atspkg/" ++ p
+    where depCache = ".atspkg/" ++ p ++ "-buildplan"
           setBuildPlan' = do
             pkgSet <- input auto "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
             case mkBuildPlan pkgSet deps of
-                Just x  -> pure x
+                Just x  -> createDirectoryIfMissing True ".atspkg" >> BSL.writeFile depCache (encode x) >> pure x
                 Nothing -> resolutionFailed
 
 mkBuildPlan :: ATSPackageSet -> [ATSDependency] -> Maybe [[ATSDependency]]
