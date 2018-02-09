@@ -16,6 +16,7 @@ import           System.Environment
 import           System.Info
 import           System.Posix.Files
 
+-- https://github.com/vmchale/atspkg/archive/master.zip
 manufacturer :: String
 manufacturer = case os of
     "darwin" -> "apple"
