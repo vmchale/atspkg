@@ -17,7 +17,7 @@ resolutionFailed :: IO a
 resolutionFailed = printErr ResolutionFailed
 
 data PackageError = Unrecognized String
-                     | ResolutionFailed
+                  | ResolutionFailed
 
 (<#>) :: Doc -> Doc -> Doc
 (<#>) a b = a <> line <> b
