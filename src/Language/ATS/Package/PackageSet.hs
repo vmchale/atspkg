@@ -26,12 +26,12 @@ setBuildPlan :: FilePath -- ^ Filepath for cache inside @.atspkg@
              -> [ATSDependency] -- ^
              -> IO [[ATSDependency]]
 setBuildPlan p deps = do
-    putStrLn "Resolving dependencies..."
     b <- doesFileExist depCache
     bool setBuildPlan' (decode <$> BSL.readFile depCache) b
 
     where depCache = ".atspkg/" ++ p ++ "-buildplan"
           setBuildPlan' = do
+            putStrLn "Resolving dependencies..."
             pkgSet <- input auto "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
             case mkBuildPlan pkgSet deps of
                 Just x  -> createDirectoryIfMissing True ".atspkg" >> BSL.writeFile depCache (encode x) >> pure x
