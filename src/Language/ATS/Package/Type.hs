@@ -41,6 +41,7 @@ data ATSDependency = ATSDependency { libName    :: Text -- ^ Library name, e.g.
                                    , dir        :: Text -- ^ Directory we should unpack to
                                    , url        :: Text -- ^ Url pointing to tarball
                                    , libVersion :: Version
+                                   -- , libDepends :: [Text] -- ^ Strings containing dependencies
                                    }
                 deriving (Eq, Show, Generic, Interpret, Binary)
 
