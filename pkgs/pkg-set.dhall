@@ -12,7 +12,3 @@ let pkgset =
   ]
 
 in pkgset
-
-  -- , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/libc-gmp.dhall
-  -- , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-libpcre.dhall
-  -- , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/libc-unistring.dhall
