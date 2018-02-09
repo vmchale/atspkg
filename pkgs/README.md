@@ -9,14 +9,14 @@ a package is relatively simple: all it requires is a tarball and version
 information.
 
 ```
-let dep = 
+let dep = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default-pkg.dhall
+
+in dep //
   { libName = "atscntrb-hx-libpcre"
   , dir = ".atspkg/contrib/atscntrb-hx-libpcre"
   , url = "https://registry.npmjs.org/atscntrb-hx-libpcre/-/atscntrb-hx-libpcre-1.0.2.tgz"
   , libVersion = [0,1,2]
   }
-
-in dep
 ```
 
 `atspkg` defines `$PATSHOMELOCS` to be `.atspkg/contrib` and subdirectories, so
