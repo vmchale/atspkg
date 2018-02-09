@@ -24,7 +24,7 @@ data PackageError = Unrecognized String
 
 instance Pretty PackageError where
     pretty (Unrecognized t) = red "Error:" <> "Unrecognized archive format when unpacking" <#> hang 2 (text t)
-    pretty ResolutionFailed = red "Error:" <> "Package resolution failed."
+    pretty ResolutionFailed = red "Error:" <> "Package resolution failed.\n"
 
 -- TODO monaderror?
 printErr :: PackageError -> IO a
