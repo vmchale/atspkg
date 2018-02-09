@@ -4,6 +4,8 @@ let dep =
   , dir = ".atspkg/contrib/hspkg-fast-arthimetic"
   , url = "https://hackage.haskell.org/package/fast-arithmetic-0.3.2.4/fast-arithmetic-0.3.2.4.tar.gz"
   , libVersion = [0,3,2,4]
+  , libDepends = []
+    : List Text
   }
 
 in dep
