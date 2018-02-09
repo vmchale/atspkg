@@ -8,6 +8,7 @@ module Language.ATS.Package.Dependency ( -- * Functions
                                        ) where
 
 import qualified Codec.Archive.Tar                    as Tar
+import           Codec.Archive.Zip                    (ZipOption (..), extractFilesFromArchive, toArchive)
 import qualified Codec.Compression.GZip               as Gzip
 import           Control.Concurrent.ParallelIO.Global
 import           Control.Lens
@@ -97,6 +98,17 @@ getCompressor s
     | ".tar" `TL.isSuffixOf` s = pure id
     | otherwise = unrecognized (TL.unpack s)
 
+tarResponse :: Text -> FilePath -> ByteString -> IO ()
+tarResponse url' dirName response = do
+    compress <- getCompressor url'
+    let f = Tar.unpack dirName . Tar.read . compress
+    f response
+
+zipResponse :: FilePath -> ByteString -> IO ()
+zipResponse dirName response = do
+    let options = OptDestination dirName
+    extractFilesFromArchive [options] (toArchive response)
+
 buildHelper :: Bool -> ATSDependency -> IO ()
 buildHelper b (ATSDependency lib' dirName' url'' _) = do
 
@@ -112,8 +124,9 @@ buildHelper b (ATSDependency lib' dirName' url'' _) = do
         response <- responseBody <$> httpLbs (initialRequest { method = "GET" }) manager
 
         putStrLn ("Unpacking library " ++ lib ++ "...")
-        compress <- getCompressor url''
-        Tar.unpack dirName . Tar.read . compress $ response
+        if "zip" `TL.isSuffixOf` url'' then
+            zipResponse dirName response
+                else tarResponse url'' dirName response
 
         needsMove <- doesDirectoryExist (dirName ++ "/package")
         when needsMove $ do
