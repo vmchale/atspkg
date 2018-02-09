@@ -97,7 +97,7 @@ fetch = Fetch <$>
 
 fetchPkg :: String -> IO ()
 fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
-    let (lib, dirName, url') = ("atspkg", p, pkg) & each %~ TL.pack
+    let (lib, dirName, url') = (mempty, p, pkg) & each %~ TL.pack
     fetchDeps True mempty [ATSDependency lib dirName url' undefined] [] True
     ps <- getSubdirs p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
