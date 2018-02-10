@@ -8,6 +8,7 @@ module Data.Dependency
     , Version (..)
     , DepM
     , ResolveError (..)
+    , Constraint (..)
     ) where
 
 import           Control.Composition
