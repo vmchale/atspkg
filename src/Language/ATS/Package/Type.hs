@@ -71,8 +71,8 @@ data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , man          :: Maybe Text -- ^ Optional (markdown) manpages to be converted using @pandoc@.
                , version      :: Version -- ^ Library version
                , compiler     :: Version -- ^ Compiler version
-               , dependencies :: [ATSDependency] -- ^ List of dependencies
-               , clib         :: [ATSDependency] -- ^ List of C dependencies
+               , dependencies :: [Text] -- ^ List of dependencies
+               , clib         :: [Text] -- ^ List of C dependencies
                , ccompiler    :: Text -- ^ The C compiler we should use
                , cflags       :: [Text] -- ^ List of flags to pass to the C compiler
                , atsSource    :: [Text] -- ^ Directory containing ATS source to be compile to C.

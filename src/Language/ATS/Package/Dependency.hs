@@ -2,8 +2,7 @@
 
 module Language.ATS.Package.Dependency ( -- * Functions
                                          fetchDeps
-                                       -- * Constants
-                                       , libcGC
+                                       , buildHelper
                                        ) where
 
 import qualified Codec.Archive.Tar                    as Tar
@@ -28,26 +27,20 @@ import           System.Environment                   (getEnv)
 import           System.Posix.Files
 import           System.Process
 
-libcGC :: Version -> ATSDependency
-libcGC v = ATSDependency "gc" ("gc-" <> g v) ("https://github.com/ivmai/bdwgc/releases/download/v" <> g v <> "/gc-" <> g v <> ".tar.gz") v ["atomic-ops"]
-    where g = TL.pack . show
-
-fetchDeps :: Bool -- ^ Set to 'False' if unsure.
-          -> [IO ()] -- ^ Setup steps that can be performed concurrently
-          -> [ATSDependency] -- ^ ATS dependencies
-          -> [ATSDependency] -- ^ C Dependencies
+fetchDeps :: [IO ()] -- ^ Setup steps that can be performed concurrently
+          -> [String] -- ^ ATS dependencies
+          -> [String] -- ^ C Dependencies
           -> Bool -- ^ Whether to perform setup anyhow.
           -> IO ()
-fetchDeps b setup' deps cdeps b' =
+fetchDeps setup' deps cdeps b' =
     unless (null deps && null cdeps && b') $ do
         deps' <- join <$> setBuildPlan "ats" deps
         putStrLn "Checking ATS dependencies..."
         d <- (<> "lib/") <$> pkgHome
-        let libs' = fmap (buildHelper b) deps'
+        let libs' = fmap (buildHelper False) deps'
         cdeps' <- join <$> setBuildPlan "c" cdeps
         let unpacked = fmap (over dirLens (TL.pack d <>)) cdeps'
-            clibs = fmap (buildHelper b) unpacked
-        print unpacked
+            clibs = fmap (buildHelper False) unpacked
         parallel_ (setup' ++ libs' ++ clibs)
         mapM_ (setup (GCC Nothing Nothing)) unpacked
 

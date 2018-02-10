@@ -7,6 +7,8 @@ module Language.ATS.Package.PackageSet ( ATSPackageSet (..)
                                        , mkBuildPlan
                                        ) where
 
+import           Control.Arrow
+import           Control.Monad
 import           Data.Binary                (decode, encode)
 import           Data.Bool                  (bool)
 import qualified Data.ByteString.Lazy       as BSL
@@ -19,11 +21,13 @@ import           Language.ATS.Package.Error
 import           Language.ATS.Package.Type
 import           System.Directory           (createDirectoryIfMissing, doesFileExist)
 
+-- TODO string instance? string :: Type String
+
 newtype ATSPackageSet = ATSPackageSet [ ATSDependency ]
     deriving (Interpret, Show)
 
 setBuildPlan :: FilePath -- ^ Filepath for cache inside @.atspkg@
-             -> [ATSDependency] -- ^
+             -> [String] -- ^ Libraries we want
              -> IO [[ATSDependency]]
 setBuildPlan p deps = do
     b <- doesFileExist depCache
@@ -37,24 +41,26 @@ setBuildPlan p deps = do
                 Just x  -> createDirectoryIfMissing True ".atspkg" >> BSL.writeFile depCache (encode x) >> pure x
                 Nothing -> resolutionFailed
 
-mkBuildPlan :: ATSPackageSet -> [ATSDependency] -> Maybe [[ATSDependency]]
-mkBuildPlan aps = finalize . resolve . buildSequence . fmap asDep
+mkBuildPlan :: ATSPackageSet -> [String] -> Maybe [[ATSDependency]]
+mkBuildPlan aps@(ATSPackageSet ps) = finalize . resolve . fmap asDep <=< stringBuildPlan
     where finalize = fmap (fmap (fmap (lookupVersions aps)))
           resolve = resolveDependencies (atsPkgsToPkgs aps)
+          stringBuildPlan names = sequence [ lookup x libs | x <- names ]
+              where libs = (TL.unpack . libName &&& id) <$> ps
 
 asDep :: ATSDependency -> Dependency
-asDep ATSDependency{..} = Dependency (TL.unpack libName) mempty (TL.unpack <$> libDeps)
+asDep ATSDependency{..} = Dependency (TL.unpack libName) mempty (TL.unpack <$> libDeps) libVersion
 
-atsPkgsToPkgs :: ATSPackageSet -> PackageSet
+atsPkgsToPkgs :: ATSPackageSet -> PackageSet Dependency
 atsPkgsToPkgs (ATSPackageSet deps) = PackageSet $ foldr (.) id inserts mempty
     where inserts = insert <$> deps
           insert dep = M.insertWith
-            (\_ -> S.insert (libVersion dep))
+            (\_ -> S.insert (asDep dep))
             (TL.unpack $ libName dep)
-            (S.singleton (libVersion dep))
+            (S.singleton (asDep dep))
 
-lookupVersions :: ATSPackageSet -> (String, Version) -> ATSDependency
-lookupVersions (ATSPackageSet deps) (name, v) = head (filter f deps)
+lookupVersions :: ATSPackageSet -> Dependency -> ATSDependency
+lookupVersions (ATSPackageSet deps) (Dependency name _ _ v) = head (filter f deps)
     where f = (&&) <$> matchName <*> matchVersion
           libName' = TL.unpack . libName
           matchName = (== name) . libName'
