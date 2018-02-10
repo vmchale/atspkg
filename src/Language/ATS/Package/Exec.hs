@@ -106,7 +106,7 @@ fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
     buildHelper True (ATSDependency lib dirName url' undefined mempty)
     ps <- getSubdirs p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
-    let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg False False mempty ["install"] Nothing 0)
+    let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg False False False mempty ["install"] Nothing 0)
     bool (buildAll (Just pkgDir) >> a) a =<< check (Just pkgDir)
 
 exec :: IO ()
@@ -123,7 +123,7 @@ run Upgrade = upgradeAtsPkg
 run Nuke = cleanAll
 run (Fetch u) = fetchPkg u
 run Clean = mkPkg False False False mempty ["clean"] Nothing 0
-run (Build rs rb tgt rba v lint) = runHelper rb rba rs tgt v lint
+run (Build rs rb tgt rba v lint) = runHelper rb rba lint rs tgt v
 run c = runHelper False False False rs Nothing 0
     where rs = g c
           g Install       = ["install"]
