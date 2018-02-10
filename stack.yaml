@@ -4,12 +4,12 @@ packages:
   - '.'
   - 'dependency'
   - 'shake-ats'
+  - 'hs2ats'
 extra-deps:
   - shake-ext-2.3.0.0
   - composition-prelude-1.1.0.2
   - language-ats-0.2.0.0
   - cli-setup-0.2.0.1
-  - hs2ats-0.2.1.3
   - ats-setup-0.3.0.2
 flags:
   ats-pkg:
