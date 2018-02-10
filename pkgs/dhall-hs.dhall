@@ -5,6 +5,3 @@ in dep //
   , url = "https://hackage.haskell.org/package/dhall-1.9.1/dhall-1.9.1.tar.gz"
   , libVersion = [1,9,1]
   }
-
-
-
