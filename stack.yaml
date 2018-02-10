@@ -11,6 +11,7 @@ extra-deps:
   - language-ats-0.2.0.0
   - cli-setup-0.2.0.1
   - ats-setup-0.3.0.2
+  - hspec-dirstream-0.3.0.0
 flags:
   ats-pkg:
     development: false
