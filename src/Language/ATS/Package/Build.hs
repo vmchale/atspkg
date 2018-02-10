@@ -13,6 +13,7 @@ module Language.ATS.Package.Build ( mkPkg
 
 import           Control.Composition
 import           Control.Concurrent.ParallelIO.Global
+import           Control.Lens
 import           Control.Monad.IO.Class               (MonadIO)
 import           Data.Binary                          (decode, encode)
 import qualified Data.ByteString                      as BS
@@ -159,8 +160,8 @@ mkPkg rb rba lint setup rs tgt _ = do
             , pkgToAction setup rs tgt =<< cleanConfig rs
             ]
 
-asTuple :: TargetPair -> (Text, Text)
-asTuple (TargetPair s t) = (s, t)
+asTuple :: TargetPair -> (Text, Text, Bool)
+asTuple (TargetPair s t b) = (s, t, b)
 
 mkConfig :: Rules ()
 mkConfig =
@@ -214,7 +215,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
 
     where g (Bin s t ls hs' atg gc' cSrc) =
             atsBin
-                (BinaryTarget cc' (TL.unpack <$> cf) (ATSToolConfig v v' False) gc' (TL.unpack <$> ls) (TL.unpack s) hs' (both TL.unpack . asTuple <$> atg) (TL.unpack t) (TL.unpack <$> cSrc))
+                (BinaryTarget cc' (TL.unpack <$> cf) (ATSToolConfig v v' False) gc' (TL.unpack <$> ls) (TL.unpack s) hs' (unpackBoth . asTuple <$> atg) (TL.unpack t) (TL.unpack <$> cSrc))
 
           cDepsRules = unless (null as) $ do
             let cedar = TL.unpack cdir
@@ -225,3 +226,6 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
             mapM_ (cgen $ ATSToolConfig v v' hasPF) atsSourceDirs
 
           cc' = maybe (TL.unpack ccLocal) (<> "-gcc") tgt
+
+          unpackBoth :: (Text, Text, Bool) -> (String, String, Bool)
+          unpackBoth = over _1 TL.unpack . over _2 TL.unpack

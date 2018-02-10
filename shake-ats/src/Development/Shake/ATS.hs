@@ -44,6 +44,7 @@ import           Development.Shake.ATS.Type
 import           Development.Shake.FilePath
 import           Development.Shake.Version
 import           Language.ATS
+import           Lens.Micro
 import           System.Directory                  (copyFile, createDirectoryIfMissing)
 import           System.Exit                       (ExitCode (ExitSuccess))
 
@@ -99,13 +100,16 @@ makeCFlags ss fc ghcV b = gcFlag' : (hsExtra <> ss) where
 libToDirs :: [ForeignCabal] -> [String]
 libToDirs = fmap (takeDirectory . TL.unpack . cabalFile)
 
+uncurry3 :: (a -> b -> c -> d) -> ((a, b, c) -> d)
+uncurry3 f = \(x, y, z) -> f x y z
+
 -- TODO libraries should be linked against *cross-compiled* versions!!
 -- aka we need to compile atslib
 atsBin :: BinaryTarget -> Rules ()
 atsBin BinaryTarget{..} = do
 
     unless (null genTargets) $
-        mapM_ (uncurry genATS) genTargets
+        mapM_ (uncurry3 genATS) genTargets
 
     unless (null hsLibs) $
         mapM_ cabalExport hsLibs
@@ -114,7 +118,7 @@ atsBin BinaryTarget{..} = do
         h <- patsHome (compilerVer toolConfig)
         h' <- pkgHome (ccFromString cc)
         let home = h ++ "lib/ats2-postiats-" ++ show (libVersion toolConfig)
-        sources <- transitiveDeps (snd <$> genTargets) [src]
+        sources <- transitiveDeps ((^._2) <$> genTargets) [src]
         b' <- doesFileExist "atspkg.dhall"
         let hb = bool id ("atspkg.dhall" :) b'
         need (hb (sources ++ (TL.unpack . objectFile <$> hsLibs)))

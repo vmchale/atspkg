@@ -48,8 +48,9 @@ data ATSDependency = ATSDependency { libName    :: Text -- ^ Library name, e.g.
 makeLensesFor [("dir", "dirLens")] ''ATSDependency
 
 -- | This is just a tuple, except I can figure out how to use it with Dhall.
-data TargetPair = TargetPair { hs  :: Text
-                             , ats :: Text
+data TargetPair = TargetPair { hs    :: Text
+                             , ats   :: Text
+                             , cppHs :: Bool
                              } deriving (Eq, Show, Generic, Interpret, Binary)
 
 deriving instance Interpret ForeignCabal

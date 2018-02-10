@@ -76,7 +76,7 @@ data BinaryTarget = BinaryTarget { cc         :: String -- ^ C compiler to be us
                                  , libs       :: [String] -- ^ Libraries against which to link
                                  , src        :: String -- ^ Source file for binary.
                                  , hsLibs     :: [ForeignCabal] -- ^ Cabal-based Haskell libraries
-                                 , genTargets :: [(String, String)] -- ^ Files to be run through @hs2ats@.
+                                 , genTargets :: [(String, String, Bool)] -- ^ Files to be run through @hs2ats@.
                                  , binTarget  :: String -- ^ Binary target
                                  , cDeps      :: [String] -- ^ Any C files necessary to compile the target
                                  } deriving (Generic, Binary)
