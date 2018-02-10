@@ -3,6 +3,8 @@ sudo: false
 cache:
   directories:
     - $HOME/.stack
+    - $HOME/.cabal
+    - $HOME/.ghc
 addons:
   apt:
     packages:
@@ -12,6 +14,13 @@ matrix:
 
     # Linux
     - env: TARGET=x86_64-unknown-linux
+      addons:
+        apt:
+          sources:
+            - hvr-ghc
+          packages:
+            - ghc-8.2.2
+            - cabal-install-head
       language: python
 
     # OS X
@@ -42,6 +51,7 @@ script:
     then
       export BINPATH="$(find . -name atspkg -perm 755 | tail -n1)"
     else
+      cabal new-build --happy-options='-gcsa' --alex-options='-g'
       export BINPATH="$(find -name atspkg -executable | tail -n4 | head -n1)"
     fi
   - echo $BINPATH
