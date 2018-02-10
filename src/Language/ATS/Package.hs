@@ -10,6 +10,7 @@ module Language.ATS.Package ( pkgToAction
                             , fetchDeps
                             , getCCompiler
                             , mkBuildPlan
+                            , buildHelper
                             -- * Types
                             , Version (..)
                             , Pkg (..)

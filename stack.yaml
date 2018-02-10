@@ -9,7 +9,7 @@ extra-deps:
   - language-ats-0.2.0.0
   - cli-setup-0.2.0.1
   - hs2ats-0.2.1.3
-  - dependency-0.1.0.1
+  - dependency-0.1.0.3
   - ats-setup-0.3.0.2
 flags:
   ats-pkg:
