@@ -20,7 +20,7 @@ import           Language.ATS.Package.Type
 import           System.Directory           (createDirectoryIfMissing, doesFileExist)
 
 newtype ATSPackageSet = ATSPackageSet [ ATSDependency ]
-    deriving (Interpret)
+    deriving (Interpret, Show)
 
 setBuildPlan :: FilePath -- ^ Filepath for cache inside @.atspkg@
              -> [ATSDependency] -- ^
@@ -28,13 +28,16 @@ setBuildPlan :: FilePath -- ^ Filepath for cache inside @.atspkg@
 setBuildPlan p deps = do
     b <- doesFileExist depCache
     bool setBuildPlan' (decode <$> BSL.readFile depCache) b
+    -- ds <- bool setBuildPlan' (decode <$> BSL.readFile depCache) b
+    -- print ds
+    -- pure ds
 
     where depCache = ".atspkg/" ++ p ++ "-buildplan"
           setBuildPlan' = do
             putStrLn "Resolving dependencies..."
             pkgSet <- input auto "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
             case mkBuildPlan pkgSet deps of
-                Just x  -> createDirectoryIfMissing True ".atspkg" >> BSL.writeFile depCache (encode x) >> pure x
+                Just x  -> print (deps, x) >> createDirectoryIfMissing True ".atspkg" >> BSL.writeFile depCache (encode x) >> pure x
                 Nothing -> resolutionFailed
 
 mkBuildPlan :: ATSPackageSet -> [ATSDependency] -> Maybe [[ATSDependency]]
@@ -43,7 +46,7 @@ mkBuildPlan aps = finalize . resolve . buildSequence . fmap asDep
           resolve = resolveDependencies (atsPkgsToPkgs aps)
 
 asDep :: ATSDependency -> Dependency
-asDep ATSDependency{..} = Dependency (TL.unpack libName) mempty mempty
+asDep ATSDependency{..} = Dependency (TL.unpack libName) mempty (TL.unpack <$> libDeps)
 
 atsPkgsToPkgs :: ATSPackageSet -> PackageSet
 atsPkgsToPkgs (ATSPackageSet deps) = PackageSet $ foldr (.) id inserts mempty
