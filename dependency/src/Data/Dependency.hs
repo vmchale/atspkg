@@ -49,6 +49,7 @@ iterateM :: (Monad m) => Int -> (a -> m a) -> a -> m [a]
 iterateM 0 _ _ = pure []
 iterateM n f x = (x:) <$> (iterateM (n-1) f =<< f x)
 
+-- FIXME saturate everything at once.
 saturateDeps :: Int -> PackageSet Dependency -> Dependency -> DepM [Dependency]
 saturateDeps n ps = fmap toList . resolve <=< saturateDeps' ps
     where resolve :: S.Set Dependency -> DepM (S.Set Dependency)
