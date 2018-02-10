@@ -184,6 +184,12 @@ pkgToTargets :: Pkg -> [FilePath] -> [FilePath]
 pkgToTargets ~Pkg{..} [] = TL.unpack . target <$> bin
 pkgToTargets _ ts        = ts
 
+-- CROSS-COMPILING atslib:
+--
+-- 1. use the intmin version
+--
+-- 2. Then idk?? it's a mess??
+
 pkgToAction :: [IO ()] -- ^ Setup actions to be performed
             -> [String] -- ^ Targets
             -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
@@ -197,7 +203,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
 
         let cdps = if any gcBin bs then "gc" : cds else cds
 
-        liftIO $ fetchDeps setup (TL.unpack <$> ds) (TL.unpack <$> cdps) False >> stopGlobalPool
+        liftIO $ fetchDeps (ccFromString cc') setup (TL.unpack <$> ds) (TL.unpack <$> cdps) False >> stopGlobalPool
 
         let bins = TL.unpack . target <$> bs
         setTargets rs bins mt

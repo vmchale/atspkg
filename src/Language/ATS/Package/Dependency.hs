@@ -21,32 +21,33 @@ import           Dhall
 import           Language.ATS.Package.Error
 import           Language.ATS.Package.PackageSet
 import           Language.ATS.Package.Type
-import           Network.HTTP.Client
+import           Network.HTTP.Client                  hiding (host)
 import           Network.HTTP.Client.TLS              (tlsManagerSettings)
 import           System.Directory
 import           System.Environment                   (getEnv)
 import           System.Posix.Files
 import           System.Process
 
-fetchDeps :: [IO ()] -- ^ Setup steps that can be performed concurrently
+fetchDeps :: CCompiler -- ^ C compiler to use
+          -> [IO ()] -- ^ Setup steps that can be performed concurrently
           -> [String] -- ^ ATS dependencies
           -> [String] -- ^ C Dependencies
           -> Bool -- ^ Whether to perform setup anyhow.
           -> IO ()
-fetchDeps setup' deps cdeps b' =
+fetchDeps cc' setup' deps cdeps b' =
     unless (null deps && null cdeps && b') $ do
         deps' <- join <$> setBuildPlan "ats" deps 15
         putStrLn "Checking ATS dependencies..."
-        d <- (<> "lib/") <$> pkgHome
+        d <- (<> "lib/") <$> pkgHome cc'
         let libs' = fmap (buildHelper False) deps'
         cdeps' <- join <$> setBuildPlan "c" cdeps 4
         let unpacked = fmap (over dirLens (TL.pack d <>)) cdeps'
             clibs = fmap (buildHelper False) unpacked
         parallel_ (setup' ++ libs' ++ clibs)
-        mapM_ (setup (GCC Nothing Nothing)) unpacked
+        mapM_ (setup cc') unpacked
 
-pkgHome :: IO FilePath
-pkgHome = (++ "/.atspkg/") <$> getEnv "HOME"
+pkgHome :: CCompiler -> IO FilePath
+pkgHome cc' = (++ ("/.atspkg/" ++ ccToDir cc')) <$> getEnv "HOME"
 
 allSubdirs :: FilePath -> IO [FilePath]
 allSubdirs [] = pure mempty
@@ -57,8 +58,7 @@ allSubdirs d = do
     ds' <- mapM allSubdirs ds
     pure $ join (ds : ds')
 
--- TODO - change permissions on chmod +x ./mpn/m4-ccas ?
--- we'd ideally have something more general.
+-- TODO we should allow ATS libraries to be set up like this?
 clibSetup :: CCompiler -- ^ C compiler
           -> String -- ^ Library name
           -> FilePath -- ^ Filepath to unpack to
@@ -67,10 +67,10 @@ clibSetup cc' lib' p = do
     subdirs <- allSubdirs p
     configurePath <- fromMaybe (p <> "/configure") <$> findFile subdirs "configure"
     setFileMode configurePath ownerModes
-    h <- pkgHome
+    h <- pkgHome cc'
     let procEnv = Just [("CC", ccToString cc'), ("CFLAGS" :: String, "-I" <> h <> "include"), ("PATH", "/usr/bin:/bin")]
     putStrLn $ "configuring " ++ lib' ++ "..."
-    void $ readCreateProcess ((proc configurePath ["--prefix", h]) { cwd = Just p, env = procEnv, std_err = CreatePipe }) ""
+    void $ readCreateProcess ((proc configurePath ["--prefix", h, "--host", host]) { cwd = Just p, env = procEnv, std_err = CreatePipe }) ""
     putStrLn $ "building " ++ lib' ++ "..."
     void $ readCreateProcess ((proc "make" []) { cwd = Just p, std_err = CreatePipe }) ""
     putStrLn $ "installing " ++ lib' ++ "..."
@@ -80,7 +80,7 @@ setup :: CCompiler -- ^ C compiler to use
       -> ATSDependency -- ^ ATSDependency itself
       -> IO ()
 setup cc' (ATSDependency lib' dirName' _ _ _) = do
-    lib'' <- (<> TL.unpack lib') <$> pkgHome
+    lib'' <- (<> TL.unpack lib') <$> pkgHome cc'
     b <- doesFileExist lib''
     unless b $ do
         clibSetup cc' (TL.unpack lib') (TL.unpack dirName')

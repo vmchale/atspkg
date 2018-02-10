@@ -11,7 +11,7 @@ let pkg
     , clib = []
       : List Text
     , ccompiler = "gcc"
-    , cflags = [ "-O2", "-flto" ]
+    , cflags = [ "-O2" ]
     , atsSource = ([] : List Text)
     , cDir = "cbits"
     }

@@ -58,6 +58,9 @@ to $HOME/.local/share/man/man1
 **-l**, **-\-no-lint**
 :   Disable the shake linter
 
+**-t**, **-\-target**
+:   Set the compilation target using its triple.
+
 # CONFIGURATION
 
 **atspkg** is configured with Dhall, in an atspkg.dhall file. **atspkg** can be
