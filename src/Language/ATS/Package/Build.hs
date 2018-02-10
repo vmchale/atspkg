@@ -53,7 +53,7 @@ buildAll p = on (>>) (=<< wants p) fetchCompiler setupCompiler
 build :: [String] -- ^ Targets
       -> IO ()
 build rs = bool (mkPkgEmpty [buildAll Nothing]) (mkPkgEmpty mempty) =<< check Nothing
-    where mkPkgEmpty ts = mkPkg False False ts rs Nothing 1
+    where mkPkgEmpty ts = mkPkg False False True ts rs Nothing 1
 
 -- TODO clean generated ATS
 mkClean :: Rules ()
@@ -124,11 +124,12 @@ mkRun = mkPhony "run" id bin
 
 options :: Bool -- ^ Whether to rebuild config
         -> Bool -- ^ Whether to rebuild all targets
+        -> Bool -- ^ Whether to run the linter
         -> [String] -- ^ A list of targets
         -> ShakeOptions
-options rb rba rs = shakeOptions { shakeFiles = ".atspkg"
+options rb rba lint rs = shakeOptions { shakeFiles = ".atspkg"
                           , shakeThreads = 4
-                          , shakeLint = Just LintBasic
+                          , shakeLint = bool Nothing (Just LintBasic) lint
                           , shakeVersion = showVersion version
                           , shakeRebuild = foldMap g [ (rb, [(RebuildNow, ".atspkg/config")])
                                                      , (rba, (RebuildNow ,) <$> rs)
@@ -142,14 +143,15 @@ cleanConfig _         = getConfig Nothing
 
 mkPkg :: Bool -- ^ Whether to ignore cached package config
       -> Bool -- ^ Rebuild all targets
+      -> Bool -- ^ Run linter
       -> [IO ()] -- ^ Setup
       -> [String] -- ^ Targets
       -> Maybe String -- ^ Target triple
       -> Int -- ^ Verbosity
       -> IO ()
-mkPkg rb rba setup rs tgt _ = do
+mkPkg rb rba lint setup rs tgt _ = do
     cfg <- cleanConfig rs
-    let opt = options rb rba $ pkgToTargets cfg rs
+    let opt = options rb rba lint $ pkgToTargets cfg rs
     shake opt $
         mconcat
             [ want rs

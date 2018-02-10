@@ -2,6 +2,7 @@ module Data.Dependency
     ( -- * Functions
       resolveDependencies
     , buildSequence
+    , satisfies
     -- * Types
     , Dependency (..)
     , PackageSet (..)

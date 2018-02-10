@@ -15,7 +15,6 @@ module Data.Dependency.Type ( Dependency (..)
                             , Version (..)
                             , Constraint (..)
                             , PackageSet (..)
-                            , BuildTarget (..)
                             -- * Helper functions
                             , satisfies
                             ) where
@@ -97,5 +96,3 @@ data Dependency = Dependency { _libName         :: String
                              , _libVersion      :: Version
                              }
                              deriving (Show, Eq, Ord, Generic, NFData)
-
-newtype BuildTarget a = BuildTarget { targetFunction :: (String, Version) -> a }

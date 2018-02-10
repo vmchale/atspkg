@@ -33,6 +33,7 @@ data Command = Install
                      , _archTarget :: Maybe String
                      , _rebuildAll :: Bool
                      , _verbosity  :: Int
+                     , _lint       :: Bool
                      }
              | Clean
              | Test { _targets :: [String] }
@@ -87,7 +88,11 @@ build' = Build
         <> short 'r'
         <> help "Force rebuild of all targets")
     <*> (length <$>
-        many (flag' () (short 't' <> long "verbose")))
+        many (flag' () (short 't' <> long "verbose" <> help "Turn up verbosity")))
+    <*> switch
+        (long "lint"
+        <> short 'l'
+        <> help "Enable the shake linter")
 
 fetch :: Parser Command
 fetch = Fetch <$>
@@ -107,19 +112,19 @@ fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
 exec :: IO ()
 exec = execParser wrapper >>= run
 
-runHelper :: Bool -> Bool -> [String] -> Maybe String -> Int -> IO ()
-runHelper rb rba rs tgt v = bool
-    (mkPkg rb rba [buildAll Nothing] rs tgt v)
-    (mkPkg rb rba mempty rs tgt v)
+runHelper :: Bool -> Bool -> Bool -> [String] -> Maybe String -> Int -> IO ()
+runHelper rb rba lint rs tgt v = bool
+    (mkPkg rb rba lint [buildAll Nothing] rs tgt v)
+    (mkPkg rb rba lint mempty rs tgt v)
     =<< check Nothing
 
 run :: Command -> IO ()
 run Upgrade = upgradeAtsPkg
 run Nuke = cleanAll
 run (Fetch u) = fetchPkg u
-run Clean = mkPkg False False mempty ["clean"] Nothing 0
-run (Build rs rb tgt rba v) = runHelper rb rba rs tgt v
-run c = runHelper False False rs Nothing 0
+run Clean = mkPkg False False False mempty ["clean"] Nothing 0
+run (Build rs rb tgt rba v lint) = runHelper rb rba rs tgt v lint
+run c = runHelper False False False rs Nothing 0
     where rs = g c
           g Install       = ["install"]
           g (Test  ts)    = "test" : ts
