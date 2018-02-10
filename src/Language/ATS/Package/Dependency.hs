@@ -44,9 +44,10 @@ fetchDeps b setup' deps cdeps b' =
         putStrLn "Checking ATS dependencies..."
         d <- (<> "lib/") <$> pkgHome
         let libs' = fmap (buildHelper b) deps'
-            cdeps' = fmap (over dirLens (TL.pack d <>)) cdeps
-        unpacked <- join <$> setBuildPlan "c" cdeps'
-        let clibs = fmap (buildHelper b) unpacked
+        cdeps' <- join <$> setBuildPlan "c" cdeps
+        let unpacked = fmap (over dirLens (TL.pack d <>)) cdeps'
+            clibs = fmap (buildHelper b) unpacked
+        print unpacked
         parallel_ (setup' ++ libs' ++ clibs)
         mapM_ (setup (GCC Nothing Nothing)) unpacked
 
