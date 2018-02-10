@@ -50,7 +50,7 @@ makeLensesFor [("dir", "dirLens")] ''ATSDependency
 -- | This is just a tuple, except I can figure out how to use it with Dhall.
 data TargetPair = TargetPair { hs    :: Text
                              , ats   :: Text
-                             , cppHs :: Bool
+                             , cpphs :: Bool
                              } deriving (Eq, Show, Generic, Interpret, Binary)
 
 deriving instance Interpret ForeignCabal
