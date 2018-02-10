@@ -9,6 +9,8 @@ addons:
   apt:
     packages:
       - libgmp3-dev
+      - xz-utils
+      - liblzma-dev
 matrix:
   include:
 
@@ -27,6 +29,9 @@ matrix:
     - env: TARGET=x86_64-apple-darwin
       os: osx
       language: default
+
+  allow_failures:
+    - env: TARGET="x86_64-apple-darwin"
 
 before_install:
   - mkdir -p ~/.local/bin
