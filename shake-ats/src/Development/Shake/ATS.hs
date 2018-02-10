@@ -26,6 +26,7 @@ module Development.Shake.ATS ( -- * Shake Rules
                              , BinaryTarget (..)
                              , ATSToolConfig (..)
                              , CCompiler (..)
+                             , ArtifactType (..)
                              ) where
 
 import           Control.Monad
