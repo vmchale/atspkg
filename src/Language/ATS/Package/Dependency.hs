@@ -3,7 +3,6 @@
 module Language.ATS.Package.Dependency ( -- * Functions
                                          fetchDeps
                                        -- * Constants
-                                       , libcAtomicOps
                                        , libcGC
                                        ) where
 
@@ -29,10 +28,6 @@ import           System.Environment                   (getEnv)
 import           System.Posix.Files
 import           System.Process
 
-libcAtomicOps :: Version -> ATSDependency
-libcAtomicOps v = ATSDependency "atomic-ops" ("atomic-ops-" <> g v) ("https://github.com/ivmai/libatomic_ops/releases/download/v" <> g v <> "/libatomic_ops-" <> g v <> ".tar.gz") v mempty
-    where g = TL.pack . show
-
 libcGC :: Version -> ATSDependency
 libcGC v = ATSDependency "gc" ("gc-" <> g v) ("https://github.com/ivmai/bdwgc/releases/download/v" <> g v <> "/gc-" <> g v <> ".tar.gz") v ["atomic-ops"]
     where g = TL.pack . show
@@ -49,8 +44,9 @@ fetchDeps b setup' deps cdeps b' =
         putStrLn "Checking ATS dependencies..."
         d <- (<> "lib/") <$> pkgHome
         let libs' = fmap (buildHelper b) deps'
-            unpacked = fmap (over dirLens (TL.pack d <>)) cdeps
-            clibs = fmap (buildHelper b) unpacked
+            cdeps' = fmap (over dirLens (TL.pack d <>)) cdeps
+        unpacked <- join <$> setBuildPlan "c" cdeps'
+        let clibs = fmap (buildHelper b) unpacked
         parallel_ (setup' ++ libs' ++ clibs)
         mapM_ (setup (GCC Nothing Nothing)) unpacked
 

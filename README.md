@@ -7,11 +7,23 @@ is not yet stable.
 
 ## Installation
 
+### Script
+
 The easiest way to install is via a script, viz.
 
 ```bash
 curl -sSl https://raw.githubusercontent.com/vmchale/atspkg/master/bash/install.sh | bash -s
 ```
+
+Thereafter, you can run
+
+```bash
+atspkg upgrade
+```
+
+to upgrade to the latest release.
+
+### Source
 
 Alternately, you can download
 [Cabal](https://www.haskell.org/cabal/download.html) and

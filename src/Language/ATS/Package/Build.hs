@@ -194,8 +194,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
         want [".atspkg/config"]
 
         let gcV = Version [7,6,4]
-            atomicV = Version [7,6,2]
-            cdps = if any gcBin bs then libcAtomicOps atomicV : libcGC gcV : cds else cds
+            cdps = if any gcBin bs then libcGC gcV : cds else cds
 
         liftIO $ fetchDeps False setup ds cdps False >> stopGlobalPool
 
