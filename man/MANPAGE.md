@@ -55,6 +55,9 @@ to $HOME/.local/share/man/man1
 **-r**, **-\-rebuild**
 :   Rebuild all binary targets.
 
+**-l**, **-\-no-lint**
+:   Disable the shake linter
+
 # CONFIGURATION
 
 **atspkg** is configured with Dhall, in an atspkg.dhall file. **atspkg** can be

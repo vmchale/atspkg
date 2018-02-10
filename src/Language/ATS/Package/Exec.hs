@@ -89,10 +89,11 @@ build' = Build
         <> help "Force rebuild of all targets")
     <*> (length <$>
         many (flag' () (short 't' <> long "verbose" <> help "Turn up verbosity")))
-    <*> switch
-        (long "lint"
+    <*> fmap not
+        (switch
+        (long "no-lint"
         <> short 'l'
-        <> help "Enable the shake linter")
+        <> help "Disable the shake linter"))
 
 fetch :: Parser Command
 fetch = Fetch <$>
