@@ -33,7 +33,7 @@ setBuildPlan p deps = do
     b <- doesFileExist depCache
     bool setBuildPlan' (decode <$> BSL.readFile depCache) b
 
-    where depCache = ".atspkg/" ++ p ++ "-buildplan"
+    where depCache = ".atspkg/buildplan-" ++ p
           setBuildPlan' = do
             putStrLn "Resolving dependencies..."
             pkgSet <- input auto "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
