@@ -2,7 +2,6 @@ module Data.Dependency
     ( -- * Functions
       resolveDependencies
     , buildSequence
-    , asGraph
     -- * Types
     , Dependency (..)
     , PackageSet (..)
@@ -46,13 +45,14 @@ dock (x:ys@(y:_))
      | x == y = y
      | otherwise = dock ys
 
-iterateM :: (Monad m) => (a -> m a) -> a -> m [a]
-iterateM f x = (x:) <$> (iterateM f =<< f x)
+iterateM :: (Monad m) => Int -> (a -> m a) -> a -> m [a]
+iterateM 0 _ _ = pure []
+iterateM n f x = (x:) <$> (iterateM (n-1) f =<< f x)
 
-saturateDeps :: PackageSet Dependency -> Dependency -> DepM [Dependency]
-saturateDeps ps = fmap toList . resolve <=< saturateDeps' ps
+saturateDeps :: Int -> PackageSet Dependency -> Dependency -> DepM [Dependency]
+saturateDeps n ps = fmap toList . resolve <=< saturateDeps' ps
     where resolve :: S.Set Dependency -> DepM (S.Set Dependency)
-          resolve set = dock <$> iterateM next set
+          resolve set = dock <$> iterateM n next set
           next :: S.Set Dependency -> DepM (S.Set Dependency)
           next depSet = S.unions <$> sequence (saturateDeps' ps <$> toList depSet)
 
@@ -76,8 +76,8 @@ saturateDeps' (PackageSet ps) dep = do
 -- 5. Specify an error if a package is not present.
 --
 -- This doesn't do any package resolution beyond versioning.
-resolveDependencies :: PackageSet Dependency -> [Dependency] -> DepM [[Dependency]]
-resolveDependencies ps = select . getLatest <=< fmap buildSequence . saturated
+resolveDependencies :: Int -> PackageSet Dependency -> [Dependency] -> DepM [[Dependency]]
+resolveDependencies n ps = select . getLatest <=< fmap buildSequence . saturated
     where select = fmap (fmap (fmap snd))
-          saturated dep = join <$> traverse (saturateDeps ps) dep
+          saturated dep = join <$> traverse (saturateDeps n ps) dep
           getLatest = traverse (traverse (latest ps))

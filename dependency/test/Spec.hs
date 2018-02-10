@@ -32,4 +32,4 @@ main = hspec $ parallel $ do
             buildSequence deps `shouldBe` [[free, comonad], [lens]]
     describe "resolveDependencies" $
         it "correctly resolves dependencies in a package set" $
-            resolveDependencies set [lens] `shouldBe` Right [[free, comonad], [lens]]
+            resolveDependencies 10 set [lens] `shouldBe` Right [[free, comonad], [lens]]
