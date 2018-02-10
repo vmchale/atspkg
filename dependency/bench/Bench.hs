@@ -40,5 +40,5 @@ main =
                       , bench "6" $ nf buildSequence (bifunctors : microlens : deps)
                       ]
                 , bgroup "resolveDependencies"
-                      [ bench "3" $ nf (resolveDependencies set) [lens] ]
+                      [ bench "3" $ nf (resolveDependencies 10 set) [lens] ]
                 ]
