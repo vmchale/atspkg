@@ -65,7 +65,6 @@ script:
   - echo $BINPATH
   - mv $BINPATH atspkg-$TARGET
   - ls atspkg-$TARGET
-  - ./atspkg-$TARGET remote https://github.com/vmchale/getkb/archive/master.zip
 
 deploy:
   api_key:

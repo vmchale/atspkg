@@ -57,7 +57,8 @@ allSubdirs d = do
     ds' <- mapM allSubdirs ds
     pure $ join (ds : ds')
 
--- TODO? autoconf
+-- TODO - change permissions on chmod +x ./mpn/m4-ccas ?
+-- we'd ideally have something more general.
 clibSetup :: CCompiler -- ^ C compiler
           -> String -- ^ Library name
           -> FilePath -- ^ Filepath to unpack to
@@ -71,7 +72,7 @@ clibSetup cc' lib' p = do
     putStrLn $ "configuring " ++ lib' ++ "..."
     void $ readCreateProcess ((proc configurePath ["--prefix", h]) { cwd = Just p, env = procEnv, std_err = CreatePipe }) ""
     putStrLn $ "building " ++ lib' ++ "..."
-    void $ readCreateProcess ((proc "make" []) { cwd = Just p}) ""
+    void $ readCreateProcess ((proc "make" []) { cwd = Just p, std_err = CreatePipe }) ""
     putStrLn $ "installing " ++ lib' ++ "..."
     void $ readCreateProcess ((proc "make" ["install"]) { cwd = Just p, std_err = CreatePipe }) ""
 
