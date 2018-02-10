@@ -44,13 +44,14 @@ install:
   - stack --no-terminal --install-ghc test --only-dependencies
 
 script:
-  - stack --no-terminal build --haddock --no-haddock-deps
+  - stack --no-terminal build --haddock --no-haddock-deps --test --bench --no-run-tests --no-run-benchmarks
   - curl -sL https://raw.github.com/ndmitchell/weeder/master/misc/travis.sh | sh -s .
   - |
     if [ `uname` = "Darwin" ]
     then
       export BINPATH="$(find . -name atspkg -perm 755 | tail -n1)"
     else
+      cabal new-test
       cabal new-build --happy-options='-gcsa' --alex-options='-g'
       export BINPATH="$(find -name atspkg -executable | tail -n4 | head -n1)"
     fi
