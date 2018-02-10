@@ -34,11 +34,11 @@ fetchDeps :: [IO ()] -- ^ Setup steps that can be performed concurrently
           -> IO ()
 fetchDeps setup' deps cdeps b' =
     unless (null deps && null cdeps && b') $ do
-        deps' <- join <$> setBuildPlan "ats" deps
+        deps' <- join <$> setBuildPlan "ats" deps 15
         putStrLn "Checking ATS dependencies..."
         d <- (<> "lib/") <$> pkgHome
         let libs' = fmap (buildHelper False) deps'
-        cdeps' <- join <$> setBuildPlan "c" cdeps
+        cdeps' <- join <$> setBuildPlan "c" cdeps 4
         let unpacked = fmap (over dirLens (TL.pack d <>)) cdeps'
             clibs = fmap (buildHelper False) unpacked
         parallel_ (setup' ++ libs' ++ clibs)

@@ -30,7 +30,7 @@ setBuildPlan :: FilePath -- ^ Filepath for cache inside @.atspkg@
              -> [String] -- ^ Libraries we want
              -> Int -- ^ Depth of search when resolving dependencies
              -> IO [[ATSDependency]]
-setBuildPlan p n deps = do
+setBuildPlan p deps n  = do
     b <- doesFileExist depCache
     bool setBuildPlan' (decode <$> BSL.readFile depCache) b
 
