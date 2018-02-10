@@ -45,6 +45,7 @@ library
                      , http-client
                      , bytestring
                      , shake
+                     , lzma
                      , tar
                      , zlib
                      , http-client-tls
