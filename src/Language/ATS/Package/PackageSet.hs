@@ -38,15 +38,18 @@ setBuildPlan p deps = do
             putStrLn "Resolving dependencies..."
             pkgSet <- input auto "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
             case mkBuildPlan pkgSet deps of
-                Just x  -> createDirectoryIfMissing True ".atspkg" >> BSL.writeFile depCache (encode x) >> pure x
-                Nothing -> resolutionFailed
+                Right x -> createDirectoryIfMissing True ".atspkg" >> BSL.writeFile depCache (encode x) >> pure x
+                Left x  -> resolutionFailed x
 
-mkBuildPlan :: ATSPackageSet -> [String] -> Maybe [[ATSDependency]]
+mkBuildPlan :: ATSPackageSet -> [String] -> DepM [[ATSDependency]]
 mkBuildPlan aps@(ATSPackageSet ps) = finalize . resolve . fmap asDep <=< stringBuildPlan
     where finalize = fmap (fmap (fmap (lookupVersions aps)))
           resolve = resolveDependencies (atsPkgsToPkgs aps)
-          stringBuildPlan names = sequence [ lookup x libs | x <- names ]
+          stringBuildPlan names = sequence [ lookup' x libs | x <- names ]
               where libs = (TL.unpack . libName &&& id) <$> ps
+                    lookup' k vs = case lookup k vs of
+                        Just x  -> Right x
+                        Nothing -> Left (NotPresent k)
 
 asDep :: ATSDependency -> Dependency
 asDep ATSDependency{..} = Dependency (TL.unpack libName) mempty (TL.unpack <$> libDeps) libVersion
