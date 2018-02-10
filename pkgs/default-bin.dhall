@@ -3,7 +3,7 @@ let bin =
   , target = "target/project" 
   , libs = ([] : List Text)
   , hsDeps = ([] : List { cabalFile : Text, objectFile : Text })
-  , hs2ats = ([] : List { hs : Text, ats : Text })
+  , hs2ats = ([] : List { hs : Text, ats : Text, cpphs : Bool })
   , gcBin = False
   , cSources = ([] : List Text)
   }
