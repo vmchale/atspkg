@@ -71,7 +71,7 @@ clibSetup cc' lib' p = do
     putStrLn $ "configuring " ++ lib' ++ "..."
     void $ readCreateProcess ((proc configurePath ["--prefix", h]) { cwd = Just p, env = procEnv, std_err = CreatePipe }) ""
     putStrLn $ "building " ++ lib' ++ "..."
-    void $ readCreateProcess ((proc "make" []) { cwd = Just p, std_err = CreatePipe }) ""
+    void $ readCreateProcess ((proc "make" []) { cwd = Just p}) ""
     putStrLn $ "installing " ++ lib' ++ "..."
     void $ readCreateProcess ((proc "make" ["install"]) { cwd = Just p, std_err = CreatePipe }) ""
 
