@@ -2,7 +2,7 @@ let dep = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default-p
 
 in dep //
   { libName = "hs-dhall"
-  , dir = "hs2ats-deps"
+  , dir = ".atspkg/hs2ats-deps"
   , url = "https://hackage.haskell.org/package/dhall-1.9.1/dhall-1.9.1.tar.gz"
   , libVersion = [1,9,1]
   }
