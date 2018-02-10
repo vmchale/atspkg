@@ -7,6 +7,7 @@ module Language.ATS.Package.Dependency ( -- * Functions
 
 import qualified Codec.Archive.Tar                    as Tar
 import           Codec.Archive.Zip                    (ZipOption (..), extractFilesFromArchive, toArchive)
+import qualified Codec.Compression.BZip               as Bzip
 import qualified Codec.Compression.GZip               as Gzip
 import qualified Codec.Compression.Lzma               as Lzma
 import           Control.Concurrent.ParallelIO.Global
@@ -91,6 +92,7 @@ getCompressor s
     | ".tar.gz" `TL.isSuffixOf` s || ".tgz" `TL.isSuffixOf` s = pure Gzip.decompress
     | ".tar" `TL.isSuffixOf` s = pure id
     | ".tar.xz" `TL.isSuffixOf` s = pure Lzma.decompress
+    | ".tar.bz2" `TL.isSuffixOf` s = pure Bzip.decompress
     | otherwise = unrecognized (TL.unpack s)
 
 tarResponse :: Text -> FilePath -> ByteString -> IO ()
