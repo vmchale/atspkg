@@ -5,6 +5,7 @@ module Language.ATS.Package.Error ( -- * Helper functions
                                   , resolutionFailed
                                   ) where
 
+import           Data.Dependency
 import           System.Exit
 import           Text.PrettyPrint.ANSI.Leijen
 
@@ -13,18 +14,18 @@ infixr 5 <#>
 unrecognized :: String -> IO a
 unrecognized = printErr . Unrecognized
 
-resolutionFailed :: IO a
-resolutionFailed = printErr ResolutionFailed
+resolutionFailed :: ResolveError -> IO a
+resolutionFailed = printErr . DepErr
 
 data PackageError = Unrecognized String
-                  | ResolutionFailed
+                  | DepErr ResolveError
 
 (<#>) :: Doc -> Doc -> Doc
 (<#>) a b = a <> line <> b
 
 instance Pretty PackageError where
     pretty (Unrecognized t) = red "Error:" <+> "Unrecognized archive format when unpacking" <#> hang 2 (text t)
-    pretty ResolutionFailed = red "Error:" <+> "Package resolution failed.\n"
+    pretty (DepErr d)       = pretty d
 
 -- TODO monaderror?
 printErr :: PackageError -> IO a
