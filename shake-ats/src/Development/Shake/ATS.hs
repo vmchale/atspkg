@@ -120,7 +120,7 @@ atsBin BinaryTarget{..} = do
         let cc' = cc toolConfig
         h' <- pkgHome cc'
         let home = h ++ "lib/ats2-postiats-" ++ show (libVersion toolConfig)
-        sources <- (<> otherDeps <>) . (<> cDeps) <$> transitiveDeps ((^._2) <$> genTargets) [src]
+        sources <- (otherDeps <>) . (<> cDeps) <$> transitiveDeps ((^._2) <$> genTargets) [src]
         b' <- doesFileExist "atspkg.dhall"
         let hb = bool id ("atspkg.dhall" :) b'
         need (hb (sources ++ (TL.unpack . objectFile <$> hsLibs)))
