@@ -120,16 +120,17 @@ atsBin BinaryTarget{..} = do
         let cc' = cc toolConfig
         h' <- pkgHome cc'
         let home = h ++ "lib/ats2-postiats-" ++ show (libVersion toolConfig)
-        sources <- (otherDeps <>) . (<> cDeps) <$> transitiveDeps ((^._2) <$> genTargets) [src]
+        sources <- (<> cDeps) <$> transitiveDeps ((^._2) <$> genTargets) [src]
         b' <- doesFileExist "atspkg.dhall"
         let hb = bool id ("atspkg.dhall" :) b'
+        need [otherDeps]
         need (hb (sources ++ (TL.unpack . objectFile <$> hsLibs)))
         copySources toolConfig sources
 
         let ccommand = unwords [ ccToString cc', "-I" ++ h ++ "ccomp/runtime/", "-I" ++ h, "-I" ++ h' ++ "include", "-L" ++  h' ++ "lib", "-L" ++ home ++ "/ccomp/atslib/lib"]
         path <- fromMaybe "" <$> getEnv "PATH"
         let toLibs = fmap ("-l" <>)
-        let libs' = ("atslib" :) $ bool libs ("gc" : libs) gc
+        let libs' = ("atslib" :) $ bool libs ("gc" : libs) gc -- TODO make atslib a configuration option
         ghcV <- case hsLibs of
             [] -> pure undefined
             _  -> ghcVersion

@@ -136,6 +136,7 @@ options rb rba lint rs = shakeOptions { shakeFiles = ".atspkg"
                           , shakeRebuild = foldMap g [ (rb, [(RebuildNow, ".atspkg/config")])
                                                      , (rba, (RebuildNow ,) <$> rs)
                                                      ]
+                          , shakeChange = ChangeModtimeAndDigestInput
                           }
     where g (b, ts) = bool mempty ts b
 
