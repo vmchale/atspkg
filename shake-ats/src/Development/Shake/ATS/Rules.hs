@@ -61,7 +61,7 @@ cabalExport (ForeignCabal cbp' cf' obf') = do
         liftIO $ copyFile obj out
 
         let hdr = dropExtension obj ++ "_stub.h"
-        liftIO $ copyFile hdr (takeDirectory out ++ "/opt/build/" ++ takeFileName hdr)
+        liftIO $ copyFile hdr (takeDirectory out ++ "/" ++ takeFileName hdr)
 
 -- | Build a @.lats@ file.
 atsLex :: FilePattern -> Rules ()
