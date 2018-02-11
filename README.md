@@ -17,7 +17,8 @@ Things that `atspkg` will do for you:
   * Track all file dependencies
   * Make contributing to your projects easier
   * Run builds in parallel (like `make`)
-  * Handle flags for garbage collection if desired
+  * Handle flags for garbage collection when necessary
+  * Install `patscc` and other ATS tooling
 
 Things that `atspkg` will not do for you:
 
@@ -27,6 +28,7 @@ Things that `atspkg` will not do for you:
   * Provide a centralized package repository
   * Library builds (this is planned)
   * Offer a principled foundation for package builds
+  * Cache builds locally (like `nix` or `cabal`)
 
 ### Example
 
