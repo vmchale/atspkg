@@ -23,6 +23,7 @@ Things that `atspkg` will not do for you:
   * Give you the full flexibility of the C/ATS ecosystem
   * Simplify builds involving other ecosystems
   * Provide a centralized package repository
+  * Library builds (this is planned)
 
 ## Installation
 
