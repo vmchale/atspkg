@@ -25,6 +25,13 @@ Things that `atspkg` will not do for you:
   * Provide a centralized package repository
   * Library builds (this is planned)
 
+As an example, the following two lines will install `getkb`:
+
+```bash
+curl -sSl https://raw.githubusercontent.com/vmchale/atspkg/master/bash/install.sh | bash -s
+atspkg remote https://github.com/vmchale/getkb/archive/master.zip
+```
+
 ## Installation
 
 ### Script
