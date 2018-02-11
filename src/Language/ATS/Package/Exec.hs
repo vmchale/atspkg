@@ -123,9 +123,9 @@ run :: Command -> IO ()
 run Upgrade = upgradeAtsPkg
 run Nuke = cleanAll
 run (Fetch u) = fetchPkg u
-run Clean = mkPkg False False False mempty ["clean"] Nothing 0
-run (Build rs rb tgt rba v lint) = runHelper rb rba lint rs tgt v
-run c = runHelper False False False rs Nothing 0
+run Clean = mkPkg False False True mempty ["clean"] Nothing 0
+run (Build rs rb tgt rba v lint) = runHelper rb rba (not lint) rs tgt v
+run c = runHelper False False True rs Nothing 0
     where rs = g c
           g Install       = ["install"]
           g (Test  ts)    = "test" : ts
