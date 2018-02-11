@@ -200,11 +200,13 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
 
     unless (rs == ["clean"]) $ do
 
-        want [".atspkg/config"]
+        checkDeps <- liftIO $ doesFileExist ".atspkg/config"
 
         let cdps = if any gcBin bs then "gc" : cds else cds
 
-        liftIO $ fetchDeps (ccFromString cc') setup (TL.unpack <$> ds) (TL.unpack <$> cdps) False >> stopGlobalPool
+        liftIO $ fetchDeps (ccFromString cc') setup (TL.unpack <$> ds) (TL.unpack <$> cdps) checkDeps >> stopGlobalPool
+
+        want [".atspkg/config"]
 
         let bins = TL.unpack . target <$> bs
         setTargets rs bins mt

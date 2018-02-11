@@ -31,7 +31,7 @@ import           GHC.Generics                 (Generic)
 import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>))
 
 newtype PackageSet a = PackageSet (M.Map String (S.Set a))
-    deriving (Eq, Ord, Generic)
+    deriving (Eq, Ord, Foldable, Generic)
     deriving newtype Binary
 
 newtype Version = Version [Integer]
