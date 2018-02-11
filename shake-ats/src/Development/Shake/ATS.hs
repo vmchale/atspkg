@@ -98,7 +98,8 @@ makeCFlags ss fc ghcV b = gcFlag' : (hsExtra <> ss) where
     packageDbs = (\x -> ["-package-db", x ++ "/dist-newstyle/packagedb/ghc-" ++ ghcV]) =<< libToDirs fc
 
 libToDirs :: [ForeignCabal] -> [String]
-libToDirs = fmap (takeDirectory . TL.unpack . cabalFile)
+libToDirs = fmap (takeDirectory . TL.unpack . h)
+    where h (ForeignCabal mpr cf _) = fromMaybe cf mpr
 
 uncurry3 :: (a -> b -> c -> d) -> ((a, b, c) -> d)
 uncurry3 f (x, y, z) = f x y z
