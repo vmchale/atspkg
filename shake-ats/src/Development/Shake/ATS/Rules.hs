@@ -37,8 +37,7 @@ getSubdirs p = do
             ss <- mapM getSubdirs ds'
             pure $ ds' <> join ss
 
--- TODO - copy the .ghc.environment.* file to the current directory
--- also cabal exports can happen concurrently
+-- TODO cabal exports can happen concurrently w/ compiler & whatnot
 cabalExport :: ForeignCabal -> Rules ()
 cabalExport (ForeignCabal cbp' cf' obf') = do
 
@@ -55,14 +54,14 @@ cabalExport (ForeignCabal cbp' cf' obf') = do
         command_ [Cwd obfDir] "cabal" ["new-build"]
 
         let subdir = takeDirectory cbp ++ "/"
-            correctDir = (&&) <$> (== "build") <*> (libName `isPrefixOf`)
+            correctDir = (libName `isPrefixOf`)
             endsBuild = correctDir . last . splitPath
         dir <- filter endsBuild <$> liftIO (getSubdirs $ subdir ++ "dist-newstyle/build")
-        let obj = head dir ++ "/" ++ takeFileName obf
+        let obj = head dir ++ "/opt/build/" ++ takeFileName obf
         liftIO $ copyFile obj out
 
         let hdr = dropExtension obj ++ "_stub.h"
-        liftIO $ copyFile hdr (takeDirectory out ++ "/" ++ takeFileName hdr)
+        liftIO $ copyFile hdr (takeDirectory out ++ "/opt/build/" ++ takeFileName hdr)
 
 -- | Build a @.lats@ file.
 atsLex :: FilePattern -> Rules ()
