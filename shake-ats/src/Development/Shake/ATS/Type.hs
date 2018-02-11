@@ -55,7 +55,8 @@ pattern GHCStd = GHC Nothing Nothing
 
 data ArtifactType = StaticLibrary
                   | DynamicLibrary
-                  | Binary Bool
+                  | Binary Bool -- ^ Whether binary build should create a static binary
+                  deriving (Generic, Binary)
 
 data CCompiler = GCC { _prefix :: Maybe String, _suffix :: Maybe String }
                | Clang
@@ -70,6 +71,7 @@ data ATSToolConfig = ATSToolConfig { libVersion  :: Version
                                    , cc          :: CCompiler -- ^ C compiler to be used
                                    } deriving (Generic, Binary)
 
+-- | Type for binary and library builds with ATS.
 data BinaryTarget = BinaryTarget { cFlags     :: [String] -- ^ Flags to be passed to the C compiler
                                  , toolConfig :: ATSToolConfig
                                  , gc         :: Bool -- ^ Whether to configure build for use with the garbage collector.
@@ -78,7 +80,9 @@ data BinaryTarget = BinaryTarget { cFlags     :: [String] -- ^ Flags to be passe
                                  , hsLibs     :: [ForeignCabal] -- ^ Cabal-based Haskell libraries
                                  , genTargets :: [(String, String, Bool)] -- ^ Files to be run through @hs2ats@.
                                  , binTarget  :: String -- ^ Binary target
-                                 , cDeps      :: [String] -- ^ Any other files necessary to compile the target
+                                 , cDeps      :: [String] -- ^ C files necessary to compile the target
+                                 , otherDeps  :: [String] -- ^ Other files necessary to compile target
+                                 , tgtType    :: ArtifactType -- ^ Build type
                                  } deriving (Generic, Binary)
 
 -- | Data type containing information about Haskell components of a build.

@@ -13,12 +13,15 @@ import qualified Codec.Compression.Lzma               as Lzma
 import           Control.Concurrent.ParallelIO.Global
 import           Control.Lens
 import           Control.Monad
+import           Data.Binary                          (decode)
 import           Data.ByteString.Lazy                 (ByteString)
+import qualified Data.ByteString.Lazy                 as BSL
 import           Data.Maybe                           (fromMaybe)
 import           Data.Semigroup                       (Semigroup (..))
 import qualified Data.Text.Lazy                       as TL
 import           Development.Shake.ATS
 import           Dhall
+import           Language.ATS.Package.Config
 import           Language.ATS.Package.Error
 import           Language.ATS.Package.PackageSet
 import           Language.ATS.Package.Type
@@ -33,11 +36,12 @@ fetchDeps :: CCompiler -- ^ C compiler to use
           -> [IO ()] -- ^ Setup steps that can be performed concurrently
           -> [String] -- ^ ATS dependencies
           -> [String] -- ^ C Dependencies
-          -> String -- ^ URL of package set to be used
+          -> FilePath -- ^ Path to configuration file
           -> Bool -- ^ Whether to perform setup anyhow.
           -> IO ()
-fetchDeps cc' setup' deps cdeps pkgSet b' =
+fetchDeps cc' setup' deps cdeps cfgPath b' =
     unless (null deps && null cdeps && b') $ do
+        pkgSet <- TL.unpack . defaultPkgs . decode <$> BSL.readFile cfgPath
         deps' <- join <$> setBuildPlan "ats" pkgSet deps
         putStrLn "Checking ATS dependencies..."
         d <- (<> "lib/") <$> pkgHome cc'
@@ -47,7 +51,6 @@ fetchDeps cc' setup' deps cdeps pkgSet b' =
             clibs = fmap (buildHelper False) unpacked
         parallel_ (setup' ++ libs' ++ clibs)
         mapM_ (setup cc') unpacked
-        writeFile ".atspkg/setup-done" ""
 
 pkgHome :: CCompiler -> IO FilePath
 pkgHome cc' = (++ ("/.atspkg/" ++ ccToDir cc')) <$> getEnv "HOME"

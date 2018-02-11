@@ -136,6 +136,7 @@ options rb rba lint rs = shakeOptions { shakeFiles = ".atspkg"
                           , shakeRebuild = foldMap g [ (rb, [(RebuildNow, ".atspkg/config")])
                                                      , (rba, (RebuildNow ,) <$> rs)
                                                      ]
+                          , shakeVerbosity = Diagnostic
                           }
     where g (b, ts) = bool mempty ts b
 
@@ -201,16 +202,14 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
 
     unless (rs == ["clean"]) $ do
 
-        let cdps = if any gcBin bs then "gc" : cds else cds
+        let cdps = if f bs || f ts then "gc" : cds else cds where f = any gcBin
 
         mkUserConfig
-
-        let userCfg = "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
 
         "deps" ~> do
             (_, cfgBin') <- cfgBin
             need [ cfgBin' ]
-            liftIO $ fetchDeps (ccFromString cc') setup (TL.unpack <$> ds) (TL.unpack <$> cdps) userCfg False >> stopGlobalPool
+            liftIO $ fetchDeps (ccFromString cc') setup (TL.unpack <$> ds) (TL.unpack <$> cdps) cfgBin' False >> stopGlobalPool
 
         want [".atspkg/config"]
 
@@ -223,7 +222,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
 
     where g (Bin s t ls hs' atg gc' cSrc) =
             atsBin
-                (BinaryTarget (TL.unpack <$> cf) (ATSToolConfig v v' False (ccFromString cc')) gc' (TL.unpack <$> ls) (TL.unpack s) hs' (unpackBoth . asTuple <$> atg) (TL.unpack t) (withDeps cSrc))
+                (BinaryTarget (TL.unpack <$> cf) (ATSToolConfig v v' False (ccFromString cc')) gc' (TL.unpack <$> ls) (TL.unpack s) hs' (unpackBoth . asTuple <$> atg) (TL.unpack t) (TL.unpack <$> cSrc) ["deps"] (Binary False))
 
           cDepsRules = unless (null as) $ do
             let cedar = TL.unpack cdir
@@ -234,7 +233,6 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
             mapM_ (cgen $ ATSToolConfig v v' hasPF (ccFromString cc')) atsSourceDirs
 
           cc' = maybe (TL.unpack ccLocal) (<> "-gcc") tgt
-          withDeps cSrc = "deps" : (TL.unpack <$> cSrc)
 
           unpackBoth :: (Text, Text, Bool) -> (String, String, Bool)
           unpackBoth = over _1 TL.unpack . over _2 TL.unpack
