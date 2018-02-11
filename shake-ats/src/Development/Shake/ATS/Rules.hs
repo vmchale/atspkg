@@ -6,6 +6,7 @@ module Development.Shake.ATS.Rules ( atsLex
                                    ) where
 
 import           Control.Monad
+import           Data.List                  (isPrefixOf)
 import           Data.Semigroup             (Semigroup (..))
 import qualified Data.Text.Lazy             as TL
 import           Development.Shake          hiding (doesDirectoryExist)
@@ -45,6 +46,7 @@ cabalExport (ForeignCabal cbp' cf' obf') = do
         cbp = maybe cf TL.unpack cbp'
         obf = TL.unpack obf'
         obfDir = takeDirectory (obf -<.> "hs")
+        libName = takeBaseName cf
 
     trDeps <- liftIO $ getCabalDeps cf
     obf %> \out -> do
@@ -53,7 +55,8 @@ cabalExport (ForeignCabal cbp' cf' obf') = do
         command_ [Cwd obfDir] "cabal" ["new-build"]
 
         let subdir = takeDirectory cbp ++ "/"
-            endsBuild = (== "build") . last . splitPath
+            correctDir = (&&) <$> (== "build") <*> (libName `isPrefixOf`)
+            endsBuild = correctDir . last . splitPath
         dir <- filter endsBuild <$> liftIO (getSubdirs $ subdir ++ "dist-newstyle/build")
         let obj = head dir ++ "/" ++ takeFileName obf
         liftIO $ copyFile obj out

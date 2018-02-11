@@ -63,7 +63,6 @@ test-suite hs2ats-test
                      , hspec
                      , hspec-dirstream
                      , system-filepath
-                     , language-ats
   if flag(development)
     ghc-options:       -Werror
   if impl(ghc >= 8.0)
