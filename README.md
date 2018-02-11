@@ -5,6 +5,25 @@
 This is a build system for ATS written in Haskell and configured with Dhall. It
 is not yet stable.
 
+# Features & Non-Features
+
+Things that `atspkg` will do for you:
+
+  * Dramatically simplify CI for ATS projects
+  * Simplify distribution of your project
+  * Enable Haskell builds that depend on ATS code
+  * Enable ATS builds that depend on Haskell code
+  * Ensure reproducible builds by allowing pinning a compiler version
+  * Track all file dependencies.
+  * Make contributing to your projects easier
+
+Things that `atspkg` will not do for you:
+
+  * Dependency resolution (this is planned)
+  * Give you the full flexibility of the C/ATS ecosystem
+  * Simplify builds involving other ecosystems
+  * Provide a centralized package repository
+
 ## Installation
 
 ### Script
