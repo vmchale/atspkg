@@ -123,7 +123,7 @@ atsBin BinaryTarget{..} = do
         sources <- (<> cDeps) <$> transitiveDeps ((^._2) <$> genTargets) [src]
         b' <- doesFileExist "atspkg.dhall"
         let hb = bool id ("atspkg.dhall" :) b'
-        need [otherDeps]
+        need otherDeps
         need (hb (sources ++ (TL.unpack . objectFile <$> hsLibs)))
         copySources toolConfig sources
 
