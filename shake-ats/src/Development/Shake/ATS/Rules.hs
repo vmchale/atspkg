@@ -13,7 +13,7 @@ import           Development.Shake.ATS.Type hiding (BinaryTarget (..))
 import           Development.Shake.Cabal
 import           Development.Shake.FilePath
 import           Language.ATS.Generate
-import           System.Directory           (copyFile, createDirectoryIfMissing, doesDirectoryExist, listDirectory)
+import           System.Directory
 
 -- | Given a plain Haskell source file, generate a @.sats@ file containing
 -- analogous types.
@@ -39,10 +39,10 @@ getSubdirs p = do
 -- TODO - copy the .ghc.environment.* file to the current directory
 -- also cabal exports can happen concurrently
 cabalExport :: ForeignCabal -> Rules ()
-cabalExport (ForeignCabal cf' obf' cbp') = do
+cabalExport (ForeignCabal cbp' cf' obf') = do
 
     let cf = TL.unpack cf'
-        cbp = TL.unpack cbp'
+        cbp = maybe cf TL.unpack cbp'
         obf = TL.unpack obf'
         obfDir = takeDirectory (obf -<.> "hs")
 
