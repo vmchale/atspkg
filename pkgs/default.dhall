@@ -1,8 +1,8 @@
 let pkg
   = { bin = []
-      : List { src : Text, target : Text, libs : List Text, hsDeps : List { cabalFile : Text, objectFile : Text } , hs2ats : List { hs : Text, ats : Text, cpphs : Bool }, gcBin : Bool, cSources : List Text }
+      : List { src : Text, target : Text, libs : List Text, hsDeps : List { projectFile : Optional Text, cabalFile : Text, objectFile : Text } , hs2ats : List { hs : Text, ats : Text, cpphs : Bool }, gcBin : Bool, cSources : List Text }
     , test = []
-      : List { src : Text, target : Text, libs : List Text, hsDeps : List { cabalFile : Text, objectFile : Text } , hs2ats : List { hs : Text, ats : Text, cpphs : Bool }, gcBin : Bool, cSources : List Text }
+      : List { src : Text, target : Text, libs : List Text, hsDeps : List { projectFile : Optional Text, cabalFile : Text, objectFile : Text } , hs2ats : List { hs : Text, ats : Text, cpphs : Bool }, gcBin : Bool, cSources : List Text }
     , man = ([] : Optional Text)
     , version = [0,3,9]
     , compiler = [0,3,9]
