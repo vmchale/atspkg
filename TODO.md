@@ -1,3 +1,5 @@
+# Dhall
+- [ ] make packages functions from version number
 # Features
 - [ ] install ghc??? lol
 - [ ] `fetching...` should include version number.
@@ -13,7 +15,7 @@
 - [ ] package naming
 - [ ] shell completions should list targets (?)
 - [ ] better handling of Haskell dependencies in dependencies
-- [ ] custom build scripts in ATS
+- [ ] custom build scripts in ATS (`setup.dats`)
 - [ ] Set number of threads manually
 - [ ] Install GHC/Cabal? (see:
   `https://downloads.haskell.org/~ghc/8.2.2/ghc-8.2.2-src.tar.xz`)

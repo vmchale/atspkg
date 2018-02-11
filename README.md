@@ -14,16 +14,19 @@ Things that `atspkg` will do for you:
   * Enable Haskell builds that depend on ATS code
   * Enable ATS builds that depend on Haskell code
   * Ensure reproducible builds by allowing pinning a compiler version
-  * Track all file dependencies.
+  * Track all file dependencies
   * Make contributing to your projects easier
+  * Run builds in parallel (like `make`)
+  * Handle flags for garbage collection if desired
 
 Things that `atspkg` will not do for you:
 
   * Dependency resolution (this is planned)
   * Give you the full flexibility of the C/ATS ecosystem
-  * Simplify builds involving other ecosystems
+  * Integrate with other ecosystems
   * Provide a centralized package repository
   * Library builds (this is planned)
+  * Offer a principled foundation for package builds
 
 ### Example
 
