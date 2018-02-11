@@ -1,0 +1,3 @@
+datavtype option(a: vt@ype) =
+  | Some of a
+  | None
