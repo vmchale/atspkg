@@ -36,6 +36,8 @@ ccFromString "clang" = Clang
 ccFromString s
     | "gcc" `isSuffixOf` s = GCC (Just (reverse . drop 3 . reverse $ s)) Nothing
     | "gcc" `isPrefixOf` s = GCC Nothing (Just $ drop 3 s)
+    | "ghc" `isSuffixOf` s = GHC (Just (reverse . drop 3 . reverse $ s)) Nothing
+    | "ghc" `isPrefixOf` s = GHC Nothing (Just $ drop 3 s)
 ccFromString _ = GCC Nothing Nothing
 
 mkQualified :: Monoid a => Maybe a -> Maybe a -> a -> a
