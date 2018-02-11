@@ -206,12 +206,11 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
 
         mkUserConfig
 
-        "deps" ~> do
+        ".atspkg/deps" %> \out -> do
             (_, cfgBin') <- cfgBin
             need [ cfgBin' ]
             liftIO $ fetchDeps (ccFromString cc') setup (TL.unpack <$> ds) (TL.unpack <$> cdps) cfgBin' False >> stopGlobalPool
-
-        want [".atspkg/config"]
+            liftIO $ writeFile out ""
 
         let bins = TL.unpack . target <$> bs
         setTargets rs bins mt
@@ -222,7 +221,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
 
     where g (Bin s t ls hs' atg gc' cSrc) =
             atsBin
-                (BinaryTarget (TL.unpack <$> cf) (ATSToolConfig v v' False (ccFromString cc')) gc' (TL.unpack <$> ls) (TL.unpack s) hs' (unpackBoth . asTuple <$> atg) (TL.unpack t) (TL.unpack <$> cSrc) ["deps"] (Binary False))
+                (BinaryTarget (TL.unpack <$> cf) (ATSToolConfig v v' False (ccFromString cc')) gc' (TL.unpack <$> ls) (TL.unpack s) hs' (unpackBoth . asTuple <$> atg) (TL.unpack t) (TL.unpack <$> cSrc) [".atspkg/deps", ".atspkg/config"] (Binary False))
 
           cDepsRules = unless (null as) $ do
             let cedar = TL.unpack cdir
