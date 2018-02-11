@@ -39,9 +39,10 @@ getSubdirs p = do
 -- TODO - copy the .ghc.environment.* file to the current directory
 -- also cabal exports can happen concurrently
 cabalExport :: ForeignCabal -> Rules ()
-cabalExport (ForeignCabal cf' obf') = do
+cabalExport (ForeignCabal cf' obf' cbp') = do
 
     let cf = TL.unpack cf'
+        cbp = TL.unpack cbp'
         obf = TL.unpack obf'
         obfDir = takeDirectory (obf -<.> "hs")
 
@@ -51,7 +52,7 @@ cabalExport (ForeignCabal cf' obf') = do
         need (cf : fmap ((obfDir <> "/") <>) trDeps)
         command_ [Cwd obfDir] "cabal" ["new-build"]
 
-        let subdir = takeDirectory cf ++ "/"
+        let subdir = takeDirectory cbp ++ "/"
             endsBuild = (== "build") . last . splitPath
         dir <- filter endsBuild <$> liftIO (getSubdirs $ subdir ++ "dist-newstyle/build")
         let obj = head dir ++ "/" ++ takeFileName obf

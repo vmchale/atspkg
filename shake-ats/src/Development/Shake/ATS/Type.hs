@@ -82,6 +82,7 @@ data BinaryTarget = BinaryTarget { cc         :: String -- ^ C compiler to be us
                                  } deriving (Generic, Binary)
 
 -- | Data type containing information about Haskell components of a build.
-data ForeignCabal = ForeignCabal { cabalFile  :: TL.Text -- ^ @.cabal@ file associated with the library
-                                 , objectFile :: TL.Text -- ^ Object file to be generated
+data ForeignCabal = ForeignCabal { projectFile :: Maybe TL.Text -- ^ @cabal.project@ file to track
+                                 , cabalFile   :: TL.Text -- ^ @.cabal@ file associated with the library
+                                 , objectFile  :: TL.Text -- ^ Object file to be generated
                                  } deriving (Eq, Show, Generic, Binary)

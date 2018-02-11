@@ -101,7 +101,7 @@ libToDirs :: [ForeignCabal] -> [String]
 libToDirs = fmap (takeDirectory . TL.unpack . cabalFile)
 
 uncurry3 :: (a -> b -> c -> d) -> ((a, b, c) -> d)
-uncurry3 f = \(x, y, z) -> f x y z
+uncurry3 f (x, y, z) = f x y z
 
 -- TODO libraries should be linked against *cross-compiled* versions!!
 -- aka we need to compile atslib
@@ -132,7 +132,7 @@ atsBin BinaryTarget{..} = do
             [] -> pure undefined
             _  -> ghcVersion
         command_
-            [EchoStderr False, AddEnv "PATSHOME" home, AddEnv "PATH" (home ++ "/bin:" ++ path), AddEnv "PATSHOMELOCS" $ ".atspkg/hs2ats:" ++ patsHomeLocs 5]
+            [EchoStderr False, AddEnv "PATSHOME" home, AddEnv "PATH" (home ++ "/bin:" ++ path), AddEnv "PATSHOMELOCS" $ patsHomeLocs 5]
             (home ++ "/bin/patscc")
             (mconcat
                 [ [src, "-atsccomp", ccommand, "-o", binTarget, "-cleanaft"]
@@ -165,7 +165,7 @@ transitiveDeps :: [FilePath] -> [FilePath] -> Action [FilePath]
 transitiveDeps _ [] = pure []
 transitiveDeps gen ps = fmap join $ forM ps $ \p -> if p `elem` gen then pure mempty else do
     contents <- liftIO $ readFile p
-    let ats = fromRight mempty . parseATS . lexATS $ contents
+    let ats = fromRight mempty . parse $ contents
     let dir = takeDirectory p
     deps <- filterM (\f -> ((f `elem` gen) ||) <$> doesFileExist f) $ fixDir dir . trim <$> getDependencies ats
     deps' <- transitiveDeps gen deps
