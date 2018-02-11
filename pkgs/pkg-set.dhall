@@ -9,7 +9,7 @@ let pkgset =
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall
   , https://raw.githubusercontent.com/vmchale/either/master/pkg.dhall
-  , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-fast-arithmetic.dhall
+  , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-fast-arithmetic.dhall [0,3,2,5]
   , https://raw.githubusercontent.com/vmchale/ats-linecount/master/pkg.dhall
   ]
 
