@@ -73,7 +73,7 @@ gcFlag True  = "-DATS_MEMALLOC_GCBDW"
 -- Copy source files to the appropriate place. This is necessary because
 -- @#include@s in ATS are weird.
 copySources :: ATSToolConfig -> [FilePath] -> Action ()
-copySources (ATSToolConfig v v' _) sources =
+copySources (ATSToolConfig v v' _ _) sources =
     forM_ sources $ \dep -> do
         h <- patsHome v'
         let home = h ++ "lib/ats2-postiats-" ++ show v
@@ -117,7 +117,8 @@ atsBin BinaryTarget{..} = do
 
     binTarget %> \_ -> do
         h <- patsHome (compilerVer toolConfig)
-        h' <- pkgHome (ccFromString cc)
+        let cc' = cc toolConfig
+        h' <- pkgHome cc'
         let home = h ++ "lib/ats2-postiats-" ++ show (libVersion toolConfig)
         sources <- transitiveDeps ((^._2) <$> genTargets) [src]
         b' <- doesFileExist "atspkg.dhall"
@@ -125,7 +126,7 @@ atsBin BinaryTarget{..} = do
         need (hb (sources ++ (TL.unpack . objectFile <$> hsLibs)))
         copySources toolConfig sources
 
-        let ccommand = unwords [ cc, "-I" ++ h ++ "ccomp/runtime/", "-I" ++ h, "-I" ++ h' ++ "include", "-L" ++  h' ++ "lib", "-L" ++ home ++ "/ccomp/atslib/lib"]
+        let ccommand = unwords [ ccToString cc', "-I" ++ h ++ "ccomp/runtime/", "-I" ++ h, "-I" ++ h' ++ "include", "-L" ++  h' ++ "lib", "-L" ++ home ++ "/ccomp/atslib/lib"]
         path <- fromMaybe "" <$> getEnv "PATH"
         let toLibs = fmap ("-l" <>)
         let libs' = ("atslib" :) $ bool libs ("gc" : libs) gc

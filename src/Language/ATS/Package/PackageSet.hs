@@ -27,16 +27,17 @@ newtype ATSPackageSet = ATSPackageSet [ ATSDependency ]
     deriving (Interpret, Show)
 
 setBuildPlan :: FilePath -- ^ Filepath for cache inside @.atspkg@
+             -> String -- ^ URL of package set to use.
              -> [String] -- ^ Libraries we want
              -> IO [[ATSDependency]]
-setBuildPlan p deps = do
+setBuildPlan p url deps = do
     b <- doesFileExist depCache
     bool setBuildPlan' (decode <$> BSL.readFile depCache) b
 
     where depCache = ".atspkg/buildplan-" ++ p
           setBuildPlan' = do
             putStrLn "Resolving dependencies..."
-            pkgSet <- input auto "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
+            pkgSet <- input auto (TL.pack url)
             case mkBuildPlan pkgSet deps of
                 Right x -> createDirectoryIfMissing True ".atspkg" >> BSL.writeFile depCache (encode x) >> pure x
                 Left x  -> resolutionFailed x
