@@ -36,7 +36,7 @@ fetchDeps :: CCompiler -- ^ C compiler to use
           -> Bool -- ^ Whether to perform setup anyhow.
           -> IO ()
 fetchDeps cc' setup' deps cdeps b' =
-    unless (null deps && null cdeps && b') $ do
+    unless ((null deps && null cdeps) || b') $ do
         deps' <- join <$> setBuildPlan "ats" deps
         putStrLn "Checking ATS dependencies..."
         d <- (<> "lib/") <$> pkgHome cc'
@@ -46,6 +46,7 @@ fetchDeps cc' setup' deps cdeps b' =
             clibs = fmap (buildHelper False) unpacked
         parallel_ (setup' ++ libs' ++ clibs)
         mapM_ (setup cc') unpacked
+        writeFile ".atspkg/setup-done" ""
 
 pkgHome :: CCompiler -> IO FilePath
 pkgHome cc' = (++ ("/.atspkg/" ++ ccToDir cc')) <$> getEnv "HOME"
