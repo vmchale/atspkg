@@ -36,7 +36,7 @@ data Command = Install
                      , _lint       :: Bool
                      }
              | Clean
-             | Test { _targets :: [String] }
+             | Test { _targets :: [String], _lint :: Bool }
              | Fetch { _url :: String }
              | Nuke
              | Upgrade
@@ -60,7 +60,7 @@ run' :: Parser Command
 run' = Run <$> targets "run"
 
 test' :: Parser Command
-test' = Test <$> targets "test"
+test' = Test <$> targets "test" <*> noLint
 
 valgrind :: Parser Command
 valgrind = Valgrind <$> targets "run with valgrind"
@@ -89,11 +89,14 @@ build' = Build
         <> help "Force rebuild of all targets")
     <*> (length <$>
         many (flag' () (short 't' <> long "verbose" <> help "Turn up verbosity")))
-    <*> fmap not
-        (switch
-        (long "no-lint"
-        <> short 'l'
-        <> help "Disable the shake linter"))
+    <*> noLint
+
+noLint :: Parser Bool
+noLint = fmap not
+    (switch
+    (long "no-lint"
+    <> short 'l'
+    <> help "Disable the shake linter"))
 
 fetch :: Parser Command
 fetch = Fetch <$>
@@ -124,11 +127,11 @@ run Upgrade = upgradeAtsPkg
 run Nuke = cleanAll
 run (Fetch u) = fetchPkg u
 run Clean = mkPkg False False True mempty ["clean"] Nothing 0
-run (Build rs rb tgt rba v lint) = runHelper rb rba (not lint) rs tgt v
+run (Build rs rb tgt rba v lint) = runHelper rb rba lint rs tgt v
+run (Test ts lint) = runHelper False False lint ("test" : ts) Nothing 0
 run c = runHelper False False True rs Nothing 0
     where rs = g c
           g Install       = ["install"]
-          g (Test  ts)    = "test" : ts
           g (Valgrind ts) = "valgrind" : ts
           g (Run ts)      = "run" : ts
           g _             = undefined
