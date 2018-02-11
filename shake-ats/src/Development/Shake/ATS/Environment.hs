@@ -33,6 +33,7 @@ ccToString (GHC pre suff) = mkQualified pre suff "ghc"
 ccFromString :: String -> CCompiler
 ccFromString "gcc" = GCC Nothing Nothing
 ccFromString "clang" = Clang
+ccFromString "ghc" = GHC Nothing Nothing
 ccFromString s
     | "gcc" `isSuffixOf` s = GCC (Just (reverse . drop 3 . reverse $ s)) Nothing
     | "gcc" `isPrefixOf` s = GCC Nothing (Just $ drop 3 s)
