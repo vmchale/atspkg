@@ -6,4 +6,4 @@ let dep = λ(x : List Integer) →
     : List Text
   }
 
-in dep
+in dep [0,1,0]
