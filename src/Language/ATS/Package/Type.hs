@@ -55,13 +55,13 @@ data TargetPair = TargetPair { hs    :: Text
 
 deriving instance Interpret ForeignCabal
 
-data Bin = Bin { src          :: Text -- ^ Source file (should end with @.dats@)
-               , target       :: Text -- ^ Binary to be built
-               , libs         :: [Text] -- ^ Libraries to link against (e.g. @[ "pthread" ]@)
-               , hsDeps       :: [ForeignCabal] -- ^ Haskell @.cabal@ files associated with the final library we want to make
-               , hs2ats       :: [TargetPair] -- ^ List of sources and targets for @hs2ats@
-               , gcBin        :: Bool -- ^ Whether to use the garbage collector
-               , extraSources :: [Text] -- ^ Other source files the build depends on
+data Bin = Bin { src      :: Text -- ^ Source file (should end with @.dats@)
+               , target   :: Text -- ^ Binary to be built
+               , libs     :: [Text] -- ^ Libraries to link against (e.g. @[ "pthread" ]@)
+               , hsDeps   :: [ForeignCabal] -- ^ Haskell @.cabal@ files associated with the final library we want to make
+               , hs2ats   :: [TargetPair] -- ^ List of sources and targets for @hs2ats@
+               , gcBin    :: Bool -- ^ Whether to use the garbage collector
+               , cSources :: [Text] -- ^ C source files the build depends on
                }
          deriving (Show, Eq, Generic, Interpret, Binary)
 
