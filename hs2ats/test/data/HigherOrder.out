@@ -1,0 +1,5 @@
+datavtype generic_sum(a: vt@ype, b: vt@ype) =
+  | Generic_l of a
+  | Generic_r of b
+
+vtypedef generic_sum_int = generic_sum(Strptr1, int)
