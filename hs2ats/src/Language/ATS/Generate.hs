@@ -53,6 +53,7 @@ qnameToString (QNamed _ _ "Maybe") = Right "Option_vt"
 qnameToString (QNamed _ _ s)       = Right $ convertConventions s
 qnameToString _                    = unsupported "qnameToString"
 
+-- should we allow user-defined string map?
 stringTypeConv :: String -> ErrM String
 stringTypeConv "Integer" = Right "Intinf"
 stringTypeConv "String"  = Right "Strptr1"
@@ -66,9 +67,7 @@ stringTypeConv "CFloat"  = Right "float"
 stringTypeConv "Double"  = Right "double"
 stringTypeConv "Bool"    = Right "bool"
 stringTypeConv "CBool"   = Right "bool"
-stringTypeConv x         = Right x
--- stringTypeConv "Vector"  = Right "list_vt"
--- stringTypeConv _         = unsupported "stringTypeConv"
+stringTypeConv _         = unsupported "stringTypeConv"
 
 toStringATS' :: QName a -> ErrM ATS.Type
 toStringATS' (QNamed _ _ s) = Named . Unqualified <$> stringTypeConv s
@@ -93,7 +92,6 @@ typeToType (TyApp _ t@TyApp{} t')             = over typeCallArgs <$> fmap (:) (
 typeToType (TyParen _ t)                      = typeToType t
 typeToType (TyBang _ _ _ t)                   = typeToType t
 typeToType (TyFun _ t t')                     = FunctionType "-<lincloptr1>" <$> typeToType t <*> typeToType t'
-typeToType (TyList _ t)                       = Dependent (Unqualified "List0_vt") <$> (pure <$> typeToType t)
 typeToType (TyTuple _ _ ts)                   = ATS.Tuple undefined <$> mapM typeToType ts
 typeToType _                                  = Left $ Unsupported "typeToType"
 
@@ -146,20 +144,15 @@ asATSType (DataDecl _ DataType{} _ dh [qcd] _) = ViewTypeDef undefined <$> (fst 
 asATSType (DataDecl _ DataType{} _ dh qcds _)  = SumViewType <$> (fst <$> asATSName dh) <*> (pruneATSNils . snd <$> asATSName dh) <*> mapM qualConDeclToLeaf (reverse qcds)
 asATSType _                                    = unsupported "asATSType"
 
--- TODO GDataDecl and DataFamDecl
+-- TODO GDataDecl
 isDataDecl :: Decl a -> Bool
 isDataDecl TypeDecl{} = True
 isDataDecl DataDecl{} = True
 isDataDecl _          = False
 
--- TODO imports
 filterModule :: Module a -> [Decl a]
 filterModule (Module _ _ _ _ ds) = filter isDataDecl ds
 filterModule _                   = []
-
--- #include "contrib/atscntrb-hx-intinf/mylibies.hats"
-
--- TODO @rights@ for stuff.
 
 modulePrint :: Module a -> (String, [GenerateError])
 modulePrint = g . fmap asATSType . filterModule
@@ -167,8 +160,14 @@ modulePrint = g . fmap asATSType . filterModule
 
 extends :: ParseMode
 extends = defaultParseMode
-    { extensions = [EnableExtension StandaloneDeriving, EnableExtension CPP, EnableExtension RecordWildCards, EnableExtension BangPatterns, EnableExtension ExplicitForAll]
+    { extensions = EnableExtension <$> es
     , fixities = Just baseFixities }
+    where es = [ StandaloneDeriving
+               , CPP
+               , RecordWildCards
+               , BangPatterns
+               , ExplicitForAll
+               ]
 
 -- | Given a string containing Haskell, return a string containing ATS and
 -- a list of warnings.

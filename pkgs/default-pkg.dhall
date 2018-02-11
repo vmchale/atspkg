@@ -1,6 +1,6 @@
-let dep =
+let dep = λ(x : List Integer) →
   { dir = ".atspkg/contrib"
-  , libVersion = [0,1,0]
+  , libVersion = x
     : List Integer
   , libDeps = []
     : List Text
