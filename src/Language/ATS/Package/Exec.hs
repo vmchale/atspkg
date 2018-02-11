@@ -18,6 +18,7 @@ import           Paths_ats_pkg
 import           System.Directory
 import           System.IO.Temp             (withSystemTempDirectory)
 
+-- TODO command to list available packages.
 wrapper :: ParserInfo Command
 wrapper = info (helper <*> versionInfo <*> command')
     (fullDesc
