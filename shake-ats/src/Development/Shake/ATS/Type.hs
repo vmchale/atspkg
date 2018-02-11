@@ -61,16 +61,16 @@ data CCompiler = GCC { _prefix :: Maybe String, _suffix :: Maybe String }
                | Clang
                | Other String
                | GHC { _prefix :: Maybe String, _suffix :: Maybe String }
-               deriving (Eq)
+               deriving (Eq, Generic, Binary)
 
 -- | Information about where to find @patscc@ and @patsopt@.
 data ATSToolConfig = ATSToolConfig { libVersion  :: Version
                                    , compilerVer :: Version
                                    , hasPretty   :: Bool -- ^ Whether to display errors via @pats-filter@
+                                   , cc          :: CCompiler -- ^ C compiler to be used
                                    } deriving (Generic, Binary)
 
-data BinaryTarget = BinaryTarget { cc         :: String -- ^ C compiler to be used.
-                                 , cFlags     :: [String] -- ^ Flags to be passed to the C compiler
+data BinaryTarget = BinaryTarget { cFlags     :: [String] -- ^ Flags to be passed to the C compiler
                                  , toolConfig :: ATSToolConfig
                                  , gc         :: Bool -- ^ Whether to configure build for use with the garbage collector.
                                  , libs       :: [String] -- ^ Libraries against which to link
@@ -78,7 +78,7 @@ data BinaryTarget = BinaryTarget { cc         :: String -- ^ C compiler to be us
                                  , hsLibs     :: [ForeignCabal] -- ^ Cabal-based Haskell libraries
                                  , genTargets :: [(String, String, Bool)] -- ^ Files to be run through @hs2ats@.
                                  , binTarget  :: String -- ^ Binary target
-                                 , cDeps      :: [String] -- ^ Any C files necessary to compile the target
+                                 , cDeps      :: [String] -- ^ Any other files necessary to compile the target
                                  } deriving (Generic, Binary)
 
 -- | Data type containing information about Haskell components of a build.

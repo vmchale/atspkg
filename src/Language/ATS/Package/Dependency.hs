@@ -33,15 +33,16 @@ fetchDeps :: CCompiler -- ^ C compiler to use
           -> [IO ()] -- ^ Setup steps that can be performed concurrently
           -> [String] -- ^ ATS dependencies
           -> [String] -- ^ C Dependencies
+          -> String -- ^ URL of package set to be used
           -> Bool -- ^ Whether to perform setup anyhow.
           -> IO ()
-fetchDeps cc' setup' deps cdeps b' =
+fetchDeps cc' setup' deps cdeps pkgSet b' =
     unless (null deps && null cdeps && b') $ do
-        deps' <- join <$> setBuildPlan "ats" deps
+        deps' <- join <$> setBuildPlan "ats" pkgSet deps
         putStrLn "Checking ATS dependencies..."
         d <- (<> "lib/") <$> pkgHome cc'
         let libs' = fmap (buildHelper False) deps'
-        cdeps' <- join <$> setBuildPlan "c" cdeps
+        cdeps' <- join <$> setBuildPlan "c" pkgSet cdeps
         let unpacked = fmap (over dirLens (TL.pack d <>)) cdeps'
             clibs = fmap (buildHelper False) unpacked
         parallel_ (setup' ++ libs' ++ clibs)
