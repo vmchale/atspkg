@@ -28,9 +28,8 @@ newtype ATSPackageSet = ATSPackageSet [ ATSDependency ]
 
 setBuildPlan :: FilePath -- ^ Filepath for cache inside @.atspkg@
              -> [String] -- ^ Libraries we want
-             -> Int -- ^ Depth of search when resolving dependencies
              -> IO [[ATSDependency]]
-setBuildPlan p deps n  = do
+setBuildPlan p deps = do
     b <- doesFileExist depCache
     bool setBuildPlan' (decode <$> BSL.readFile depCache) b
 
@@ -38,14 +37,14 @@ setBuildPlan p deps n  = do
           setBuildPlan' = do
             putStrLn "Resolving dependencies..."
             pkgSet <- input auto "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
-            case mkBuildPlan pkgSet n deps of
+            case mkBuildPlan pkgSet deps of
                 Right x -> createDirectoryIfMissing True ".atspkg" >> BSL.writeFile depCache (encode x) >> pure x
                 Left x  -> resolutionFailed x
 
-mkBuildPlan :: ATSPackageSet -> Int -> [String] -> DepM [[ATSDependency]]
-mkBuildPlan aps@(ATSPackageSet ps) n = finalize . resolve . fmap asDep <=< stringBuildPlan
+mkBuildPlan :: ATSPackageSet -> [String] -> DepM [[ATSDependency]]
+mkBuildPlan aps@(ATSPackageSet ps) = finalize . resolve . fmap asDep <=< stringBuildPlan
     where finalize = fmap (fmap (fmap (lookupVersions aps)))
-          resolve = resolveDependencies n (atsPkgsToPkgs aps)
+          resolve = resolveDependencies (atsPkgsToPkgs aps)
           stringBuildPlan names = sequence [ lookup' x libs | x <- names ]
               where libs = (TL.unpack . libName &&& id) <$> ps
                     lookup' k vs = case lookup k vs of

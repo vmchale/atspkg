@@ -37,11 +37,11 @@ fetchDeps :: CCompiler -- ^ C compiler to use
           -> IO ()
 fetchDeps cc' setup' deps cdeps b' =
     unless (null deps && null cdeps && b') $ do
-        deps' <- join <$> setBuildPlan "ats" deps 15
+        deps' <- join <$> setBuildPlan "ats" deps
         putStrLn "Checking ATS dependencies..."
         d <- (<> "lib/") <$> pkgHome cc'
         let libs' = fmap (buildHelper False) deps'
-        cdeps' <- join <$> setBuildPlan "c" cdeps 4
+        cdeps' <- join <$> setBuildPlan "c" cdeps
         let unpacked = fmap (over dirLens (TL.pack d <>)) cdeps'
             clibs = fmap (buildHelper False) unpacked
         parallel_ (setup' ++ libs' ++ clibs)
