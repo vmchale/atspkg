@@ -8,6 +8,6 @@ in λ(x : List Integer) →
   dep //
     { libName = "fast-arithmetic"
     , dir = ".atspkg/contrib/hspkg-fast-arthimetic"
-    , url = "https://hackage.haskell.org/package/fast-arithmetic-", showVersion x, "/fast-arithmetic-", showVersion x, ".tar.gz"
+    , url = concat ["https://hackage.haskell.org/package/fast-arithmetic-", showVersion x, "/fast-arithmetic-", showVersion x, ".tar.gz"]
     , libVersion = x
     }
