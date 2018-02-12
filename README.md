@@ -13,7 +13,7 @@ Things that `atspkg` will do for you:
   * Simplify distribution of your project
   * Enable Haskell builds that depend on ATS code
   * Enable ATS builds that depend on Haskell code
-  * Ensure reproducible builds by allowing pinning a compiler version
+  * Ensure reproducible builds via pinned compiler versions
   * Track all file dependencies
   * Make contributing to your projects easier
   * Run builds in parallel (like `make`)
@@ -27,7 +27,7 @@ Things that `atspkg` will not do for you:
   * Integrate with other ecosystems
   * Provide a centralized package repository
   * Library builds (this is planned)
-  * Offer a principled foundation for package builds
+  * Offer a common architecture for package builds
   * Cache builds locally (like `nix` or `cabal`)
 
 ### Example
@@ -75,7 +75,7 @@ Note that `$HOME/.local/bin` will need to be on your `PATH`.
 ## Global Configuration
 
 `atspkg` is configured via a file in `~/.config/atspkg/config.dhall`. You can
-use it to use a custom package set:
+set custom package set as follows:
 
 ```
 let cfg = 
