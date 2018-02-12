@@ -61,8 +61,8 @@ script:
     then
       export BINPATH="$(find . -name atspkg -perm 755 | tail -n1)"
     else
-    #cabal new-test
-    #cabal new-build --happy-options='-gcsa' --alex-options='-g'
+    # cabal new-build --happy-options='-gcsa' --alex-options='-g'
+    # cabal new-test
       export BINPATH="$(find -name atspkg -executable | tail -n4 | head -n1)"
     fi
   - echo $BINPATH
