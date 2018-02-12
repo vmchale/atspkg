@@ -32,11 +32,11 @@ Things that `atspkg` will not do for you:
 
 ### Example
 
-As an example, the following two lines will install `getkb`:
+As an example, the following two lines will install `polyglot`:
 
 ```bash
 curl -sSl https://raw.githubusercontent.com/vmchale/atspkg/master/bash/install.sh | bash -s
-atspkg remote https://github.com/vmchale/getkb/archive/master.zip
+atspkg remote https://github.com/vmchale/polyglot/archive/master.zip
 ```
 
 As you can see, this greatly simplifies distribution and testing of programs
