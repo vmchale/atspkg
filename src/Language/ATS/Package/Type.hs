@@ -55,6 +55,7 @@ data TargetPair = TargetPair { hs    :: Text
 
 deriving instance Interpret ForeignCabal
 
+
 data Bin = Bin { src      :: Text -- ^ Source file (should end with @.dats@)
                , target   :: Text -- ^ Binary to be built
                , libs     :: [Text] -- ^ Libraries to link against (e.g. @[ "pthread" ]@)
@@ -65,6 +66,15 @@ data Bin = Bin { src      :: Text -- ^ Source file (should end with @.dats@)
                , extras   :: [Text] -- ^ Extra source files the build depends on
                }
          deriving (Show, Eq, Generic, Interpret, Binary)
+
+-- data Lib = Lib { src      :: [Text] -- ^ Source files (should end with @.dats@) to be compiled to object files
+--                , target   :: Text
+--                , hsDeps   :: [ForeignCabal] -- ^ Haskell @.cabal@ files associated with object files
+--                , hs2ats   :: [TargetPair] -- ^ Sources and targets for @hs2ats@
+--                , cSources :: [Text] -- ^ C source files the build depends on
+--                , extras   :: [Text] -- ^ Other source files the build depends on
+--                }
+--          deriving (Show, Eq, Generic, Interpret, Binary)
 
 -- TODO make binaries optional
 -- | Data type associated with @atspkg.dhall@ file.
