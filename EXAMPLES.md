@@ -69,7 +69,7 @@ packaging the Haskell for distribution.
 
 ### Calling Haskell from ATS
 
-You can see a demo [here](https://github.com/vmchale/fast-arithmetic).
+You can see a demo [here](https://hub.darcs.net/vmchale/ats-storable/browse/dhall-ats).
 Currently, there is not generic `Storable` instance that works with ATS, so the
 process is a bit more involved than is ideal. `atspkg` has abilities similar to
 [hs2ats](http://hackage.haskell.org/package/hs2ats), which means that you can
