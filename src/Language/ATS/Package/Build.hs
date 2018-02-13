@@ -221,7 +221,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
 
     where g (Bin s t ls hs' atg gc' cSrc extra) =
             atsBin
-                (BinaryTarget (TL.unpack <$> cf) (ATSToolConfig v v' False (ccFromString cc')) gc' (TL.unpack <$> ls) (TL.unpack s) hs' (unpackBoth . asTuple <$> atg) (TL.unpack t) (TL.unpack <$> cSrc) (deps extra) (Binary False))
+                (BinaryTarget (TL.unpack <$> cf) (ATSToolConfig v v' False (ccFromString cc')) gc' (TL.unpack <$> ls) [TL.unpack s] hs' (unpackBoth . asTuple <$> atg) (TL.unpack t) (TL.unpack <$> cSrc) (deps extra) Executable)
 
           cDepsRules = unless (null as) $ do
             let cedar = TL.unpack cdir

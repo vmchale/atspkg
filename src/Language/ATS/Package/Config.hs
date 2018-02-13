@@ -18,8 +18,9 @@ import           Dhall
 import           System.Directory       (createDirectoryIfMissing)
 import           System.Environment     (getEnv)
 
-newtype UserConfig = UserConfig { defaultPkgs :: Text
-                                } deriving (Generic, Interpret, Binary)
+data UserConfig = UserConfig { defaultPkgs :: Text
+                             , path        :: Maybe Text
+                             } deriving (Generic, Interpret, Binary)
 
 cfgFile :: String
 cfgFile = $(embedStringFile "config.dhall")

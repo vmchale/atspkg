@@ -8,7 +8,6 @@ module Language.ATS.Package ( pkgToAction
                             , cleanAll
                             , upgradeAtsPkg
                             , fetchDeps
-                            , getCCompiler
                             , mkBuildPlan
                             , buildHelper
                             -- * Types
@@ -27,6 +26,5 @@ import           Language.ATS.Package.Build
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Dependency
 import           Language.ATS.Package.PackageSet
-import           Language.ATS.Package.Tools
 import           Language.ATS.Package.Type
 import           Language.ATS.Package.Upgrade
