@@ -99,6 +99,24 @@ in pkg //
 
 ### Writing Your Own Packages
 
-Have a look [here](https://github.com/vmchale/either/blob/master/pkg.dhall) for
+Have a look [here](https://github.com/vmchale/either) for
 an example package using some of the Dhall helper functions provided to manage
 versioning.
+
+The sample configuration file is:
+
+```dhall
+let dep = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default-pkg.dhall
+in
+let concat = https://ipfs.io/ipfs/QmQ8w5PLcsNz56dMvRtq54vbuPe9cNnCCUXAQp6xLc6Ccx/Prelude/Text/concat
+in
+let showVersion = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/dhall-version.dhall
+
+in λ(x : List Integer) → 
+  dep //
+    { libName = "either"
+    , dir = ".atspkg/contrib"
+    , url = concat ["https://github.com/vmchale/either/archive/", showVersion x, ".tar.gz"]
+    , libVersion = x
+}
+```
