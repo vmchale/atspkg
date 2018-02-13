@@ -96,3 +96,9 @@ in pkg //
     , cflags = ["-package-db", "hs/dist-newstyle/packagedb/ghc-8.2.2/", "-optc-O2", "-optc-flto", "-optc-mtune=native", "hs/Foreign"]
   }
 ```
+
+### Writing Your Own Packages
+
+Have a look [here](https://github.com/vmchale/either/blob/master/pkg.dhall) for
+an example package using some of the Dhall helper functions provided to manage
+versioning.

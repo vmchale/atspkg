@@ -30,3 +30,4 @@
 - [ ] User manual
 # Code Quality
 - [ ] Benchmark/test suite
+- [ ] Make a `Dhall` subdirectory for "library" functions
