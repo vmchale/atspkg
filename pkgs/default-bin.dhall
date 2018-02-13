@@ -6,6 +6,7 @@ let bin =
   , hs2ats = ([] : List { hs : Text, ats : Text, cpphs : Bool })
   , gcBin = False
   , cSources = ([] : List Text)
+  , extras = ([] : List Text)
   }
 
 in bin

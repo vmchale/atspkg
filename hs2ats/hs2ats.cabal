@@ -26,8 +26,7 @@ library
   build-depends:       base >= 4.7 && < 5
                      , haskell-src-exts
                      , language-ats
-                     , text
-                     , cases
+                     , casing
                      , lens
                      , optparse-generic
                      , ansi-wl-pprint

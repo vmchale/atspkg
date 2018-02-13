@@ -62,6 +62,7 @@ data Bin = Bin { src      :: Text -- ^ Source file (should end with @.dats@)
                , hs2ats   :: [TargetPair] -- ^ List of sources and targets for @hs2ats@
                , gcBin    :: Bool -- ^ Whether to use the garbage collector
                , cSources :: [Text] -- ^ C source files the build depends on
+               , extras   :: [Text] -- ^ Extra source files the build depends on
                }
          deriving (Show, Eq, Generic, Interpret, Binary)
 
