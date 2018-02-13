@@ -90,5 +90,28 @@ concatenate custom package sets with the above.
 
 ## Examples
 
+### Quick Start
+
+Install [pi](http://github.com/vmchale/project-init) with
+
+```
+curl -LSfs https://japaric.github.io/trust/install.sh | sh -s -- --git vmchale/project-init
+```
+
+Initialize an ATS project with
+
+```
+pi new ats project
+```
+
+Then build & run it:
+
+```
+cd project
+atspkg run
+```
+
+### Further Documentation
+
 You can find several examples with explanation
 [here](https://github.com/vmchale/atspkg/blob/master/EXAMPLES.md)
