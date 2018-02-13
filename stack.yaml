@@ -6,9 +6,9 @@ packages:
   - 'shake-ats'
   - 'hs2ats'
 extra-deps:
-  - shake-ext-2.3.0.0
+  - shake-ext-2.3.0.1
   - composition-prelude-1.1.0.2
-  - language-ats-0.3.0.0
+  - language-ats-0.3.0.1
   - cli-setup-0.2.0.1
   - ats-setup-0.3.0.2
   - hspec-dirstream-0.3.0.0
