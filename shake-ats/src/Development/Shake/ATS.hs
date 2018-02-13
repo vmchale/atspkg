@@ -20,6 +20,8 @@ module Development.Shake.ATS ( -- * Shake Rules
                              , ccToDir
                              , compatible
                              , host
+                             , patscc
+                             , patsopt
                              -- Types
                              , Version (..)
                              , ForeignCabal (..)
@@ -37,34 +39,35 @@ import           Data.List                         (intercalate)
 import           Data.Maybe                        (fromMaybe)
 import           Data.Semigroup                    (Semigroup (..))
 import qualified Data.Text.Lazy                    as TL
-import           Development.Shake
+import           Development.Shake                 hiding (doesFileExist)
 import           Development.Shake.ATS.Environment
 import           Development.Shake.ATS.Rules
 import           Development.Shake.ATS.Type
+import           Development.Shake.C
 import           Development.Shake.FilePath
 import           Development.Shake.Version
 import           Language.ATS
 import           Lens.Micro
-import           System.Directory                  (copyFile, createDirectoryIfMissing)
+import           System.Directory                  (copyFile, createDirectoryIfMissing, doesFileExist)
 import           System.Exit                       (ExitCode (ExitSuccess))
 
 -- | Whether generated libraries are to be considered compatible.
 compatible :: CCompiler -> CCompiler -> Bool
-compatible (GCC Nothing Nothing) Clang = True
-compatible Clang (GCC Nothing Nothing) = True
-compatible x y                         = x == y
+compatible GCCStd Clang = True
+compatible Clang GCCStd = True
+compatible x y          = x == y
 
--- | Run @patsopt@ given information about
+-- | Run @patsopt@ given information about various things
 atsCommand :: CmdResult r => ATSToolConfig
                           -> String -- ^ Source file
                           -> String -- ^ C code to be generated
                           -> Action r
 atsCommand tc sourceFile out = do
-    h <- patsHome (compilerVer tc)
-    let home = h ++ "lib/ats2-postiats-" ++ show (libVersion tc)
-        atsArgs = [EchoStderr False, AddEnv "PATSHOME" home]
-        patsc = home ++ "/bin/patsopt"
-    command atsArgs patsc ["--output", out, "-dd", sourceFile, "-cc"]
+    path <- fromMaybe "" <$> getEnv "PATH"
+    home' <- home tc
+    let env = patsEnv home' path
+    patsc <- patsopt tc
+    command env patsc ["--output", out, "-dd", sourceFile, "-cc"]
 
 gcFlag :: Bool -> String
 gcFlag False = "-DATS_MEMALLOC_LIBC"
@@ -76,26 +79,25 @@ copySources :: ATSToolConfig -> [FilePath] -> Action ()
 copySources (ATSToolConfig v v' _ _) sources =
     forM_ sources $ \dep -> do
         h <- patsHome v'
-        let home = h ++ "lib/ats2-postiats-" ++ show v
-        liftIO $ createDirectoryIfMissing True (home ++ "/" ++ takeDirectory dep)
-        liftIO $ copyFile dep (home ++ "/" ++ dep)
+        let home' = h ++ "lib/ats2-postiats-" ++ show v
+        liftIO $ createDirectoryIfMissing True (home' ++ "/" ++ takeDirectory dep)
+        liftIO $ copyFile dep (home' ++ "/" ++ dep)
 
 -- This is the @$PATSHOMELOCS@ variable to be passed to the shell.
 patsHomeLocs :: Int -> String
 patsHomeLocs n = intercalate ":" $ (<> ".atspkg/contrib") . ("./" <>) <$> g
     where g = [ join $ replicate i "../" | i <- [1..n] ]
 
--- TODO depend on GHC version?
 makeCFlags :: [String] -- ^ Inputs
            -> [ForeignCabal] -- ^ Haskell libraries
            -> String -- ^ GHC version
            -> Bool -- ^ Whether to use the Garbage collector
            -> [String]
-makeCFlags ss fc ghcV b = gcFlag' : (hsExtra <> ss) where
+makeCFlags ss fc ghcV' b = gcFlag' : (hsExtra <> ss) where
     gcFlag' = bool ("-optc" <>) id noHs $ gcFlag b
-    hsExtra = bool (["--make", "-odir", ".atspkg", "-no-hs-main", "-package-db", "~/.cabal/store/ghc-" ++ ghcV ++ "/package.db/"] ++ packageDbs) mempty noHs
+    hsExtra = bool (["--make", "-I.", "-odir", ".atspkg", "-no-hs-main", "-package-db", "~/.cabal/store/ghc-" ++ ghcV' ++ "/package.db/"] ++ packageDbs) mempty noHs
     noHs = null fc
-    packageDbs = (\x -> ["-package-db", x ++ "/dist-newstyle/packagedb/ghc-" ++ ghcV]) =<< libToDirs fc
+    packageDbs = (\x -> ["-package-db", x ++ "/dist-newstyle/packagedb/ghc-" ++ ghcV']) =<< libToDirs fc
 
 libToDirs :: [ForeignCabal] -> [String]
 libToDirs = fmap (takeDirectory . TL.unpack . h)
@@ -104,10 +106,54 @@ libToDirs = fmap (takeDirectory . TL.unpack . h)
 uncurry3 :: (a -> b -> c -> d) -> ((a, b, c) -> d)
 uncurry3 f (x, y, z) = f x y z
 
--- TODO libraries should be linked against *cross-compiled* versions!!
--- aka we need to compile atslib
+-- Change architecture to use C stuff better?
+-- Step 1: Use patsopt to generate C files
+-- Step 2: Use gcc to generate `.o` files
+-- Step 3: Generate library/binary from those files.
+
+-- | Location of @patscc@
+patscc :: MonadIO m => ATSToolConfig -> m String
+patscc = patsTool "patscc"
+
+-- | Location of @patsopt@
+patsopt :: MonadIO m => ATSToolConfig -> m String
+patsopt = patsTool "patsopt"
+
+patsTool :: MonadIO m => String -> ATSToolConfig -> m String
+patsTool tool tc = do
+    h <- patsHome (compilerVer tc)
+    pure $ h ++ "lib/ats2-postiats-" ++ show (libVersion tc) ++ "/bin/" ++ tool
+
+cconfig :: MonadIO m => ATSToolConfig -> [String] -> Bool -> [String] -> m CConfig
+cconfig tc libs gc extras = do
+    h <- patsHome (compilerVer tc)
+    let cc' = cc tc
+    h' <- pkgHome cc'
+    home' <- home tc
+    let libs' = ("atslib" :) $ bool libs ("gc" : libs) gc
+    pure $ CConfig [h ++ "ccomp/runtime/", h, h' ++ "include"] libs' [h' ++ "lib", home' ++ "/ccomp/atslib/lib"] extras
+
+home :: MonadIO m => ATSToolConfig -> m String
+home tc = do
+    h <- patsHome (compilerVer tc)
+    pure $ h ++ "lib/ats2-postiats-" ++ show (libVersion tc)
+
+patsEnv :: FilePath -> FilePath -> [CmdOption]
+patsEnv home' path = EchoStderr False :
+    zipWith AddEnv
+        ["PATSHOME", "PATH", "PATSHOMELOCS"]
+        [home', home' ++ "/bin:" ++ path, patsHomeLocs 5]
+
+atsToC :: FilePath -> FilePath
+atsToC = (-<.> "c") . (".atspkg/c/" <>)
+
+ghcV :: [ForeignCabal] -> Action String
+ghcV hsLibs = case hsLibs of
+    [] -> pure undefined
+    _  -> ghcVersion
+
 atsBin :: BinaryTarget -> Rules ()
-atsBin BinaryTarget{..} = do
+atsBin tgt@BinaryTarget{..} = do
 
     unless (null genTargets) $
         mapM_ (uncurry3 genATS) genTargets
@@ -115,33 +161,40 @@ atsBin BinaryTarget{..} = do
     unless (null hsLibs) $
         mapM_ cabalExport hsLibs
 
+    let cTargets = atsToC <$> src
+
+    foldr (>>) (pure ()) (atsCGen toolConfig tgt <$> src <*> cTargets)
+
     binTarget %> \_ -> do
-        h <- patsHome (compilerVer toolConfig)
-        let cc' = cc toolConfig
-        h' <- pkgHome cc'
-        let home = h ++ "lib/ats2-postiats-" ++ show (libVersion toolConfig)
+
+        need cTargets
+
+        ghcV' <- ghcV hsLibs
+
+        cconfig' <- cconfig toolConfig libs gc (makeCFlags cFlags hsLibs ghcV' gc)
+
+        let f Executable    = ccAction
+            f StaticLibrary = staticLibA
+
+        unit $ f tgtType (cc toolConfig) cTargets binTarget cconfig'
+
+atsCGen :: ATSToolConfig
+        -> BinaryTarget
+        -> FilePath -- ^ ATS source
+        -> FilePattern -- ^ Pattern for C file to be generated
+        -> Rules ()
+atsCGen tc BinaryTarget{..} atsSrc cFiles =
+    cFiles %> \out -> do
+
+        -- tell shake which files to track and copy them to the appropriate
+        -- directory
         need (otherDeps ++ (TL.unpack . objectFile <$> hsLibs))
-        sources <- (<> cDeps) <$> transitiveDeps ((^._2) <$> genTargets) [src]
+        sources <- (<> cDeps) <$> transitiveDeps ((^._2) <$> genTargets) [atsSrc]
         need sources
-        copySources toolConfig sources
+        copySources tc sources
 
-        let ccommand = unwords [ ccToString cc', "-I" ++ h ++ "ccomp/runtime/", "-I" ++ h, "-I" ++ h' ++ "include", "-L" ++  h' ++ "lib", "-L" ++ home ++ "/ccomp/atslib/lib"]
-        path <- fromMaybe "" <$> getEnv "PATH"
-        let toLibs = fmap ("-l" <>)
-        let libs' = ("atslib" :) $ bool libs ("gc" : libs) gc -- TODO make atslib a configuration option
-        ghcV <- case hsLibs of
-            [] -> pure undefined
-            _  -> ghcVersion
-        command_
-            [EchoStderr False, AddEnv "PATSHOME" home, AddEnv "PATH" (home ++ "/bin:" ++ path), AddEnv "PATSHOMELOCS" $ patsHomeLocs 5]
-            (home ++ "/bin/patscc")
-            (mconcat
-                [ [src, "-atsccomp", ccommand, "-o", binTarget, "-cleanaft"]
-                , makeCFlags cFlags hsLibs ghcV gc
-                , toLibs libs'
-                ])
+        atsCommand tc atsSrc out
 
--- given directory.
 cgen :: ATSToolConfig
      -> FilePath -- ^ Directory containing ATS source code
      -> Rules ()
@@ -162,13 +215,13 @@ handleSource tc sourceFile = do
 trim :: String -> String
 trim = init . drop 1
 
-transitiveDeps :: [FilePath] -> [FilePath] -> Action [FilePath]
+transitiveDeps :: (MonadIO m) => [FilePath] -> [FilePath] -> m [FilePath]
 transitiveDeps _ [] = pure []
 transitiveDeps gen ps = fmap join $ forM ps $ \p -> if p `elem` gen then pure mempty else do
     contents <- liftIO $ readFile p
     let ats = fromRight mempty . parse $ contents
     let dir = takeDirectory p
-    deps <- filterM (\f -> ((f `elem` gen) ||) <$> doesFileExist f) $ fixDir dir . trim <$> getDependencies ats
+    deps <- filterM (\f -> ((f `elem` gen) ||) <$> (liftIO . doesFileExist) f) $ fixDir dir . trim <$> getDependencies ats
     deps' <- transitiveDeps gen deps
     pure $ (p:deps) ++ deps'
 

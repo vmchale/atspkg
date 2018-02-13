@@ -1,30 +1,20 @@
-{-# LANGUAGE DeriveAnyClass  #-}
-{-# LANGUAGE DeriveGeneric   #-}
-{-# LANGUAGE PatternSynonyms #-}
-
-
--- gcc -c -o lib1.o lib1.c
--- gcc ats-src/libnumbertheory.o -shared -o ats-src/libnumbertheory.so
--- gcc number-theory-ffi_dats.c -c -fPIC -o ats-src/libnumbertheory.o -IATS2-Postiats-include-0.3.8/ -IATS2-Postiats-include-0.3.8/ccomp/runtime/
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+{-# LANGUAGE DeriveAnyClass     #-}
+{-# LANGUAGE DeriveGeneric      #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 module Development.Shake.ATS.Type ( ForeignCabal (..)
                                   , Version (..)
                                   , BinaryTarget (..)
                                   , ArtifactType (..)
                                   , ATSToolConfig (..)
-                                  , CCompiler (GCC, Clang, GHC, Other, GCCStd, GHCStd)
                                   ) where
 
-import           Data.Binary     (Binary (..))
-import           Data.Dependency (Version (..))
-import qualified Data.Text.Lazy  as TL
-import           GHC.Generics    (Generic)
-
-pattern GCCStd :: CCompiler
-pattern GCCStd = GCC Nothing Nothing
-
-pattern GHCStd :: CCompiler
-pattern GHCStd = GHC Nothing Nothing
+import           Data.Binary         (Binary (..))
+import           Data.Dependency     (Version (..))
+import qualified Data.Text.Lazy      as TL
+import           Development.Shake.C
+import           GHC.Generics        (Generic)
 
 -- We should have four build types:
 --
@@ -53,16 +43,12 @@ pattern GHCStd = GHC Nothing Nothing
 --
 -- * Also binary caches are good.
 
-data ArtifactType = StaticLibrary
-                  | DynamicLibrary
-                  | Binary Bool -- ^ Whether binary build should create a static binary
-                  deriving (Generic, Binary)
+deriving instance Generic CCompiler
+deriving instance Binary CCompiler
 
-data CCompiler = GCC { _prefix :: Maybe String, _suffix :: Maybe String }
-               | Clang
-               | Other String
-               | GHC { _prefix :: Maybe String, _suffix :: Maybe String }
-               deriving (Eq, Generic, Binary)
+data ArtifactType = StaticLibrary
+                  | Executable
+                  deriving (Generic, Binary)
 
 -- | Information about where to find @patscc@ and @patsopt@.
 data ATSToolConfig = ATSToolConfig { libVersion  :: Version
@@ -76,7 +62,7 @@ data BinaryTarget = BinaryTarget { cFlags     :: [String] -- ^ Flags to be passe
                                  , toolConfig :: ATSToolConfig
                                  , gc         :: Bool -- ^ Whether to configure build for use with the garbage collector.
                                  , libs       :: [String] -- ^ Libraries against which to link
-                                 , src        :: String -- ^ Source file for binary.
+                                 , src        :: [String] -- ^ ATS source files. If building an executable, at most one may contain @main0@.
                                  , hsLibs     :: [ForeignCabal] -- ^ Cabal-based Haskell libraries
                                  , genTargets :: [(String, String, Bool)] -- ^ Files to be run through @hs2ats@.
                                  , binTarget  :: String -- ^ Binary target

@@ -39,7 +39,6 @@ library
                      , Language.ATS.Package.Compiler
                      , Language.ATS.Package.Build
                      , Language.ATS.Package.Upgrade
-                     , Language.ATS.Package.Tools
                      , Language.ATS.Package.Config
                      , Language.ATS.Package.PackageSet
   build-depends:       base >= 4.7 && < 5
