@@ -85,6 +85,9 @@ let cfg =
 in cfg
 ```
 
+Package sets are simply sets of packages, so you can also use Dhall to
+concatenate custom package sets with the above.
+
 ## Examples
 
 You can find several examples with explanation
