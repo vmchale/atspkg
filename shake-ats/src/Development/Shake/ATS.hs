@@ -173,10 +173,10 @@ atsBin tgt@BinaryTarget{..} = do
 
         cconfig' <- cconfig toolConfig libs gc (makeCFlags cFlags hsLibs ghcV' gc)
 
-        let f Executable    = ccAction
-            f StaticLibrary = staticLibA
+        let g Executable    = ccAction
+            g StaticLibrary = staticLibA
 
-        unit $ f tgtType (cc toolConfig) cTargets binTarget cconfig'
+        unit $ g tgtType (cc toolConfig) cTargets binTarget cconfig'
 
 atsCGen :: ATSToolConfig
         -> BinaryTarget
