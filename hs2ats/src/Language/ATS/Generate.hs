@@ -12,20 +12,19 @@ module Language.ATS.Generate
     , ErrM
     ) where
 
-import           Cases                        (snakify)
 import           Control.Arrow
 import           Control.Lens                 (over, _head)
 import           Data.Bool                    (bool)
 import           Data.Char                    (toUpper)
 import           Data.Either                  (lefts, rights)
 import           Data.Maybe
-import qualified Data.Text                    as T
 import           Language.ATS                 as ATS
 import           Language.ATS.Generate.Error
 import           Language.Haskell.Exts
 import           Language.Haskell.Exts.Syntax as HS
 import           Language.Preprocessor.Cpphs  (defaultCpphsOptions, runCpphs)
 import           Options.Generic
+import           Text.Casing                  (quietSnake)
 
 data Program = Program { src    :: FilePath <?> "Haskell source file"
                        , target :: FilePath <?> "ATS target"
@@ -33,7 +32,7 @@ data Program = Program { src    :: FilePath <?> "Haskell source file"
                        } deriving (Generic, ParseRecord)
 
 convertConventions :: String -> String
-convertConventions = filterKeys . T.unpack . snakify . T.pack
+convertConventions = filterKeys . quietSnake
 
 pattern QNamed :: l -> l -> String -> QName l
 pattern QNamed x y s = UnQual x (Ident y s)
