@@ -232,7 +232,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
             mapM_ (cgen $ ATSToolConfig v v' hasPF (ccFromString cc')) atsSourceDirs
 
           cc' = maybe (TL.unpack ccLocal) (<> "-gcc") tgt
-          deps = (".atspkg/deps":) . ("atspkg/config":) . fmap TL.unpack
+          deps = (".atspkg/deps":) . (".atspkg/config":) . fmap TL.unpack
 
           unpackBoth :: (Text, Text, Bool) -> (String, String, Bool)
           unpackBoth = over _1 TL.unpack . over _2 TL.unpack
