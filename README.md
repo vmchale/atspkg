@@ -71,23 +71,6 @@ cabal new-install ats-pkg --symlink-bindir ~/.local/bin --happy-options='-gcsa' 
 
 Note that `$HOME/.local/bin` will need to be on your `PATH`.
 
-## Global Configuration
-
-`atspkg` is configured via a file in `~/.config/atspkg/config.dhall`. You can
-set custom package set as follows:
-
-```
-let cfg = 
-  { defaultPkgs = "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
-  , path = ([] : Optional Text)
-  }
-
-in cfg
-```
-
-Package sets are simply sets of packages, so you can also use Dhall to
-concatenate custom package sets with the above.
-
 ## Examples
 
 ### Quick Start
@@ -115,3 +98,20 @@ atspkg run
 
 You can find several examples with explanation
 [here](https://github.com/vmchale/atspkg/blob/master/EXAMPLES.md)
+
+## Global Configuration
+
+`atspkg` is configured via a file in `~/.config/atspkg/config.dhall`. You can
+set custom package set as follows:
+
+```
+let cfg = 
+  { defaultPkgs = "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
+  , path = ([] : Optional Text)
+  }
+
+in cfg
+```
+
+Package sets are simply sets of packages, so you can also use Dhall to
+concatenate custom package sets with the above.
