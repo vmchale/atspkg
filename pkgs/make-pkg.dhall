@@ -4,7 +4,7 @@ let concat = https://ipfs.io/ipfs/QmQ8w5PLcsNz56dMvRtq54vbuPe9cNnCCUXAQp6xLc6Ccx
 in
 let showVersion = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/dhall-version.dhall
 
-in λ(x : List Integer, name : Text, githubUsername : Text) → 
+in λ({ x : List Integer, name : Text, githubUsername : Text }) → 
   dep //
     { libName = name
     , dir = ".atspkg/contrib"
