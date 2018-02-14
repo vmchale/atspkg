@@ -229,7 +229,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
                 targets = fmap (((cedar <> "/") <>) . (-<.> "c") . takeBaseName . TL.unpack) as
             want targets
             hasPF <- patsFilter
-            mapM_ (cgen $ ATSToolConfig v v' hasPF (ccFromString cc')) atsSourceDirs
+            mapM_ (cgen (ATSToolConfig v v' hasPF (ccFromString cc')) [".atspkg/deps", ".atspkg/config"]) atsSourceDirs
 
           cc' = maybe (TL.unpack ccLocal) (<> "-gcc") tgt
           deps = (".atspkg/deps":) . (".atspkg/config":) . fmap TL.unpack
