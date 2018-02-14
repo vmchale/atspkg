@@ -1,5 +1,5 @@
 name:                dependency
-version:             0.1.0.5
+version:             0.1.0.6
 synopsis:            Dependency resolution for package management
 description:         A library for resolving dependencies; uses a topological sort to construct a build plan and then allows choice between all compatible plans.
 license:             BSD3

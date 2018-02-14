@@ -37,5 +37,5 @@ main :: IO ()
 main =
     defaultMain [ bgroup "resolveDependencies"
                       [ bench "3" $ nf (resolveDependencies set) [lens]
-                      , bench "3" $ nf (resolveDependencies set) [lens, microlens, bifunctors] ]
+                      , bench "6" $ nf (resolveDependencies set) [lens, microlens, bifunctors] ]
                 ]
