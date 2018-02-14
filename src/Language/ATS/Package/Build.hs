@@ -11,36 +11,25 @@ module Language.ATS.Package.Build ( mkPkg
                                   , check
                                   ) where
 
-import           Control.Composition
 import           Control.Concurrent.ParallelIO.Global
-import           Control.Lens
-import           Control.Monad.IO.Class               (MonadIO)
-import           Data.Binary                          (decode, encode)
 import qualified Data.ByteString                      as BS
 import qualified Data.ByteString.Lazy                 as BSL
 import           Data.List                            (nub)
-import           Data.Maybe                           (fromMaybe)
-import           Data.Semigroup                       (Semigroup (..))
-import qualified Data.Text.Lazy                       as TL
 import           Data.Version                         hiding (Version (..))
-import           Development.Shake                    hiding (doesFileExist)
 import           Development.Shake.ATS
 import           Development.Shake.Check
 import           Development.Shake.Clean
-import           Development.Shake.FilePath
 import           Development.Shake.Man
-import           Dhall                                hiding (bool, maybe)
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Config
 import           Language.ATS.Package.Dependency
 import           Language.ATS.Package.Type            hiding (version)
 import           Paths_ats_pkg
-import           System.Directory                     (doesFileExist, getCurrentDirectory)
-import qualified System.Environment                   as SE
+import           Quaalude
 
 check :: Maybe FilePath -> IO Bool
 check p = do
-    home <- SE.getEnv "HOME"
+    home <- getEnv "HOME"
     v <- wants p
     doesFileExist (home ++ "/.atspkg/" ++ show v ++ "/bin/patscc")
 
@@ -70,9 +59,9 @@ mkInstall :: Rules ()
 mkInstall =
     "install" ~> do
         config <- getConfig Nothing
-        bins <- fmap (TL.unpack . target) . bin <$> getConfig Nothing
+        bins <- fmap (unpack . target) . bin <$> getConfig Nothing
         need bins
-        home <- fromMaybe "" <$> getEnv "HOME"
+        home <- liftIO $ getEnv "HOME"
         let binDest = ((home <> "/.local/bin/") <>) . takeBaseName <$> bins
         void $ zipWithM copyFile' bins binDest
         pa <- pandoc
@@ -101,17 +90,17 @@ getConfig dir' = liftIO $ do
     d <- fromMaybe <$> fmap (<> "/atspkg.dhall") getCurrentDirectory <*> pure dir'
     b <- not <$> doesFileExist ".atspkg/config"
     if b
-        then input auto (TL.pack d)
+        then input auto (pack d)
         else fmap (decode . BSL.fromStrict) . BS.readFile $ ".atspkg/config"
 
 manTarget :: Text -> FilePath
-manTarget m = TL.unpack m -<.> "1"
+manTarget m = unpack m -<.> "1"
 
 mkPhony :: String -> (String -> String) -> (Pkg -> [Bin]) -> [String] -> Rules ()
 mkPhony cmdStr f select rs =
     cmdStr ~> do
         config <- getConfig Nothing
-        let runs = bool (filter (/= cmdStr) rs) (fmap (TL.unpack . target) . select $ config) (rs == [cmdStr])
+        let runs = bool (filter (/= cmdStr) rs) (fmap (unpack . target) . select $ config) (rs == [cmdStr])
         need runs
         mapM_ cmd_ (f <$> runs)
 
@@ -184,7 +173,7 @@ bits rs = mconcat $ [ mkManpage, mkInstall, mkConfig ] <>
     sequence [ mkRun, mkTest, mkValgrind ] rs
 
 pkgToTargets :: Pkg -> [FilePath] -> [FilePath]
-pkgToTargets ~Pkg{..} [] = TL.unpack . target <$> bin
+pkgToTargets ~Pkg{..} [] = unpack . target <$> bin
 pkgToTargets _ ts        = ts
 
 -- CROSS-COMPILING atslib:
@@ -209,10 +198,10 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
         ".atspkg/deps" %> \out -> do
             (_, cfgBin') <- cfgBin
             need [ cfgBin' ]
-            liftIO $ fetchDeps (ccFromString cc') setup (TL.unpack <$> ds) (TL.unpack <$> cdps) cfgBin' False >> stopGlobalPool
+            liftIO $ fetchDeps (ccFromString cc') setup (unpack <$> ds) (unpack <$> cdps) cfgBin' False >> stopGlobalPool
             liftIO $ writeFile out ""
 
-        let bins = TL.unpack . target <$> bs
+        let bins = unpack . target <$> bs
         setTargets rs bins mt
 
         cDepsRules >> bits rs
@@ -221,18 +210,18 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
 
     where g (Bin s t ls hs' atg gc' cSrc extra) =
             atsBin
-                (BinaryTarget (TL.unpack <$> cf) (ATSToolConfig v v' False (ccFromString cc')) gc' (TL.unpack <$> ls) [TL.unpack s] hs' (unpackBoth . asTuple <$> atg) (TL.unpack t) (TL.unpack <$> cSrc) (deps extra) Executable)
+                (BinaryTarget (unpack <$> cf) (ATSToolConfig v v' False (ccFromString cc')) gc' (unpack <$> ls) [unpack s] hs' (unpackBoth . asTuple <$> atg) (unpack t) (unpack <$> cSrc) (deps extra) Executable)
 
           cDepsRules = unless (null as) $ do
-            let cedar = TL.unpack cdir
-                atsSourceDirs = nub (takeDirectory . TL.unpack <$> as)
-                targets = fmap (((cedar <> "/") <>) . (-<.> "c") . takeBaseName . TL.unpack) as
+            let cedar = unpack cdir
+                atsSourceDirs = nub (takeDirectory . unpack <$> as)
+                targets = fmap (((cedar <> "/") <>) . (-<.> "c") . takeBaseName . unpack) as
             want targets
             hasPF <- patsFilter
             mapM_ (cgen (ATSToolConfig v v' hasPF (ccFromString cc')) [".atspkg/deps", ".atspkg/config"]) atsSourceDirs
 
-          cc' = maybe (TL.unpack ccLocal) (<> "-gcc") tgt
-          deps = (".atspkg/deps":) . (".atspkg/config":) . fmap TL.unpack
+          cc' = maybe (unpack ccLocal) (<> "-gcc") tgt
+          deps = (".atspkg/deps":) . (".atspkg/config":) . fmap unpack
 
           unpackBoth :: (Text, Text, Bool) -> (String, String, Bool)
-          unpackBoth = over _1 TL.unpack . over _2 TL.unpack
+          unpackBoth = over _1 unpack . over _2 unpack

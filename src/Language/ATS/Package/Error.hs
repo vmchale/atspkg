@@ -6,10 +6,8 @@ module Language.ATS.Package.Error ( -- * Helper functions
                                   ) where
 
 import           Data.Dependency
+import           Quaalude
 import           System.Exit
-import           Text.PrettyPrint.ANSI.Leijen
-
-infixr 5 <#>
 
 unrecognized :: String -> IO a
 unrecognized = printErr . Unrecognized
@@ -19,9 +17,6 @@ resolutionFailed = printErr . DepErr
 
 data PackageError = Unrecognized String
                   | DepErr ResolveError
-
-(<#>) :: Doc -> Doc -> Doc
-(<#>) a b = a <> line <> b
 
 instance Pretty PackageError where
     pretty (Unrecognized t) = red "Error:" <+> "Unrecognized archive format when unpacking" <#> hang 2 (text t)

@@ -21,11 +21,9 @@ module Language.ATS.Package.Type ( -- * Types
                                  , dirLens
                                  ) where
 
-import           Control.Lens
-import           Data.Binary           (Binary (..))
 import           Data.Dependency
 import           Development.Shake.ATS
-import           Dhall
+import           Quaalude
 
 data ATSConstraint = ATSConstraint { pkgName :: Text
                                    , lower   :: Maybe Version

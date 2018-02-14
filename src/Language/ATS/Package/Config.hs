@@ -7,16 +7,10 @@ module Language.ATS.Package.Config ( UserConfig (..)
                                    , cfgBin
                                    ) where
 
-import           Control.Arrow
-import           Control.Monad.IO.Class
-import           Data.Binary
-import qualified Data.ByteString.Lazy   as BSL
+import qualified Data.ByteString.Lazy as BSL
 import           Data.FileEmbed
-import qualified Data.Text.Lazy         as TL
-import           Development.Shake      hiding (getEnv)
-import           Dhall
-import           System.Directory       (createDirectoryIfMissing)
-import           System.Environment     (getEnv)
+import qualified Data.Text.Lazy       as TL
+import           Quaalude
 
 data UserConfig = UserConfig { defaultPkgs    :: Text
                              , path           :: Maybe Text

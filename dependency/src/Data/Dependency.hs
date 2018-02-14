@@ -12,7 +12,7 @@ module Data.Dependency
     , Constraint (..)
     ) where
 
-import           Control.Composition
+import           Control.Monad
 import           Data.Dependency.Error
 import           Data.Dependency.Sort
 import           Data.Dependency.Type

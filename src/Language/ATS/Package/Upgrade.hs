@@ -5,16 +5,8 @@ module Language.ATS.Package.Upgrade ( upgradeAtsPkg
 
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import           Data.Char                  (isDigit)
-import           Data.List                  (intersperse)
-import           Data.Maybe                 (fromMaybe)
-import           Data.Semigroup
-import           Development.Shake.FilePath
-import           Network.HTTP.Client
-import           Network.HTTP.Client.TLS    (tlsManagerSettings)
-import           System.Directory           (createDirectoryIfMissing, renameFile)
-import           System.Environment
+import           Quaalude
 import           System.Info
-import           System.Posix.Files
 
 -- https://github.com/vmchale/atspkg/archive/master.zip
 manufacturer :: String
@@ -28,7 +20,7 @@ targetArch = g [arch, manufacturer, os]
 
 atspkgPath :: IO String
 atspkgPath = do
-    home <- fromMaybe "." <$> lookupEnv "HOME"
+    home <- getEnv "HOME"
     pure $ home <> "/.local/bin/atspkg"
 
 -- TODO install `pi`?

@@ -2,7 +2,6 @@
 
 module Language.ATS.Package.Exec ( exec
                                  ) where
-
 import           Control.Composition
 import           Control.Lens               hiding (argument)
 import           Data.Bool                  (bool)
@@ -43,6 +42,7 @@ data Command = Install
              | Upgrade
              | Valgrind { _targets :: [String] }
              | Run { _targets :: [String] }
+             | Check { _filePath :: String, _details :: Bool }
 
 command' :: Parser Command
 command' = hsubparser
@@ -55,7 +55,22 @@ command' = hsubparser
     <> command "upgrade" (info (pure Upgrade) (progDesc "Upgrade to the latest version of atspkg"))
     <> command "valgrind" (info valgrind (progDesc "Run generated binaries through valgrind"))
     <> command "run" (info run' (progDesc "Run generated binaries"))
+    <> command "check" (info check' (progDesc "Check pkg.dhall file to ensure it is well-typed."))
     )
+
+check' :: Parser Command
+check' = Check
+    <$> targetP dhallCompletions id "check"
+    <*> switch
+    (long "detailed"
+    <> short 'd'
+    <> help "Enable detailed error messages")
+
+ftypeCompletions :: String -> Mod ArgumentFields a
+ftypeCompletions ext = completer . bashCompleter $ "file -X '!*." ++ ext ++ "' -o plusdirs"
+
+dhallCompletions :: Mod ArgumentFields a
+dhallCompletions = ftypeCompletions "dhall"
 
 run' :: Parser Command
 run' = Run <$> targets "run"
@@ -67,10 +82,14 @@ valgrind :: Parser Command
 valgrind = Valgrind <$> targets "run with valgrind"
 
 targets :: String -> Parser [String]
-targets s = many
+targets = targetP mempty many
+
+targetP :: Mod ArgumentFields String -> (Parser String -> a) -> String -> a
+targetP completions f s = f
     (argument str
     (metavar "TARGET"
-    <> help ("Targets to " <> s)))
+    <> help ("Targets to " <> s)
+    <> completions))
 
 build' :: Parser Command
 build' = Build
@@ -124,6 +143,7 @@ runHelper rb rba lint rs tgt v = bool
     =<< check Nothing
 
 run :: Command -> IO ()
+run (Check p b) = print =<< checkPkg p b
 run Upgrade = upgradeAtsPkg
 run Nuke = cleanAll
 run (Fetch u) = fetchPkg u

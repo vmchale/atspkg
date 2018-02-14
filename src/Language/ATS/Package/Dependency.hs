@@ -11,25 +11,14 @@ import qualified Codec.Compression.BZip               as Bzip
 import qualified Codec.Compression.GZip               as Gzip
 import qualified Codec.Compression.Lzma               as Lzma
 import           Control.Concurrent.ParallelIO.Global
-import           Control.Lens
-import           Control.Monad
-import           Data.Binary                          (decode)
-import           Data.ByteString.Lazy                 (ByteString)
 import qualified Data.ByteString.Lazy                 as BSL
-import           Data.Maybe                           (fromMaybe)
-import           Data.Semigroup                       (Semigroup (..))
 import qualified Data.Text.Lazy                       as TL
 import           Development.Shake.ATS
-import           Dhall
 import           Language.ATS.Package.Config
 import           Language.ATS.Package.Error
 import           Language.ATS.Package.PackageSet
 import           Language.ATS.Package.Type
-import           Network.HTTP.Client                  hiding (host)
-import           Network.HTTP.Client.TLS              (tlsManagerSettings)
-import           System.Directory
-import           System.Environment                   (getEnv)
-import           System.Posix.Files
+import           Quaalude
 import           System.Process
 
 fetchDeps :: CCompiler -- ^ C compiler to use
@@ -41,13 +30,13 @@ fetchDeps :: CCompiler -- ^ C compiler to use
           -> IO ()
 fetchDeps cc' setup' deps cdeps cfgPath b' =
     unless (null deps && null cdeps && b') $ do
-        pkgSet <- TL.unpack . defaultPkgs . decode <$> BSL.readFile cfgPath
+        pkgSet <- unpack . defaultPkgs . decode <$> BSL.readFile cfgPath
         deps' <- join <$> setBuildPlan "ats" pkgSet deps
         putStrLn "Checking ATS dependencies..."
         d <- (<> "lib/") <$> pkgHome cc'
         let libs' = fmap (buildHelper False) deps'
         cdeps' <- join <$> setBuildPlan "c" pkgSet cdeps
-        let unpacked = fmap (over dirLens (TL.pack d <>)) cdeps'
+        let unpacked = fmap (over dirLens (pack d <>)) cdeps'
             clibs = fmap (buildHelper False) unpacked
         parallel_ (setup' ++ libs' ++ clibs)
         mapM_ (setup cc') unpacked
@@ -86,10 +75,10 @@ setup :: CCompiler -- ^ C compiler to use
       -> ATSDependency -- ^ ATSDependency itself
       -> IO ()
 setup cc' (ATSDependency lib' dirName' _ _ _) = do
-    lib'' <- (<> TL.unpack lib') <$> pkgHome cc'
+    lib'' <- (<> unpack lib') <$> pkgHome cc'
     b <- doesFileExist lib''
     unless b $ do
-        clibSetup cc' (TL.unpack lib') (TL.unpack dirName')
+        clibSetup cc' (unpack lib') (unpack dirName')
         writeFile lib'' ""
 
 getCompressor :: Text -> IO (ByteString -> ByteString)
@@ -98,7 +87,7 @@ getCompressor s
     | ".tar" `TL.isSuffixOf` s = pure id
     | ".tar.xz" `TL.isSuffixOf` s = pure Lzma.decompress
     | ".tar.bz2" `TL.isSuffixOf` s = pure Bzip.decompress
-    | otherwise = unrecognized (TL.unpack s)
+    | otherwise = unrecognized (unpack s)
 
 tarResponse :: Text -> FilePath -> ByteString -> IO ()
 tarResponse url' dirName response = do
@@ -114,7 +103,7 @@ zipResponse dirName response = do
 buildHelper :: Bool -> ATSDependency -> IO ()
 buildHelper b (ATSDependency lib' dirName' url'' _ _) = do
 
-    let (lib, dirName, url') = (lib', dirName', url'') & each %~ TL.unpack
+    let (lib, dirName, url') = (lib', dirName', url'') & each %~ unpack
 
     needsSetup <- not <$> doesDirectoryExist (dirName ++ if b then "/atspkg.dhall" else "")
 
