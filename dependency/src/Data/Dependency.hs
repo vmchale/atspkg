@@ -52,8 +52,7 @@ saturateDeps ps = resolve <=< saturateDeps' ps
 
 saturateDeps' :: PackageSet Dependency -> Dependency -> DepM (S.Set Dependency)
 saturateDeps' (PackageSet ps) dep = do
-    let libDeps = _libDependencies dep
-    deps <- sequence [ lookupMap lib ps | lib <- libDeps ]
+    deps <- sequence [ lookupMap lib ps | lib <- _libDependencies dep ]
     list <- (:) dep <$> traverse lookupSet deps
     pure $ S.fromList list
 
@@ -67,7 +66,7 @@ saturateDeps' (PackageSet ps) dep = do
 --
 -- 4. Specify an error for overconstrained builds
 --
--- 5. Specify an error if a package is not present.
+-- 5. Specify an error if a package is not present
 --
 -- This doesn't do any package resolution beyond versioning.
 resolveDependencies :: PackageSet Dependency -> [Dependency] -> DepM [[Dependency]]
