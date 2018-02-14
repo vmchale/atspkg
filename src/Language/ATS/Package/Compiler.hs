@@ -7,11 +7,9 @@ module Language.ATS.Package.Compiler
     , setupCompiler
     ) where
 
-import           Control.Monad
 import           Data.Dependency
-import qualified Distribution.ATS   as X
-import           System.Directory
-import           System.Environment (getEnv)
+import qualified Distribution.ATS as X
+import           Quaalude
 
 cleanAll :: IO ()
 cleanAll = do

@@ -1,5 +1,5 @@
 name:                ats-pkg
-version:             2.4.0.5
+version:             2.4.0.6
 synopsis:            A build tool for ATS
 description:         A collection of scripts to simplify building ATS projects.
 homepage:            https://github.com/vmchale/atspkg#readme
@@ -41,6 +41,8 @@ library
                      , Language.ATS.Package.Upgrade
                      , Language.ATS.Package.Config
                      , Language.ATS.Package.PackageSet
+                     , Language.ATS.Package.Dhall
+                     , Quaalude
   build-depends:       base >= 4.7 && < 5
                      , http-client
                      , bytestring
@@ -70,8 +72,7 @@ library
                      , binary
                      , dependency
                      , ats-setup
-                     -- , lzma
-                     -- , bzlib
+  build-tools:         cpphs
   default-language:    Haskell2010
   if flag(development)
     ghc-options: -Werror

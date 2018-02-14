@@ -10,6 +10,7 @@ module Language.ATS.Package ( pkgToAction
                             , fetchDeps
                             , mkBuildPlan
                             , buildHelper
+                            , checkPkg
                             -- * Types
                             , Version (..)
                             , Pkg (..)
@@ -25,6 +26,7 @@ module Language.ATS.Package ( pkgToAction
 import           Language.ATS.Package.Build
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Dependency
+import           Language.ATS.Package.Dhall
 import           Language.ATS.Package.PackageSet
 import           Language.ATS.Package.Type
 import           Language.ATS.Package.Upgrade
