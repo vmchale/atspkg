@@ -196,11 +196,13 @@ atsCGen tc BinaryTarget{..} atsSrc cFiles =
         atsCommand tc atsSrc out
 
 cgen :: ATSToolConfig
+     -> [String] -- ^ Additional source files
      -> FilePath -- ^ Directory containing ATS source code
      -> Rules ()
-cgen tc dir =
+cgen tc extras dir =
 
     "//*.c" %> \out -> do
+        need extras
         let sourceFile = dir ++ "/" ++ (takeBaseName out -<.> "dats")
         handleSource tc sourceFile
         atsCommand tc sourceFile out
