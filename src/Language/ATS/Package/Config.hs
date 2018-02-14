@@ -18,8 +18,9 @@ import           Dhall
 import           System.Directory       (createDirectoryIfMissing)
 import           System.Environment     (getEnv)
 
-data UserConfig = UserConfig { defaultPkgs :: Text
-                             , path        :: Maybe Text
+data UserConfig = UserConfig { defaultPkgs    :: Text
+                             , path           :: Maybe Text
+                             , githubUsername :: Text
                              } deriving (Generic, Interpret, Binary)
 
 cfgFile :: String

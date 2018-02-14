@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP                        #-}
 {-# LANGUAGE DeriveAnyClass             #-}
 {-# LANGUAGE DeriveFoldable             #-}
 {-# LANGUAGE DeriveFunctor              #-}
@@ -25,7 +26,9 @@ import           Data.Functor.Foldable
 import           Data.Functor.Foldable.TH
 import           Data.List                    (intercalate)
 import qualified Data.Map                     as M
+#if __GLASGOW_HASKELL__ < 804
 import           Data.Semigroup
+#endif
 import qualified Data.Set                     as S
 import           GHC.Generics                 (Generic)
 import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>))
