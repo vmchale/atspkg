@@ -40,25 +40,14 @@ buildSequence :: [Dependency] -> [[Dependency]]
 buildSequence = reverse . groupBy independent . sortDeps
     where independent (Dependency ln _ ls _) (Dependency ln' _ ls' _) = ln' `notElem` ls && ln `notElem` ls'
 
-dock :: (Eq a, Ord a) => [S.Set a] -> S.Set a
-dock [x] = x
-dock []  = S.fromList []
-dock (x:ys@(y:_))
-     | x == y = y
-     | otherwise = dock ys
-
 iterateM :: (Monad m) => Int -> (a -> m a) -> a -> m [a]
 iterateM 0 _ _ = pure []
 iterateM n f x = (x:) <$> (iterateM (n-1) f =<< f x)
 
--- FIXME saturate everything at once.
-saturateDeps :: PackageSet Dependency -> Dependency -> DepM [Dependency]
-saturateDeps ps = fmap toList . resolve <=< saturateDeps' ps
-    where resolve :: S.Set Dependency -> DepM (S.Set Dependency)
-          resolve set = dock <$> iterateM n next set
-          next :: S.Set Dependency -> DepM (S.Set Dependency)
+saturateDeps :: PackageSet Dependency -> Dependency -> DepM (S.Set Dependency)
+saturateDeps ps = resolve <=< saturateDeps' ps
+    where resolve set = last <$> iterateM n next set
           next depSet = S.unions <$> sequence (saturateDeps' ps <$> toList depSet)
-          n :: Int
           n = length (toList ps)
 
 saturateDeps' :: PackageSet Dependency -> Dependency -> DepM (S.Set Dependency)
@@ -82,7 +71,7 @@ saturateDeps' (PackageSet ps) dep = do
 --
 -- This doesn't do any package resolution beyond versioning.
 resolveDependencies :: PackageSet Dependency -> [Dependency] -> DepM [[Dependency]]
-resolveDependencies ps = select . getLatest <=< fmap buildSequence . saturated
+resolveDependencies ps = select . getLatest <=< fmap (buildSequence . toList) . saturated
     where select = fmap (fmap (fmap snd))
-          saturated dep = join <$> traverse (saturateDeps ps) dep
+          saturated dep = S.unions <$> traverse (saturateDeps ps) dep
           getLatest = traverse (traverse (latest ps))

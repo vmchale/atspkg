@@ -35,10 +35,7 @@ set = PackageSet $ M.fromList (mapSingles [("lens", lens), ("comonad", comonad),
 
 main :: IO ()
 main =
-    defaultMain [ bgroup "buildSequence"
-                      [ bench "3" $ nf buildSequence deps
-                      , bench "6" $ nf buildSequence (bifunctors : microlens : deps)
-                      ]
-                , bgroup "resolveDependencies"
-                      [ bench "3" $ nf (resolveDependencies set) [lens] ]
+    defaultMain [ bgroup "resolveDependencies"
+                      [ bench "3" $ nf (resolveDependencies set) [lens]
+                      , bench "3" $ nf (resolveDependencies set) [lens, microlens, bifunctors] ]
                 ]
