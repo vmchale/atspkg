@@ -1,11 +1,11 @@
-## Examples
+# Examples
 
 `atspkg` is configured with
 [Dhall](https://hackage.haskell.org/package/dhall/docs/Dhall-Tutorial.html). You
 may wish to read the Dhall tutorial first, but you do not need to fully
 understand everything to get started.
 
-### Project Templates
+## Project Templates
 
 You can use [pi](https://github.com/vmchale/project-init) with the builtin `ats`
 template as follows:
@@ -24,7 +24,18 @@ pi git vmchale/haskell-ats ambitious-project
 
 which can be built with `atspkg build` followed by `cabal new-build`.
 
-### Building a Binary Package
+### Other Templates
+
+  * ATS project calling Haskell:
+    [ats-haskell](https://github.com/vmchale/ats-haskell)
+
+## Samples
+
+  * Executable project: [polyglot](https://github.com/vmchale/polyglot)
+  * Library and test suite: [either](http://github.com/vmchale/either)
+  * ATS calling Haskell: [dhall-ats](https://github.com/vmchale/dhall-ats)
+
+## Building a Binary Package
 
 The minimal configuration for a package with a binary target is as follows:
 
@@ -46,7 +57,7 @@ in pkg //
 You need only specify the source file and the target; `atspkg` will parse your
 ATS source files and track them (it will not track included C).
 
-### Building a Haskell Library
+## Building a Haskell Library
 
 You can see an example [here](https://github.com/vmchale/fast-arithmetic). You
 can configure the ATS side of things as follows:
@@ -67,7 +78,7 @@ You may want to consider
 [ats-setup](http://hackage.haskell.org/package/ats-setup) as well if you are
 packaging the Haskell for distribution.
 
-### Calling Haskell from ATS
+## Calling Haskell from ATS
 
 You can see a demo [here](https://hub.darcs.net/vmchale/ats-storable/browse/dhall-ats).
 Currently, there is not generic `Storable` instance that works with ATS, so the
@@ -97,7 +108,7 @@ in pkg //
   }
 ```
 
-### Writing Your Own Packages
+## Writing Your Own Packages
 
 Have a look [here](https://github.com/vmchale/either) for
 an example package using some of the Dhall helper functions provided to manage
