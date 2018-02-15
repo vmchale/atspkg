@@ -25,7 +25,7 @@ wrapper = info (helper <*> versionInfo <*> command')
     <> header "atspkg - a build tool for ATS\nsee 'man atspkg' for more detailed help")
 
 versionInfo :: Parser (a -> a)
-versionInfo = infoOption ("atspkg version: " ++ showVersion P.version) (short 'v' <> long "version" <> help "Show version")
+versionInfo = infoOption ("atspkg version: " ++ showVersion P.version) (short 'V' <> long "version" <> help "Show version")
 
 data Command = Install
              | Build { _targets    :: [String]
@@ -108,7 +108,7 @@ build' = Build
         <> short 'r'
         <> help "Force rebuild of all targets")
     <*> (length <$>
-        many (flag' () (short 't' <> long "verbose" <> help "Turn up verbosity")))
+        many (flag' () (short 'v' <> long "verbose" <> help "Turn up verbosity")))
     <*> noLint
 
 noLint :: Parser Bool

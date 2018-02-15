@@ -49,7 +49,7 @@ build rs = bool (mkPkgEmpty [buildAll Nothing]) (mkPkgEmpty mempty) =<< check No
 mkClean :: Rules ()
 mkClean = "clean" ~> do
     cleanHaskell
-    removeFilesAfter "." ["//*.1", "//*.c", "tags"]
+    removeFilesAfter "." ["//*.1", "//*.c", "tags", "//*.a"]
     removeFilesAfter "target" ["//*"]
     removeFilesAfter ".atspkg" ["//*"]
     removeFilesAfter "ats-deps" ["//*"]
@@ -112,12 +112,20 @@ mkTest = mkPhony "test" id test
 mkRun :: [String] -> Rules ()
 mkRun = mkPhony "run" id bin
 
+toVerbosity :: Int -> Verbosity
+toVerbosity 0 = Normal
+toVerbosity 1 = Loud
+toVerbosity 2 = Chatty
+toVerbosity 3 = Diagnostic
+toVerbosity _ = undefined
+
 options :: Bool -- ^ Whether to rebuild config
         -> Bool -- ^ Whether to rebuild all targets
         -> Bool -- ^ Whether to run the linter
+        -> Int -- ^ Verbosity level
         -> [String] -- ^ A list of targets
         -> ShakeOptions
-options rb rba lint rs = shakeOptions { shakeFiles = ".atspkg"
+options rb rba lint v rs = shakeOptions { shakeFiles = ".atspkg"
                           , shakeThreads = 4
                           , shakeLint = bool Nothing (Just LintBasic) lint
                           , shakeVersion = showVersion P.version
@@ -125,6 +133,7 @@ options rb rba lint rs = shakeOptions { shakeFiles = ".atspkg"
                                                      , (rba, (RebuildNow ,) <$> rs)
                                                      ]
                           , shakeChange = ChangeModtimeAndDigestInput
+                          , shakeVerbosity = toVerbosity v
                           }
     where g (b, ts) = bool mempty ts b
 
@@ -140,12 +149,12 @@ mkPkg :: Bool -- ^ Whether to ignore cached package config
       -> Maybe String -- ^ Target triple
       -> Int -- ^ Verbosity
       -> IO ()
-mkPkg rb rba lint setup rs tgt _ = do
+mkPkg rb rba lint setup rs tgt v = do
     cfg <- cleanConfig rs
-    let opt = options rb rba lint $ pkgToTargets cfg rs
+    let opt = options rb rba lint v $ pkgToTargets cfg rs
     shake opt $
         mconcat
-            [ want rs
+            [ want (pkgToTargets cfg rs)
             , mkClean
             , pkgToAction setup rs tgt =<< cleanConfig rs
             ]
