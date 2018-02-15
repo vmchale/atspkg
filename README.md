@@ -28,6 +28,7 @@ Things that `atspkg` will not do for you:
   * Provide a centralized package repository
   * Offer a common architecture for package builds
   * Cache builds locally (like `nix` or `cabal`)
+  * Cache binary builds of ATS libraries (this is also planned)
 
 ### Example
 
