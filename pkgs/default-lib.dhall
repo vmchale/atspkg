@@ -5,6 +5,7 @@ in
 
 let bin =
   { libs = ([] : List Text)
+  , includes = ([] : List Text)
   , hsDeps = ([] : List ForeignCabal)
   , hs2ats = ([] : List TargetPair)
   , cSources = ([] : List Text)

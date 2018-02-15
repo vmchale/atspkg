@@ -54,7 +54,16 @@ allSubdirs d = do
     ds' <- mapM allSubdirs ds
     pure $ join (ds : ds')
 
--- TODO we should allow ATS libraries to be set up like this?
+{- atslibSetup :: CCompiler -}
+            {- -> String -}
+            {- -> FilePath -}
+            {- -> IO () -}
+{- atslibSetup cc' lib' p = do -}
+    {- h <- pkgHome cc' -}
+    {- -- TODO set procEnv? -}
+    {- pure () -}
+
+
 clibSetup :: CCompiler -- ^ C compiler
           -> String -- ^ Library name
           -> FilePath -- ^ Filepath to unpack to

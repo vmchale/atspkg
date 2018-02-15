@@ -71,6 +71,7 @@ data Lib = Lib { name      :: Text -- ^ Name of library being provided
                , src       :: [Text] -- ^ Source files (should end with @.dats@) to be compiled to object files
                , libTarget :: Text
                , libs      :: [Text] -- ^ Libraries to link against (e.g. @[ "pthread" ]@)
+               , includes  :: [Text] -- ^ Include files to be installed with the library
                , hsDeps    :: [ForeignCabal] -- ^ Haskell @.cabal@ files associated with object files
                , hs2ats    :: [TargetPair] -- ^ Sources and targets for @hs2ats@
                , cSources  :: [Text] -- ^ C source files the build depends on
