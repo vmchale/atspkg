@@ -58,11 +58,14 @@ mkInstall :: Rules ()
 mkInstall =
     "install" ~> do
         config <- getConfig Nothing
+        libs <- fmap (unpack . libTarget) . libraries <$> getConfig Nothing
         bins <- fmap (unpack . target) . bin <$> getConfig Nothing
-        need bins
+        need (bins <> libs)
         home <- liftIO $ getEnv "HOME"
         let binDest = ((home <> "/.local/bin/") <>) . takeBaseName <$> bins
-        void $ zipWithM copyFile' bins binDest
+        let libDest = ((home <> "/.atspkg/lib/") <>) . takeFileName <$> libs
+        zipWithM_ copyFile' bins binDest
+        zipWithM_ copyFile' libs libDest
         pa <- pandoc
         case man config of
             Just mt -> if not pa then pure () else do
@@ -117,7 +120,7 @@ toVerbosity 0 = Normal
 toVerbosity 1 = Loud
 toVerbosity 2 = Chatty
 toVerbosity 3 = Diagnostic
-toVerbosity _ = undefined
+toVerbosity _ = Diagnostic -- really should be a warning
 
 options :: Bool -- ^ Whether to rebuild config
         -> Bool -- ^ Whether to rebuild all targets
@@ -184,12 +187,6 @@ pkgToTargets :: Pkg -> [FilePath] -> [FilePath]
 pkgToTargets ~Pkg{..} [] = (unpack . target <$> bin) <> (unpack . libTarget <$> libraries)
 pkgToTargets _ ts        = ts
 
--- CROSS-COMPILING atslib:
---
--- 1. use the intmin version
---
--- 2. Then idk?? it's a mess??
-
 pkgToAction :: [IO ()] -- ^ Setup actions to be performed
             -> [String] -- ^ Targets
             -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
@@ -218,12 +215,12 @@ pkgToAction setup rs tgt ~(Pkg bs ts libs mt v v' ds cds ccLocal cf as cdir) =
         mapM_ g (bs ++ ts)
 
     where g (Bin s t ls hs' atg gc' cSrc extra) =
-            atsBin
-                (BinaryTarget (unpack <$> cf) (ATSToolConfig v v' False (ccFromString cc')) gc' (unpack <$> ls) [unpack s] hs' (unpackBoth . asTuple <$> atg) (unpack t) (unpack <$> cSrc) (deps extra) Executable)
+            atsBin (BinaryTarget (unpack <$> cf) atsToolConfig gc' (unpack <$> ls) [unpack s] hs' (unpackBoth . asTuple <$> atg) (unpack t) (unpack <$> cSrc) (deps extra) Executable)
 
-          h (Lib sources t ls hs' atg cSrc extra) =
-            atsBin (BinaryTarget (unpack <$> cf) (ATSToolConfig v v' False (ccFromString cc')) False (unpack <$> ls) (unpack <$> sources) hs' (unpackBoth . asTuple <$> atg) (unpack t) (unpack <$> cSrc) (deps extra) StaticLibrary)
+          h (Lib _ s t ls hs' atg cSrc extra) =
+            atsBin (BinaryTarget (unpack <$> cf) atsToolConfig False (unpack <$> ls) (unpack <$> s) hs' (unpackBoth . asTuple <$> atg) (unpack t) (unpack <$> cSrc) (deps extra) StaticLibrary)
 
+          atsToolConfig = ATSToolConfig v v' False (ccFromString cc')
 
           cDepsRules = unless (null as) $ do
             let cedar = unpack cdir

@@ -41,6 +41,8 @@ to $HOME/.local/share/man/man1
 
 **run** - Run the generated binary
 
+**check** - Check a pkg.dhall file to make sure it is well-typed.
+
 ## OPTIONS
 
 **-h** **-\-help**
@@ -61,6 +63,12 @@ to $HOME/.local/share/man/man1
 **-t**, **-\-target**
 :   Set the compilation target using its triple.
 
+**-v**, **-\-verbose**
+:   Turn up the verbosity
+
+**-d**, **-\-detailed**
+:   Enable detailed error messages
+
 # CONFIGURATION
 
 **atspkg** is configured with Dhall, in an atspkg.dhall file. **atspkg** can be
@@ -78,6 +86,10 @@ pi new ats project
 
 ```
 pi git vmchale/haskell-ats ambitious-project
+```
+
+```
+pi git vmchale/ats-haskell weird-project
 ```
 
 # BUGS

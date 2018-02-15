@@ -4,7 +4,7 @@ let TargetPair = { hs : Text, ats : Text, cpphs : Bool }
 in
 let Bin = { src : Text, target : Text, libs : List Text, hsDeps : List ForeignCabal , hs2ats : List TargetPair, gcBin : Bool, cSources : List Text, extras : List Text }
 in
-let Lib = { src : List Text, libTarget : Text, libs : List Text, hsDeps : List ForeignCabal, hs2ats : List TargetPair, cSources : List Text, extras : List Text }
+let Lib = { name : Text, src : List Text, libTarget : Text, libs : List Text, hsDeps : List ForeignCabal, hs2ats : List TargetPair, cSources : List Text, extras : List Text }
 in
 
 let pkg

@@ -5,7 +5,7 @@ import           Distribution.Simple
 import           Distribution.Types.HookedBuildInfo
 
 installActions :: IO ()
-installActions = foldr (>>) (pure ())
+installActions = sequence_
     [ writeManpages "man/atspkg.1" "atspkg.1"
     , writeTheFuck
     , writeBashCompletions "atspkg"

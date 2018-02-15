@@ -40,6 +40,8 @@ relevant manpages to $HOME/.local/share/man/man1
 \f[B]valgrind\f[] \- Run \f[B]valgrind\f[] on the generated binary
 .PP
 \f[B]run\f[] \- Run the generated binary
+.PP
+\f[B]check\f[] \- Check a pkg.dhall file to make sure it is well\-typed.
 .SS OPTIONS
 .TP
 .B \f[B]\-h\f[] \f[B]\-\-help\f[]
@@ -71,6 +73,16 @@ Disable the shake linter
 Set the compilation target using its triple.
 .RS
 .RE
+.TP
+.B \f[B]\-v\f[], \f[B]\-\-verbose\f[]
+Turn up the verbosity
+.RS
+.RE
+.TP
+.B \f[B]\-d\f[], \f[B]\-\-detailed\f[]
+Enable detailed error messages
+.RS
+.RE
 .SH CONFIGURATION
 .PP
 \f[B]atspkg\f[] is configured with Dhall, in an atspkg.dhall file.
@@ -91,6 +103,12 @@ pi\ new\ ats\ project
 .nf
 \f[C]
 pi\ git\ vmchale/haskell\-ats\ ambitious\-project
+\f[]
+.fi
+.IP
+.nf
+\f[C]
+pi\ git\ vmchale/ats\-haskell\ weird\-project
 \f[]
 .fi
 .SH BUGS
