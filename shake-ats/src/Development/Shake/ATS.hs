@@ -86,7 +86,7 @@ copySources (ATSToolConfig v v' _ _) sources =
 -- This is the @$PATSHOMELOCS@ variable to be passed to the shell.
 patsHomeLocs :: Int -> String
 patsHomeLocs n = intercalate ":" $ (<> ".atspkg/contrib") . ("./" <>) <$> g
-    where g = [ join $ replicate i "../" | i <- [1..n] ]
+    where g = [ join $ replicate i "../" | i <- [0..n] ]
 
 makeCFlags :: [String] -- ^ Inputs
            -> [ForeignCabal] -- ^ Haskell libraries
