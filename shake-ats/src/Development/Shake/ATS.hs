@@ -106,11 +106,6 @@ libToDirs = fmap (takeDirectory . TL.unpack . h)
 uncurry3 :: (a -> b -> c -> d) -> ((a, b, c) -> d)
 uncurry3 f (x, y, z) = f x y z
 
--- Change architecture to use C stuff better?
--- Step 1: Use patsopt to generate C files
--- Step 2: Use gcc to generate `.o` files
--- Step 3: Generate library/binary from those files.
-
 -- | Location of @patscc@
 patscc :: MonadIO m => ATSToolConfig -> m String
 patscc = patsTool "patscc"
@@ -152,6 +147,10 @@ ghcV hsLibs = case hsLibs of
     [] -> pure undefined
     _  -> ghcVersion
 
+doStatic :: ArtifactType -> Rules () -> Rules ()
+doStatic StaticLibrary = id
+doStatic _             = const (pure ())
+
 atsBin :: BinaryTarget -> Rules ()
 atsBin tgt@BinaryTarget{..} = do
 
@@ -163,20 +162,27 @@ atsBin tgt@BinaryTarget{..} = do
 
     let cTargets = atsToC <$> src
 
-    foldr (>>) (pure ()) (atsCGen toolConfig tgt <$> src <*> cTargets)
+    let h Executable    = id
+        h StaticLibrary = fmap (-<.> "o")
+        g Executable    = ccAction
+        g StaticLibrary = staticLibA
+        h' = h tgtType
+
+    cconfig' <- cconfig toolConfig libs gc (makeCFlags cFlags mempty (pure undefined) gc)
+
+    zipWithM_ (atsCGen toolConfig tgt) src cTargets
+
+    doStatic tgtType (zipWithM_ (objectFileR (cc toolConfig) cconfig') cTargets (h' cTargets))
 
     binTarget %> \_ -> do
 
-        need cTargets
+        need (h' cTargets)
 
         ghcV' <- ghcV hsLibs
 
-        cconfig' <- cconfig toolConfig libs gc (makeCFlags cFlags hsLibs ghcV' gc)
+        cconfig'' <- cconfig toolConfig libs gc (makeCFlags cFlags hsLibs ghcV' gc)
 
-        let g Executable    = ccAction
-            g StaticLibrary = staticLibA
-
-        unit $ g tgtType (cc toolConfig) cTargets binTarget cconfig'
+        unit $ g tgtType (cc toolConfig) (h' cTargets) binTarget cconfig''
 
 atsCGen :: ATSToolConfig
         -> BinaryTarget

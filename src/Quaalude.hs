@@ -51,6 +51,7 @@ module Quaalude ( bool
                 , shakeOptions
                 , copyFile'
                 , Change (..)
+                , Verbosity (..)
                 , removeFilesAfter
                 , Lint (..)
                 , takeBaseName
