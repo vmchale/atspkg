@@ -11,10 +11,11 @@ module Language.ATS.Package.Build ( mkPkg
                                   , check
                                   ) where
 
-import qualified Data.ByteString                 as BS
-import qualified Data.ByteString.Lazy            as BSL
-import           Data.List                       (nub)
-import           Data.Version                    (showVersion)
+import           Control.Concurrent.ParallelIO.Global
+import qualified Data.ByteString                      as BS
+import qualified Data.ByteString.Lazy                 as BSL
+import           Data.List                            (nub)
+import           Data.Version                         (showVersion)
 import           Development.Shake.ATS
 import           Development.Shake.Check
 import           Development.Shake.Clean
@@ -22,8 +23,8 @@ import           Development.Shake.Man
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Config
 import           Language.ATS.Package.Dependency
-import           Language.ATS.Package.Type       hiding (Version)
-import qualified Paths_ats_pkg                   as P
+import           Language.ATS.Package.Type            hiding (Version)
+import qualified Paths_ats_pkg                        as P
 import           Quaalude
 
 check :: Maybe FilePath -> IO Bool
@@ -58,14 +59,16 @@ mkInstall :: Rules ()
 mkInstall =
     "install" ~> do
         config <- getConfig Nothing
-        let libs = fmap (unpack . libTarget) . libraries $ config -- getConfig Nothing
-            bins = fmap (unpack . target) . bin $ config -- getConfig Nothing
+        let libs = fmap (unpack . libTarget) . libraries $ config
+            bins = fmap (unpack . target) . bin $ config
+            incs = ((fmap unpack . includes) =<<) . libraries $ config
         need (bins <> libs)
         home <- liftIO $ getEnv "HOME"
         let binDest = ((home <> "/.local/bin/") <>) . takeFileName <$> bins
         let libDest = ((home <> "/.atspkg/lib/") <>) . takeFileName <$> libs
-        zipWithM_ copyFile' bins binDest
-        zipWithM_ copyFile' libs libDest
+        let inclDest = ((home <> "/.atspkg/includes/") <>) . takeFileName <$> incs
+        let zips = zipWith copyFile (bins ++ libs ++ incs) (binDest ++ libDest ++ inclDest)
+        liftIO $ parallel_ zips
         pa <- pandoc
         case man config of
             Just mt -> if not pa then pure () else do
@@ -161,6 +164,7 @@ mkPkg rb rba lint setup rs tgt v = do
             , mkClean
             , pkgToAction setup rs tgt =<< cleanConfig rs
             ]
+    stopGlobalPool
 
 asTuple :: TargetPair -> (Text, Text, Bool)
 asTuple (TargetPair s t b) = (s, t, b)
