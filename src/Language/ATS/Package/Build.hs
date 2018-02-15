@@ -14,7 +14,7 @@ module Language.ATS.Package.Build ( mkPkg
 import qualified Data.ByteString                 as BS
 import qualified Data.ByteString.Lazy            as BSL
 import           Data.List                       (nub)
-import           Data.Version                    hiding (Version (..))
+import           Data.Version                    (showVersion)
 import           Development.Shake.ATS
 import           Development.Shake.Check
 import           Development.Shake.Clean
@@ -22,8 +22,8 @@ import           Development.Shake.Man
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Config
 import           Language.ATS.Package.Dependency
-import           Language.ATS.Package.Type       hiding (version)
-import           Paths_ats_pkg
+import           Language.ATS.Package.Type       hiding (Version)
+import qualified Paths_ats_pkg                   as P
 import           Quaalude
 
 check :: Maybe FilePath -> IO Bool
@@ -120,7 +120,7 @@ options :: Bool -- ^ Whether to rebuild config
 options rb rba lint rs = shakeOptions { shakeFiles = ".atspkg"
                           , shakeThreads = 4
                           , shakeLint = bool Nothing (Just LintBasic) lint
-                          , shakeVersion = showVersion version
+                          , shakeVersion = showVersion P.version
                           , shakeRebuild = foldMap g [ (rb, [(RebuildNow, ".atspkg/config")])
                                                      , (rba, (RebuildNow ,) <$> rs)
                                                      ]
@@ -172,7 +172,7 @@ bits rs = mconcat $ [ mkManpage, mkInstall, mkConfig ] <>
     sequence [ mkRun, mkTest, mkValgrind ] rs
 
 pkgToTargets :: Pkg -> [FilePath] -> [FilePath]
-pkgToTargets ~Pkg{..} [] = unpack . target <$> bin
+pkgToTargets ~Pkg{..} [] = (unpack . target <$> bin) <> (unpack . libTarget <$> libraries)
 pkgToTargets _ ts        = ts
 
 -- CROSS-COMPILING atslib:
@@ -186,7 +186,7 @@ pkgToAction :: [IO ()] -- ^ Setup actions to be performed
             -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
             -> Pkg -- ^ Package data type
             -> Rules ()
-pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
+pkgToAction setup rs tgt ~(Pkg bs ts libs mt v v' ds cds ccLocal cf as cdir) =
 
     unless (rs == ["clean"]) $ do
 
@@ -204,11 +204,17 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
 
         cDepsRules >> bits rs
 
+        mapM_ h libs
+
         mapM_ g (bs ++ ts)
 
     where g (Bin s t ls hs' atg gc' cSrc extra) =
             atsBin
                 (BinaryTarget (unpack <$> cf) (ATSToolConfig v v' False (ccFromString cc')) gc' (unpack <$> ls) [unpack s] hs' (unpackBoth . asTuple <$> atg) (unpack t) (unpack <$> cSrc) (deps extra) Executable)
+
+          h (Lib sources t ls hs' atg cSrc extra) =
+            atsBin (BinaryTarget (unpack <$> cf) (ATSToolConfig v v' False (ccFromString cc')) False (unpack <$> ls) (unpack <$> sources) hs' (unpackBoth . asTuple <$> atg) (unpack t) (unpack <$> cSrc) (deps extra) StaticLibrary)
+
 
           cDepsRules = unless (null as) $ do
             let cedar = unpack cdir

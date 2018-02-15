@@ -7,7 +7,6 @@ let bin =
   { libs = ([] : List Text)
   , hsDeps = ([] : List ForeignCabal)
   , hs2ats = ([] : List TargetPair)
-  , gcBin = False
   , cSources = ([] : List Text)
   , extras = ([] : List Text)
   }

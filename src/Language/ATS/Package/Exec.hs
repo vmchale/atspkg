@@ -11,9 +11,9 @@ import qualified Data.Text.Lazy             as TL
 import           Data.Version               hiding (Version (..))
 import           Development.Shake.ATS
 import           Development.Shake.FilePath
-import           Language.ATS.Package       hiding (version)
+import           Language.ATS.Package
 import           Options.Applicative        hiding (auto)
-import           Paths_ats_pkg
+import qualified Paths_ats_pkg              as P
 import           System.Directory
 import           System.IO.Temp             (withSystemTempDirectory)
 
@@ -25,7 +25,7 @@ wrapper = info (helper <*> versionInfo <*> command')
     <> header "atspkg - a build tool for ATS\nsee 'man atspkg' for more detailed help")
 
 versionInfo :: Parser (a -> a)
-versionInfo = infoOption ("atspkg version: " ++ showVersion version) (short 'v' <> long "version" <> help "Show version")
+versionInfo = infoOption ("atspkg version: " ++ showVersion P.version) (short 'v' <> long "version" <> help "Show version")
 
 data Command = Install
              | Build { _targets    :: [String]
