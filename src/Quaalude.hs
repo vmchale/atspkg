@@ -7,6 +7,7 @@ module Quaalude ( bool
                 , when
                 , join
                 , zipWithM_
+                , zipWithM
                 , filterM
                 , encode
                 , decode

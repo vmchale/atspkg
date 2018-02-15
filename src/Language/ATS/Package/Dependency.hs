@@ -43,7 +43,7 @@ fetchDeps cc' setup' deps cdeps atsBld cfgPath b' =
         atsBld' <- join <$> setBuildPlan "atsbld" pkgSet atsBld
         parallel_ (extraWorkerWhileBlocked <$> (setup' ++ libs' ++ clibs))
         mapM_ atsPkgSetup atsBld'
-        mapM_ (setup cc') unpacked >> stopGlobalPool
+        mapM_ (setup cc') unpacked
 
 pkgHome :: CCompiler -> IO FilePath
 pkgHome cc' = (++ ("/.atspkg/" ++ ccToDir cc')) <$> getEnv "HOME"
