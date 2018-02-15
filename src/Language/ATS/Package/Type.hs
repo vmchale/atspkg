@@ -67,7 +67,8 @@ data Bin = Bin { src      :: Text -- ^ Source file (should end with @.dats@)
                }
          deriving (Show, Eq, Generic, Interpret, Binary)
 
-data Lib = Lib { src       :: [Text] -- ^ Source files (should end with @.dats@) to be compiled to object files
+data Lib = Lib { name      :: Text -- ^ Name of library being provided
+               , src       :: [Text] -- ^ Source files (should end with @.dats@) to be compiled to object files
                , libTarget :: Text
                , libs      :: [Text] -- ^ Libraries to link against (e.g. @[ "pthread" ]@)
                , hsDeps    :: [ForeignCabal] -- ^ Haskell @.cabal@ files associated with object files
