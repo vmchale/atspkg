@@ -28,4 +28,5 @@ fixDir p =
       TL.unpack
     . TL.replace (TL.pack "./") (TL.pack $ p ++ "/")
     . TL.replace (TL.pack "../") (TL.pack $ joinPath (init $ splitPath p) ++ "/")
+    . TL.replace (TL.pack "$PATSHOMELOCS") (TL.pack ".atspkg/contrib")
     . TL.pack
