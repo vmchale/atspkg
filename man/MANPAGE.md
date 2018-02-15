@@ -67,7 +67,7 @@ to $HOME/.local/share/man/man1
 :   Turn up the verbosity
 
 **-d**, **-\-detailed**
-:   Enable detailed error messages
+:   Enable detailed error messages when checking configuration files
 
 # CONFIGURATION
 

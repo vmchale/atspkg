@@ -67,8 +67,7 @@ mkInstall =
         let binDest = ((home <> "/.local/bin/") <>) . takeFileName <$> bins
         let libDest = ((home <> "/.atspkg/lib/") <>) . takeFileName <$> libs
         let inclDest = ((home <> "/.atspkg/includes/") <>) . takeFileName <$> incs
-        let zips = zipWith copyFile (bins ++ libs ++ incs) (binDest ++ libDest ++ inclDest)
-        liftIO $ parallel_ zips
+        zipWithM_ copyFile' (bins ++ libs ++ incs) (binDest ++ libDest ++ inclDest)
         pa <- pandoc
         case man config of
             Just mt -> if not pa then pure () else do
