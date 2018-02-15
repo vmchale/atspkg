@@ -3,6 +3,7 @@
 {-# LANGUAGE DeriveAnyClass             #-}
 {-# LANGUAGE DeriveGeneric              #-}
 {-# LANGUAGE DerivingStrategies         #-}
+{-# LANGUAGE DuplicateRecordFields      #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE ScopedTypeVariables        #-}
@@ -13,6 +14,7 @@ module Language.ATS.Package.Type ( -- * Types
                                    Pkg (..)
                                  , ATSDependency (..)
                                  , Bin (..)
+                                 , Lib (..)
                                  , Version (..)
                                  , ATSConstraint (..)
                                  , TargetPair (..)
@@ -65,19 +67,21 @@ data Bin = Bin { src      :: Text -- ^ Source file (should end with @.dats@)
                }
          deriving (Show, Eq, Generic, Interpret, Binary)
 
--- data Lib = Lib { src      :: [Text] -- ^ Source files (should end with @.dats@) to be compiled to object files
---                , target   :: Text
---                , hsDeps   :: [ForeignCabal] -- ^ Haskell @.cabal@ files associated with object files
---                , hs2ats   :: [TargetPair] -- ^ Sources and targets for @hs2ats@
---                , cSources :: [Text] -- ^ C source files the build depends on
---                , extras   :: [Text] -- ^ Other source files the build depends on
---                }
---          deriving (Show, Eq, Generic, Interpret, Binary)
+data Lib = Lib { src       :: [Text] -- ^ Source files (should end with @.dats@) to be compiled to object files
+               , libTarget :: Text
+               , libs      :: [Text] -- ^ Libraries to link against (e.g. @[ "pthread" ]@)
+               , hsDeps    :: [ForeignCabal] -- ^ Haskell @.cabal@ files associated with object files
+               , hs2ats    :: [TargetPair] -- ^ Sources and targets for @hs2ats@
+               , cSources  :: [Text] -- ^ C source files the build depends on
+               , extras    :: [Text] -- ^ Other source files the build depends on
+               }
+         deriving (Show, Eq, Generic, Interpret, Binary)
 
 -- TODO make binaries optional
 -- | Data type associated with @atspkg.dhall@ file.
 data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , test         :: [Bin] -- ^ List of test suites
+               , libraries    :: [Lib] -- ^ List of libraries to be built
                , man          :: Maybe Text -- ^ Optional (markdown) manpages to be converted using @pandoc@.
                , version      :: Version -- ^ Library version
                , compiler     :: Version -- ^ Compiler version
