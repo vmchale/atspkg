@@ -58,11 +58,11 @@ mkInstall :: Rules ()
 mkInstall =
     "install" ~> do
         config <- getConfig Nothing
-        libs <- fmap (unpack . libTarget) . libraries <$> getConfig Nothing
-        bins <- fmap (unpack . target) . bin <$> getConfig Nothing
+        let libs = fmap (unpack . libTarget) . libraries $ config -- getConfig Nothing
+            bins = fmap (unpack . target) . bin $ config -- getConfig Nothing
         need (bins <> libs)
         home <- liftIO $ getEnv "HOME"
-        let binDest = ((home <> "/.local/bin/") <>) . takeBaseName <$> bins
+        let binDest = ((home <> "/.local/bin/") <>) . takeFileName <$> bins
         let libDest = ((home <> "/.atspkg/lib/") <>) . takeFileName <$> libs
         zipWithM_ copyFile' bins binDest
         zipWithM_ copyFile' libs libDest
