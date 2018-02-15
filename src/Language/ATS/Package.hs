@@ -15,9 +15,11 @@ module Language.ATS.Package ( pkgToAction
                             , Version (..)
                             , Pkg (..)
                             , Bin (..)
+                            , Lib (..)
                             , ATSConstraint (..)
                             , ATSDependency (..)
                             , TargetPair (..)
+                            , ForeignCabal (..)
                             , ATSPackageSet (..)
                             -- * Lenses
                             , dirLens

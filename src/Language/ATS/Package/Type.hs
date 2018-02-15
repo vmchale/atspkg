@@ -16,6 +16,7 @@ module Language.ATS.Package.Type ( -- * Types
                                  , Bin (..)
                                  , Lib (..)
                                  , Version (..)
+                                 , ForeignCabal (..)
                                  , ATSConstraint (..)
                                  , TargetPair (..)
                                  , CCompiler (..)
