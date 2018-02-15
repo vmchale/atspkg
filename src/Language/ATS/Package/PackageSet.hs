@@ -30,7 +30,6 @@ setBuildPlan p url deps = do
 
     where depCache = ".atspkg/buildplan-" ++ p
           setBuildPlan' = do
-            putStrLn "Resolving dependencies..."
             pkgSet <- input auto (pack url)
             case mkBuildPlan pkgSet deps of
                 Right x -> createDirectoryIfMissing True ".atspkg" >> BSL.writeFile depCache (encode x) >> pure x

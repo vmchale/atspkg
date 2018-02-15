@@ -30,6 +30,7 @@ fetchDeps :: CCompiler -- ^ C compiler to use
           -> IO ()
 fetchDeps cc' setup' deps cdeps cfgPath b' =
     unless (null deps && null cdeps && b') $ do
+        putStrLn "Resolving dependencies..."
         pkgSet <- unpack . defaultPkgs . decode <$> BSL.readFile cfgPath
         deps' <- join <$> setBuildPlan "ats" pkgSet deps
         putStrLn "Checking ATS dependencies..."
@@ -38,8 +39,8 @@ fetchDeps cc' setup' deps cdeps cfgPath b' =
         cdeps' <- join <$> setBuildPlan "c" pkgSet cdeps
         let unpacked = fmap (over dirLens (pack d <>)) cdeps'
             clibs = fmap (buildHelper False) unpacked
-        parallel_ (setup' ++ libs' ++ clibs)
-        mapM_ (setup cc') unpacked
+        parallel_ (extraWorkerWhileBlocked <$> (setup' ++ libs' ++ clibs))
+        mapM_ (setup cc') unpacked >> stopGlobalPool
 
 pkgHome :: CCompiler -> IO FilePath
 pkgHome cc' = (++ ("/.atspkg/" ++ ccToDir cc')) <$> getEnv "HOME"

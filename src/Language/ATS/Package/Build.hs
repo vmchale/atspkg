@@ -11,11 +11,10 @@ module Language.ATS.Package.Build ( mkPkg
                                   , check
                                   ) where
 
-import           Control.Concurrent.ParallelIO.Global
-import qualified Data.ByteString                      as BS
-import qualified Data.ByteString.Lazy                 as BSL
-import           Data.List                            (nub)
-import           Data.Version                         hiding (Version (..))
+import qualified Data.ByteString                 as BS
+import qualified Data.ByteString.Lazy            as BSL
+import           Data.List                       (nub)
+import           Data.Version                    hiding (Version (..))
 import           Development.Shake.ATS
 import           Development.Shake.Check
 import           Development.Shake.Clean
@@ -23,7 +22,7 @@ import           Development.Shake.Man
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Config
 import           Language.ATS.Package.Dependency
-import           Language.ATS.Package.Type            hiding (version)
+import           Language.ATS.Package.Type       hiding (version)
 import           Paths_ats_pkg
 import           Quaalude
 
@@ -198,8 +197,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts mt v v' ds cds ccLocal cf as cdir) =
         ".atspkg/deps" %> \out -> do
             (_, cfgBin') <- cfgBin
             need [ cfgBin' ]
-            liftIO $ fetchDeps (ccFromString cc') setup (unpack <$> ds) (unpack <$> cdps) cfgBin' False >> stopGlobalPool
-            liftIO $ writeFile out ""
+            liftIO $ fetchDeps (ccFromString cc') setup (unpack <$> ds) (unpack <$> cdps) cfgBin' False >> writeFile out ""
 
         let bins = unpack . target <$> bs
         setTargets rs bins mt
