@@ -90,6 +90,7 @@ data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , compiler     :: Version -- ^ Compiler version
                , dependencies :: [Text] -- ^ List of dependencies
                , clib         :: [Text] -- ^ List of C dependencies
+               , buildDeps    :: [Text] -- ^ List of ATS dependencies that should be installed as static libraries
                , ccompiler    :: Text -- ^ The C compiler we should use
                , cflags       :: [Text] -- ^ List of flags to pass to the C compiler
                , atsSource    :: [Text] -- ^ Directory containing ATS source to be compile to C.
