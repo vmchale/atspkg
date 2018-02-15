@@ -21,6 +21,8 @@ let pkg
       : List Text
     , clib = []
       : List Text
+    , buildDeps = []
+      : List Text
     , ccompiler = "gcc"
     , cflags = [ "-O2" ]
     , atsSource = ([] : List Text)

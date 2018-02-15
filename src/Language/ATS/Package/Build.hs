@@ -192,7 +192,7 @@ pkgToAction :: [IO ()] -- ^ Setup actions to be performed
             -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
             -> Pkg -- ^ Package data type
             -> Rules ()
-pkgToAction setup rs tgt ~(Pkg bs ts libs mt v v' ds cds ccLocal cf as cdir) =
+pkgToAction setup rs tgt ~(Pkg bs ts libs mt v v' ds cds bdeps ccLocal cf as cdir) =
 
     unless (rs == ["clean"]) $ do
 
@@ -203,7 +203,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts libs mt v v' ds cds ccLocal cf as cdir) =
         ".atspkg/deps" %> \out -> do
             (_, cfgBin') <- cfgBin
             need [ cfgBin' ]
-            liftIO $ fetchDeps (ccFromString cc') setup (unpack <$> ds) (unpack <$> cdps) cfgBin' False >> writeFile out ""
+            liftIO $ fetchDeps (ccFromString cc') setup (unpack <$> ds) (unpack <$> cdps) (unpack <$> bdeps) cfgBin' False >> writeFile out ""
 
         let bins = unpack . target <$> bs
         setTargets rs bins mt

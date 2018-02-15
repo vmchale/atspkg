@@ -25,10 +25,11 @@ fetchDeps :: CCompiler -- ^ C compiler to use
           -> [IO ()] -- ^ Setup steps that can be performed concurrently
           -> [String] -- ^ ATS dependencies
           -> [String] -- ^ C Dependencies
+          -> [String] -- ^ ATS build dependencies
           -> FilePath -- ^ Path to configuration file
           -> Bool -- ^ Whether to perform setup anyhow.
           -> IO ()
-fetchDeps cc' setup' deps cdeps cfgPath b' =
+fetchDeps cc' setup' deps cdeps atsBld cfgPath b' =
     unless (null deps && null cdeps && b') $ do
         putStrLn "Resolving dependencies..."
         pkgSet <- unpack . defaultPkgs . decode <$> BSL.readFile cfgPath
@@ -39,7 +40,9 @@ fetchDeps cc' setup' deps cdeps cfgPath b' =
         cdeps' <- join <$> setBuildPlan "c" pkgSet cdeps
         let unpacked = fmap (over dirLens (pack d <>)) cdeps'
             clibs = fmap (buildHelper False) unpacked
+        atsBld' <- join <$> setBuildPlan "atsbld" pkgSet atsBld
         parallel_ (extraWorkerWhileBlocked <$> (setup' ++ libs' ++ clibs))
+        mapM_ atsPkgSetup atsBld'
         mapM_ (setup cc') unpacked >> stopGlobalPool
 
 pkgHome :: CCompiler -> IO FilePath
@@ -54,15 +57,12 @@ allSubdirs d = do
     ds' <- mapM allSubdirs ds
     pure $ join (ds : ds')
 
-{- atslibSetup :: CCompiler -}
-            {- -> String -}
-            {- -> FilePath -}
-            {- -> IO () -}
-{- atslibSetup cc' lib' p = do -}
-    {- h <- pkgHome cc' -}
-    {- -- TODO set procEnv? -}
-    {- pure () -}
-
+atslibSetup :: String
+            -> FilePath
+            -> IO ()
+atslibSetup lib' p = do
+    putStrLn $ "installing " ++ lib' ++ "..."
+    void $ readCreateProcess ((proc "atspkg" ["install"]) { cwd = Just p, std_err = CreatePipe }) ""
 
 clibSetup :: CCompiler -- ^ C compiler
           -> String -- ^ Library name
@@ -80,6 +80,15 @@ clibSetup cc' lib' p = do
     void $ readCreateProcess ((proc "make" []) { cwd = Just p, std_err = CreatePipe }) ""
     putStrLn $ "installing " ++ lib' ++ "..."
     void $ readCreateProcess ((proc "make" ["install"]) { cwd = Just p, std_err = CreatePipe }) ""
+
+atsPkgSetup :: ATSDependency
+            -> IO ()
+atsPkgSetup (ATSDependency lib' dirName' _ _ _) = do
+    lib'' <- (<> unpack lib') <$> pkgHome GCCStd
+    b <- doesFileExist lib''
+    unless b $ do
+        atslibSetup (unpack lib') (unpack dirName')
+        writeFile lib'' ""
 
 setup :: CCompiler -- ^ C compiler to use
       -> ATSDependency -- ^ ATSDependency itself
