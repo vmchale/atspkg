@@ -34,16 +34,23 @@ mkUserConfig :: Rules ()
 mkUserConfig = do
 
     (h, cfgBin') <- cfgBin
-    let cfg = h ++ "/.config/atspkg/config.dhall"
 
-    want [cfgBin']
+    join (unless
+        <$> liftIO (doesFileExist cfgBin')
+        <*> pure (g h cfgBin'))
 
-    readUserConfig h cfg
+    where g h cfgBin' = do
 
-    cfgBin' %> \_ -> do
-        need [cfg]
-        cfgContents <- liftIO $ input auto (TL.pack cfg)
-        liftIO $ BSL.writeFile cfgBin' (encode (cfgContents :: UserConfig))
+            let cfg = h ++ "/.config/atspkg/config.dhall"
+
+            want [cfgBin']
+
+            readUserConfig h cfg
+
+            cfgBin' %> \_ -> do
+                need [cfg]
+                cfgContents <- liftIO $ input auto (TL.pack cfg)
+                liftIO $ BSL.writeFile cfgBin' (encode (cfgContents :: UserConfig))
 
 readUserConfig :: FilePath -> FilePath -> Rules ()
 readUserConfig h cfg = do

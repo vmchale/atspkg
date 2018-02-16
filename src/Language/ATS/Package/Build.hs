@@ -173,8 +173,7 @@ mkConfig =
     ".atspkg/config" %> \out -> do
         need ["atspkg.dhall"]
         x <- liftIO $ input auto "./atspkg.dhall"
-        let bts = encode (x :: Pkg)
-        liftIO $ BSL.writeFile out bts
+        liftIO $ BSL.writeFile out (encode (x :: Pkg))
 
 setTargets :: [String] -> [FilePath] -> Maybe Text -> Rules ()
 setTargets rs bins mt = when (null rs) $
