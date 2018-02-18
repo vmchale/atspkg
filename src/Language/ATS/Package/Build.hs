@@ -219,7 +219,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts libs mt v v' ds cds bdeps ccLocal cf as cdi
     where g (Bin s t ls hs' atg gc' cSrc extra) =
             atsBin (BinaryTarget (unpack <$> cf) atsToolConfig gc' (unpack <$> ls) [unpack s] hs' (unpackBoth . asTuple <$> atg) (unpack t) (unpack <$> cSrc) (deps extra) Executable)
 
-          h (Lib _ s t ls _ hs' atg cSrc extra) =
+          h (Lib _ s t ls _ hs' atg cSrc extra _) =
             atsBin (BinaryTarget (unpack <$> cf) atsToolConfig False (unpack <$> ls) (unpack <$> s) hs' (unpackBoth . asTuple <$> atg) (unpack t) (unpack <$> cSrc) (deps extra) StaticLibrary)
 
           atsToolConfig = ATSToolConfig v v' False (ccFromString cc')
