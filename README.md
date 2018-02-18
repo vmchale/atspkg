@@ -22,7 +22,7 @@ Things that `atspkg` will do for you:
 
 Things that `atspkg` will not do for you:
 
-  * Dependency resolution (under construction)
+  * Dependency resolution (this is planned)
   * Give you the full flexibility of the C/ATS ecosystem
   * Integrate with other ecosystems
   * Provide a centralized package repository

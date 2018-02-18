@@ -51,7 +51,7 @@ cabalExport (ForeignCabal cbp' cf' obf') = do
     obf %> \out -> do
 
         need (cf : fmap ((obfDir <> "/") <>) trDeps)
-        command_ [Cwd obfDir] "cabal" ["new-build", "-O2"]
+        command_ [Cwd obfDir] "cabal" ["new-build", "all", "-O2"]
 
         let subdir = takeDirectory cbp ++ "/"
             correctDir = (libName `isPrefixOf`)
