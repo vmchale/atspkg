@@ -66,7 +66,7 @@ atslibSetup lib' p = do
     putStrLn $ "installing " ++ lib' ++ "..."
     subdirs <- allSubdirs p
     pkgPath <- fromMaybe p <$> findFile subdirs "atspkg.dhall"
-    readCreateProcess ((proc "atspkg" ["install"]) { cwd = Just (takeDirectory pkgPath), std_err = CreatePipe }) ""
+    void $ readCreateProcess ((proc "atspkg" ["install"]) { cwd = Just (takeDirectory pkgPath), std_err = CreatePipe }) ""
 
 clibSetup :: CCompiler -- ^ C compiler
           -> String -- ^ Library name

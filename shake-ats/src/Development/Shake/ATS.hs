@@ -66,7 +66,8 @@ atsCommand :: CmdResult r => ATSToolConfig
 atsCommand tc sourceFile out = do
     path <- fromMaybe "" <$> getEnv "PATH"
     home' <- home tc
-    let env = patsEnv home' path
+    h <- fromMaybe "" <$> getEnv "HOME"
+    let env = patsEnv h home' path
     patsc <- patsopt tc
     command env patsc ["--output", out, "-dd", sourceFile, "-cc"]
 
@@ -85,8 +86,8 @@ copySources (ATSToolConfig v v' _ _) sources =
         liftIO $ copyFile dep (home' ++ "/" ++ dep)
 
 -- This is the @$PATSHOMELOCS@ variable to be passed to the shell.
-patsHomeLocs :: Int -> String
-patsHomeLocs n = intercalate ":" $ (<> ".atspkg/contrib") . ("./" <>) <$> g
+patsHomeLocs :: FilePath -> Int -> String
+patsHomeLocs h n = intercalate ":" $ (<> (h <> ".atspkg/include")) . (<> ".atspkg/contrib") . ("./" <>) <$> g
     where g = [ join $ replicate i "../" | i <- [0..n] ]
 
 makeCFlags :: [String] -- ^ Inputs
@@ -134,11 +135,11 @@ home tc = do
     h <- patsHome (compilerVer tc)
     pure $ h ++ "lib/ats2-postiats-" ++ show (libVersion tc)
 
-patsEnv :: FilePath -> FilePath -> [CmdOption]
-patsEnv home' path = EchoStderr False :
+patsEnv :: FilePath -> FilePath -> FilePath -> [CmdOption]
+patsEnv h home' path = EchoStderr False :
     zipWith AddEnv
         ["PATSHOME", "PATH", "PATSHOMELOCS"]
-        [home', home' ++ "/bin:" ++ path, patsHomeLocs 5]
+        [home', home' ++ "/bin:" ++ path, patsHomeLocs h 5]
 
 atsToC :: FilePath -> FilePath
 atsToC = (-<.> "c") . (".atspkg/c/" <>)
