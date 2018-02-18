@@ -85,16 +85,15 @@ mkManpage = do
         Just _ -> bool (pure ()) manpages b
         _      -> pure ()
 
--- TODO allow it to be called in parent directory
--- getParents :: FilePath -> IO [FilePath]
--- getParents p = do
+cacheConfiguration :: Text -> IO Pkg
+cacheConfiguration = input auto
 
 getConfig :: MonadIO m => Maybe FilePath -> m Pkg
 getConfig dir' = liftIO $ do
     d <- fromMaybe <$> fmap (<> "/atspkg.dhall") getCurrentDirectory <*> pure dir'
     b <- not <$> doesFileExist ".atspkg/config"
     if b
-        then input auto (pack d)
+        then cacheConfiguration (pack d)
         else fmap (decode . BSL.fromStrict) . BS.readFile $ ".atspkg/config"
 
 manTarget :: Text -> FilePath
