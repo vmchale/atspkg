@@ -1,6 +1,6 @@
-let ForeignCabal = { projectFile : Optional Text, cabalFile : Text, objectFile : Text }
+let ForeignCabal = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/types/ForeignCabal.dhall
 in
-let TargetPair = { hs : Text, ats : Text, cpphs : Bool }
+let TargetPair = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/types/TargetPair.dhall
 in
 
 let lib =
@@ -12,5 +12,4 @@ let lib =
   , extras = ([] : List Text)
   , static = True
   }
-
 in lib

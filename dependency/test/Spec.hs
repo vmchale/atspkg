@@ -1,3 +1,5 @@
+{-# LANGUAGE TupleSections #-}
+
 import           Control.Arrow
 import           Data.Dependency
 import qualified Data.Map        as M
@@ -5,15 +7,16 @@ import qualified Data.Set        as S
 import           Test.Hspec
 
 free :: Dependency
-free = Dependency "free" mempty mempty defV
+free = Dependency "free" mempty defV
 
 comonad :: Dependency
-comonad = Dependency "comonad" mempty mempty defV
+comonad = Dependency "comonad" mempty defV
 
--- newLens = Depedency "lens" mmepty ["free", "comonad"] (Version [0,2,0])
+newLens :: Dependency
+newLens = Dependency "lens" ((,mempty) <$> ["free", "comonad"]) (Version [0,2,0])
 
 lens :: Dependency
-lens = Dependency "lens" mempty ["free", "comonad"] defV
+lens = Dependency "lens" ((,mempty) <$> ["free", "comonad"]) defV
 
 defV :: Version
 defV = Version [0,1,0]
@@ -25,7 +28,7 @@ mapSingles :: [(d, b)] -> [(d, S.Set b)]
 mapSingles = fmap (second S.singleton)
 
 set :: PackageSet Dependency
-set = PackageSet $ M.fromList (mapSingles [("lens", lens), ("comonad", comonad), ("free", free)])
+set = PackageSet $ M.fromList (("lens", S.fromList [lens, newLens]) : mapSingles [("comonad", comonad), ("free", free)])
 
 main :: IO ()
 main = hspec $ parallel $ do
@@ -34,4 +37,4 @@ main = hspec $ parallel $ do
             buildSequence deps `shouldBe` [[free, comonad], [lens]]
     describe "resolveDependencies" $
         it "correctly resolves dependencies in a package set" $
-            resolveDependencies set [lens] `shouldBe` Right [[free, comonad], [lens]]
+            resolveDependencies set [lens] `shouldBe` Right [[free, comonad], [newLens]]

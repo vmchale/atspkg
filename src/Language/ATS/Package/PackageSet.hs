@@ -45,8 +45,15 @@ mkBuildPlan aps@(ATSPackageSet ps) = finalize . resolve . fmap asDep <=< stringB
                         Just x  -> Right x
                         Nothing -> Left (NotPresent k)
 
+canonicalize :: ATSConstraint -> Constraint Version
+canonicalize (ATSConstraint (Just l) Nothing)  = GreaterThanEq l
+canonicalize (ATSConstraint Nothing (Just u))  = LessThanEq u
+canonicalize (ATSConstraint Nothing Nothing)   = None
+canonicalize (ATSConstraint (Just l) (Just u)) = Bounded (GreaterThanEq l) (LessThanEq u)
+
 asDep :: ATSDependency -> Dependency
-asDep ATSDependency{..} = Dependency (unpack libName) mempty (unpack <$> libDeps) libVersion
+asDep ATSDependency{..} = Dependency (unpack libName) (g <$> libDeps) libVersion
+    where g = unpack *** canonicalize
 
 atsPkgsToPkgs :: ATSPackageSet -> PackageSet Dependency
 atsPkgsToPkgs (ATSPackageSet deps) = PackageSet $ foldr (.) id inserts mempty
@@ -57,7 +64,7 @@ atsPkgsToPkgs (ATSPackageSet deps) = PackageSet $ foldr (.) id inserts mempty
             (S.singleton (asDep dep))
 
 lookupVersions :: ATSPackageSet -> Dependency -> ATSDependency
-lookupVersions (ATSPackageSet deps) (Dependency name _ _ v) = head (filter f deps)
+lookupVersions (ATSPackageSet deps) (Dependency name _ v) = head (filter f deps)
     where f = (&&) <$> matchName <*> matchVersion
           libName' = unpack . libName
           matchName = (== name) . libName'
