@@ -5,6 +5,7 @@ cache:
     - $HOME/.stack
     - $HOME/.cabal
     - $HOME/.ghc
+    - .stack-work
 addons:
   apt:
     packages:
