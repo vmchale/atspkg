@@ -189,6 +189,9 @@ pkgToTargets :: Pkg -> [FilePath] -> [FilePath]
 pkgToTargets ~Pkg{..} [] = (unpack . target <$> bin) <> (unpack . libTarget <$> libraries)
 pkgToTargets _ ts        = ts
 
+noConstr :: ATSConstraint
+noConstr = ATSConstraint Nothing Nothing
+
 pkgToAction :: [IO ()] -- ^ Setup actions to be performed
             -> [String] -- ^ Targets
             -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
@@ -198,14 +201,14 @@ pkgToAction setup rs tgt ~(Pkg bs ts libs mt v v' ds cds bdeps ccLocal cf as cdi
 
     unless (rs == ["clean"]) $ do
 
-        let cdps = if f bs || f ts then "gc" : cds else cds where f = any gcBin
+        let cdps = if f bs || f ts then ("gc", noConstr) : cds else cds where f = any gcBin
 
         mkUserConfig
 
         ".atspkg/deps" %> \out -> do
             (_, cfgBin') <- cfgBin
             need [ cfgBin' ]
-            liftIO $ fetchDeps (ccFromString cc') setup (unpack <$> ds) (unpack <$> cdps) (unpack <$> bdeps) cfgBin' False >> writeFile out ""
+            liftIO $ fetchDeps (ccFromString cc') setup (unpack . fst <$> ds) (unpack . fst <$> cdps) (unpack . fst <$> bdeps) cfgBin' False >> writeFile out ""
 
         let bins = unpack . target <$> bs
         setTargets rs bins mt

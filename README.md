@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/vmchale/atspkg.svg?branch=master)](https://travis-ci.org/vmchale/atspkg)
 
 This is a build system for ATS written in Haskell and configured with Dhall. It
-is not yet stable.
+is not fully working, but the configuration format is now stable.
 
 ## Features & Non-Features
 
@@ -22,7 +22,7 @@ Things that `atspkg` will do for you:
 
 Things that `atspkg` will not do for you:
 
-  * Dependency resolution (this is planned)
+  * Dependency resolution (under construction)
   * Give you the full flexibility of the C/ATS ecosystem
   * Integrate with other ecosystems
   * Provide a centralized package repository

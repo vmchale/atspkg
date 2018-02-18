@@ -20,6 +20,7 @@ module Language.ATS.Package.Type ( -- * Types
                                  , ATSConstraint (..)
                                  , TargetPair (..)
                                  , CCompiler (..)
+                                 , LibDep
                                  -- * Lenses
                                  , dirLens
                                  ) where
@@ -28,23 +29,23 @@ import           Data.Dependency
 import           Development.Shake.ATS
 import           Quaalude
 
-data ATSConstraint = ATSConstraint { pkgName :: Text
-                                   , lower   :: Maybe Version
-                                   , upper   :: Maybe Version
+data ATSConstraint = ATSConstraint { lower :: Maybe Version
+                                   , upper :: Maybe Version
                                    }
-                deriving (Eq, Show, Generic, Interpret)
+                deriving (Eq, Show, Generic, Binary, Interpret)
 
 deriving newtype instance Interpret Version
 
--- TODO make this a map from versions to tarballs etc.
+type LibDep = (Text, ATSConstraint)
+
 -- | Type for a dependency
 data ATSDependency = ATSDependency { libName    :: Text -- ^ Library name, e.g.
                                    , dir        :: Text -- ^ Directory we should unpack to
                                    , url        :: Text -- ^ Url pointing to tarball
                                    , libVersion :: Version
-                                   , libDeps    :: [Text] -- ^ Strings containing dependencies
+                                   , libDeps    :: [LibDep] -- ^ Strings containing dependencies
                                    }
-                deriving (Eq, Show, Generic, Interpret, Binary)
+                   deriving (Eq, Show, Generic, Interpret, Binary)
 
 makeLensesFor [("dir", "dirLens")] ''ATSDependency
 
@@ -55,7 +56,6 @@ data TargetPair = TargetPair { hs    :: Text
                              } deriving (Eq, Show, Generic, Interpret, Binary)
 
 deriving instance Interpret ForeignCabal
-
 
 data Bin = Bin { src      :: Text -- ^ Source file (should end with @.dats@)
                , target   :: Text -- ^ Binary to be built
@@ -89,9 +89,9 @@ data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , man          :: Maybe Text -- ^ Optional (markdown) manpages to be converted using @pandoc@.
                , version      :: Version -- ^ Library version
                , compiler     :: Version -- ^ Compiler version
-               , dependencies :: [Text] -- ^ List of dependencies
-               , clib         :: [Text] -- ^ List of C dependencies
-               , buildDeps    :: [Text] -- ^ List of ATS dependencies that should be installed as static libraries
+               , dependencies :: [LibDep] -- ^ List of dependencies
+               , clib         :: [LibDep] -- ^ List of C dependencies
+               , buildDeps    :: [LibDep] -- ^ List of ATS dependencies that should be installed as static libraries
                , ccompiler    :: Text -- ^ The C compiler we should use
                , cflags       :: [Text] -- ^ List of flags to pass to the C compiler
                , atsSource    :: [Text] -- ^ Directory containing ATS source to be compile to C.

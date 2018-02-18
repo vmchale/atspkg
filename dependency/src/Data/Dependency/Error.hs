@@ -15,6 +15,7 @@ type DepM = Either ResolveError
 -- | An error that can occur during package resolution.
 data ResolveError = InternalError
                   | NotPresent String
+                  | Conflict [String] String
                   deriving (Show, Eq, NFData, Generic)
                   -- CircularDependencies String String
                   -- Conflict String String (Constraint Version) (Constraint Version)
@@ -22,3 +23,4 @@ data ResolveError = InternalError
 instance Pretty ResolveError where
     pretty InternalError = red "Error:" <+> "the" <+> squotes "dependency" <+> "package enountered an internal error. Please report this as a bug:\n" <> hang 2 "https://hub.darcs.net/vmchale/ats/issues"
     pretty (NotPresent s) = red "Error:" <+> "the package" <+> squotes (text s) <+> "could not be found.\n"
+    pretty (Conflict ss s) = red "Error:" <+> "the package" <+> squotes (text s) <+> "conflicts with already in-scope packages: " <+> pretty ss

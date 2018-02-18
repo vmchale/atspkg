@@ -3,6 +3,8 @@
 module Language.ATS.Package.Error ( -- * Helper functions
                                     unrecognized
                                   , resolutionFailed
+                                  -- * Types
+                                  , PackageError
                                   ) where
 
 import           Data.Dependency

@@ -23,6 +23,7 @@ module Data.Dependency.Type ( Dependency (..)
                             -- * Helper functions
                             , satisfies
                             , compatible
+                            , check
                             ) where
 
 import           Control.DeepSeq              (NFData)
@@ -96,11 +97,14 @@ instance Monoid (Constraint a) where
     mappend = (<>)
 
 data Dependency = Dependency { _libName         :: String
-                             , _libConstraint   :: Constraint Version
-                             , _libDependencies :: [String]
+                             , _libDependencies :: [(String, Constraint Version)]
                              , _libVersion      :: Version
                              }
                              deriving (Show, Eq, Ord, Generic, NFData)
+
+check :: Dependency -> [Dependency] -> Bool
+check (Dependency ln _ v) ds = and [ g v ds' | (Dependency _ ds' _) <- ds ]
+    where g v' = all (`satisfies` v') . fmap snd . filter ((== ln) . fst)
 
 satisfies :: (Ord a) => Constraint a -> a -> Bool
 satisfies (LessThanEq x) y    = x <= y
