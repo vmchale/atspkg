@@ -15,6 +15,7 @@ module Quaalude ( bool
                 , isPrefixOf
                 , isSuffixOf
                 , on
+                , both
                 , (<>)
                 , (***)
                 , (&&&)
@@ -82,10 +83,18 @@ module Quaalude ( bool
                 , putDoc
                 , Pretty (pretty)
                 , module X
+                -- Lens exports
+                , over
+                , _1
+                , _2
+                , makeLensesFor
+                , each
+                , (&)
+                , (%~)
                 ) where
 
 import           Control.Arrow                hiding ((<+>))
-import           Control.Lens                 as X
+import           Control.Lens                 hiding (both)
 import           Control.Monad.IO.Class
 import           Data.ByteString.Lazy         (ByteString)
 import           Network.HTTP.Client

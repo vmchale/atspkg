@@ -58,17 +58,18 @@ data ATSToolConfig = ATSToolConfig { libVersion  :: Version
                                    } deriving (Generic, Binary)
 
 -- | Type for binary and library builds with ATS.
-data BinaryTarget = BinaryTarget { cFlags     :: [String] -- ^ Flags to be passed to the C compiler
-                                 , toolConfig :: ATSToolConfig
-                                 , gc         :: Bool -- ^ Whether to configure build for use with the garbage collector.
-                                 , libs       :: [String] -- ^ Libraries against which to link
-                                 , src        :: [String] -- ^ ATS source files. If building an executable, at most one may contain @main0@.
-                                 , hsLibs     :: [ForeignCabal] -- ^ Cabal-based Haskell libraries
-                                 , genTargets :: [(String, String, Bool)] -- ^ Files to be run through @hs2ats@.
-                                 , binTarget  :: String -- ^ Binary target
-                                 , cDeps      :: [String] -- ^ C files necessary to compile the target
-                                 , otherDeps  :: [String] -- ^ Other files necessary to compile target
-                                 , tgtType    :: ArtifactType -- ^ Build type
+data BinaryTarget = BinaryTarget { cFlags      :: [String] -- ^ Flags to be passed to the C compiler
+                                 , toolConfig  :: ATSToolConfig
+                                 , gc          :: Bool -- ^ Whether to configure build for use with the garbage collector.
+                                 , libs        :: [String] -- ^ Libraries against which to link
+                                 , src         :: [String] -- ^ ATS source files. If building an executable, at most one may contain @main0@.
+                                 , hsLibs      :: [ForeignCabal] -- ^ Cabal-based Haskell libraries
+                                 , genTargets  :: [(String, String, Bool)] -- ^ Files to be run through @hs2ats@.
+                                 , linkTargets :: [(String, String)] -- ^ Targets for @_link.hats@ generation.
+                                 , binTarget   :: String -- ^ Binary target
+                                 , cDeps       :: [String] -- ^ C files necessary to compile the target
+                                 , otherDeps   :: [String] -- ^ Other files necessary to compile target
+                                 , tgtType     :: ArtifactType -- ^ Build type
                                  } deriving (Generic, Binary)
 
 -- | Data type containing information about Haskell components of a build.
