@@ -8,5 +8,7 @@ let lib = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default-
 in
 let default = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default.dhall
 in
+let plainDeps = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/plain-deps.dhall
+in
 
-{ showVersion = showVersion, makePkg = makePkg, bin = bin, lib = lib, default = default }
+{ showVersion = showVersion, makePkg = makePkg, bin = bin, lib = lib, default = default, plainDeps = plainDeps }
