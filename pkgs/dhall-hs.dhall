@@ -1,4 +1,4 @@
-let dep = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default-pkg.dhall
+let dep = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default-pkg.dhall
 
 in dep //
   { libName = "hs-dhall"
