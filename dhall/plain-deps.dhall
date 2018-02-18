@@ -1,5 +1,5 @@
-let T = Optional (List Integer)
+let none = [] : Optional (List Integer)
 in
-let plainDeps = λ(x : Text) → { _1 = x, _2 = { lower : ([] : T), upper ([] : T) } }
+let plainDeps = λ(x : Text) → { _1 = x, _2 = { lower = none, upper = none } }
 
 in plainDeps
