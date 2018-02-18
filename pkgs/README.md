@@ -9,7 +9,7 @@ a package is relatively simple: all it requires is a tarball and version
 information.
 
 ```
-let dep = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default-pkg.dhall
+let dep = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default-pkg.dhall
 
 in dep //
   { libName = "atscntrb-hx-libpcre"
@@ -30,9 +30,9 @@ to add a dependency.
 As a minimal example:
 
 ```
-let pkg = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default.dhall
+let pkg = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default.dhall
 in
-let dbin = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default-bin.dhall
+let dbin = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default-bin.dhall
 
 in pkg //
   { bin =

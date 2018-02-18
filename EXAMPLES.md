@@ -89,9 +89,9 @@ usually generate ATS types based on the Haskell types.
 The following is a minimal example of a configuration file:
 
 ```dhall
-let pkg = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default.dhall
+let pkg = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default.dhall
 in
-let dbin = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default-bin.dhall
+let dbin = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default-bin.dhall
 
 in pkg //
   { bin =
@@ -117,11 +117,11 @@ versioning.
 The sample configuration file is:
 
 ```dhall
-let dep = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/default-pkg.dhall
+let dep = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default-pkg.dhall
 in
 let concat = https://ipfs.io/ipfs/QmQ8w5PLcsNz56dMvRtq54vbuPe9cNnCCUXAQp6xLc6Ccx/Prelude/Text/concat
 in
-let showVersion = https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/dhall-version.dhall
+let showVersion = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/dhall-version.dhall
 
 in λ(x : List Integer) → 
   dep //
