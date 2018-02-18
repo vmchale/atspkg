@@ -199,7 +199,7 @@ atsCGen tc BinaryTarget{..} atsSrc cFiles =
         -- tell shake which files to track and copy them to the appropriate
         -- directory
         need (otherDeps ++ (TL.unpack . objectFile <$> hsLibs))
-        sources <- (<> cDeps) <$> transitiveDeps ((^._2) <$> genTargets) [atsSrc]
+        sources <- (<> cDeps) <$> transitiveDeps ((snd <$> linkTargets) <> ((^._2) <$> genTargets)) [atsSrc]
         need sources
         copySources tc sources
 
