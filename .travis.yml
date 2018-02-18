@@ -52,6 +52,7 @@ before_install:
 install:
   - stack --no-terminal --install-ghc test --only-dependencies
   - stack install dhall
+  - rm -rf .stack-work
 
 script:
   - stack --no-terminal build --haddock --no-haddock-deps --test --bench --no-run-tests --no-run-benchmarks
