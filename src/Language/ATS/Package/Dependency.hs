@@ -34,16 +34,18 @@ fetchDeps cc' setup' deps cdeps atsBld cfgPath b' =
         putStrLn "Resolving dependencies..."
         pkgSet <- unpack . defaultPkgs . decode <$> BSL.readFile cfgPath
         deps' <- join <$> setBuildPlan "ats" pkgSet deps
+        atsDeps' <- join <$> setBuildPlan "ats-bld" pkgSet atsBld
         putStrLn "Checking ATS dependencies..."
         d <- (<> "lib/") <$> pkgHome cc'
         let libs' = fmap (buildHelper False) deps'
         cdeps' <- join <$> setBuildPlan "c" pkgSet cdeps
         let unpacked = fmap (over dirLens (pack d <>)) cdeps'
             clibs = fmap (buildHelper False) unpacked
+            atsLibs = fmap (buildHelper False) atsDeps'
         atsBld' <- join <$> setBuildPlan "atsbld" pkgSet atsBld
-        parallel_ (extraWorkerWhileBlocked <$> (setup' ++ libs' ++ clibs))
-        mapM_ atsPkgSetup atsBld'
+        parallel_ (extraWorkerWhileBlocked <$> (setup' ++ libs' ++ clibs ++ atsLibs))
         mapM_ (setup cc') unpacked
+        mapM_ atsPkgSetup atsBld'
 
 pkgHome :: CCompiler -> IO FilePath
 pkgHome cc' = (++ ("/.atspkg/" ++ ccToDir cc')) <$> getEnv "HOME"
@@ -62,7 +64,9 @@ atslibSetup :: String
             -> IO ()
 atslibSetup lib' p = do
     putStrLn $ "installing " ++ lib' ++ "..."
-    void $ readCreateProcess ((proc "atspkg" ["install"]) { cwd = Just p, std_err = CreatePipe }) ""
+    subdirs <- allSubdirs p
+    pkgPath <- fromMaybe p <$> findFile subdirs "atspkg.dhall" -- FIXME this will fail for more than one package
+    void $ readCreateProcess ((proc "atspkg" ["install"]) { cwd = Just (takeDirectory pkgPath), std_err = CreatePipe }) ""
 
 clibSetup :: CCompiler -- ^ C compiler
           -> String -- ^ Library name
