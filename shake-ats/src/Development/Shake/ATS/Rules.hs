@@ -3,14 +3,16 @@ module Development.Shake.ATS.Rules ( atsLex
                                    , cabalExport
                                    , getSubdirs
                                    , genATS
+                                   , genLinks
                                    ) where
 
 import           Control.Monad
-import           Data.List                  (isPrefixOf)
-import           Data.Semigroup             (Semigroup (..))
-import qualified Data.Text.Lazy             as TL
-import           Development.Shake          hiding (doesDirectoryExist)
-import           Development.Shake.ATS.Type hiding (BinaryTarget (..))
+import           Data.List                      (isPrefixOf)
+import           Data.Semigroup                 (Semigroup (..))
+import qualified Data.Text.Lazy                 as TL
+import           Development.Shake              hiding (doesDirectoryExist)
+import           Development.Shake.ATS.Generate
+import           Development.Shake.ATS.Type     hiding (BinaryTarget (..))
 import           Development.Shake.Cabal
 import           Development.Shake.FilePath
 import           Language.ATS.Generate
@@ -26,6 +28,13 @@ genATS src target cpphs =
     target %> \out -> liftIO $ do
         createDirectoryIfMissing True (takeDirectory out)
         genATSTypes src out cpphs
+
+genLinks :: FilePath -> FilePath -> Rules ()
+genLinks dats link =
+    link %> \out -> liftIO $ do
+        contents <- readFile dats
+        let proc = generateLinks contents
+        writeFile out (either undefined id proc)
 
 getSubdirs :: FilePath -> IO [FilePath]
 getSubdirs p = do
