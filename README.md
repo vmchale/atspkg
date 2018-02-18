@@ -62,7 +62,7 @@ to upgrade to the latest release.
 
 ### Source
 
-Alternately, you can download
+If that doesn't work, you can download
 [Cabal](https://www.haskell.org/cabal/download.html) and
 [GHC](https://www.haskell.org/ghc/download.html) and install with
 
