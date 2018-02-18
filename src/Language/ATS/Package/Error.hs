@@ -4,7 +4,7 @@ module Language.ATS.Package.Error ( -- * Helper functions
                                     unrecognized
                                   , resolutionFailed
                                   -- * Types
-                                  , PackageError
+                                  , PackageError (..)
                                   ) where
 
 import           Data.Dependency
