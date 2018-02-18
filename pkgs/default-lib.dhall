@@ -3,13 +3,14 @@ in
 let TargetPair = { hs : Text, ats : Text, cpphs : Bool }
 in
 
-let bin =
+let lib =
   { libs = ([] : List Text)
   , includes = ([] : List Text)
   , hsDeps = ([] : List ForeignCabal)
   , hs2ats = ([] : List TargetPair)
   , cSources = ([] : List Text)
   , extras = ([] : List Text)
+  , static = True
   }
 
-in bin
+in lib

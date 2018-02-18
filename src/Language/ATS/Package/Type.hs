@@ -77,6 +77,7 @@ data Lib = Lib { name      :: Text -- ^ Name of library being provided
                , hs2ats    :: [TargetPair] -- ^ Sources and targets for @hs2ats@
                , cSources  :: [Text] -- ^ C source files the build depends on
                , extras    :: [Text] -- ^ Other source files the build depends on
+               , static    :: Bool -- ^ Whether to make a static library
                }
          deriving (Show, Eq, Generic, Interpret, Binary)
 

@@ -10,6 +10,8 @@ free = Dependency "free" mempty mempty defV
 comonad :: Dependency
 comonad = Dependency "comonad" mempty mempty defV
 
+-- newLens = Depedency "lens" mmepty ["free", "comonad"] (Version [0,2,0])
+
 lens :: Dependency
 lens = Dependency "lens" mempty ["free", "comonad"] defV
 

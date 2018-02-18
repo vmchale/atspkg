@@ -10,7 +10,6 @@ maintainer:          vamchale@gmail.com
 copyright:           Copyright: (c) 2018 Vanessa McHale
 category:            Language, Haskell, ATS
 build-type:          Simple
-extra-doc-files:     README.md
 cabal-version:       1.18
 
 Flag development {

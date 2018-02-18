@@ -3,6 +3,7 @@ module Data.Dependency
       resolveDependencies
     , buildSequence
     , satisfies
+    , compatible
     -- * Types
     , Dependency (..)
     , PackageSet (..)
@@ -10,31 +11,44 @@ module Data.Dependency
     , DepM
     , ResolveError (..)
     , Constraint (..)
+    , ResolveStateM (..)
+    , ResolveState
+    , ResMap
     ) where
 
 import           Control.Monad
+import           Control.Monad.Tardis
+import           Control.Monad.Trans.Class
 import           Data.Dependency.Error
 import           Data.Dependency.Sort
 import           Data.Dependency.Type
-import           Data.Foldable         (toList)
-import           Data.List             (groupBy)
-import qualified Data.Map              as M
-import qualified Data.Set              as S
+import           Data.Foldable             (toList)
+import           Data.List                 (groupBy)
+import qualified Data.Map                  as M
+import qualified Data.Set                  as S
 
 lookupMap :: String -> M.Map String a -> DepM a
 lookupMap k ps = case M.lookup k ps of
     Just x  -> Right x
     Nothing -> Left (NotPresent k)
 
-lookupSet :: S.Set a -> DepM a
-lookupSet s = case S.lookupMax s of
+lookupSet :: M.Map String Dependency -> S.Set a -> DepM a
+lookupSet _ s = case S.lookupMax s of
     Just x  -> Right x
     Nothing -> Left InternalError
 
-latest :: (Ord a) => PackageSet a -> Dependency -> DepM (String, a)
+latest :: PackageSet Dependency -> Dependency -> ResolveState (String, Dependency)
 latest (PackageSet ps) (Dependency ln _ _ _) = do
-    s <- lookupMap ln ps
-    (,) ln <$> lookupSet s
+
+    st <- getPast
+    s <- lift $ lookupMap ln ps
+    v <- lift (lookupSet st s)
+
+    -- get future modifications and apply them, sending state forwards
+    pf <- getFuture
+    modifyForwards (pf . M.insert ln v)
+
+    pure (ln, v)
 
 buildSequence :: [Dependency] -> [[Dependency]]
 buildSequence = reverse . groupBy independent . sortDeps
@@ -53,8 +67,11 @@ saturateDeps ps = resolve <=< saturateDeps' ps
 saturateDeps' :: PackageSet Dependency -> Dependency -> DepM (S.Set Dependency)
 saturateDeps' (PackageSet ps) dep = do
     deps <- sequence [ lookupMap lib ps | lib <- _libDependencies dep ]
-    list <- (:) dep <$> traverse lookupSet deps
+    list <- (:) dep <$> traverse (lookupSet mempty) deps
     pure $ S.fromList list
+
+run :: ResolveState a -> DepM a
+run = flip evalTardisT (id, mempty) . unResolve
 
 -- | Heuristics:
 --
@@ -73,4 +90,4 @@ resolveDependencies :: PackageSet Dependency -> [Dependency] -> DepM [[Dependenc
 resolveDependencies ps = select . getLatest <=< fmap (buildSequence . toList) . saturated
     where select = fmap (fmap (fmap snd))
           saturated dep = S.unions <$> traverse (saturateDeps ps) dep
-          getLatest = traverse (traverse (latest ps))
+          getLatest = run . traverse (traverse (latest ps))
