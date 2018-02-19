@@ -2,4 +2,4 @@ let makePkg = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/make
 
 in λ(x : { x : List Integer, name : Text, githubUsername : Text, description : Text }) →
   makePkg { x = x.x, name = x.name, githubUsername = x.githubUsername }
-    // { description = [ x.description ] }
+    // { description = [ x.description ] : Optional Text }
