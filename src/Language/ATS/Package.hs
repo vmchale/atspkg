@@ -11,6 +11,7 @@ module Language.ATS.Package ( pkgToAction
                             , mkBuildPlan
                             , buildHelper
                             , checkPkg
+                            , displayList
                             -- * Types
                             , Version (..)
                             , Pkg (..)
