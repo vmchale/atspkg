@@ -78,8 +78,12 @@ module Quaalude ( bool
                 -- * "Text.PrettyPrint.ANSI.Leijen" reëxports
                 , (<+>)
                 , text
+                , punctuate
                 , red
+                , dullyellow
+                , hardline
                 , hang
+                , indent
                 , putDoc
                 , Pretty (pretty)
                 , module X

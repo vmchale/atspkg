@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE RecordWildCards            #-}
@@ -5,6 +6,7 @@
 module Language.ATS.Package.PackageSet ( ATSPackageSet (..)
                                        , setBuildPlan
                                        , mkBuildPlan
+                                       , displayList
                                        ) where
 
 import qualified Data.ByteString.Lazy       as BSL
@@ -15,10 +17,23 @@ import           Language.ATS.Package.Error
 import           Language.ATS.Package.Type
 import           Quaalude
 
--- TODO string instance? string :: Type String
-
 newtype ATSPackageSet = ATSPackageSet [ ATSDependency ]
     deriving (Interpret, Show)
+
+instance Pretty Version where
+    pretty v = text (show v)
+
+instance Pretty ATSDependency where
+    pretty (ATSDependency ln dir url v _) = dullyellow (text (unpack ln)) <#> indent 4 ("directory:" <+> text (unpack dir) <#> "url:" <+> text (unpack url) <#> "version" <+> pretty v) <> hardline
+
+instance Pretty ATSPackageSet where
+    pretty (ATSPackageSet ds) = mconcat (punctuate hardline (pretty <$> ds))
+
+displayList :: String -> IO ()
+displayList = putDoc . pretty <=< listDeps
+
+listDeps :: String -> IO ATSPackageSet
+listDeps = input auto . pack
 
 setBuildPlan :: FilePath -- ^ Filepath for cache inside @.atspkg@
              -> String -- ^ URL of package set to use.
@@ -30,10 +45,12 @@ setBuildPlan p url deps = do
 
     where depCache = ".atspkg/buildplan-" ++ p
           setBuildPlan' = do
-            pkgSet <- input auto (pack url)
+            pkgSet <- listDeps url
             case mkBuildPlan pkgSet deps of
-                Right x -> createDirectoryIfMissing True ".atspkg" >> BSL.writeFile depCache (encode x) >> pure x
                 Left x  -> resolutionFailed x
+                Right x -> createDirectoryIfMissing True ".atspkg" >>
+                           BSL.writeFile depCache (encode x) >>
+                           pure x
 
 mkBuildPlan :: ATSPackageSet -> [String] -> DepM [[ATSDependency]]
 mkBuildPlan aps@(ATSPackageSet ps) = finalize . resolve . fmap asDep <=< stringBuildPlan

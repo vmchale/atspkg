@@ -2,8 +2,9 @@
 
 module Language.ATS.Package.Exec ( exec
                                  ) where
+
 import           Control.Composition
-import           Control.Lens               hiding (argument)
+import           Control.Lens               hiding (List, argument)
 import           Data.Bool                  (bool)
 import           Data.Maybe                 (fromMaybe)
 import           Data.Semigroup             (Semigroup (..))
@@ -43,6 +44,7 @@ data Command = Install
              | Valgrind { _targets :: [String] }
              | Run { _targets :: [String] }
              | Check { _filePath :: String, _details :: Bool }
+             | List
 
 command' :: Parser Command
 command' = hsubparser
@@ -56,6 +58,7 @@ command' = hsubparser
     <> command "valgrind" (info valgrind (progDesc "Run generated binaries through valgrind"))
     <> command "run" (info run' (progDesc "Run generated binaries"))
     <> command "check" (info check' (progDesc "Check pkg.dhall file to ensure it is well-typed."))
+    <> command "list" (info (pure List) (progDesc "List available packages"))
     )
 
 check' :: Parser Command
@@ -143,6 +146,7 @@ runHelper rb rba lint rs tgt v = bool
     =<< check Nothing
 
 run :: Command -> IO ()
+run List = displayList "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
 run (Check p b) = print =<< checkPkg p b
 run Upgrade = upgradeAtsPkg
 run Nuke = cleanAll
