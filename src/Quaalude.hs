@@ -98,6 +98,7 @@ module Quaalude ( bool
                 , each
                 , (&)
                 , (%~)
+                -- , maybeDo
                 ) where
 
 import           Control.Arrow                hiding ((<+>))
@@ -125,6 +126,10 @@ import           System.Environment           (getEnv)
 import           Text.PrettyPrint.ANSI.Leijen hiding (bool, (<>))
 
 infixr 5 <#>
+
+-- maybeDo :: Monad m => Maybe (m ()) -> m ()
+-- maybeDo (Just a) = a
+-- maybeDo _        = pure ()
 
 -- | Same as "Text.PrettyPrint.ANSI.Leijen"'s @<$>@, but doesn't clash with the
 -- prelude.

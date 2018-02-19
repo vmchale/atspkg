@@ -76,6 +76,14 @@ mkInstall =
                 need [mt']
                 copyFile' mt' manDest
             Nothing -> pure ()
+        co <- compleat
+        case completions config of
+            Just com -> if not co then pure () else do
+                let com' = unpack com
+                    comDest = home <> "/.compleat/" <> takeFileName com'
+                need [com']
+                copyFile' com' comDest
+            Nothing -> pure ()
 
 mkManpage :: Rules ()
 mkManpage = do
@@ -196,7 +204,7 @@ pkgToAction :: [IO ()] -- ^ Setup actions to be performed
             -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
             -> Pkg -- ^ Package data type
             -> Rules ()
-pkgToAction setup rs tgt ~(Pkg bs ts libs mt v v' ds cds bdeps ccLocal cf as cdir) =
+pkgToAction setup rs tgt ~(Pkg bs ts libs mt _ v v' ds cds bdeps ccLocal cf as cdir) =
 
     unless (rs == ["clean"]) $ do
 
