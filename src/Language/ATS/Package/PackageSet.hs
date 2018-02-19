@@ -24,8 +24,8 @@ instance Pretty Version where
     pretty v = text (show v)
 
 instance Pretty ATSDependency where
-    pretty (ATSDependency ln dir url Nothing v _) = dullyellow (text (unpack ln)) <#> indent 4 ("directory:" <+> text (unpack dir) <#> "url:" <+> text (unpack url) <#> "version:" <+> pretty v) <> hardline
-    pretty (ATSDependency ln dir url (Just d) v _) = dullyellow (text (unpack ln)) <#> indent 4 ("description:" <+> text (unpack d) <#> "directory:" <+> text (unpack dir) <#> "url:" <+> text (unpack url) <#> "version:" <+> pretty v) <> hardline
+    pretty (ATSDependency ln _ url Nothing v _) = dullyellow (text (unpack ln)) <#> indent 4 ("url:" <+> text (unpack url) <#> "version:" <+> pretty v) <> hardline
+    pretty (ATSDependency ln _ url (Just d) v _) = dullyellow (text (unpack ln)) <#> indent 4 ("description:" <+> text (unpack d) <#> "url:" <+> text (unpack url) <#> "version:" <+> pretty v) <> hardline
 
 instance Pretty ATSPackageSet where
     pretty (ATSPackageSet ds) = mconcat (punctuate hardline (pretty <$> ds))
