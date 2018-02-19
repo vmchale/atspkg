@@ -2,6 +2,7 @@
 
 module Quaalude ( bool
                 , intersperse
+                , sortBy
                 , void
                 , unless
                 , when
@@ -89,9 +90,11 @@ module Quaalude ( bool
                 , module X
                 -- Lens exports
                 , over
+                , view
                 , _1
                 , _2
                 , makeLensesFor
+                , makeLenses
                 , each
                 , (&)
                 , (%~)
@@ -111,7 +114,7 @@ import           Control.Composition
 import           Control.Monad
 import           Data.Binary
 import           Data.Bool                    (bool)
-import           Data.List                    (intersperse, isPrefixOf, isSuffixOf)
+import           Data.List                    (intersperse, isPrefixOf, isSuffixOf, sortBy)
 import           Data.Maybe                   (fromMaybe)
 import           Data.Text.Lazy               (pack, unpack)
 import           Development.Shake            hiding (getEnv)
