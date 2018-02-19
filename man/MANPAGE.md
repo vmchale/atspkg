@@ -43,6 +43,8 @@ to $HOME/.local/share/man/man1
 
 **check** - Check a pkg.dhall file to make sure it is well-typed.
 
+**list** - List all available packages in current package set.
+
 ## OPTIONS
 
 **-h** **-\-help**
