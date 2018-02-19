@@ -13,6 +13,7 @@ let pkgset =
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-fast-arithmetic.dhall [0,3,2,5]
   , https://raw.githubusercontent.com/vmchale/ats-linecount/master/pkg.dhall
   , https://raw.githubusercontent.com/vmchale/specats/master/pkg.dhall [0,2,2]
+  , https://raw.githubusercontent.com/vmchale/monoid/master/pkg.dhall [0,1,0]
   ]
 
 in pkgset
