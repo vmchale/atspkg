@@ -2,6 +2,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE RecordWildCards            #-}
+{-# LANGUAGE TemplateHaskell            #-}
 
 module Language.ATS.Package.PackageSet ( ATSPackageSet (..)
                                        , setBuildPlan
@@ -17,8 +18,10 @@ import           Language.ATS.Package.Error
 import           Language.ATS.Package.Type
 import           Quaalude
 
-newtype ATSPackageSet = ATSPackageSet [ ATSDependency ]
+newtype ATSPackageSet = ATSPackageSet { _atsPkgSet :: [ ATSDependency ] }
     deriving (Interpret, Show)
+
+makeLenses ''ATSPackageSet
 
 instance Pretty Version where
     pretty v = text (show v)
@@ -34,7 +37,8 @@ displayList :: String -> IO ()
 displayList = putDoc . pretty <=< listDeps
 
 listDeps :: String -> IO ATSPackageSet
-listDeps = input auto . pack
+listDeps = fmap s . input auto . pack
+    where s = over atsPkgSet (sortBy (compare `on` libName))
 
 setBuildPlan :: FilePath -- ^ Filepath for cache inside @.atspkg@
              -> String -- ^ URL of package set to use.
