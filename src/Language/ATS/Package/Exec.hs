@@ -88,11 +88,11 @@ targets :: String -> Parser [String]
 targets = targetP mempty many
 
 targetP :: Mod ArgumentFields String -> (Parser String -> a) -> String -> a
-targetP completions f s = f
+targetP completions' f s = f
     (argument str
     (metavar "TARGET"
     <> help ("Targets to " <> s)
-    <> completions))
+    <> completions'))
 
 build' :: Parser Command
 build' = Build

@@ -89,6 +89,7 @@ data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , test         :: [Bin] -- ^ List of test suites
                , libraries    :: [Lib] -- ^ List of libraries to be built
                , man          :: Maybe Text -- ^ Optional (markdown) manpages to be converted using @pandoc@.
+               , completions  :: Maybe Text -- ^ Optional @compleat@ completions to be installed alongside package.
                , version      :: Version -- ^ Library version
                , compiler     :: Version -- ^ Compiler version
                , dependencies :: [LibDep] -- ^ List of dependencies
