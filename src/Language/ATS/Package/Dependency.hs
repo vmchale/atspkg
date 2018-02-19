@@ -87,7 +87,7 @@ clibSetup cc' lib' p = do
 
 atsPkgSetup :: ATSDependency
             -> IO ()
-atsPkgSetup (ATSDependency lib' dirName' _ _ _) = do
+atsPkgSetup (ATSDependency lib' dirName' _ _ _ _) = do
     lib'' <- (<> unpack lib') <$> pkgHome GCCStd
     b <- doesFileExist lib''
     unless b $ do
@@ -97,7 +97,7 @@ atsPkgSetup (ATSDependency lib' dirName' _ _ _) = do
 setup :: CCompiler -- ^ C compiler to use
       -> ATSDependency -- ^ ATSDependency itself
       -> IO ()
-setup cc' (ATSDependency lib' dirName' _ _ _) = do
+setup cc' (ATSDependency lib' dirName' _ _ _ _) = do
     lib'' <- (<> unpack lib') <$> pkgHome cc'
     b <- doesFileExist lib''
     unless b $ do
@@ -124,7 +124,7 @@ zipResponse dirName response = do
     extractFilesFromArchive [options] (toArchive response)
 
 buildHelper :: Bool -> ATSDependency -> IO ()
-buildHelper b (ATSDependency lib' dirName' url'' _ _) = do
+buildHelper b (ATSDependency lib' dirName' url'' _ _ _) = do
 
     let (lib, dirName, url') = (lib', dirName', url'') & each %~ unpack
 

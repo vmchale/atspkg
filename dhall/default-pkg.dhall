@@ -1,11 +1,12 @@
 let LibDep = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/types/LibDep.dhall
 in
 
-let dep = λ(x : List Integer) →
+let dep =
   { dir = ".atspkg/contrib"
-  , libVersion = x
-    : List Integer
+  , libVersion = [0,1,0]
   , libDeps = []
     : List LibDep
+  , description = []
+    : Optional Text
   }
-in dep [0,1,0]
+in dep

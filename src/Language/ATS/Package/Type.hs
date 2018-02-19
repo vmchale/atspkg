@@ -39,11 +39,12 @@ deriving newtype instance Interpret Version
 type LibDep = (Text, ATSConstraint)
 
 -- | Type for a dependency
-data ATSDependency = ATSDependency { libName    :: Text -- ^ Library name, e.g.
-                                   , dir        :: Text -- ^ Directory we should unpack to
-                                   , url        :: Text -- ^ Url pointing to tarball
-                                   , libVersion :: Version
-                                   , libDeps    :: [LibDep] -- ^ Strings containing dependencies
+data ATSDependency = ATSDependency { libName     :: Text -- ^ Library name, e.g.
+                                   , dir         :: Text -- ^ Directory we should unpack to
+                                   , url         :: Text -- ^ Url pointing to tarball
+                                   , description :: Maybe Text -- ^ Package description
+                                   , libVersion  :: Version
+                                   , libDeps     :: [LibDep] -- ^ Strings containing dependencies
                                    }
                    deriving (Eq, Show, Generic, Interpret, Binary)
 
