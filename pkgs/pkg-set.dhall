@@ -6,7 +6,6 @@ let pkgset =
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-cstream.dhall [1,0,4]
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/libc-atomic-ops.dhall
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/libc-gc.dhall
-  , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/dhall-hs.dhall
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,1]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall
   , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall [0,1,5]
