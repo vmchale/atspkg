@@ -23,6 +23,7 @@ module Language.ATS.Package ( pkgToAction
                             , ForeignCabal (..)
                             , ATSPackageSet (..)
                             , LibDep
+                            , DepSelector
                             , PackageError (..)
                             -- * Lenses
                             , dirLens

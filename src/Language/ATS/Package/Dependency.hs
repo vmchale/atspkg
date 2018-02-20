@@ -33,12 +33,12 @@ fetchDeps cc' setup' deps cdeps atsBld cfgPath b' =
     unless (null deps && null cdeps && b') $ do
         putStrLn "Resolving dependencies..."
         pkgSet <- unpack . defaultPkgs . decode <$> BSL.readFile cfgPath
-        deps' <- join <$> setBuildPlan "ats" pkgSet deps
-        atsDeps' <- join <$> setBuildPlan "atsbld" pkgSet atsBld
+        deps' <- join <$> setBuildPlan "ats" libDeps pkgSet deps
+        atsDeps' <- join <$> setBuildPlan "atsbld" libBldDeps pkgSet atsBld
         putStrLn "Checking ATS dependencies..."
         d <- (<> "lib/") <$> pkgHome cc'
         let libs' = fmap (buildHelper False) deps'
-        cdeps' <- join <$> setBuildPlan "c" pkgSet cdeps
+        cdeps' <- join <$> setBuildPlan "c" libDeps pkgSet cdeps
         let unpacked = fmap (over dirLens (pack d <>)) cdeps'
             clibs = fmap (buildHelper False) unpacked
             atsLibs = fmap (buildHelper False) atsDeps'
