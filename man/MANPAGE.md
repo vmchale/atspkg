@@ -45,7 +45,7 @@ to $HOME/.local/share/man/man1
 
 **list** - List all available packages in current package set.
 
-## OPTIONS
+# OPTIONS
 
 **-h** **-\-help**
 :   Display help

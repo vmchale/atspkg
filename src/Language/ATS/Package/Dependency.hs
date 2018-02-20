@@ -34,7 +34,7 @@ fetchDeps cc' setup' deps cdeps atsBld cfgPath b' =
         putStrLn "Resolving dependencies..."
         pkgSet <- unpack . defaultPkgs . decode <$> BSL.readFile cfgPath
         deps' <- join <$> setBuildPlan "ats" pkgSet deps
-        atsDeps' <- join <$> setBuildPlan "ats-bld" pkgSet atsBld
+        atsDeps' <- join <$> setBuildPlan "atsbld" pkgSet atsBld
         putStrLn "Checking ATS dependencies..."
         d <- (<> "lib/") <$> pkgHome cc'
         let libs' = fmap (buildHelper False) deps'
@@ -42,10 +42,9 @@ fetchDeps cc' setup' deps cdeps atsBld cfgPath b' =
         let unpacked = fmap (over dirLens (pack d <>)) cdeps'
             clibs = fmap (buildHelper False) unpacked
             atsLibs = fmap (buildHelper False) atsDeps'
-        atsBld' <- join <$> setBuildPlan "atsbld" pkgSet atsBld
         parallel_ (extraWorkerWhileBlocked <$> (setup' ++ libs' ++ clibs ++ atsLibs))
         mapM_ (setup cc') unpacked
-        mapM_ atsPkgSetup atsBld'
+        mapM_ atsPkgSetup atsDeps'
 
 pkgHome :: CCompiler -> IO FilePath
 pkgHome cc' = (++ ("/.atspkg/" ++ ccToDir cc')) <$> getEnv "HOME"
@@ -59,6 +58,18 @@ allSubdirs d = do
     ds' <- mapM allSubdirs ds
     pure $ join (ds : ds')
 
+maybeExit :: ExitCode -> IO ()
+maybeExit ExitSuccess = pure ()
+maybeExit x           = exitWith x
+
+waitCreateProcess :: CreateProcess -> IO ()
+waitCreateProcess =
+    maybeExit <=< waitForProcess <=< fmap (view _4) . createProcess
+
+silentCreateProcess :: CreateProcess -> IO ()
+silentCreateProcess proc' =
+    void $ readCreateProcess (proc' { std_err = NoStream }) ""
+
 atslibSetup :: String
             -> FilePath
             -> IO ()
@@ -66,7 +77,7 @@ atslibSetup lib' p = do
     putStrLn $ "installing " ++ lib' ++ "..."
     subdirs <- allSubdirs p
     pkgPath <- fromMaybe p <$> findFile subdirs "atspkg.dhall"
-    void $ readCreateProcess ((proc "atspkg" ["install"]) { cwd = Just (takeDirectory pkgPath), std_err = CreatePipe }) ""
+    waitCreateProcess ((proc "atspkg" ["install"]) { cwd = Just (takeDirectory pkgPath), std_out = Inherit })
 
 clibSetup :: CCompiler -- ^ C compiler
           -> String -- ^ Library name
@@ -79,15 +90,15 @@ clibSetup cc' lib' p = do
     h <- pkgHome cc'
     let procEnv = Just [("CC", ccToString cc'), ("CFLAGS" :: String, "-I" <> h <> "include"), ("PATH", "/usr/bin:/bin")]
     putStrLn $ "configuring " ++ lib' ++ "..."
-    void $ readCreateProcess ((proc configurePath ["--prefix", h, "--host", host]) { cwd = Just p, env = procEnv, std_err = CreatePipe }) ""
+    void $ readCreateProcess ((proc configurePath ["--prefix", h, "--host", host]) { cwd = Just p, env = procEnv, std_err = NoStream }) ""
     putStrLn $ "building " ++ lib' ++ "..."
-    void $ readCreateProcess ((proc "make" []) { cwd = Just p, std_err = CreatePipe }) ""
+    silentCreateProcess ((proc "make" []) { cwd = Just p })
     putStrLn $ "installing " ++ lib' ++ "..."
-    void $ readCreateProcess ((proc "make" ["install"]) { cwd = Just p, std_err = CreatePipe }) ""
+    silentCreateProcess ((proc "make" ["install"]) { cwd = Just p })
 
 atsPkgSetup :: ATSDependency
             -> IO ()
-atsPkgSetup (ATSDependency lib' dirName' _ _ _ _) = do
+atsPkgSetup (ATSDependency lib' dirName' _ _ _ _ _) = do
     lib'' <- (<> unpack lib') <$> pkgHome GCCStd
     b <- doesFileExist lib''
     unless b $ do
@@ -97,7 +108,7 @@ atsPkgSetup (ATSDependency lib' dirName' _ _ _ _) = do
 setup :: CCompiler -- ^ C compiler to use
       -> ATSDependency -- ^ ATSDependency itself
       -> IO ()
-setup cc' (ATSDependency lib' dirName' _ _ _ _) = do
+setup cc' (ATSDependency lib' dirName' _ _ _ _ _) = do
     lib'' <- (<> unpack lib') <$> pkgHome cc'
     b <- doesFileExist lib''
     unless b $ do
@@ -124,7 +135,7 @@ zipResponse dirName response = do
     extractFilesFromArchive [options] (toArchive response)
 
 buildHelper :: Bool -> ATSDependency -> IO ()
-buildHelper b (ATSDependency lib' dirName' url'' _ _ _) = do
+buildHelper b (ATSDependency lib' dirName' url'' _ _ _ _) = do
 
     let (lib, dirName, url') = (lib', dirName', url'') & each %~ unpack
 

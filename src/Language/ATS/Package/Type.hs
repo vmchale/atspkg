@@ -45,6 +45,7 @@ data ATSDependency = ATSDependency { libName     :: Text -- ^ Library name, e.g.
                                    , description :: Maybe Text -- ^ Package description
                                    , libVersion  :: Version
                                    , libDeps     :: [LibDep] -- ^ Strings containing dependencies
+                                   , buildDeps   :: [LibDep] -- ^ List of dependencies that must be built
                                    }
                    deriving (Eq, Show, Generic, Interpret, Binary)
 
