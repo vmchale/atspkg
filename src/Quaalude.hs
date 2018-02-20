@@ -24,6 +24,8 @@ module Quaalude ( bool
                 , first
                 , second
                 , getEnv
+                , exitWith
+                , ExitCode (ExitSuccess)
                 , MonadIO (..)
                 -- * "Data.Text.Lazy" reëxports
                 , Text
@@ -93,6 +95,7 @@ module Quaalude ( bool
                 , view
                 , _1
                 , _2
+                , _4
                 , makeLensesFor
                 , makeLenses
                 , each
@@ -123,6 +126,7 @@ import           Development.Shake.FilePath
 import           Dhall                        hiding (bool)
 import           System.Directory             as X
 import           System.Environment           (getEnv)
+import           System.Exit                  (ExitCode (ExitSuccess), exitWith)
 import           Text.PrettyPrint.ANSI.Leijen hiding (bool, (<>))
 
 infixr 5 <#>

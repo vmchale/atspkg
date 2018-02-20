@@ -27,7 +27,7 @@ instance Pretty Version where
     pretty v = text (show v)
 
 instance Pretty ATSDependency where
-    pretty (ATSDependency ln _ url md v _) = dullyellow (text (unpack ln)) <#> indent 4 (g md "url:" <+> text (unpack url) <#> "version:" <+> pretty v) <> hardline
+    pretty (ATSDependency ln _ url md v _ _) = dullyellow (text (unpack ln)) <#> indent 4 (g md "url:" <+> text (unpack url) <#> "version:" <+> pretty v) <> hardline
         where g (Just d) = ("description:" <+> text (unpack d) <#>)
               g Nothing  = id
 
@@ -35,11 +35,14 @@ instance Pretty ATSPackageSet where
     pretty (ATSPackageSet ds) = mconcat (punctuate hardline (pretty <$> ds))
 
 displayList :: String -> IO ()
-displayList = putDoc . pretty <=< listDeps
+displayList = putDoc . pretty <=< listDeps True
 
-listDeps :: String -> IO ATSPackageSet
-listDeps = fmap s . input auto . pack
-    where s = over atsPkgSet (sortBy (compare `on` libName))
+listDeps :: Bool -- ^ Whether to sort dependencies
+         -> String -- ^ URL of package set
+         -> IO ATSPackageSet
+listDeps b = fmap s . input auto . pack
+    where s = bool id s' b
+          s' = over atsPkgSet (sortBy (compare `on` libName))
 
 setBuildPlan :: FilePath -- ^ Filepath for cache inside @.atspkg@
              -> String -- ^ URL of package set to use.
@@ -51,7 +54,7 @@ setBuildPlan p url deps = do
 
     where depCache = ".atspkg/buildplan-" ++ p
           setBuildPlan' = do
-            pkgSet <- listDeps url
+            pkgSet <- listDeps False url
             case mkBuildPlan pkgSet deps of
                 Left x  -> resolutionFailed x
                 Right x -> createDirectoryIfMissing True ".atspkg" >>
