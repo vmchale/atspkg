@@ -45,26 +45,30 @@ listDeps b = fmap s . input auto . pack
           s' = over atsPkgSet (sortBy (compare `on` libName))
 
 setBuildPlan :: FilePath -- ^ Filepath for cache inside @.atspkg@
+             -> DepSelector
              -> String -- ^ URL of package set to use.
              -> [String] -- ^ Libraries we want
              -> IO [[ATSDependency]]
-setBuildPlan p url deps = do
+setBuildPlan p getDeps url deps = do
     b <- doesFileExist depCache
     bool setBuildPlan' (decode <$> BSL.readFile depCache) b
 
     where depCache = ".atspkg/buildplan-" ++ p
           setBuildPlan' = do
             pkgSet <- listDeps False url
-            case mkBuildPlan pkgSet deps of
+            case mkBuildPlan getDeps pkgSet deps of
                 Left x  -> resolutionFailed x
                 Right x -> createDirectoryIfMissing True ".atspkg" >>
                            BSL.writeFile depCache (encode x) >>
                            pure x
 
-mkBuildPlan :: ATSPackageSet -> [String] -> DepM [[ATSDependency]]
-mkBuildPlan aps@(ATSPackageSet ps) = finalize . resolve . fmap asDep <=< stringBuildPlan
+mkBuildPlan :: DepSelector
+            -> ATSPackageSet
+            -> [String]
+            -> DepM [[ATSDependency]]
+mkBuildPlan getDeps aps@(ATSPackageSet ps) = finalize . resolve . fmap (asDep getDeps) <=< stringBuildPlan
     where finalize = fmap (fmap (fmap (lookupVersions aps)))
-          resolve = resolveDependencies (atsPkgsToPkgs aps)
+          resolve = resolveDependencies (atsPkgsToPkgs libDeps aps)
           stringBuildPlan names = sequence [ lookup' x libs | x <- names ]
               where libs = (unpack . libName &&& id) <$> ps
                     lookup' k vs = case lookup k vs of
@@ -77,17 +81,21 @@ canonicalize (ATSConstraint Nothing (Just u))  = LessThanEq u
 canonicalize (ATSConstraint Nothing Nothing)   = None
 canonicalize (ATSConstraint (Just l) (Just u)) = Bounded (GreaterThanEq l) (LessThanEq u)
 
-asDep :: ATSDependency -> Dependency
-asDep ATSDependency{..} = Dependency (unpack libName) (g <$> libDeps) libVersion
+asDep :: DepSelector
+      -> ATSDependency
+      -> Dependency
+asDep getDeps d@ATSDependency{..} = Dependency (unpack libName) (g <$> getDeps d) libVersion
     where g = unpack *** canonicalize
 
-atsPkgsToPkgs :: ATSPackageSet -> PackageSet Dependency
-atsPkgsToPkgs (ATSPackageSet deps) = PackageSet $ foldr (.) id inserts mempty
+atsPkgsToPkgs :: DepSelector
+              -> ATSPackageSet
+              -> PackageSet Dependency
+atsPkgsToPkgs getDeps (ATSPackageSet deps) = PackageSet $ foldr (.) id inserts mempty
     where inserts = insert <$> deps
           insert dep = M.insertWith
-            (\_ -> S.insert (asDep dep))
+            (\_ -> S.insert (asDep getDeps dep))
             (unpack $ libName dep)
-            (S.singleton (asDep dep))
+            (S.singleton (asDep getDeps dep))
 
 lookupVersions :: ATSPackageSet -> Dependency -> ATSDependency
 lookupVersions (ATSPackageSet deps) (Dependency name _ v) = head (filter f deps)

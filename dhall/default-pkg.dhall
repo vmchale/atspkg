@@ -6,7 +6,7 @@ let dep =
   , libVersion = [0,1,0]
   , libDeps = []
     : List LibDep
-  , buildDeps = []
+  , libBldDeps = []
     : List LibDep
   , description = []
     : Optional Text

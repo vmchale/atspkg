@@ -21,6 +21,7 @@ module Language.ATS.Package.Type ( -- * Types
                                  , TargetPair (..)
                                  , CCompiler (..)
                                  , LibDep
+                                 , DepSelector
                                  -- * Lenses
                                  , dirLens
                                  ) where
@@ -38,6 +39,9 @@ deriving newtype instance Interpret Version
 
 type LibDep = (Text, ATSConstraint)
 
+-- | You likely want 'libDeps' or 'libBldDeps'
+type DepSelector = ATSDependency -> [LibDep]
+
 -- | Type for a dependency
 data ATSDependency = ATSDependency { libName     :: Text -- ^ Library name, e.g.
                                    , dir         :: Text -- ^ Directory we should unpack to
@@ -45,7 +49,7 @@ data ATSDependency = ATSDependency { libName     :: Text -- ^ Library name, e.g.
                                    , description :: Maybe Text -- ^ Package description
                                    , libVersion  :: Version
                                    , libDeps     :: [LibDep] -- ^ Strings containing dependencies
-                                   , buildDeps   :: [LibDep] -- ^ List of dependencies that must be built
+                                   , libBldDeps  :: [LibDep] -- ^ List of dependencies that must be built
                                    }
                    deriving (Eq, Show, Generic, Interpret, Binary)
 
