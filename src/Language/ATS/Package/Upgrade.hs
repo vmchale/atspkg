@@ -8,7 +8,6 @@ import           Data.Char                  (isDigit)
 import           Quaalude
 import           System.Info
 
--- https://github.com/vmchale/atspkg/archive/master.zip
 manufacturer :: String
 manufacturer = case os of
     "darwin" -> "apple"
@@ -23,7 +22,6 @@ atspkgPath = do
     home <- getEnv "HOME"
     pure $ home <> "/.local/bin/atspkg"
 
--- TODO install `pi`?
 upgradeAtsPkg :: IO ()
 upgradeAtsPkg = do
 
