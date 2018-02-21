@@ -13,6 +13,7 @@ asGraph ds = (f triple, keys)
           s = view _2
           keys = view _1 . s triple
 
+-- | Topologically sort dependencies
 sortDeps :: [Dependency] -> [Dependency]
 sortDeps ds = fmap find . topSort $ g
     where (g, find) = asGraph ds

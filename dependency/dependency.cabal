@@ -30,6 +30,7 @@ library
                      , recursion-schemes
                      , microlens
                      , transformers
+                     , composition-prelude
                      , deepseq
                      , binary
                      , deepseq

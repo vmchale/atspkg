@@ -2,8 +2,7 @@ module Data.Dependency
     ( -- * Functions
       resolveDependencies
     , buildSequence
-    , satisfies
-    , compatible
+    , check
     -- * Types
     , Dependency (..)
     , PackageSet (..)
@@ -16,6 +15,7 @@ module Data.Dependency
     , ResMap
     ) where
 
+import           Control.Composition
 import           Control.Monad
 import           Control.Monad.Tardis
 import           Control.Monad.Trans.Class
@@ -32,30 +32,55 @@ lookupMap k ps = case M.lookup k ps of
     Just x  -> Right x
     Nothing -> Left (NotPresent k)
 
-checkWith :: Dependency -> [Dependency] -> S.Set Dependency -> DepM Dependency
+-- | This function checks a package against currently in-scope packages,
+-- downgrading versions as necessary until we reach something amenable or run out
+-- of options.
+checkWith :: Dependency -- ^ Dependency we want
+          -> [Dependency] -- ^ Dependencies already in scope.
+          -> S.Set Dependency -- ^ Set of available versions
+          -> DepM Dependency
 checkWith x ds s
     | check x ds = Right x
     | otherwise = lookupSet ds (S.deleteMax s)
 
 lookupSet :: [Dependency] -- ^ Dependencies already added
-          -> S.Set Dependency -- ^ Set of dependencies
+          -> S.Set Dependency -- ^ Set of available versions of given dependency
           -> DepM Dependency
 lookupSet ds s = case S.lookupMax s of
     Just x  -> checkWith x ds s
     Nothing -> g s
 
+    -- FIXME this is quite wrong: the maximum will only not exist if it is of
+    -- size zero. We should track the wanted library here so we can recover from
+    -- failure later on.
     where g s'
-            | S.size s' > 0 = Left (Conflict (_libName <$> ds) (_libName . head . toList $ s'))
+            | S.size s' > 0 = Left (Conflicts (_libName <$> ds) (_libName . head . toList $ s'))
             | otherwise = Left InternalError
 
--- Currently this is completely broken. It does check for compatibility with
--- past packages, but doesn't do the fancy tardis shit it's supposed to when
--- package resolution fails.
+-- This does check for compatibility with past packages, but doesn't do the
+-- fancy tardis shenanigans it's supposed to when package resolution fails.
 latest :: PackageSet Dependency -> Dependency -> ResolveState (String, Dependency)
-latest (PackageSet ps) (Dependency ln _ _) = do
+latest set@(PackageSet ps) d@(Dependency ln _ _) = do
     st <- getPast
     s <- lift $ lookupMap ln ps
-    (,) ln <$> lift (lookupSet (toList st) s)
+    finish set d ln (lookupSet (toList st) s)
+
+finish :: PackageSet Dependency -> Dependency -> String -> DepM Dependency -> ResolveState (String, Dependency)
+finish set d ln dep' =
+    case dep' of
+
+        Right dep ->
+            modifyForwards (M.insert ln dep) >>
+            pure (ln, dep)
+
+        Left (Conflicts lns _) -> do
+            f <- getFuture
+            modifyForwards f
+            x <- latest set d
+            sendPast . thread . fmap M.delete $ lns
+            pure x
+
+        Left err -> lift (Left err)
 
 buildSequence :: [Dependency] -> [[Dependency]]
 buildSequence = reverse . groupBy independent . sortDeps

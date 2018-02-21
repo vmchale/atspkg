@@ -47,6 +47,8 @@ type Mod = ResMap -> ResMap
 type ResMap = M.Map String Dependency
 type ResolveState = ResolveStateM (Either ResolveError)
 
+-- | We use a tardis monad here to give ourselves greater flexibility during
+-- dependency solving.
 newtype ResolveStateM m a = ResolveStateM { unResolve :: TardisT Mod ResMap m a }
     deriving (Functor)
     deriving newtype (Applicative, Monad, MonadFix, MonadTardis Mod ResMap)
@@ -54,6 +56,7 @@ newtype ResolveStateM m a = ResolveStateM { unResolve :: TardisT Mod ResMap m a 
 instance MonadTrans ResolveStateM where
     lift = ResolveStateM . lift
 
+-- | A package set is simply a map between package names and a set of packages.
 newtype PackageSet a = PackageSet (M.Map String (S.Set a))
     deriving (Eq, Ord, Foldable, Generic)
     deriving newtype Binary
@@ -78,7 +81,7 @@ instance Ord Version where
         | x == y = Version xs <= Version ys
         | otherwise = x <= y
 
--- TODO comonad??
+-- | Monoid/functor for representing constraints.
 data Constraint a = LessThanEq a
                   | GreaterThanEq a
                   | Eq a
@@ -86,7 +89,6 @@ data Constraint a = LessThanEq a
                   | None
                   deriving (Show, Eq, Ord, Functor, Generic, NFData)
 
--- free moinoid but "pokey" because it has extra constructors
 instance Semigroup (Constraint a) where
     (<>) None x = x
     (<>) x None = x
@@ -96,19 +98,29 @@ instance Monoid (Constraint a) where
     mempty = None
     mappend = (<>)
 
+-- | A generic dependency, consisting of a package name and version, as well as
+-- dependency names and their constraints.
 data Dependency = Dependency { _libName         :: String
                              , _libDependencies :: [(String, Constraint Version)]
                              , _libVersion      :: Version
                              }
                              deriving (Show, Eq, Ord, Generic, NFData)
 
+check' :: Dependency -> [Dependency] -> Bool
+check' (Dependency _ lds _) ds =
+    and [ compatible (Eq v') c | (Dependency ln _ v') <- ds, (str, c) <- lds, ln == str ]
+
+-- | Check a given dependency is compatible with in-scope dependencies.
 check :: Dependency -> [Dependency] -> Bool
-check (Dependency ln _ v) ds = and [ g v ds' | (Dependency _ ds' _) <- ds ]
-    where g v' = all (`satisfies` v') . fmap snd . filter ((== ln) . fst)
+check d = (&&) <$> check' d <*> check'' d
+
+check'' :: Dependency -> [Dependency] -> Bool
+check'' (Dependency ln _ v) ds = and [ g ds' | (Dependency _ ds' _) <- ds ]
+    where g = all ((`satisfies` v) . snd) . filter ((== ln) . fst)
 
 satisfies :: (Ord a) => Constraint a -> a -> Bool
-satisfies (LessThanEq x) y    = x <= y
-satisfies (GreaterThanEq x) y = x >= y
+satisfies (LessThanEq x) y    = x >= y
+satisfies (GreaterThanEq x) y = x <= y
 satisfies (Eq x) y            = x == y
 satisfies (Bounded x y) z     = satisfies x z && satisfies y z
 satisfies None _              = True
