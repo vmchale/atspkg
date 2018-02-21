@@ -44,7 +44,7 @@ buildAll p = on (>>) (=<< wants p) fetchCompiler setupCompiler
 build :: [String] -- ^ Targets
       -> IO ()
 build rs = bool (mkPkgEmpty [buildAll Nothing]) (mkPkgEmpty mempty) =<< check Nothing
-    where mkPkgEmpty ts = mkPkg False False True ts rs Nothing 1
+    where mkPkgEmpty ts = mkPkg False True ts rs Nothing 1
 
 -- TODO clean generated ATS
 mkClean :: Rules ()
@@ -131,39 +131,40 @@ toVerbosity 2 = Chatty
 toVerbosity 3 = Diagnostic
 toVerbosity _ = Diagnostic -- really should be a warning
 
-options :: Bool -- ^ Whether to rebuild config
-        -> Bool -- ^ Whether to rebuild all targets
+options :: Bool -- ^ Whether to rebuild all targets
         -> Bool -- ^ Whether to run the linter
         -> Int -- ^ Verbosity level
         -> [String] -- ^ A list of targets
         -> ShakeOptions
-options rb rba lint v rs = shakeOptions { shakeFiles = ".atspkg"
+options rba lint v rs = shakeOptions { shakeFiles = ".atspkg"
                           , shakeThreads = 4
                           , shakeLint = bool Nothing (Just LintBasic) lint
                           , shakeVersion = showVersion P.version
-                          , shakeRebuild = foldMap g [ (rb, [(RebuildNow, ".atspkg/config")])
-                                                     , (rba, (RebuildNow ,) <$> rs)
-                                                     ]
+                          , shakeRebuild = rebuildTargets rba rs
                           , shakeChange = ChangeModtimeAndDigestInput
                           , shakeVerbosity = toVerbosity v
                           }
+
+rebuildTargets :: Bool -- ^ Force rebuild of all targets
+               -> [a] -- ^ Targets
+               -> [(Rebuild, a)]
+rebuildTargets rba rs = foldMap g [ (rba, (RebuildNow ,) <$> rs) ]
     where g (b, ts) = bool mempty ts b
 
 cleanConfig :: (MonadIO m) => [String] -> m Pkg
 cleanConfig ["clean"] = pure undefined
 cleanConfig _         = getConfig Nothing
 
-mkPkg :: Bool -- ^ Whether to ignore cached package config
-      -> Bool -- ^ Rebuild all targets
+mkPkg :: Bool -- ^ Force rebuild
       -> Bool -- ^ Run linter
       -> [IO ()] -- ^ Setup
       -> [String] -- ^ Targets
       -> Maybe String -- ^ Target triple
       -> Int -- ^ Verbosity
       -> IO ()
-mkPkg rb rba lint setup rs tgt v = do
+mkPkg rba lint setup rs tgt v = do
     cfg <- cleanConfig rs
-    let opt = options rb rba lint v $ pkgToTargets cfg rs
+    let opt = options rba lint v $ pkgToTargets cfg rs
     shake opt $
         mconcat
             [ want (pkgToTargets cfg rs)

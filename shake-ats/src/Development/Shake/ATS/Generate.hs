@@ -5,10 +5,10 @@ import           Control.Lens
 import           Data.Semigroup
 import           Language.ATS
 
-generateLinks :: String -> Either (ATSError String) String
+generateLinks :: String -> Either ATSError String
 generateLinks = fmap (printATS . generateLinks') . parse
 
-generateLinks' :: ATS -> ATS
+generateLinks' :: ATS a -> ATS a
 generateLinks' (ATS ds) = ATS (fmap g ds <> [macDecl]) --  ATS [Local undefined (ATS (fmap g ds <> [macDecl])) (ATS mempty)]
     where g f@Func{} = Extern undefined (set (fun.preF.expression) expr f)
           g x        = x

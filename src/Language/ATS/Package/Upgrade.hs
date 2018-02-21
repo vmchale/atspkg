@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Language.ATS.Package.Upgrade ( upgradeAtsPkg
+module Language.ATS.Package.Upgrade ( upgradeBin
                                     ) where
 
 import qualified Data.ByteString.Lazy.Char8 as BSL
@@ -22,17 +22,19 @@ atspkgPath = do
     home <- getEnv "HOME"
     pure $ home <> "/.local/bin/atspkg"
 
-upgradeAtsPkg :: IO ()
-upgradeAtsPkg = do
+upgradeBin :: String -> String -> IO ()
+upgradeBin user proj = do
+
+    let inner = user <> "/" <> proj
 
     putStrLn "Finding latest release..."
     manager <- newManager tlsManagerSettings
-    initialRequest <- parseRequest "https://github.com/vmchale/atspkg/releases/latest"
+    initialRequest <- parseRequest ("https://github.com/" ++ inner ++ "/releases/latest")
     response <- responseBody <$> httpLbs (initialRequest { method = "GET", redirectCount = 0 }) manager
 
     putStrLn "Downloading latest release..."
     let strVersion = BSL.takeWhile (/='"') . BSL.dropWhile (not . isDigit) . BSL.dropWhile (/='"') $ response
-        binRequest = "https://github.com/vmchale/atspkg/releases/download/" <> BSL.unpack strVersion <> "/atspkg-" <> targetArch
+        binRequest = "https://github.com/" <> inner <> "/releases/download/" <> BSL.unpack strVersion <> "/atspkg-" <> targetArch
     followupRequest <- parseRequest binRequest
     binBytes <- responseBody <$> httpLbs (followupRequest { method = "GET" }) manager
 

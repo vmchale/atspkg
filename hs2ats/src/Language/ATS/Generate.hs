@@ -68,20 +68,19 @@ stringTypeConv "Bool"    = Right "bool"
 stringTypeConv "CBool"   = Right "bool"
 stringTypeConv _         = unsupported "stringTypeConv"
 
-toStringATS' :: QName a -> ErrM ATS.Type
+toStringATS' :: QName a -> ErrM (ATS.Type b)
 toStringATS' (QNamed _ _ s) = Named . Unqualified <$> stringTypeConv s
 toStringATS' _              = unsupported "toStringATS'"
 
-tyVarToSort :: TyVarBind a -> ErrM Universal
+tyVarToSort :: TyVarBind a -> ErrM (Universal b)
 tyVarToSort (UnkindedVar _ (Ident _ s)) = Right $ Universal [s] (Just (Vt0p None)) mempty
 tyVarToSort _                           = unsupported "tyVarToSort"
 
-universalHelper :: [TyVarBind a] -> ErrM (ATS.Type -> ATS.Type)
+universalHelper :: [TyVarBind a] -> ErrM (ATS.Type b -> ATS.Type b)
 universalHelper (t:ts) = fmap <$> (ForA <$> tyVarToSort t) <*> universalHelper ts
 universalHelper []     = pure id
 
--- TODO track staloads?
-typeToType :: HS.Type a -> ErrM ATS.Type
+typeToType :: HS.Type a -> ErrM (ATS.Type b)
 typeToType (TyForall _ (Just us) Nothing t)   = universalHelper us <*> typeToType t
 typeToType (TyCon _ qn)                       = toStringATS' qn
 typeToType (TyVar _ n)                        = Right $ Named $ Unqualified (toStringATS n)
@@ -94,11 +93,11 @@ typeToType (TyFun _ t t')                     = FunctionType "-<lincloptr1>" <$>
 typeToType (TyTuple _ _ ts)                   = ATS.Tuple undefined <$> mapM typeToType ts
 typeToType _                                  = Left $ Unsupported "typeToType"
 
-fieldDeclToType :: FieldDecl a -> ErrM (String, ATS.Type)
+fieldDeclToType :: FieldDecl a -> ErrM (String, ATS.Type b)
 fieldDeclToType (FieldDecl _ [n] t) = (,) (toStringATS n) <$> typeToType t
 fieldDeclToType _                   = Left $ Unsupported "fieldDeclToType"
 
-conDeclToType :: ConDecl a -> ErrM (String, Maybe ATS.Type)
+conDeclToType :: ConDecl a -> ErrM (String, Maybe (ATS.Type b))
 conDeclToType (ConDecl _ n [])  = Right (toStringATS n, Nothing)
 conDeclToType (ConDecl _ n [t]) = (,) (toStringATS n) . Just <$> typeToType t
 conDeclToType (ConDecl _ n ts)  = (,) (toStringATS n) . Just . ATS.Tuple undefined <$> mapM typeToType ts
@@ -109,7 +108,7 @@ toStringATS :: HS.Name a -> String
 toStringATS (Ident _ s) = s
 toStringATS _           = undefined
 
-tyvarToArg :: Bool -> TyVarBind a -> ErrM SortArg
+tyvarToArg :: Bool -> TyVarBind a -> ErrM (SortArg b)
 tyvarToArg False (UnkindedVar _ n) = Right $ SortArg (toStringATS n) (Vt0p None)
 tyvarToArg True (UnkindedVar _ n)  = Right $ SortArg (toStringATS n) (Vt0p Plus)
 tyvarToArg _ _                     = unsupported "tyvarToArg"
@@ -117,26 +116,26 @@ tyvarToArg _ _                     = unsupported "tyvarToArg"
 consM :: (Monad m) => m a -> m [a] -> m [a]
 consM x xs = (:) <$> x <*> xs
 
-asATSName :: DeclHead a -> ErrM (String, [SortArg])
+asATSName :: DeclHead a -> ErrM (String, [SortArg b])
 asATSName (DHead _ n)    = Right (convertConventions $ toStringATS n, [])
 asATSName (DHParen _ d)  = (,) . fst <$> asATSName d <*> pure []
 asATSName (DHApp _ d tb) = (,) . fst <$> asATSName d <*> consM (tyvarToArg False tb) (snd <$> asATSName d)
 asATSName _              = unsupported "asATSName"
 
-qualConDeclToType :: QualConDecl a -> ErrM ATS.Type
+qualConDeclToType :: QualConDecl a -> ErrM (ATS.Type b)
 qualConDeclToType (EmptyQualCon _ cd) = fromJust . snd <$> conDeclToType cd
 qualConDeclToType _                   = unsupported "qualConDeclToType"
 
-qualConDeclToLeaf :: QualConDecl a -> ErrM Leaf
+qualConDeclToLeaf :: QualConDecl a -> ErrM (Leaf b)
 qualConDeclToLeaf (EmptyQualCon _ cd) = Leaf [] <$> (over _head toUpper . convertConventions . fst <$> conDeclToType cd) <*> pure [] <*> (snd <$> conDeclToType cd)
 qualConDeclToLeaf _                   = unsupported "qualConDeclToLeaf"
 
-pruneATSNils :: [SortArg] -> Maybe [SortArg]
+pruneATSNils :: [SortArg a] -> Maybe [SortArg a]
 pruneATSNils [] = Nothing
 pruneATSNils x  = Just x
 
 -- TODO if it derives functor, use +
-asATSType :: Decl a -> ErrM Declaration
+asATSType :: Decl a -> ErrM (Declaration b)
 asATSType (TypeDecl _ dh t) = ViewTypeDef undefined <$> (fst <$> asATSName dh) <*> (pruneATSNils . snd <$> asATSName dh) <*> typeToType t
 asATSType (DataDecl _ NewType{} _ dh [qcd] _)  = ViewTypeDef undefined <$> (fst <$> asATSName dh) <*> (pruneATSNils . snd <$> asATSName dh) <*> qualConDeclToType qcd
 asATSType (DataDecl _ DataType{} _ dh [qcd] _) = ViewTypeDef undefined <$> (fst <$> asATSName dh) <*> (pruneATSNils . snd <$> asATSName dh) <*> qualConDeclToType qcd
@@ -155,12 +154,14 @@ filterModule _                   = []
 
 modulePrint :: Module a -> (String, [GenerateError])
 modulePrint = g . fmap asATSType . filterModule
-    where g = (printATS . ATS . reverse . rights) &&& lefts
+    where g = (h . ATS . reverse . rights) &&& lefts
+          h :: ATS AlexPosn -> String
+          h = printATS
 
 extends :: ParseMode
-extends = defaultParseMode
-    { extensions = EnableExtension <$> es
-    , fixities = Just baseFixities }
+extends =
+    defaultParseMode { extensions = EnableExtension <$> es, fixities = Just baseFixities }
+
     where es = [ StandaloneDeriving
                , CPP
                , RecordWildCards
