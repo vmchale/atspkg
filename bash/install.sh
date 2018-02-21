@@ -18,11 +18,7 @@ main() {
     binname=$(getTarget)
     mkdir -p "$HOME/.local/bin"
     local dest=$HOME/.local/bin/atspkg
-    if which duma > /dev/null ; then
-        duma https://github.com/vmchale/atspkg/releases/download/"$latest"/"$binname" -O "$dest"
-    else
-        wget https://github.com/vmchale/atspkg/releases/download/"$latest"/"$binname" -O "$dest"
-    fi
+    curl -Lo "$dest" https://github.com/vmchale/atspkg/releases/download/"$latest"/"$binname"
     chmod +x "$dest"
 
 }
