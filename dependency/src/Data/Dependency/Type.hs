@@ -21,8 +21,6 @@ module Data.Dependency.Type ( Dependency (..)
                             , ResolveStateM (..)
                             , ResolveState
                             -- * Helper functions
-                            , satisfies
-                            , compatible
                             , check
                             ) where
 
