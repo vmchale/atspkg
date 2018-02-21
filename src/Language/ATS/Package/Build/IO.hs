@@ -1,7 +1,4 @@
-module Language.ATS.Package.Build.IO ( configure
-                                     , make
-                                     , install
-                                     , clibSetup
+module Language.ATS.Package.Build.IO ( clibSetup
                                      , maybeExit
                                      , pkgHome
                                      , allSubdirs

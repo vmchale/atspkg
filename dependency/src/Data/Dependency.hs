@@ -48,6 +48,9 @@ lookupSet ds s = case S.lookupMax s of
             | S.size s' > 0 = Left (Conflict (_libName <$> ds) (_libName . head . toList $ s'))
             | otherwise = Left InternalError
 
+-- Currently this is completely broken. It does check for compatibility with
+-- past packages, but doesn't do the fancy tardis shit it's supposed to when
+-- package resolution fails.
 latest :: PackageSet Dependency -> Dependency -> ResolveState (String, Dependency)
 latest (PackageSet ps) (Dependency ln _ _) = do
     st <- getPast
