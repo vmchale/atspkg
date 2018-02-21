@@ -6,12 +6,12 @@ module Language.ATS.Package ( pkgToAction
                             , check
                             , mkPkg
                             , cleanAll
-                            , upgradeAtsPkg
                             , fetchDeps
                             , mkBuildPlan
                             , buildHelper
                             , checkPkg
                             , displayList
+                            , upgradeBin
                             -- * Types
                             , Version (..)
                             , Pkg (..)

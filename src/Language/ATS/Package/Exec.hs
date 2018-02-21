@@ -30,14 +30,16 @@ versionInfo = infoOption ("atspkg version: " ++ showVersion P.version) (short 'V
 
 data Command = Install
              | Build { _targets    :: [String]
-                     , _recache    :: Bool
                      , _archTarget :: Maybe String
                      , _rebuildAll :: Bool
                      , _verbosity  :: Int
                      , _lint       :: Bool
                      }
              | Clean
-             | Test { _targets :: [String], _lint :: Bool }
+             | Test { _targets    :: [String]
+                    , _rebuildAll :: Bool
+                    , _lint       :: Bool
+                    }
              | Fetch { _url :: String }
              | Nuke
              | Upgrade
@@ -79,7 +81,10 @@ run' :: Parser Command
 run' = Run <$> targets "run"
 
 test' :: Parser Command
-test' = Test <$> targets "test" <*> noLint
+test' = Test
+    <$> targets "test"
+    <*> rebuild
+    <*> noLint
 
 valgrind :: Parser Command
 valgrind = Valgrind <$> targets "run with valgrind"
@@ -94,24 +99,29 @@ targetP completions' f s = f
     <> help ("Targets to " <> s)
     <> completions'))
 
+rebuild :: Parser Bool
+rebuild = switch
+    (long "rebuild"
+    <> short 'r'
+    <> help "Force rebuild of all targets")
+
+triple :: Parser (Maybe String)
+triple = optional
+    (strOption
+    (long "target"
+    <> short 't'
+    <> help "Set target by using its triple"))
+
+verbosity :: Parser Int
+verbosity = length <$>
+    many (flag' () (short 'v' <> long "verbose" <> help "Turn up verbosity"))
+
 build' :: Parser Command
 build' = Build
     <$> targets "build"
-    <*> switch
-        (long "no-cache"
-        <> short 'c'
-        <> help "Turn off configuration caching")
-    <*> optional
-        (strOption
-        (long "target"
-        <> short 't'
-        <> help "Set target by using its triple"))
-    <*> switch
-        (long "rebuild"
-        <> short 'r'
-        <> help "Force rebuild of all targets")
-    <*> (length <$>
-        many (flag' () (short 'v' <> long "verbose" <> help "Turn up verbosity")))
+    <*> triple
+    <*> rebuild
+    <*> verbosity
     <*> noLint
 
 noLint :: Parser Bool
@@ -133,28 +143,28 @@ fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
     buildHelper True (ATSDependency lib dirName url' undefined undefined mempty mempty)
     ps <- getSubdirs p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
-    let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg False False False mempty ["install"] Nothing 0)
+    let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg False False mempty ["install"] Nothing 0)
     bool (buildAll (Just pkgDir) >> a) a =<< check (Just pkgDir)
 
 exec :: IO ()
 exec = execParser wrapper >>= run
 
-runHelper :: Bool -> Bool -> Bool -> [String] -> Maybe String -> Int -> IO ()
-runHelper rb rba lint rs tgt v = bool
-    (mkPkg rb rba lint [buildAll Nothing] rs tgt v)
-    (mkPkg rb rba lint mempty rs tgt v)
-    =<< check Nothing
+runHelper :: Bool -> Bool -> [String] -> Maybe String -> Int -> IO ()
+runHelper rba lint rs tgt v = g . bool x y =<< check Nothing
+    where g xs = mkPkg rba lint xs rs tgt v
+          y = mempty
+          x = [buildAll Nothing]
 
 run :: Command -> IO ()
 run List = displayList "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
 run (Check p b) = print =<< checkPkg p b
-run Upgrade = upgradeAtsPkg
+run Upgrade = upgradeBin "vmchale" "atspkg"
 run Nuke = cleanAll
 run (Fetch u) = fetchPkg u
-run Clean = mkPkg False False True mempty ["clean"] Nothing 0
-run (Build rs rb tgt rba v lint) = runHelper rb rba lint rs tgt v
-run (Test ts lint) = runHelper False False lint ("test" : ts) Nothing 0
-run c = runHelper False False True rs Nothing 0
+run Clean = mkPkg False True mempty ["clean"] Nothing 0
+run (Build rs tgt rba v lint) = runHelper rba lint rs tgt v
+run (Test ts rba lint) = runHelper rba lint ("test" : ts) Nothing 0
+run c = runHelper False True rs Nothing 0
     where rs = g c
           g Install       = ["install"]
           g (Valgrind ts) = "valgrind" : ts

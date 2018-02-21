@@ -14,12 +14,12 @@ import           Control.Concurrent.ParallelIO.Global
 import qualified Data.ByteString.Lazy                 as BSL
 import qualified Data.Text.Lazy                       as TL
 import           Development.Shake.ATS
+import           Language.ATS.Package.Build.IO
 import           Language.ATS.Package.Config
 import           Language.ATS.Package.Error
 import           Language.ATS.Package.PackageSet
 import           Language.ATS.Package.Type
 import           Quaalude
-import           System.Process
 
 fetchDeps :: CCompiler -- ^ C compiler to use
           -> [IO ()] -- ^ Setup steps that can be performed concurrently
@@ -30,45 +30,40 @@ fetchDeps :: CCompiler -- ^ C compiler to use
           -> Bool -- ^ Whether to perform setup anyhow.
           -> IO ()
 fetchDeps cc' setup' deps cdeps atsBld cfgPath b' =
-    unless (null deps && null cdeps && b') $ do
+
+    unless (null deps && null cdeps && null atsBld && b') $ do
+
         putStrLn "Resolving dependencies..."
+
         pkgSet <- unpack . defaultPkgs . decode <$> BSL.readFile cfgPath
-        deps' <- join <$> setBuildPlan "ats" libDeps pkgSet deps
-        atsDeps' <- join <$> setBuildPlan "atsbld" libBldDeps pkgSet atsBld
-        putStrLn "Checking ATS dependencies..."
+        deps' <- setBuildPlan "ats" libDeps pkgSet deps
+        atsDeps' <- setBuildPlan "atsbld" libBldDeps pkgSet atsBld
+        cdeps' <- setBuildPlan "c" libDeps pkgSet cdeps
+
+        -- Set up actions
         d <- (<> "lib/") <$> pkgHome cc'
-        let libs' = fmap (buildHelper False) deps'
-        cdeps' <- join <$> setBuildPlan "c" libDeps pkgSet cdeps
-        let unpacked = fmap (over dirLens (pack d <>)) cdeps'
-            clibs = fmap (buildHelper False) unpacked
-            atsLibs = fmap (buildHelper False) atsDeps'
-        parallel_ (extraWorkerWhileBlocked <$> (setup' ++ libs' ++ clibs ++ atsLibs))
-        mapM_ (setup cc') unpacked
-        mapM_ atsPkgSetup atsDeps'
+        let libs' = fmap (buildHelper False) (join deps')
+            unpacked = fmap (over dirLens (pack d <>)) <$> cdeps'
+            clibs = fmap (buildHelper False) (join unpacked)
+            atsLibs = fmap (buildHelper False) (join atsDeps')
 
-pkgHome :: CCompiler -> IO FilePath
-pkgHome cc' = (++ ("/.atspkg/" ++ ccToDir cc')) <$> getEnv "HOME"
+        -- Fetch all packages
+        parallel' $ join [ setup', libs', clibs, atsLibs ]
 
-allSubdirs :: FilePath -> IO [FilePath]
-allSubdirs [] = pure mempty
-allSubdirs d = do
-    d' <- listDirectory d
-    let d'' = ((d <> "/") <>) <$> d'
-    ds <- filterM doesDirectoryExist d''
-    ds' <- mapM allSubdirs ds
-    pure $ join (ds : ds')
+        -- Build C dependencies
+        unless (null unpacked) $
+            mapM_ (setup cc') (join unpacked)
 
-maybeExit :: ExitCode -> IO ()
-maybeExit ExitSuccess = pure ()
-maybeExit x           = exitWith x
+        -- Build ATS Dependencies
+        unless (null atsDeps') $
+            parallel_ (extraWorkerWhileBlocked <$> (mapM_ atsPkgSetup <$> atsDeps'))
+
+parallel' :: [IO ()] -> IO ()
+parallel' = parallel_ . fmap extraWorkerWhileBlocked
 
 waitCreateProcess :: CreateProcess -> IO ()
 waitCreateProcess =
     maybeExit <=< waitForProcess <=< fmap (view _4) . createProcess
-
-silentCreateProcess :: CreateProcess -> IO ()
-silentCreateProcess proc' =
-    void $ readCreateProcess (proc' { std_err = NoStream }) ""
 
 atslibSetup :: String
             -> FilePath
@@ -78,23 +73,6 @@ atslibSetup lib' p = do
     subdirs <- allSubdirs p
     pkgPath <- fromMaybe p <$> findFile subdirs "atspkg.dhall"
     waitCreateProcess ((proc "atspkg" ["install"]) { cwd = Just (takeDirectory pkgPath), std_out = Inherit })
-
-clibSetup :: CCompiler -- ^ C compiler
-          -> String -- ^ Library name
-          -> FilePath -- ^ Filepath to unpack to
-          -> IO ()
-clibSetup cc' lib' p = do
-    subdirs <- allSubdirs p
-    configurePath <- fromMaybe (p <> "/configure") <$> findFile subdirs "configure"
-    setFileMode configurePath ownerModes
-    h <- pkgHome cc'
-    let procEnv = Just [("CC", ccToString cc'), ("CFLAGS" :: String, "-I" <> h <> "include"), ("PATH", "/usr/bin:/bin")]
-    putStrLn $ "configuring " ++ lib' ++ "..."
-    void $ readCreateProcess ((proc configurePath ["--prefix", h, "--host", host]) { cwd = Just p, env = procEnv, std_err = NoStream }) ""
-    putStrLn $ "building " ++ lib' ++ "..."
-    silentCreateProcess ((proc "make" []) { cwd = Just p })
-    putStrLn $ "installing " ++ lib' ++ "..."
-    silentCreateProcess ((proc "make" ["install"]) { cwd = Just p })
 
 atsPkgSetup :: ATSDependency
             -> IO ()
@@ -138,17 +116,18 @@ buildHelper :: Bool -> ATSDependency -> IO ()
 buildHelper b (ATSDependency lib' dirName' url'' _ _ _ _) = do
 
     let (lib, dirName, url') = (lib', dirName', url'') & each %~ unpack
+        isLib = bool "" "library " b
 
     needsSetup <- not <$> doesDirectoryExist (dirName ++ if b then "/atspkg.dhall" else "")
 
     when needsSetup $ do
 
-        putStrLn ("Fetching library " ++ lib ++ "...")
+        putStrLn ("Fetching " ++ isLib ++ lib ++ "...")
         manager <- newManager tlsManagerSettings
         initialRequest <- parseRequest url'
         response <- responseBody <$> httpLbs (initialRequest { method = "GET" }) manager
 
-        putStrLn ("Unpacking library " ++ lib ++ "...")
+        putStrLn ("Unpacking " ++ isLib ++ lib ++ "...")
         if "zip" `TL.isSuffixOf` url'' then
             zipResponse dirName response
                 else tarResponse url'' dirName response

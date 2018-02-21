@@ -228,7 +228,8 @@ handleSource tc sourceFile = do
 trim :: String -> String
 trim = init . drop 1
 
-maybeError :: (MonadIO m) => Either (ATSError String) b -> m ()
+-- | Print any errors to standard error.
+maybeError :: (MonadIO m) => Either ATSError b -> m ()
 maybeError Right{}  = pure ()
 maybeError (Left y) = printErr y
 
