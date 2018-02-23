@@ -67,7 +67,7 @@ Rebuild all binary targets.
 .RE
 .TP
 .B \f[B]\-l\f[], \f[B]\-\-no\-lint\f[]
-Disable the shake linter
+Disable the build system linter
 .RS
 .RE
 .TP
@@ -89,12 +89,16 @@ Enable detailed error messages when checking configuration files
 .PP
 \f[B]atspkg\f[] is configured with Dhall, in an atspkg.dhall file.
 \f[B]atspkg\f[] can be configured to produce binary targets (possibly
-linked against Haskell libraries), as well as plain C targets.
+linked against Haskell libraries), static library targets, and as plain
+C targets.
+.PP
+There is also a file $HOME/.config/atspkg/config.dhall which can be used
+to configure all builds.
 .SS TEMPLATES
 .PP
-There are several template avaiable for \f[B]pi\f[] as well (see
+There are several templates available for \f[B]pi\f[] (see
 https://crates.io/crates/project_init for more details).
-A couple examples:
+Several examples:
 .IP
 .nf
 \f[C]

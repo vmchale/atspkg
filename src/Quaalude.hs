@@ -2,6 +2,7 @@
 
 module Quaalude ( bool
                 , intersperse
+                , transpose
                 , sortBy
                 , void
                 , unless
@@ -122,7 +123,7 @@ import           Control.Composition
 import           Control.Monad
 import           Data.Binary
 import           Data.Bool                    (bool)
-import           Data.List                    (intersperse, isPrefixOf, isSuffixOf, sortBy)
+import           Data.List
 import           Data.Maybe                   (fromMaybe)
 import           Data.Text.Lazy               (pack, unpack)
 import           Development.Shake            hiding (getEnv)

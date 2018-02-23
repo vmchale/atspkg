@@ -60,7 +60,7 @@ to $HOME/.local/share/man/man1
 :   Rebuild all binary targets.
 
 **-l**, **-\-no-lint**
-:   Disable the shake linter
+:   Disable the build system linter
 
 **-t**, **-\-target**
 :   Set the compilation target using its triple.
@@ -75,12 +75,15 @@ to $HOME/.local/share/man/man1
 
 **atspkg** is configured with Dhall, in an atspkg.dhall file. **atspkg** can be
 configured to produce binary targets (possibly linked against Haskell
-libraries), as well as plain C targets.
+libraries), static library targets, and as plain C targets.
+
+There is also a file $HOME/.config/atspkg/config.dhall which can be used to
+configure all builds.
 
 ## TEMPLATES
 
-There are several template avaiable for **pi** as well (see
-https://crates.io/crates/project_init for more details). A couple examples:
+There are several templates available for **pi** (see
+https://crates.io/crates/project_init for more details). Several examples:
 
 ```
 pi new ats project

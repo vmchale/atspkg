@@ -26,6 +26,7 @@ import           Data.Foldable             (toList)
 import           Data.List                 (groupBy)
 import qualified Data.Map                  as M
 import qualified Data.Set                  as S
+import           Lens.Micro                (over)
 
 lookupMap :: String -> M.Map String a -> DepM a
 lookupMap k ps = case M.lookup k ps of
@@ -41,21 +42,19 @@ checkWith :: Dependency -- ^ Dependency we want
           -> DepM Dependency
 checkWith x ds s
     | check x ds = Right x
-    | otherwise = lookupSet ds (S.deleteMax s)
+    | otherwise = lookupSet (Just x) ds (S.deleteMax s)
 
-lookupSet :: [Dependency] -- ^ Dependencies already added
+lookupSet :: Maybe Dependency -- ^ Optional dependency we are looking for.
+          -> [Dependency] -- ^ Dependencies already added
           -> S.Set Dependency -- ^ Set of available versions of given dependency
           -> DepM Dependency
-lookupSet ds s = case S.lookupMax s of
-    Just x  -> checkWith x ds s
-    Nothing -> g s
+lookupSet x ds s = case S.lookupMax s of
+    Just x' -> checkWith x' ds s
+    Nothing -> g x
 
-    -- FIXME this is quite wrong: the maximum will only not exist if it is of
-    -- size zero. We should track the wanted library here so we can recover from
-    -- failure later on.
-    where g s'
-            | S.size s' > 0 = Left (Conflicts (_libName <$> ds) (_libName . head . toList $ s'))
-            | otherwise = Left InternalError
+    where g Nothing   = Left InternalError
+          g (Just x') = Left (Conflicts (_libName <$> ds') (_libName x')) -- TODO filter only conflicting packages.
+            where ds' = filter (\d -> not (check x' [d])) ds
 
 -- This does check for compatibility with past packages, but doesn't do the
 -- fancy tardis shenanigans it's supposed to when package resolution fails.
@@ -63,7 +62,7 @@ latest :: PackageSet Dependency -> Dependency -> ResolveState (String, Dependenc
 latest set@(PackageSet ps) d@(Dependency ln _ _) = do
     st <- getPast
     s <- lift $ lookupMap ln ps
-    finish set d ln (lookupSet (toList st) s)
+    finish set d ln (lookupSet (Just d) (toList st) s)
 
 finish :: PackageSet Dependency -> Dependency -> String -> DepM Dependency -> ResolveState (String, Dependency)
 finish set d ln dep' =
@@ -76,8 +75,9 @@ finish set d ln dep' =
         Left (Conflicts lns _) -> do
             f <- getFuture
             modifyForwards f
-            x <- latest set d
-            sendPast . thread . fmap M.delete $ lns
+            let g = thread (M.alter (fmap S.deleteMax) <$> lns)
+            x@(s, dep'') <- latest (over packageSet g set) d
+            sendPast (M.insert s dep'')
             pure x
 
         Left err -> lift (Left err)
@@ -99,7 +99,7 @@ saturateDeps ps = resolve <=< saturateDeps' ps
 saturateDeps' :: PackageSet Dependency -> Dependency -> DepM (S.Set Dependency)
 saturateDeps' (PackageSet ps) dep = do
     deps <- sequence [ lookupMap lib ps | lib <- fst <$> _libDependencies dep ]
-    list <- (:) dep <$> traverse (lookupSet mempty) deps
+    list <- (:) dep <$> traverse (lookupSet Nothing mempty) deps
     pure $ S.fromList list
 
 run :: ResolveState a -> DepM a

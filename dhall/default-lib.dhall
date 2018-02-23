@@ -8,6 +8,7 @@ let lib =
   , includes = ([] : List Text)
   , hsDeps = ([] : List ForeignCabal)
   , hs2ats = ([] : List TargetPair)
+  , links = ([] : List { _1 : Text, _2 : Text })
   , cSources = ([] : List Text)
   , extras = ([] : List Text)
   , static = True

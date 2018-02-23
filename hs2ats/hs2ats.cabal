@@ -1,5 +1,5 @@
 name:                hs2ats
-version:             0.2.1.6
+version:             0.2.1.7
 synopsis:            Create ATS types from Haskell types
 description:         This package enables scanning Haskell source files for data types and then generating [ATS](http://www.ats-lang.org/) types from them.
 homepage:            https://github.com/vmchale/hs2ats#readme

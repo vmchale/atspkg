@@ -68,14 +68,13 @@ If that doesn't work, you can download
 [GHC](https://www.haskell.org/ghc/download.html) and install with
 
 ```bash
+cabal update
 cabal new-install ats-pkg --symlink-bindir ~/.local/bin --happy-options='-gcsa' --alex-options='-g'
 ```
 
 Note that `$HOME/.local/bin` will need to be on your `PATH`.
 
-## Examples
-
-### Quick Start
+## Quick Start
 
 Install [pi](http://github.com/vmchale/project-init) with
 
@@ -96,7 +95,7 @@ cd project
 atspkg run
 ```
 
-### Further Documentation
+## Examples
 
 You can find several examples with explanation
 [here](https://github.com/vmchale/atspkg/blob/master/EXAMPLES.md)
@@ -104,16 +103,14 @@ You can find several examples with explanation
 ## Global Configuration
 
 `atspkg` is configured via a file in `~/.config/atspkg/config.dhall`. You can
-set custom package set as follows:
+set a custom package set as follows:
 
 ```
 let cfg = 
   { defaultPkgs = "https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/pkg-set.dhall"
   , path = ([] : Optional Text)
+  , githubUsername = "YOUR_USERNAME"
   }
 
 in cfg
 ```
-
-Package sets are simply sets of packages, so you can also use Dhall to
-concatenate custom package sets with the above.

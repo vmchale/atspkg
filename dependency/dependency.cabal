@@ -29,6 +29,7 @@ library
                      , containers
                      , recursion-schemes
                      , microlens
+                     , microlens-th
                      , transformers
                      , composition-prelude
                      , deepseq

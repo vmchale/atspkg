@@ -22,6 +22,8 @@ module Data.Dependency.Type ( Dependency (..)
                             , ResolveState
                             -- * Helper functions
                             , check
+                            -- * Lenses
+                            , packageSet
                             ) where
 
 import           Control.DeepSeq              (NFData)
@@ -34,6 +36,7 @@ import           Data.Functor.Foldable
 import           Data.Functor.Foldable.TH
 import           Data.List                    (intercalate)
 import qualified Data.Map                     as M
+import           Lens.Micro.TH
 #if __GLASGOW_HASKELL__ < 804
 import           Data.Semigroup
 #endif
@@ -55,7 +58,7 @@ instance MonadTrans ResolveStateM where
     lift = ResolveStateM . lift
 
 -- | A package set is simply a map between package names and a set of packages.
-newtype PackageSet a = PackageSet (M.Map String (S.Set a))
+newtype PackageSet a = PackageSet { _packageSet :: M.Map String (S.Set a) }
     deriving (Eq, Ord, Foldable, Generic)
     deriving newtype Binary
 
@@ -142,3 +145,5 @@ instance Pretty a => Pretty (Constraint a) where
         a (EqF v)            = "≡" <+> pretty v
         a (BoundedF c c')    = c <+> "∧" <+> c'
         a NoneF              = mempty
+
+makeLenses ''PackageSet

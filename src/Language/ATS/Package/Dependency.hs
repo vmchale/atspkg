@@ -46,17 +46,18 @@ fetchDeps cc' setup' deps cdeps atsBld cfgPath b' =
             unpacked = fmap (over dirLens (pack d <>)) <$> cdeps'
             clibs = fmap (buildHelper False) (join unpacked)
             atsLibs = fmap (buildHelper False) (join atsDeps')
+            cBuild = mapM_ (setup cc') <$> transpose unpacked
+            atsBuild = mapM_ atsPkgSetup <$> transpose atsDeps'
 
-        -- Fetch all packages
+        -- Fetch all packages & build compiler
         parallel' $ join [ setup', libs', clibs, atsLibs ]
 
-        -- Build C dependencies
-        unless (null unpacked) $
-            mapM_ (setup cc') (join unpacked)
+        let tagBuild str bld =
+                unless (null bld) $
+                    putStrLn (mconcat ["Building ", str, " dependencies..."]) >>
+                    parallel' bld
 
-        -- Build ATS Dependencies
-        unless (null atsDeps') $
-            parallel_ (extraWorkerWhileBlocked <$> (mapM_ atsPkgSetup <$> atsDeps'))
+        zipWithM_ tagBuild [ "C", "ATS" ] [ cBuild, atsBuild ]
 
 parallel' :: [IO ()] -> IO ()
 parallel' = parallel_ . fmap extraWorkerWhileBlocked

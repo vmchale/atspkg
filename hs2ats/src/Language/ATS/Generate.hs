@@ -167,6 +167,7 @@ extends =
                , RecordWildCards
                , BangPatterns
                , ExplicitForAll
+               , FlexibleContexts
                ]
 
 -- | Given a string containing Haskell, return a string containing ATS and
