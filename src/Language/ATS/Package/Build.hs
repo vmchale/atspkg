@@ -46,7 +46,7 @@ wants p = compiler <$> getConfig p
 buildAll :: Maybe FilePath -> IO ()
 buildAll p = on (>>) (=<< wants p) fetchCompiler setupCompiler
 
-buildCabal :: String -> Args -> BuildFlags -> IO HookedBuildInfo
+buildCabal :: String -> Args -> ConfigFlags -> IO HookedBuildInfo
 buildCabal libName _ _ = do
     build mempty
     libDir <- (<> "/") <$> getCurrentDirectory
@@ -59,7 +59,7 @@ modifyLib libDir key = second (M.toList . M.alter (fmap modify) key . M.fromList
 
 cabalHooks :: String -- ^ Haskell library name
            -> UserHooks
-cabalHooks libName = simpleUserHooks { preBuild = buildCabal libName }
+cabalHooks libName = simpleUserHooks { preConf = buildCabal libName }
 
 -- | Build a set of targets
 build :: [String] -- ^ Targets
