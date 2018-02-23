@@ -12,6 +12,7 @@ module Language.ATS.Package ( pkgToAction
                             , upgradeBin
                             -- * Cabal helper functions
                             , cabalHooks
+                            , atsPolyglotBuild
                             -- * Types
                             , Version (..)
                             , Pkg (..)

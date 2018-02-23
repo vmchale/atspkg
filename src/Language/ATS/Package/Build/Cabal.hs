@@ -1,12 +1,16 @@
+-- | Integration with @Cabal@.
 module Language.ATS.Package.Build.Cabal ( cabalHooks
+                                        , atsPolyglotBuild
                                         ) where
-
-import           Language.ATS.Package.Build
 
 import           Distribution.PackageDescription
 import           Distribution.Simple
 import           Distribution.Simple.LocalBuildInfo
+import           Language.ATS.Package.Build
 import           Quaalude
+
+atsPolyglotBuild :: IO ()
+atsPolyglotBuild = defaultMainWithHooks cabalHooks
 
 configureCabal :: IO LocalBuildInfo -> IO LocalBuildInfo
 configureCabal = (<*>) $ do
