@@ -1,17 +1,17 @@
 module Language.ATS.Package ( pkgToAction
-                            , fetchCompiler
-                            , setupCompiler
                             , build
                             , buildAll
                             , check
                             , mkPkg
                             , cleanAll
                             , fetchDeps
-                            , mkBuildPlan
                             , buildHelper
                             , checkPkg
                             , displayList
                             , upgradeBin
+                            -- * Cabal helper functions
+                            , buildCabal
+                            , cabalHooks
                             -- * Types
                             , Version (..)
                             , Pkg (..)

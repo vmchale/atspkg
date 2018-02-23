@@ -1,8 +1,10 @@
 {-# OPTIONS_GHC -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat #-}
 
+import           Data.Bool                       (bool)
 import           Distribution.CommandLine
+import           Distribution.PackageDescription
 import           Distribution.Simple
-import           Distribution.Types.HookedBuildInfo
+import           Distribution.Simple.Setup
 
 installActions :: IO ()
 installActions = sequence_
@@ -11,6 +13,12 @@ installActions = sequence_
     , writeBashCompletions "atspkg"
     ]
 
+maybeInstallActions :: ConfigFlags -> IO ()
+maybeInstallActions cfs = bool nothing act cond
+    where act = installActions
+          nothing = pure mempty
+          cond = (mkFlagName "no-executable", True) `elem` configConfigurationsFlags cfs
+
 main :: IO ()
 main = defaultMainWithHooks $
-    simpleUserHooks { preConf = \_ _ -> installActions >> pure emptyHookedBuildInfo }
+    simpleUserHooks { preConf = \_ flags -> maybeInstallActions flags >> pure emptyHookedBuildInfo }

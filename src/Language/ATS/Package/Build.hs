@@ -7,6 +7,8 @@
 module Language.ATS.Package.Build ( mkPkg
                                   , pkgToAction
                                   , build
+                                  , buildCabal
+                                  , cabalHooks
                                   , buildAll
                                   , check
                                   ) where
@@ -20,6 +22,9 @@ import           Development.Shake.ATS
 import           Development.Shake.Check
 import           Development.Shake.Clean
 import           Development.Shake.Man
+import           Distribution.PackageDescription      hiding (Executable, includes, options)
+import           Distribution.Simple                  hiding (Version, showVersion)
+import           Distribution.Simple.Setup
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Config
 import           Language.ATS.Package.Dependency
@@ -39,6 +44,12 @@ wants p = compiler <$> getConfig p
 -- | Build in current directory or indicated directory
 buildAll :: Maybe FilePath -> IO ()
 buildAll p = on (>>) (=<< wants p) fetchCompiler setupCompiler
+
+buildCabal :: Args -> BuildFlags -> IO HookedBuildInfo
+buildCabal _ _ = build mempty >> pure emptyHookedBuildInfo
+
+cabalHooks :: UserHooks
+cabalHooks = simpleUserHooks { preBuild = buildCabal }
 
 -- | Build a set of targets
 build :: [String] -- ^ Targets
