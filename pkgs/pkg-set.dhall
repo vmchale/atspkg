@@ -12,7 +12,7 @@ let pkgset =
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall
   , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall [0,1,5]
   , https://raw.githubusercontent.com/vmchale/either/master/pkg.dhall [0,2,1]
-  , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-fast-arithmetic.dhall [0,3,2,5]
+  , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-fast-arithmetic.dhall [0,3,3,0]
   , https://raw.githubusercontent.com/vmchale/ats-linecount/master/pkg.dhall
   , https://raw.githubusercontent.com/vmchale/specats/master/pkg.dhall [0,2,2]
   , https://raw.githubusercontent.com/vmchale/monoid/master/pkg.dhall [0,1,0]

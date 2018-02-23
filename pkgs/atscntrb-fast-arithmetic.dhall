@@ -1,13 +1,5 @@
-let dep = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default-pkg.dhall
-in
-let concat = https://ipfs.io/ipfs/QmQ8w5PLcsNz56dMvRtq54vbuPe9cNnCCUXAQp6xLc6Ccx/Prelude/Text/concat
-in
-let showVersion = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/dhall-version.dhall
+let prelude = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/atspkg-prelude.dhall
 
 in λ(x : List Integer) → 
-  dep //
-    { libName = "fast-arithmetic"
-    , dir = ".atspkg/contrib/hspkg-fast-arthimetic"
-    , url = concat ["https://hackage.haskell.org/package/fast-arithmetic-", showVersion x, "/fast-arithmetic-", showVersion x, ".tar.gz"]
-    , libVersion = x
-    }
+  prelude.makeHsPkg { x = x, name = "fast-arithmetic" } 
+    // { libDeps = prelude.mapPlainDeps [ "atscntrb-hx-intinf" ], description = [ "Number theory & combinatorics library written in ATS" ] : Optional Text }
