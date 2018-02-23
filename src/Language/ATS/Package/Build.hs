@@ -7,29 +7,30 @@
 module Language.ATS.Package.Build ( mkPkg
                                   , pkgToAction
                                   , build
-                                  , buildCabal
                                   , cabalHooks
                                   , buildAll
                                   , check
                                   ) where
 
 import           Control.Concurrent.ParallelIO.Global
-import qualified Data.ByteString                      as BS
-import qualified Data.ByteString.Lazy                 as BSL
-import           Data.List                            (nub)
-import           Data.Version                         (showVersion)
+import qualified Data.ByteString                        as BS
+import qualified Data.ByteString.Lazy                   as BSL
+import           Data.List                              (nub)
+import qualified Data.Map                               as M
+import           Data.Version                           (showVersion)
 import           Development.Shake.ATS
 import           Development.Shake.Check
 import           Development.Shake.Clean
 import           Development.Shake.Man
-import           Distribution.PackageDescription      hiding (Executable, includes, options)
-import           Distribution.Simple                  hiding (Version, showVersion)
+import           Distribution.PackageDescription        hiding (Executable, includes, options)
+import           Distribution.Simple                    hiding (Version, showVersion)
 import           Distribution.Simple.Setup
+import           Distribution.Types.UnqualComponentName
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Config
 import           Language.ATS.Package.Dependency
-import           Language.ATS.Package.Type            hiding (Version)
-import qualified Paths_ats_pkg                        as P
+import           Language.ATS.Package.Type              hiding (Version)
+import qualified Paths_ats_pkg                          as P
 import           Quaalude
 
 check :: Maybe FilePath -> IO Bool
@@ -45,11 +46,20 @@ wants p = compiler <$> getConfig p
 buildAll :: Maybe FilePath -> IO ()
 buildAll p = on (>>) (=<< wants p) fetchCompiler setupCompiler
 
-buildCabal :: Args -> BuildFlags -> IO HookedBuildInfo
-buildCabal _ _ = build mempty >> pure emptyHookedBuildInfo
+buildCabal :: String -> Args -> BuildFlags -> IO HookedBuildInfo
+buildCabal libName _ _ = do
+    build mempty
+    libDir <- (<> "/") <$> getCurrentDirectory
+    pure (modifyLib libDir (mkUnqualComponentName libName) emptyHookedBuildInfo)
 
-cabalHooks :: UserHooks
-cabalHooks = simpleUserHooks { preBuild = buildCabal }
+modifyLib :: String -> UnqualComponentName -> HookedBuildInfo -> HookedBuildInfo
+modifyLib libDir key = second (M.toList . M.alter (fmap modify) key . M.fromList)
+    where modify bi = let olds = extraLibDirs bi
+            in bi { extraLibDirs = (libDir <>) <$> olds }
+
+cabalHooks :: String -- ^ Haskell library name
+           -> UserHooks
+cabalHooks libName = simpleUserHooks { preBuild = buildCabal libName }
 
 -- | Build a set of targets
 build :: [String] -- ^ Targets

@@ -7,10 +7,10 @@ module Language.ATS.Package ( pkgToAction
                             , fetchDeps
                             , buildHelper
                             , checkPkg
+                            -- * Ecosystem functionality
                             , displayList
                             , upgradeBin
                             -- * Cabal helper functions
-                            , buildCabal
                             , cabalHooks
                             -- * Types
                             , Version (..)

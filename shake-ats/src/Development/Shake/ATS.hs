@@ -41,7 +41,7 @@ import           Data.List                         (intercalate)
 import           Data.Maybe                        (fromMaybe)
 import           Data.Semigroup                    (Semigroup (..))
 import qualified Data.Text.Lazy                    as TL
-import           Development.Shake                 hiding (doesFileExist)
+import           Development.Shake                 hiding (doesFileExist, getEnv)
 import           Development.Shake.ATS.Environment
 import           Development.Shake.ATS.Rules
 import           Development.Shake.ATS.Type
@@ -50,6 +50,7 @@ import           Development.Shake.FilePath
 import           Development.Shake.Version
 import           Language.ATS
 import           System.Directory                  (copyFile, createDirectoryIfMissing, doesFileExist)
+import           System.Environment                (getEnv)
 import           System.Exit                       (ExitCode (ExitSuccess))
 
 -- | Whether generated libraries are to be considered compatible.
@@ -64,9 +65,9 @@ atsCommand :: CmdResult r => ATSToolConfig
                           -> String -- ^ C code to be generated
                           -> Action r
 atsCommand tc sourceFile out = do
-    path <- fromMaybe "" <$> getEnv "PATH"
+    path <- liftIO $ getEnv "PATH"
     home' <- home tc
-    h <- fromMaybe "" <$> getEnv "HOME"
+    h <- liftIO $ getEnv "HOME"
     let env = patsEnv h home' path
     patsc <- patsopt tc
     command env patsc ["--output", out, "-dd", sourceFile, "-cc"]
@@ -128,7 +129,7 @@ cconfig tc libs gc extras = do
     h' <- pkgHome cc'
     home' <- home tc
     let libs' = ("atslib" :) $ bool libs ("gc" : libs) gc
-    pure $ CConfig [h ++ "ccomp/runtime/", h, h' ++ "include"] libs' [h' ++ "lib", home' ++ "/ccomp/atslib/lib"] extras
+    pure $ CConfig [h ++ "ccomp/runtime/", h, h' ++ "include", ".atspkg/contrib"] libs' [h' ++ "lib", home' ++ "/ccomp/atslib/lib"] extras
 
 home :: MonadIO m => ATSToolConfig -> m String
 home tc = do
