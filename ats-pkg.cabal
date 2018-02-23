@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: ats-pkg
-version: 2.6.0.2
+version: 2.6.0.3
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -51,6 +51,7 @@ library
         Language.ATS.Package.Dependency
         Language.ATS.Package.Compiler
         Language.ATS.Package.Build
+        Language.ATS.Package.Build.Cabal
         Language.ATS.Package.Build.IO
         Language.ATS.Package.Upgrade
         Language.ATS.Package.Config

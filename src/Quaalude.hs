@@ -98,6 +98,7 @@ module Quaalude ( bool
                 , module X
                 -- Lens exports
                 , over
+                , _Just
                 , view
                 , _1
                 , _2

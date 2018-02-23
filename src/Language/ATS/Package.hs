@@ -30,6 +30,7 @@ module Language.ATS.Package ( pkgToAction
                             ) where
 
 import           Language.ATS.Package.Build
+import           Language.ATS.Package.Build.Cabal
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Dependency
 import           Language.ATS.Package.Dhall
