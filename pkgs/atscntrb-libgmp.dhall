@@ -7,6 +7,5 @@ in λ(v : List Integer) →
     { libName = "atscntrb-libgmp"
     , dir = ".atspkg/contrib/atscntrb-libgmp"
     , url = "https://registry.npmjs.org/atscntrb-libgmp/-/atscntrb-libgmp-${showVersion v}.tgz"
-    , url = "https://registry.npmjs.org/atscntrb-hx-intinf/-/atscntrb-hx-intinf-${showVersion v}.tgz"
     , libVersion = v
     }
