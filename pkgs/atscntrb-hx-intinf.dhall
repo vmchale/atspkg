@@ -8,5 +8,5 @@ in λ(v : List Integer) →
     , dir = ".atspkg/contrib/atscntrb-hx-intinf"
     , url = "https://registry.npmjs.org/atscntrb-hx-intinf/-/atscntrb-hx-intinf-${showVersion v}.tgz"
     , libVersion = v
-    libDeps = prelude.mapPlainDeps [ "atscntrb-libgmp" ]
+    , libDeps = prelude.mapPlainDeps [ "atscntrb-libgmp" ]
     }
