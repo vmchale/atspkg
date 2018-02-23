@@ -2,6 +2,8 @@ let showVersion = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/
 in
 let makePkg = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/make-pkg.dhall
 in
+let makeHsPkg = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/hackage-pkg.dhall
+in
 let makePkgDescr = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/make-pkg-descr.dhall
 in
 let bin = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default-bin.dhall
@@ -15,4 +17,4 @@ in
 let mapPlainDeps = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/map-plain-deps.dhall
 in
 
-{ showVersion = showVersion, makePkg = makePkg, bin = bin, lib = lib, default = default, plainDeps = plainDeps, mapPlainDeps = mapPlainDeps, makePkgDescr = makePkgDescr }
+{ showVersion = showVersion, makePkg = makePkg, bin = bin, lib = lib, default = default, plainDeps = plainDeps, mapPlainDeps = mapPlainDeps, makePkgDescr = makePkgDescr, makeHsPkg = makeHsPkg }
