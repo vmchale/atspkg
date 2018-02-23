@@ -3,6 +3,8 @@ let pkgset =
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-divideconquerpar.dhall
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-fworkshop.dhall
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-threadkit.dhall
+  , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-intinf.dhall [1,0,8]
+  , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-libgmp.dhall [1,0,4]
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-cstream.dhall [1,0,4]
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/libc-atomic-ops.dhall
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/libc-gc.dhall

@@ -6,6 +6,7 @@ in λ(v : List Integer) →
   dep //
     { libName = "atscntrb-hx-intinf"
     , dir = ".atspkg/contrib/atscntrb-hx-intinf"
+    , url = "https://registry.npmjs.org/atscntrb-libgmp/-/atscntrb-libgmp-${showVersion v}.tgz"
     , url = "https://registry.npmjs.org/atscntrb-hx-intinf/-/atscntrb-hx-intinf-${showVersion v}.tgz"
     , libVersion = v
     }
