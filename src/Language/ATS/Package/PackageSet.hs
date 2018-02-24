@@ -6,7 +6,6 @@
 
 module Language.ATS.Package.PackageSet ( ATSPackageSet (..)
                                        , setBuildPlan
-                                       , mkBuildPlan
                                        , displayList
                                        ) where
 

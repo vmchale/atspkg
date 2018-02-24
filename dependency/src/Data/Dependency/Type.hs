@@ -22,8 +22,6 @@ module Data.Dependency.Type ( Dependency (..)
                             , ResolveState
                             -- * Helper functions
                             , check
-                            -- * Lenses
-                            , packageSet
                             ) where
 
 import           Control.DeepSeq              (NFData)
@@ -145,5 +143,3 @@ instance Pretty a => Pretty (Constraint a) where
         a (EqF v)            = "≡" <+> pretty v
         a (BoundedF c c')    = c <+> "∧" <+> c'
         a NoneF              = mempty
-
-makeLenses ''PackageSet

@@ -31,7 +31,6 @@ library
                      , microlens
                      , microlens-th
                      , transformers
-                     , composition-prelude
                      , deepseq
                      , binary
                      , deepseq
