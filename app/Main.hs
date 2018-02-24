@@ -62,7 +62,7 @@ command' = hsubparser
     <> command "upgrade" (info (pure Upgrade) (progDesc "Upgrade to the latest version of atspkg"))
     <> command "valgrind" (info valgrind (progDesc "Run generated binaries through valgrind"))
     <> command "run" (info run' (progDesc "Run generated binaries"))
-    <> command "check" (info check' (progDesc "Check pkg.dhall file to ensure it is well-typed."))
+    <> command "check" (info check' (progDesc "Audit a package set to ensure it is well-typed."))
     <> command "list" (info (pure List) (progDesc "List available packages"))
     )
 

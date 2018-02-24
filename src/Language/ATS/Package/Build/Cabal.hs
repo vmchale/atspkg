@@ -34,6 +34,11 @@ modifyLibrary :: String -> Library -> Library
 modifyLibrary libDir lib = let old = libBuildInfo lib
     in lib { libBuildInfo = modifyBuildInfo libDir old }
 
+writeDummyFile :: IO ()
+writeDummyFile =
+    writeFile "dist-newstyle/lib" ""
+
 cabalHooks :: UserHooks
 cabalHooks = let defConf = confHook simpleUserHooks
-    in simpleUserHooks { confHook = configureCabal .* defConf }
+    in simpleUserHooks { preConf = \_ _ -> writeDummyFile >> pure emptyHookedBuildInfo
+                       , confHook = configureCabal .* defConf }
