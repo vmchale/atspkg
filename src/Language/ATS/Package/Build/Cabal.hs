@@ -36,7 +36,8 @@ modifyLibrary libDir lib = let old = libBuildInfo lib
 
 writeDummyFile :: IO ()
 writeDummyFile =
-    writeFile "dist-newstyle/lib" ""
+    createDirectoryIfMissing True "dist-newstyle/lib" >>
+    writeFile "dist-newstyle/lib/empty" ""
 
 cabalHooks :: UserHooks
 cabalHooks = let defConf = confHook simpleUserHooks

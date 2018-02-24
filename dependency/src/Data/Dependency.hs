@@ -15,7 +15,6 @@ module Data.Dependency
     , ResMap
     ) where
 
-import           Control.Composition
 import           Control.Monad
 import           Control.Monad.Tardis
 import           Control.Monad.Trans.Class
@@ -26,7 +25,6 @@ import           Data.Foldable             (toList)
 import           Data.List                 (groupBy)
 import qualified Data.Map                  as M
 import qualified Data.Set                  as S
-import           Lens.Micro                (over)
 
 lookupMap :: String -> M.Map String a -> DepM a
 lookupMap k ps = case M.lookup k ps of
@@ -53,32 +51,24 @@ lookupSet x ds s = case S.lookupMax s of
     Nothing -> g x
 
     where g Nothing   = Left InternalError
-          g (Just x') = Left (Conflicts (_libName <$> ds') (_libName x')) -- TODO filter only conflicting packages.
+          g (Just x') = Left (Conflicts (_libName <$> ds') (_libName x'))
             where ds' = filter (\d -> not (check x' [d])) ds
 
 -- This does check for compatibility with past packages, but doesn't do the
 -- fancy tardis shenanigans it's supposed to when package resolution fails.
 latest :: PackageSet Dependency -> Dependency -> ResolveState (String, Dependency)
-latest set@(PackageSet ps) d@(Dependency ln _ _) = do
+latest (PackageSet ps) d@(Dependency ln _ _) = do
     st <- getPast
     s <- lift $ lookupMap ln ps
-    finish set d ln (lookupSet (Just d) (toList st) s)
+    finish ln (lookupSet (Just d) (toList st) s)
 
-finish :: PackageSet Dependency -> Dependency -> String -> DepM Dependency -> ResolveState (String, Dependency)
-finish set d ln dep' =
+finish :: String -> DepM Dependency -> ResolveState (String, Dependency)
+finish ln dep' =
     case dep' of
 
         Right dep ->
             modifyForwards (M.insert ln dep) >>
             pure (ln, dep)
-
-        Left (Conflicts lns _) -> do
-            f <- getFuture
-            modifyForwards f
-            let g = thread (M.alter (fmap S.deleteMax) <$> lns)
-            x@(s, dep'') <- latest (over packageSet g set) d
-            sendPast (M.insert s dep'')
-            pure x
 
         Left err -> lift (Left err)
 

@@ -16,5 +16,23 @@ let plainDeps = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/pl
 in
 let mapPlainDeps = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/map-plain-deps.dhall
 in
+let Bin = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/types/Bin.dhall
+in
+let Lib = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/types/Lib.dhall
+in
+let LibDep = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/types/LibDep.dhall
+in
 
-{ showVersion = showVersion, makePkg = makePkg, bin = bin, lib = lib, default = default, plainDeps = plainDeps, mapPlainDeps = mapPlainDeps, makePkgDescr = makePkgDescr, makeHsPkg = makeHsPkg }
+{ Bin = Bin
+, Lib = Lib
+, LibDep = LibDep
+, showVersion = showVersion
+, makePkg = makePkg
+, bin = bin
+, lib = lib
+, default = default
+, plainDeps = plainDeps
+, mapPlainDeps = mapPlainDeps
+, makePkgDescr = makePkgDescr
+, makeHsPkg = makeHsPkg 
+}
