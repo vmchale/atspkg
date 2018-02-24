@@ -34,7 +34,6 @@ import           Data.Functor.Foldable
 import           Data.Functor.Foldable.TH
 import           Data.List                    (intercalate)
 import qualified Data.Map                     as M
-import           Lens.Micro.TH
 #if __GLASGOW_HASKELL__ < 804
 import           Data.Semigroup
 #endif
