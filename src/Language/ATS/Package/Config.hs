@@ -54,6 +54,10 @@ mkUserConfig = do
 
 readUserConfig :: FilePath -> FilePath -> Rules ()
 readUserConfig h cfg = do
+
     want [cfg]
 
-    cfg %> \_ -> liftIO (defaultFileConfig h)
+    e <- liftIO $ doesFileExist cfg
+
+    cfg %> \_ -> unless e $
+        liftIO (defaultFileConfig h)
