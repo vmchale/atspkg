@@ -150,9 +150,9 @@ ghcV hsLibs = case hsLibs of
     [] -> pure undefined
     _  -> ghcVersion
 
-doStatic :: ArtifactType -> Rules () -> Rules ()
-doStatic StaticLibrary = id
-doStatic _             = const (pure ())
+doLib :: ArtifactType -> Rules () -> Rules ()
+doLib Executable = pure (pure ())
+doLib _          = id
 
 atsBin :: BinaryTarget -> Rules ()
 atsBin tgt@BinaryTarget{..} = do
@@ -170,15 +170,17 @@ atsBin tgt@BinaryTarget{..} = do
 
     let h Executable    = id
         h StaticLibrary = fmap (-<.> "o")
+        h SharedLibrary = fmap (-<.> "o")
         g Executable    = ccAction
         g StaticLibrary = staticLibA
+        g SharedLibrary = sharedLibA
         h' = h tgtType
 
     cconfig' <- cconfig toolConfig libs gc (makeCFlags cFlags mempty (pure undefined) gc)
 
     zipWithM_ (atsCGen toolConfig tgt) src cTargets
 
-    doStatic tgtType (zipWithM_ (objectFileR (cc toolConfig) cconfig') cTargets (h' cTargets))
+    doLib tgtType (zipWithM_ (objectFileR (cc toolConfig) cconfig') cTargets (h' cTargets))
 
     binTarget %> \_ -> do
 

@@ -11,6 +11,6 @@ let lib =
   , links = ([] : List { _1 : Text, _2 : Text })
   , cSources = ([] : List Text)
   , extras = ([] : List Text)
-  , static = True
+  , static = False
   }
 in lib

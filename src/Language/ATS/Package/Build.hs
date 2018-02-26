@@ -215,7 +215,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts libs mt _ v v' ds cds bdeps ccLocal cf as c
 
         ".atspkg/deps" %> \out -> do
             (_, cfgBin') <- cfgBin
-            need [ cfgBin' ]
+            need [ cfgBin', ".atspkg/config" ]
             liftIO $ fetchDeps (ccFromString cc') setup (unpack . fst <$> ds) (unpack . fst <$> cdps) (unpack . fst <$> bdeps) cfgBin' False >> writeFile out ""
 
         let bins = unpack . target <$> bs
@@ -230,8 +230,11 @@ pkgToAction setup rs tgt ~(Pkg bs ts libs mt _ v v' ds cds bdeps ccLocal cf as c
     where g (Bin s t ls hs' atg gc' cSrc extra) =
             atsBin (BinaryTarget (unpack <$> cf) atsToolConfig gc' (unpack <$> ls) [unpack s] hs' (unpackBoth . asTuple <$> atg) mempty (unpack t) (unpack <$> cSrc) (deps extra) Executable)
 
-          h (Lib _ s t ls _ hs' lnk atg cSrc extra _) =
-            atsBin (BinaryTarget (unpack <$> cf) atsToolConfig False (unpack <$> ls) (unpack <$> s) hs' (unpackBoth . asTuple <$> atg) (both unpack <$> lnk) (unpack t) (unpack <$> cSrc) (deps extra) StaticLibrary)
+          h (Lib _ s t ls _ hs' lnk atg cSrc extra sta) =
+            atsBin (BinaryTarget (unpack <$> cf) atsToolConfig False (unpack <$> ls) (unpack <$> s) hs' (unpackBoth . asTuple <$> atg) (both unpack <$> lnk) (unpack t) (unpack <$> cSrc) (deps extra) (k sta))
+
+          k False = SharedLibrary
+          k True  = StaticLibrary
 
           atsToolConfig = ATSToolConfig v v' False (ccFromString cc')
 

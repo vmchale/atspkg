@@ -48,6 +48,7 @@ deriving instance Binary CCompiler
 
 data ArtifactType = StaticLibrary
                   | Executable
+                  | SharedLibrary
                   deriving (Generic, Binary)
 
 -- | Information about where to find @patscc@ and @patsopt@.

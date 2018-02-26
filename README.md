@@ -20,6 +20,7 @@ Things that `atspkg` will do for you:
   * Handle flags and libraries for garbage collection when specified
   * Install `patscc` and other ATS tooling
   * Install manual pages and shell completions
+  * Install ATS libraries
 
 Things that `atspkg` will not do for you:
 
@@ -29,7 +30,6 @@ Things that `atspkg` will not do for you:
   * Provide a centralized package repository
   * Offer a common architecture for package builds
   * Cache builds locally (like `nix` or `cabal`)
-  * Cache binary builds of ATS libraries (this is planned)
 
 ### Example
 
