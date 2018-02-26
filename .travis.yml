@@ -68,6 +68,8 @@ script:
     fi
   - echo $BINPATH
   - mv $BINPATH atspkg-$TARGET
+  - ./atspkg-$TARGET https://github.com/vmchale/polyglot/archive/master.zip
+  - poly .
   - ls atspkg-$TARGET
 
 deploy:

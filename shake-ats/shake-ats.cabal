@@ -1,5 +1,5 @@
 name:                shake-ats
-version:             1.5.0.4
+version:             1.5.0.5
 synopsis:            Utilities for building ATS projects with shake
 description:         Various helper functions for building [ATS](http://www.ats-lang.org/) with the [shake](http://shakebuild.com/) library
 homepage:            https://github.com/vmchale/shake-ats#readme
