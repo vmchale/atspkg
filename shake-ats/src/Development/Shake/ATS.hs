@@ -118,7 +118,7 @@ patsopt :: MonadIO m => ATSToolConfig -> m String
 patsopt = patsTool "patsopt"
 
 patsTool :: MonadIO m => String -> ATSToolConfig -> m String
-patsTool tool tc = (++ prep) <$> ph
+patsTool tool tc = (<> prep) <$> ph
     where ph = patsHome (compilerVer tc)
           prep = "lib/ats2-postiats-" ++ show (libVersion tc) ++ "/bin/" ++ tool
 
@@ -151,7 +151,7 @@ ghcV hsLibs = case hsLibs of
     _  -> ghcVersion
 
 doLib :: ArtifactType -> Rules () -> Rules ()
-doLib Executable = pure (pure ())
+doLib Executable = pure mempty
 doLib _          = id
 
 atsBin :: BinaryTarget -> Rules ()

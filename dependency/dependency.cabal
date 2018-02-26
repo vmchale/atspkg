@@ -20,6 +20,7 @@ Flag development {
 
 library
   hs-source-dirs:      src
+  build-tools:         cpphs
   exposed-modules:     Data.Dependency
   other-modules:       Data.Dependency.Type
                      , Data.Dependency.Error

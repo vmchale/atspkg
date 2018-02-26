@@ -68,7 +68,7 @@ script:
     fi
   - echo $BINPATH
   - mv $BINPATH atspkg-$TARGET
-  - ./atspkg-$TARGET fetch https://github.com/vmchale/polyglot/archive/master.zip
+  - ./atspkg-$TARGET remote https://github.com/vmchale/polyglot/archive/master.zip
   - poly .
   - ls atspkg-$TARGET
 
