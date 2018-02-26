@@ -38,8 +38,8 @@ main = hspec $ parallel $ do
     describe "buildSequence" $
         it "correctly orders dependencies" $
             buildSequence deps `shouldBe` [[free, comonad], [lens]]
-    describe "resolveDependencies" $
+    describe "resolveDependencies" $ do
         it "correctly resolves dependencies in a package set" $
             resolveDependencies set [newLens] `shouldBe` Right [[free, comonad], [newLens]]
-        -- it "correctly resolves dependencies in a package set" $
-        --     resolveDependencies set [ghcMod] `shouldBe` Right [[free, comonad], [lens], [ghcMod]]
+        it "correctly resolves dependencies in a package set" $
+            resolveDependencies set [ghcMod] `shouldBe` Right [[free, comonad], [lens], [ghcMod]]

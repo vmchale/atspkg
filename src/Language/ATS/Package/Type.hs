@@ -88,7 +88,6 @@ data Lib = Lib { name      :: Text -- ^ Name of library being provided
                }
          deriving (Show, Eq, Generic, Interpret, Binary)
 
--- TODO make binaries optional
 -- | Data type associated with @atspkg.dhall@ file.
 data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , test         :: [Bin] -- ^ List of test suites
