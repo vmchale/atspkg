@@ -118,9 +118,9 @@ patsopt :: MonadIO m => ATSToolConfig -> m String
 patsopt = patsTool "patsopt"
 
 patsTool :: MonadIO m => String -> ATSToolConfig -> m String
-patsTool tool tc = do
-    h <- patsHome (compilerVer tc)
-    pure $ h ++ "lib/ats2-postiats-" ++ show (libVersion tc) ++ "/bin/" ++ tool
+patsTool tool tc = (++ prep) <$> ph
+    where ph = patsHome (compilerVer tc)
+          prep = "lib/ats2-postiats-" ++ show (libVersion tc) ++ "/bin/" ++ tool
 
 cconfig :: MonadIO m => ATSToolConfig -> [String] -> Bool -> [String] -> m CConfig
 cconfig tc libs gc extras = do
