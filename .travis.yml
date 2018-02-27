@@ -68,8 +68,8 @@ script:
     fi
   - echo $BINPATH
   - mv $BINPATH atspkg-$TARGET
-  - ./atspkg-$TARGET remote https://github.com/vmchale/polyglot/archive/master.zip
-  - poly .
+    # - ./atspkg-$TARGET remote https://github.com/vmchale/polyglot/archive/master.zip
+    # - poly .
   - ls atspkg-$TARGET
 
 deploy:
