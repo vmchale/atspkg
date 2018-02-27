@@ -57,6 +57,38 @@ in pkg //
 You need only specify the source file and the target; `atspkg` will parse your
 ATS source files and track them (it will not track included C).
 
+## Building a Static Library
+
+Building a static library is quite similar:
+
+```dhall
+let prelude = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/atspkg-prelude.dhall
+
+in prelude.default //
+  { libraries =
+    [
+      prelude.lib //
+      { name = "concurrency"
+      , src = [ "mylibies_link.hats" ]
+      , includes = [ "mylibies_link.hats", ".atspkg/contrib/channel_link.hats" ]
+      , links = [ { _1 = "channel.sats", _2 = ".atspkg/contrib/channel_link.hats" } ]
+      , libTarget = ".atspkg/lib/libconcurrency.a"
+      , libs = [ "pthread" ]
+      , static = True
+      }
+    ]
+  , dependencies = prelude.mapPlainDeps [ "nproc-ats" ]
+  }
+```
+
+Note also the ability of `atspkg` to generate `.hats` files from `.sats` files
+- you can use a static file to declare the types in your library, and then
+compile to a static library separately. This is enormously beneficial for large
+builds, where we can take advantage of multicore processors to dependencies in
+parallel rather than splattering `#include` directives all over our projects.
+
+You can see the full example [here](https://github.com/vmchale/ats-concurrency).
+
 ## Building a Haskell Library
 
 You can see an example [here](https://github.com/vmchale/fast-arithmetic). You
@@ -117,17 +149,9 @@ versioning.
 The sample configuration file is:
 
 ```dhall
-let dep = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default-pkg.dhall
-in
-let concat = https://ipfs.io/ipfs/QmQ8w5PLcsNz56dMvRtq54vbuPe9cNnCCUXAQp6xLc6Ccx/Prelude/Text/concat
-in
-let showVersion = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/dhall-version.dhall
+let dep = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/prelude.dhall
 
 in λ(x : List Integer) → 
-  dep //
-    { libName = "either"
-    , dir = ".atspkg/contrib"
-    , url = concat ["https://github.com/vmchale/either/archive/", showVersion x, ".tar.gz"]
-    , libVersion = x
-}
+  prelude.makePkg { x = x, name = "either", githubUsername = "vmchale" }
+    // { description = [ "Generic sum types and utilities for working with them." ] : Optional Text }
 ```
