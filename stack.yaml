@@ -13,6 +13,7 @@ extra-deps:
   - hspec-dirstream-0.3.0.0
   - dirstream-1.0.3
   - prettyprinter-1.2.0.1
+  - hs2ats-0.2.1.7
 flags:
   ats-pkg:
     development: false
