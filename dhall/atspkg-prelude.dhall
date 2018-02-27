@@ -23,7 +23,10 @@ in
 let LibDep = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/types/LibDep.dhall
 in
 
-{ showVersion = showVersion
+{ Bin = Bin
+, Lib = Lib
+, LibDep = LibDep
+, showVersion = showVersion
 , makePkg = makePkg
 , bin = bin
 , lib = lib
