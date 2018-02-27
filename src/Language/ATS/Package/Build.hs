@@ -137,19 +137,21 @@ options :: Bool -- ^ Whether to rebuild all targets
         -> [String] -- ^ A list of targets
         -> ShakeOptions
 options rba lint v rs = shakeOptions { shakeFiles = ".atspkg"
-                          , shakeThreads = 4
-                          , shakeLint = bool Nothing (Just LintBasic) lint
-                          , shakeVersion = showVersion P.version
-                          , shakeRebuild = rebuildTargets rba rs
-                          , shakeChange = ChangeModtimeAndDigestInput
-                          , shakeVerbosity = toVerbosity v
-                          }
+                                     , shakeThreads = 4
+                                     , shakeLint = bool Nothing (Just LintBasic) lint
+                                     , shakeVersion = showVersion P.version
+                                     , shakeRebuild = rebuildTargets rba rs
+                                     , shakeChange = ChangeModtimeAndDigestInput
+                                     , shakeVerbosity = toVerbosity v
+                                     }
 
 rebuildTargets :: Bool -- ^ Force rebuild of all targets
-               -> [a] -- ^ Targets
-               -> [(Rebuild, a)]
-rebuildTargets rba rs = foldMap g [ (rba, (RebuildNow ,) <$> rs) ]
+               -> [String] -- ^ Targets
+               -> [(Rebuild, String)]
+rebuildTargets rba rs = foldMap g [ (rba, (RebuildNow ,) <$> patterns rs) ]
     where g (b, ts) = bool mempty ts b
+          patterns = thread (mkPattern <$> ["c", "o", "so", "a"])
+          mkPattern ext = ("//*." <> ext :)
 
 cleanConfig :: (MonadIO m) => [String] -> m Pkg
 cleanConfig ["clean"] = pure undefined

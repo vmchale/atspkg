@@ -1,10 +1,8 @@
 ---
-resolver: lts-10.6
+resolver: lts-10.7
 packages:
   - '.'
-  - 'dependency'
   - 'shake-ats'
-  - 'hs2ats'
 extra-deps:
   - dhall-1.10.0
   - shake-ext-2.6.0.0

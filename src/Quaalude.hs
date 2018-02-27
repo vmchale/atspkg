@@ -38,6 +38,7 @@ module Quaalude ( bool
                 , biaxe
                 , (.*)
                 , (.**)
+                , thread
                 -- * Dhall reëxports
                 , Interpret
                 , Generic

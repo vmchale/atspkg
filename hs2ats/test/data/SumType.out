@@ -1,3 +1,0 @@
-datavtype num =
-  | Float_num of float
-  | Int_num of int
