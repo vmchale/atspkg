@@ -81,8 +81,8 @@ in prelude.default //
   }
 ```
 
-Note also the ability of `atspkg` to generate `.hats` files from `.sats` files
-- you can use a static file to declare the types in your library, and then
+Note the ability of `atspkg` to generate `.hats` files from `.sats` files -
+you can use a static file to declare the types in your library, and then
 compile to a static library separately. This is enormously beneficial for large
 builds, where we can take advantage of multicore processors to dependencies in
 parallel rather than splattering `#include` directives all over our projects.
