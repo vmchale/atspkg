@@ -3,6 +3,7 @@ resolver: lts-10.7
 packages:
   - '.'
   - 'shake-ats'
+  - 'dependency'
 extra-deps:
   - dhall-1.10.0
   - shake-ext-2.6.0.0
