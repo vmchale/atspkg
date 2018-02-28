@@ -7,7 +7,6 @@ module Development.Shake.ATS.Rules ( atsLex
                                    ) where
 
 import           Control.Monad
-import           Data.List                      (isPrefixOf)
 import           Data.Semigroup                 (Semigroup (..))
 import qualified Data.Text.Lazy                 as TL
 import           Development.Shake              hiding (doesDirectoryExist)
@@ -15,6 +14,7 @@ import           Development.Shake.ATS.Generate
 import           Development.Shake.ATS.Type     hiding (ATSTarget (..))
 import           Development.Shake.Cabal
 import           Development.Shake.FilePath
+import           Development.Shake.Version
 import           Language.ATS.Generate
 import           System.Directory
 
@@ -46,7 +46,12 @@ getSubdirs p = do
             ss <- mapM getSubdirs ds'
             pure $ ds' <> join ss
 
--- TODO cabal exports can happen concurrently w/ compiler & whatnot
+-- libHSforeign-0.1.0.0-inplace-ghc8.2.2.so
+-- libHSforeign-0.1.0.0-inplace.a
+-- Foreign_stub.h
+
+-- | These rules take a @.cabal@ file and the @.o@ file to be produced from
+-- them, building the @.o@ file.
 cabalExport :: ForeignCabal -> Rules ()
 cabalExport (ForeignCabal cbp' cf' obf') = do
 
@@ -56,27 +61,32 @@ cabalExport (ForeignCabal cbp' cf' obf') = do
         obfDir = takeDirectory (obf -<.> "hs")
         libName = takeBaseName cf
 
-    trDeps <- liftIO $ getCabalDeps cf
+    (v, trDeps) <- liftIO $ getCabalDeps cf
     obf %> \out -> do
 
         need (cf : fmap ((obfDir <> "/") <>) trDeps)
-        command_ [Cwd obfDir] "cabal" ["new-build", "all", "-O2"]
+        command_ [Cwd obfDir] "cabal" ["new-build", "all"]
 
+        ghcV <- quietly ghcVersion
         let subdir = takeDirectory cbp ++ "/"
-            correctDir = (libName `isPrefixOf`)
+            correctDir = (== "build")
             endsBuild = correctDir . last . splitPath
-        dir <- filter endsBuild <$> liftIO (getSubdirs $ subdir ++ "dist-newstyle/build")
-        let obj = head dir ++ "/opt/build/" ++ takeFileName obf
+            pkgDir = subdir ++ "dist-newstyle/build/" ++ platform ++ "/ghc-" ++ ghcV ++ "/" ++ libName ++ "-" ++ showVersion v ++ "/"
+
+        dir <- filter endsBuild <$> liftIO (getSubdirs pkgDir)
+        let obj = head dir ++ "/" ++ takeFileName obf
         liftIO $ copyFile obj out
 
         let hdr = dropExtension obj ++ "_stub.h"
         liftIO $ copyFile hdr (takeDirectory out ++ "/" ++ takeFileName hdr)
 
 -- | Build a @.lats@ file.
-atsLex :: FilePattern -> Rules ()
-atsLex fp =
+atsLex :: FilePath -- ^ Filepath of @.lats@ file
+       -> FilePattern -- ^ File pattern for generated output
+       -> Rules ()
+atsLex latsIn fp =
     fp %> \out -> do
-        lats <- liftIO $ readFile (out -<.> "lats")
+        lats <- liftIO $ readFile latsIn
         (Stdout contents) <- command [Stdin lats] "atslex" []
         liftIO $ writeFile out contents
 

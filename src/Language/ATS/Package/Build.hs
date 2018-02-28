@@ -15,6 +15,7 @@ import           Control.Concurrent.ParallelIO.Global
 import qualified Data.ByteString                      as BS
 import qualified Data.ByteString.Lazy                 as BSL
 import           Development.Shake.ATS
+import           Development.Shake.C                  (ccFromString)
 import           Development.Shake.Check
 import           Development.Shake.Clean
 import           Development.Shake.Man

@@ -13,13 +13,11 @@ module Development.Shake.ATS ( -- * Shake Rules
                              , genATS
                              -- * Helper functions
                              , getSubdirs
-                             , ccToString
-                             , ccFromString
                              , ccToDir
-                             , host
+                             , withPF
+                             -- * Environment/configuration
                              , patscc
                              , patsopt
-                             , withPF
                              -- Types
                              , ForeignCabal (..)
                              , ATSTarget (..)
@@ -214,7 +212,7 @@ trim = init . drop 1
 -- | Print any errors to standard error.
 maybeError :: (MonadIO m) => Either ATSError b -> m ()
 maybeError Right{}  = pure ()
-maybeError (Left y) = printErr y
+maybeError (Left y) = warnErr y
 
 transitiveDeps :: (MonadIO m) => [FilePath] -> [FilePath] -> m [FilePath]
 transitiveDeps _ [] = pure []

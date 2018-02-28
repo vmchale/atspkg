@@ -5,6 +5,7 @@ module Language.ATS.Package.Build.IO ( clibSetup
                                      ) where
 
 import           Development.Shake.ATS
+import           Development.Shake.C
 import           Quaalude
 
 pkgHome :: CCompiler -> IO FilePath

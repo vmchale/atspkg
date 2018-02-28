@@ -81,7 +81,7 @@ in prelude.default //
   }
 ```
 
-Note the ability of `atspkg` to generate `.hats` files from `.sats` files -
+Note the ability of `atspkg` to generate `.hats` files from `.sats` files;
 you can use a static file to declare the types in your library, and then
 compile to a static library separately. This is enormously beneficial for large
 builds, where we can take advantage of multicore processors to dependencies in
@@ -136,7 +136,7 @@ in pkg //
       }
     ]
     , ccompiler = "ghc-8.2.2"
-    , cflags = ["-package-db", "hs/dist-newstyle/packagedb/ghc-8.2.2/", "-optc-O2", "-optc-flto", "-optc-mtune=native", "hs/Foreign"]
+    , cflags = ["-optc-O2", "hs/Foreign"]
   }
 ```
 

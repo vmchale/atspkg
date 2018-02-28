@@ -45,6 +45,7 @@ data Command = Install
              | Valgrind { _targets :: [String] }
              | Run { _targets    :: [String]
                    , _rebuildAll :: Bool
+                   , _verbosity  :: Int
                    , _lint       :: Bool
                    }
              | Check { _filePath :: String, _details :: Bool }
@@ -80,8 +81,10 @@ dhallCompletions :: Mod ArgumentFields a
 dhallCompletions = ftypeCompletions "dhall"
 
 run' :: Parser Command
-run' = Run <$> targets "run"
+run' = Run
+    <$> targets "run"
     <*> rebuild
+    <*> verbosity
     <*> noLint
 
 test' :: Parser Command
@@ -168,7 +171,7 @@ run (Fetch u) = fetchPkg u
 run Clean = mkPkg False True mempty ["clean"] Nothing 0
 run (Build rs tgt rba v lint) = runHelper rba lint rs tgt v
 run (Test ts rba lint) = runHelper rba lint ("test" : ts) Nothing 0
-run (Run ts rba lint) = runHelper rba lint ("run" : ts) Nothing 0
+run (Run ts rba v lint) = runHelper rba lint ("run" : ts) Nothing v
 run c = runHelper False True rs Nothing 0
     where rs = g c
           g Install       = ["install"]
