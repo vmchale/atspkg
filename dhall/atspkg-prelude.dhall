@@ -55,24 +55,23 @@ let dep =
   }
 in
 
-let bin =
+let common =
   { libs = ([] : List Text)
   , hsDeps = ([] : List ForeignCabal)
   , hs2ats = ([] : List TargetPair)
-  , gcBin = False
   , extras = ([] : List Text)
   }
 in
 
+let bin =
+  common // { gcBin = False }
+in
+
 let lib =
-  { libs = ([] : List Text)
-  , includes = ([] : List Text)
-  , hsDeps = ([] : List ForeignCabal)
-  , hs2ats = ([] : List TargetPair)
-  , links = ([] : List { _1 : Text, _2 : Text })
-  , extras = ([] : List Text)
-  , static = False
-  }
+  common //
+    { links = ([] : List { _1 : Text, _2 : Text })
+    , static = False
+    }
 in
 
 let staticLib =
@@ -153,6 +152,7 @@ in
 , makePkg = makePkg
 , bin = bin
 , lib = lib
+, dep = dep
 , staticLib = staticLib
 , default = default
 , plainDeps = plainDeps
