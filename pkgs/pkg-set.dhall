@@ -36,7 +36,7 @@ let atomicOps =
     , url = "https://github.com/ivmai/libatomic_ops/releases/download/v7.6.2/libatomic_ops-7.6.2.tar.gz"
     , libVersion = [7,6,2]
     }
-
+in
 
 let gc =
   prelude.dep //
@@ -63,8 +63,8 @@ let pkgset =
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-threadkit.dhall
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-intinf.dhall [1,0,8]
   , gmp [1,0,4]
-  , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/libc-atomic-ops.dhall
-  , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/libc-gc.dhall
+  , atomicOps
+  , gc
   , fastArithmetic [0,3,3,0]
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,3]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall
