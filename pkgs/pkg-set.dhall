@@ -40,12 +40,19 @@ in
 
 let divideConquer =
   λ(x : List Integer) →
-    prelude.makeNpmPkg { x = x, name = "atscntrb-hx-divideconquer", unpackDir = ".atspkg/contrib/atscntrb-bucs320-divideconquer" }
+    prelude.makeNpmPkg { x = x, name = "atscntrb-hx-divideconquer", unpackDir = "atscntrb-bucs320-divideconquer" }
       // { libDeps = prelude.mapPlainDeps [ "atscntrb-hx-fworkshop", "atscntrb-hx-threadkit" ] }
 in
 
+let divideConquerPar =
+  λ(x : List Integer) →
+    prelude.makeNpmPkg { x = x, name = "atscntrb-hx-divideconquerpar", unpackDir = "atscntrb-bucs320-divideconquer" }
+      // { libDeps = prelude.mapPlainDeps [ "atscntrb-hx-divideconquer" ] }
+in
+  
 let pkgset =
   [ divideConquer [1,0,5]
+  , divideConquerPar [1,0,9]
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-divideconquerpar.dhall
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-fworkshop.dhall
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-threadkit.dhall
