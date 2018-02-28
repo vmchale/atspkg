@@ -15,6 +15,7 @@ import           Quaalude
 data UserConfig = UserConfig { defaultPkgs    :: Text
                              , path           :: Maybe Text
                              , githubUsername :: Text
+                             , filterErrors   :: Bool
                              } deriving (Generic, Interpret, Binary)
 
 cfgFile :: String
