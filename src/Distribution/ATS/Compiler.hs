@@ -36,7 +36,7 @@ packageCompiler directory = do
     BS.writeFile (directory ++ ".tar.gz") (compress bytes)
 
 pkgUrl :: Version -> String
-pkgUrl v = "https://github.com/vmchale/atspkg/raw/master/pkgs/ATS2-Postiats-" ++ show v ++ ".tar.gz"
+pkgUrl v = "https://github.com/vmchale/atspkg/releases/download/compiler/ATS2-Postiats-" ++ show v ++ ".tar.gz"
 
 withCompiler :: String -> Version -> IO ()
 withCompiler s v = putStrLn $ s ++ " compiler v" ++ show v ++ "..."
