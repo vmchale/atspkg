@@ -30,6 +30,10 @@ let Src = { atsSrc : Text, cTarget : Text, atsGen : List TargetPair, extras : Li
 in
 
 {- Helper functions -}
+let patsHome =
+  ".atspkg/contrib"
+in
+
 let showVersion =
   λ(x : List Integer) → concatMapSep "." Integer (Integer/show) x
 in
@@ -160,4 +164,5 @@ in
 , makePkgDescr = makePkgDescr
 , makeHsPkg = makeHsPkg 
 , makeNpmPkg = makeNpmPkg
+, patsHome = patsHome
 }

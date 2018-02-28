@@ -9,39 +9,34 @@ a package is relatively simple: all it requires is a tarball and version
 information.
 
 ```
-let dep = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default-pkg.dhall
+let prelude = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/atspkg-prelude.dhall
 
-in dep //
+in prelude.dep //
   { libName = "atscntrb-hx-libpcre"
-  , dir = ".atspkg/contrib/atscntrb-hx-libpcre"
+  , dir = "${prelude.patsHome}/atscntrb-hx-libpcre"
   , url = "https://registry.npmjs.org/atscntrb-hx-libpcre/-/atscntrb-hx-libpcre-1.0.2.tgz"
   , libVersion = [0,1,2]
   }
 ```
 
-`atspkg` defines `$PATSHOMELOCS` to be `.atspkg/contrib` and subdirectories, so
-keep this in mind when choosing an unpack `dir`.
-
 ## Using Packages
 
-As Dhall is distributed, you can simply point to the package configuration URL
-to add a dependency. 
+To use a package, simply call it by its name and ensure the package is listed in
+the package set you are using.
 
 As a minimal example:
 
 ```
-let pkg = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default.dhall
-in
-let dbin = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default-bin.dhall
+let prelude = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/prelude.dhall
 
-in pkg //
+in prelude.default //
   { bin =
-    [ dbin //
+    [ prelude.bin //
       { src = "src/project.dats"
       , target = "target/project"
       }
     ]
-  , dependencies = [ https://raw.githubusercontent.com/vmchale/ats-concurrency/master/atspkg.dhall ]
+  , dependencies = prelude.mapPlainDeps [ "ats-concurrency" ]
   }
 ```
 
