@@ -74,6 +74,7 @@ in
 let lib =
   common //
     { links = ([] : List { _1 : Text, _2 : Text })
+    , includes = ([] : List Text)
     , static = False
     }
 in
@@ -143,7 +144,7 @@ let makePkgDescr =
       // { description = [ x.description ] : Optional Text }
 in
 
-{- We pack everything into a single record for convenience and efficiency -}
+{- We collect everything in a single record for convenience -}
 { Bin = Bin
 , Lib = Lib
 , Src = Src
