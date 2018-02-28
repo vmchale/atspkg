@@ -245,8 +245,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts libs mt _ v v' ds cds bdeps ccLocal cf as) 
           cDepsRules = unless (null as) $ do
               let targets = fmap (unpack . cTarget) as
                   sources = fmap (unpack . atsSrc) as
-                  l x = ATSTarget undefined atsToolConfig False mempty mempty mempty x mempty undefined [".atskg/deps", ".atspkg/config"] undefined
-              zipWithM_ (cgen (l (unpackBoth . asTuple <$> (atsGen =<< as)))) sources targets
+              zipWithM_ (cgen atsToolConfig [".atspkg/deps", ".atspkg/config"] (fmap (unpack . ats) . atsGen =<< as)) sources targets
 
           cc' = maybe (unpack ccLocal) (<> "-gcc") tgt
           deps = (".atspkg/deps":) . (".atspkg/config":) . fmap unpack

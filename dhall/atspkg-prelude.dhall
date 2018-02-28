@@ -1,38 +1,163 @@
-let showVersion = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/dhall-version.dhall
+{- Dhall prelude imports -}
+let concatMapSep = https://ipfs.io/ipfs/QmQ8w5PLcsNz56dMvRtq54vbuPe9cNnCCUXAQp6xLc6Ccx/Prelude/Text/concatMapSep
 in
-let makePkg = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/make-pkg.dhall
-in
-let makeHsPkg = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/hackage-pkg.dhall
-in
-let makePkgDescr = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/make-pkg-descr.dhall
-in
-let bin = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default-bin.dhall
-in
-let lib = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default-lib.dhall
-in
-let default = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default.dhall
-in
-let plainDeps = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/plain-deps.dhall
-in
-let mapPlainDeps = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/map-plain-deps.dhall
-in
-let Bin = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/types/Bin.dhall
-in
-let Lib = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/types/Lib.dhall
-in
-let LibDep = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/types/LibDep.dhall
+let map = https://ipfs.io/ipfs/QmQ8w5PLcsNz56dMvRtq54vbuPe9cNnCCUXAQp6xLc6Ccx/Prelude/List/map
 in
 
+{- Types for the record (and supporting functions -}
+let ATSConstraint = { lower : Optional (List Integer), upper : Optional (List Integer) }
+in
+
+let LibDep = { _1 : Text, _2 : ATSConstraint }
+in
+
+let LinkType = { _1 : Text, _2 : Text }
+in
+
+let ForeignCabal = { projectFile : Optional Text, cabalFile : Text, objectFile : Text }
+in
+
+let TargetPair = { hs : Text, ats : Text, cpphs : Bool }
+in
+
+let Bin = { src : Text, target : Text, libs : List Text, hsDeps : List ForeignCabal , hs2ats : List TargetPair, gcBin : Bool, extras : List Text }
+in
+
+let Lib = { name : Text, src : List Text, libTarget : Text, libs : List Text, includes : List Text, hsDeps : List ForeignCabal, links : List LinkType, hs2ats : List TargetPair, extras : List Text, static : Bool }
+in
+
+let Src = { atsSrc : Text, cTarget : Text, atsGen : List TargetPair, extras : List Text }
+in
+
+{- Helper functions -}
+let showVersion =
+  λ(x : List Integer) → concatMapSep "." Integer (Integer/show) x
+in
+
+let none = [] : Optional (List Integer)
+in
+let plainDeps = λ(x : Text) → { _1 = x, _2 = { lower = none, upper = none } }
+in
+
+let mapPlainDeps = λ(x : List Text) → map Text LibDep plainDeps x
+in
+
+{- Default configurations -}
+let dep =
+  { dir = ".atspkg/contrib"
+  , libVersion = [0,1,0]
+  , libDeps = []
+    : List LibDep
+  , libBldDeps = []
+    : List LibDep
+  , description = []
+    : Optional Text
+  }
+in
+
+let bin =
+  { libs = ([] : List Text)
+  , hsDeps = ([] : List ForeignCabal)
+  , hs2ats = ([] : List TargetPair)
+  , gcBin = False
+  , extras = ([] : List Text)
+  }
+in
+
+let lib =
+  { libs = ([] : List Text)
+  , includes = ([] : List Text)
+  , hsDeps = ([] : List ForeignCabal)
+  , hs2ats = ([] : List TargetPair)
+  , links = ([] : List { _1 : Text, _2 : Text })
+  , extras = ([] : List Text)
+  , static = False
+  }
+in
+
+let staticLib =
+  lib // { static = True }
+in
+
+let default
+  = { bin = []
+      : List Bin
+    , test = []
+      : List Bin
+    , libraries = []
+      : List Lib
+    , man = ([] : Optional Text)
+    , completions = ([] : Optional Text)
+    , version = [0,3,9]
+    , compiler = [0,3,9]
+    , dependencies = []
+      : List LibDep
+    , clib = []
+      : List LibDep
+    , buildDeps = []
+      : List LibDep
+    , ccompiler = "gcc"
+    , cflags = [ "-O2" ]
+    , atsSource = []
+      : List Src
+    }
+in
+
+{- Package functions -}
+let makePkg =
+  λ(rec : { x : List Integer, name : Text, githubUsername : Text}) → 
+    dep //
+      { libName = rec.name
+      , dir = ".atspkg/contrib"
+      , url = "https://github.com/${rec.githubUsername}/${rec.name}/archive/${showVersion rec.x}.tar.gz"
+      , libVersion = rec.x
+      }
+in
+
+let makeNpmPkg =
+  λ(rec : { x : List Integer, name : Text, unpackDir : Text }) → 
+    dep //
+      { libName = rec.name
+      , dir = ".atspkg/contrib/${rec.unpackDir}"
+      , url = "https://registry.npmjs.org/atscntrb-bucs320-divideconquer/-/atscntrb-bucs320-divideconquer-${showVersion rec.x}.tgz"
+      , libVersion = rec.x
+      }
+in
+
+let makeHsPkg =
+  λ(rec : { x : List Integer, name : Text }) → 
+    dep //
+      { libName = rec.name
+      , dir = ".atspkg/contrib"
+      , url = "https://hackage.haskell.org/package/${rec.name}-${showVersion rec.x}/${rec.name}-${showVersion rec.x}.tar.gz"
+      , libVersion = rec.x
+      }
+in
+
+let makePkgDescr =
+  λ(x : { x : List Integer, name : Text, githubUsername : Text, description : Text }) →
+    makePkg { x = x.x, name = x.name, githubUsername = x.githubUsername }
+      // { description = [ x.description ] : Optional Text }
+in
+
+{- We pack everything into a single record for user convenience -}
 { Bin = Bin
 , Lib = Lib
+, Src = Src
 , LibDep = LibDep
+, LinkType = LinkType
+, ForeignCabal = ForeignCabal
+, TargetPair = TargetPair
+, ATSConstraint = ATSConstraint
 , showVersion = showVersion
 , makePkg = makePkg
 , bin = bin
 , lib = lib
+, staticLib = staticLib
 , default = default
 , plainDeps = plainDeps
 , mapPlainDeps = mapPlainDeps
 , makePkgDescr = makePkgDescr
 , makeHsPkg = makeHsPkg 
+, makeNpmPkg = makeNpmPkg
 }

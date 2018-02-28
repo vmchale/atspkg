@@ -155,7 +155,7 @@ doLib Executable = pure mempty
 doLib _          = id
 
 atsBin :: ATSTarget -> Rules ()
-atsBin tgt@ATSTarget{..} = do
+atsBin ATSTarget{..} = do
 
     mapM_ (uncurry genLinks) linkTargets
 
@@ -175,7 +175,9 @@ atsBin tgt@ATSTarget{..} = do
 
     cconfig' <- cconfig toolConfig libs gc (makeCFlags cFlags mempty (pure undefined) gc)
 
-    zipWithM_ (cgen tgt) src cTargets
+    let atsGen = (snd <$> linkTargets) <> ((^._2) <$> genTargets)
+        atsExtras = otherDeps <> (TL.unpack . objectFile <$> hsLibs)
+    zipWithM_ (cgen toolConfig atsExtras atsGen) src cTargets
 
     doLib tgtType (zipWithM_ (objectFileR (cc toolConfig) cconfig') cTargets (h' cTargets))
 
@@ -189,17 +191,19 @@ atsBin tgt@ATSTarget{..} = do
 
         unit $ g tgtType (cc toolConfig) (h' cTargets) binTarget cconfig''
 
-cgen :: ATSTarget
+cgen :: ATSToolConfig
+     -> [FilePath] -- ^ Extra files to track
+     -> [FilePath] -- ^ ATS source that may be generated.
      -> FilePath -- ^ ATS source
      -> FilePattern -- ^ Pattern for C file to be generated
      -> Rules ()
-cgen ATSTarget{..} atsSrc cFiles =
+cgen toolConfig extras atsGens atsSrc cFiles =
     cFiles %> \out -> do
 
         -- tell shake which files to track and copy them to the appropriate
         -- directory
-        need (otherDeps <> (TL.unpack . objectFile <$> hsLibs))
-        sources <- transitiveDeps ((snd <$> linkTargets) <> ((^._2) <$> genTargets)) [atsSrc]
+        need extras
+        sources <- transitiveDeps atsGens [atsSrc]
         need sources
         copySources toolConfig sources
 
