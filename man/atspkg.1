@@ -88,9 +88,9 @@ Enable detailed error messages when checking configuration files
 .SH CONFIGURATION
 .PP
 \f[B]atspkg\f[] is configured with Dhall, in an atspkg.dhall file.
-\f[B]atspkg\f[] can be configured to produce binary targets (possibly
-linked against Haskell libraries), static library targets, and as plain
-C targets.
+\f[B]atspkg\f[] can be configured to produce binary targets, static
+library targets, shared object files, or plain C targets.
+Artifacts can be linked against Haskell libraries if desired.
 .PP
 There is also a file $HOME/.config/atspkg/config.dhall which can be used
 to configure all builds.

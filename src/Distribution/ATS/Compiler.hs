@@ -51,6 +51,7 @@ fetchCompiler mp v = do
 
         withCompiler "Fetching" v
         manager <- newManager tlsManagerSettings
+        putStrLn $ pkgUrl v
         initialRequest <- parseRequest $ pkgUrl v
         response <- responseBody <$> httpLbs (initialRequest { method = "GET" }) manager
 

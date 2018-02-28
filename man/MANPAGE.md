@@ -74,8 +74,9 @@ to $HOME/.local/share/man/man1
 # CONFIGURATION
 
 **atspkg** is configured with Dhall, in an atspkg.dhall file. **atspkg** can be
-configured to produce binary targets (possibly linked against Haskell
-libraries), static library targets, and as plain C targets.
+configured to produce binary targets, static library targets, shared object
+files, or plain C targets. Artifacts can be linked against Haskell libraries if
+desired.
 
 There is also a file $HOME/.config/atspkg/config.dhall which can be used to
 configure all builds.
