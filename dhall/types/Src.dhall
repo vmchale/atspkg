@@ -3,4 +3,4 @@ in
 let Src = { src : Text, cTarget : Text, libs : List Text, atsGen : List TargetPair, extras : List Text }
 in
 
-Bin
+Src

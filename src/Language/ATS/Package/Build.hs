@@ -64,9 +64,10 @@ mkInstall =
             incs = ((fmap unpack . includes) =<<) . libraries $ config
         need (bins <> libs)
         home <- liftIO $ getEnv "HOME"
-        let binDest = ((home <> "/.local/bin/") <>) . takeFileName <$> bins
-        let libDest = ((home <> "/.atspkg/lib/") <>) . takeFileName <$> libs
-        let inclDest = ((home <> "/.atspkg/include/") <>) . takeFileName <$> incs
+        let g str = fmap (((home <> str) <>) . takeFileName)
+            binDest =  g "/.local/bin" bins
+            libDest = ((home <> "/.atspkg/lib/") <>) . takeFileName <$> libs
+            inclDest = ((home <> "/.atspkg/include/") <>) . takeFileName <$> incs
         zipWithM_ copyFile' (bins ++ libs ++ incs) (binDest ++ libDest ++ inclDest)
         pa <- pandoc
         case man config of
