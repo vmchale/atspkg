@@ -1,14 +1,11 @@
-let dep = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default-pkg.dhall
+let dep = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/atspkg-prelude.dhall
 in
-let mapPlainDeps = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/map-plain-deps.dhall
-in
-let showVersion = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/dhall-version.dhall
 
 in λ(v : List Integer) → 
-  dep //
+  prelude.dep //
     { libName = "atscntrb-hx-intinf"
     , dir = ".atspkg/contrib/atscntrb-hx-intinf"
-    , url = "https://registry.npmjs.org/atscntrb-hx-intinf/-/atscntrb-hx-intinf-${showVersion v}.tgz"
+    , url = "https://registry.npmjs.org/atscntrb-hx-intinf/-/atscntrb-hx-intinf-${prelude.showVersion v}.tgz"
     , libVersion = v
-    , libDeps = mapPlainDeps [ "atscntrb-libgmp" ]
+    , libDeps = prelude.mapPlainDeps [ "atscntrb-libgmp" ]
     }

@@ -1,6 +1,6 @@
-let dep = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/default-pkg.dhall
+let prelude = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/atspkg-prelude.dhall
 
-in dep //
+in prelude.dep //
   { libName = "atscntrb-hx-fworkshop"
   , dir = ".atspkg/contrib/atscntrb-hx-fworkshop"
   , url = "https://registry.npmjs.org/atscntrb-hx-fworkshop/-/atscntrb-hx-fworkshop-1.0.2.tgz"
