@@ -26,8 +26,6 @@ let pkg
       : List LibDep
     , ccompiler = "gcc"
     , cflags = [ "-O2" ]
-    , atsSource = ([] : List Text)
-    , cDir = "cbits"
     , atsSrc = []
       : List Src
     }
