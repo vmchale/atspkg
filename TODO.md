@@ -6,7 +6,10 @@
 - [ ] custom build scripts in ATS (`setup.dats`)
 - [ ] Set number of threads manually
 - [ ] Install `pi`? Possibly nice.
+# Deficiencies
+- [ ] Check `gcc` version as well as `patscc`.
 # Generalizations
+- [ ] Make a `generic-package` library for `.a`, `.so`, and binary builds.
 - [ ] Install GHC/Cabal? (see:
   `https://downloads.haskell.org/~ghc/8.2.2/ghc-8.2.2-src.tar.xz`)
 - [ ] `ftp://sourceware.org/pub/valgrind/valgrind-3.13.0.tar.bz2`
