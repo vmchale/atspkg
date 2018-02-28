@@ -9,7 +9,17 @@ let fastArithmetic =
       // { libDeps = prelude.mapPlainDeps [ "atscntrb-hx-intinf" ], description = [ "Number theory & combinatorics library written in ATS" ] : Optional Text }
 in
 
-{-
+let divideConquer =
+  prelude.dep //
+    { libName = "atscntrb-hx-divideconquer"
+    , dir = ".atspkg/contrib/atscntrb-bucs320-divideconquer"
+    , url = "https://registry.npmjs.org/atscntrb-bucs320-divideconquer/-/atscntrb-bucs320-divideconquer-1.0.5.tgz"
+    , libVersion = [1,0,5]
+    , libDeps = prelude.mapPlainDeps [ "atscntrb-hx-fworkshop", "atscntrb-hx-threadkit" ]
+    }
+in
+
+  {-
 let divideConquer =
   λ(x : List Integer) →
     prelude.makeNpmPkg { x = x, name = "atscntrb-hx-divideconquer" }
@@ -18,7 +28,7 @@ in
 -}
 
 let pkgset =
-  [ https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-divideconquer.dhall
+  [ divideConquer
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-divideconquerpar.dhall
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-fworkshop.dhall
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-threadkit.dhall
