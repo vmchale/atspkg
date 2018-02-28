@@ -49,14 +49,30 @@ let divideConquerPar =
     prelude.makeNpmPkg { x = x, name = "atscntrb-hx-divideconquerpar", unpackDir = "atscntrb-bucs320-divideconquer" }
       // { libDeps = prelude.mapPlainDeps [ "atscntrb-hx-divideconquer" ] }
 in
-  
+
+let fworkshop =
+  λ(x : List Integer) →
+    prelude.makeNpmPkg { x = x, name = "atscntrb-hx-fworkshop", unpackDir = "atscntrb-hx-fworkshop" }
+in
+
+let intinf =
+  λ(x : List Integer) →
+    prelude.makeNpmPkg { x = x, name = "atscntrb-hx-intinf", unpackDir = "atscntrb-hx-intinf" }
+      // { libDeps = prelude.mapPlainDeps [ "atscntrb-libgmp" ] }
+in
+
+let threadkit =
+  λ(x : List Integer) →
+    prelude.makeNpmPkg { x = x, name = "atscntrb-hx-threadkit", unpackDir = "atscntrb-hx-threadkit" }
+      // { libDeps = prelude.mapPlainDeps [ "atscntrb-libgmp" ] }
+in
+
 let pkgset =
   [ divideConquer [1,0,5]
   , divideConquerPar [1,0,9]
-  , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-divideconquerpar.dhall
-  , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-fworkshop.dhall
-  , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-threadkit.dhall
-  , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-intinf.dhall [1,0,8]
+  , fworkshop [1,0,2]
+  , intinf [1,0,0]
+  , threadkit [1,0,3]
   , gmp [1,0,4]
   , atomicOps
   , gc
