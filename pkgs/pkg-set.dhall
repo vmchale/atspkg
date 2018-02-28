@@ -4,13 +4,13 @@ in
 
 {- Packages -}
 let fastArithmetic =
-  λ(x : List Integer) → 
-    prelude.makeHsPkg { x = x, name = "fast-arithmetic" } 
+  λ(x : List Integer) →
+    prelude.makeHsPkg { x = x, name = "fast-arithmetic" }
       // { libDeps = prelude.mapPlainDeps [ "atscntrb-hx-intinf" ], description = [ "Number theory & combinatorics library written in ATS" ] : Optional Text }
 in
 
 let gmp =
-  λ(v : List Integer) → 
+  λ(v : List Integer) →
     prelude.dep //
       { libName = "atscntrb-libgmp"
       , dir = ".atspkg/contrib/atscntrb-libgmp"

@@ -108,30 +108,30 @@ in
 
 {- Package functions -}
 let makePkg =
-  λ(rec : { x : List Integer, name : Text, githubUsername : Text}) → 
+  λ(rec : { x : List Integer, name : Text, githubUsername : Text}) →
     dep //
       { libName = rec.name
-      , dir = ".atspkg/contrib"
+      , dir = "${patsHome}"
       , url = "https://github.com/${rec.githubUsername}/${rec.name}/archive/${showVersion rec.x}.tar.gz"
       , libVersion = rec.x
       }
 in
 
 let makeNpmPkg =
-  λ(rec : { x : List Integer, name : Text, unpackDir : Text }) → 
+  λ(rec : { x : List Integer, name : Text, unpackDir : Text }) →
     dep //
       { libName = rec.name
-      , dir = ".atspkg/contrib/${rec.unpackDir}"
+      , dir = "${patsHome}/${rec.unpackDir}"
       , url = "https://registry.npmjs.org/${rec.unpackDir}/-/${rec.unpackDir}-${showVersion rec.x}.tgz"
       , libVersion = rec.x
       }
 in
 
 let makeHsPkg =
-  λ(rec : { x : List Integer, name : Text }) → 
+  λ(rec : { x : List Integer, name : Text }) →
     dep //
       { libName = rec.name
-      , dir = ".atspkg/contrib"
+      , dir = "${patsHome}"
       , url = "https://hackage.haskell.org/package/${rec.name}-${showVersion rec.x}/${rec.name}-${showVersion rec.x}.tar.gz"
       , libVersion = rec.x
       }
@@ -143,7 +143,7 @@ let makePkgDescr =
       // { description = [ x.description ] : Optional Text }
 in
 
-{- We pack everything into a single record for user convenience -}
+{- We pack everything into a single record for convenience and efficiency -}
 { Bin = Bin
 , Lib = Lib
 , Src = Src
@@ -162,7 +162,7 @@ in
 , plainDeps = plainDeps
 , mapPlainDeps = mapPlainDeps
 , makePkgDescr = makePkgDescr
-, makeHsPkg = makeHsPkg 
+, makeHsPkg = makeHsPkg
 , makeNpmPkg = makeNpmPkg
 , patsHome = patsHome
 }
