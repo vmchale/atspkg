@@ -29,6 +29,25 @@ let gmp =
       }
 in
 
+let atomicOps =
+  prelude.dep //
+    { libName = "atomic-ops"
+    , dir = "atomic-ops-7.6.2"
+    , url = "https://github.com/ivmai/libatomic_ops/releases/download/v7.6.2/libatomic_ops-7.6.2.tar.gz"
+    , libVersion = [7,6,2]
+    }
+
+
+let gc =
+  prelude.dep //
+    { libName = "gc"
+    , dir = "gc-7.6.4"
+    , url = "https://github.com/ivmai/bdwgc/releases/download/v7.6.4/gc-7.6.4.tar.gz"
+    , libVersion = [7,6,4]
+    , libDeps = prelude.mapPlainDeps [ "atomic-ops" ]
+    }
+in
+
   {-
 let divideConquer =
   λ(x : List Integer) →
