@@ -19,6 +19,16 @@ let divideConquer =
     }
 in
 
+let gmp =
+  λ(v : List Integer) → 
+    prelude.dep //
+      { libName = "atscntrb-libgmp"
+      , dir = ".atspkg/contrib/atscntrb-libgmp"
+      , url = "https://registry.npmjs.org/atscntrb-libgmp/-/atscntrb-libgmp-${prelude.showVersion v}.tgz"
+      , libVersion = v
+      }
+in
+
   {-
 let divideConquer =
   λ(x : List Integer) →
@@ -33,7 +43,7 @@ let pkgset =
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-fworkshop.dhall
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-threadkit.dhall
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-hx-intinf.dhall [1,0,8]
-  , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/atscntrb-libgmp.dhall [1,0,4]
+  , gmp [1,0,4]
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/libc-atomic-ops.dhall
   , https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/libc-gc.dhall
   , fastArithmetic [0,3,3,0]
