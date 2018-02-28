@@ -4,6 +4,8 @@ let Lib = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/types/Li
 in
 let LibDep = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/types/LibDep.dhall
 in
+let Src = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/types/Src.dhall
+in
 
 let pkg
   = { bin = []
@@ -26,6 +28,8 @@ let pkg
     , cflags = [ "-O2" ]
     , atsSource = ([] : List Text)
     , cDir = "cbits"
+    , atsSrc = []
+      : List Src
     }
 
 in pkg

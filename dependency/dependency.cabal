@@ -31,7 +31,6 @@ library
                      , recursion-schemes
                      , microlens
                      , transformers
-                     , deepseq
                      , binary
                      , deepseq
                      , tardis

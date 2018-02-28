@@ -15,6 +15,7 @@ module Language.ATS.Package.Type ( -- * Types
                                  , ATSDependency (..)
                                  , Bin (..)
                                  , Lib (..)
+                                 , Src (..)
                                  , Version (..)
                                  , ForeignCabal (..)
                                  , ATSConstraint (..)
@@ -63,14 +64,20 @@ data TargetPair = TargetPair { hs    :: Text
 
 deriving instance Interpret ForeignCabal
 
-data Bin = Bin { src      :: Text -- ^ Source file (should end with @.dats@)
-               , target   :: Text -- ^ Binary to be built
-               , libs     :: [Text] -- ^ Libraries to link against (e.g. @[ "pthread" ]@)
-               , hsDeps   :: [ForeignCabal] -- ^ Haskell @.cabal@ files associated with the final library we want to make
-               , hs2ats   :: [TargetPair] -- ^ List of sources and targets for @hs2ats@
-               , gcBin    :: Bool -- ^ Whether to use the garbage collector
-               , cSources :: [Text] -- ^ C source files the build depends on
-               , extras   :: [Text] -- ^ Extra source files the build depends on
+data Src = Src { atsSrc  :: Text
+               , cTarget :: Text
+               , atsGen  :: [TargetPair]
+               , extras  :: [Text]
+               }
+         deriving (Show, Eq, Generic, Interpret, Binary)
+
+data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
+               , target :: Text -- ^ Binary to be built
+               , libs   :: [Text] -- ^ Libraries to link against (e.g. @[ "pthread" ]@)
+               , hsDeps :: [ForeignCabal] -- ^ Haskell @.cabal@ files associated with the final library we want to make
+               , hs2ats :: [TargetPair] -- ^ List of sources and targets for @hs2ats@
+               , gcBin  :: Bool -- ^ Whether to use the garbage collector
+               , extras :: [Text] -- ^ Extra source files the build depends on
                }
          deriving (Show, Eq, Generic, Interpret, Binary)
 
@@ -82,7 +89,6 @@ data Lib = Lib { name      :: Text -- ^ Name of library being provided
                , hsDeps    :: [ForeignCabal] -- ^ Haskell @.cabal@ files associated with object files
                , links     :: [(Text, Text)] -- ^ Generate link files.
                , hs2ats    :: [TargetPair] -- ^ Sources and targets for @hs2ats@
-               , cSources  :: [Text] -- ^ C source files the build depends on
                , extras    :: [Text] -- ^ Other source files the build depends on
                , static    :: Bool -- ^ Whether to make a static library
                }
@@ -96,12 +102,11 @@ data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , completions  :: Maybe Text -- ^ Optional @compleat@ completions to be installed alongside package.
                , version      :: Version -- ^ Library version
                , compiler     :: Version -- ^ Compiler version
-               , dependencies :: [LibDep] -- ^ List of dependencies
-               , clib         :: [LibDep] -- ^ List of C dependencies
-               , buildDeps    :: [LibDep] -- ^ List of ATS dependencies that should be installed as static libraries
+               , dependencies :: [LibDep] -- ^ List of library dependencies
+               , clib         :: [LibDep] -- ^ List of C library dependencies
+               , buildDeps    :: [LibDep] -- ^ List of ATS library dependencies
                , ccompiler    :: Text -- ^ The C compiler we should use
                , cflags       :: [Text] -- ^ List of flags to pass to the C compiler
-               , atsSource    :: [Text] -- ^ Directory containing ATS source to be compile to C.
-               , cDir         :: Text -- ^ Directory for generated C.
+               , atsSource    :: [Src] -- ^ ATS source to be compile to C.
                }
          deriving (Show, Eq, Generic, Interpret, Binary)

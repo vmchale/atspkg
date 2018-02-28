@@ -14,17 +14,15 @@ module Language.ATS.Package.Build ( mkPkg
 import           Control.Concurrent.ParallelIO.Global
 import qualified Data.ByteString                      as BS
 import qualified Data.ByteString.Lazy                 as BSL
-import           Data.List                            (nub)
-import           Data.Version                         (showVersion)
 import           Development.Shake.ATS
 import           Development.Shake.Check
 import           Development.Shake.Clean
 import           Development.Shake.Man
+import           Distribution.ATS.Version
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Config
 import           Language.ATS.Package.Dependency
-import           Language.ATS.Package.Type            hiding (Version)
-import qualified Paths_ats_pkg                        as P
+import           Language.ATS.Package.Type
 import           Quaalude
 
 check :: Maybe FilePath -> IO Bool
@@ -38,7 +36,9 @@ wants p = compiler <$> getConfig p
 
 -- | Build in current directory or indicated directory
 buildAll :: Maybe FilePath -> IO ()
-buildAll p = on (>>) (=<< wants p) fetchCompiler setupCompiler
+buildAll p = on (>>) (=<< wants p) fetchDef setupDef
+    where fetchDef = fetchCompiler Nothing
+          setupDef = setupCompiler Nothing
 
 -- | Build a set of targets
 build :: [String] -- ^ Targets
@@ -139,7 +139,7 @@ options :: Bool -- ^ Whether to rebuild all targets
 options rba lint v rs = shakeOptions { shakeFiles = ".atspkg"
                                      , shakeThreads = 4
                                      , shakeLint = bool Nothing (Just LintBasic) lint
-                                     , shakeVersion = showVersion P.version
+                                     , shakeVersion = showVersion atspkgVersion
                                      , shakeRebuild = rebuildTargets rba rs
                                      , shakeChange = ChangeModtimeAndDigestInput
                                      , shakeVerbosity = toVerbosity v
@@ -207,7 +207,7 @@ pkgToAction :: [IO ()] -- ^ Setup actions to be performed
             -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
             -> Pkg -- ^ Package data type
             -> Rules ()
-pkgToAction setup rs tgt ~(Pkg bs ts libs mt _ v v' ds cds bdeps ccLocal cf as cdir) =
+pkgToAction setup rs tgt ~(Pkg bs ts libs mt _ v v' ds cds bdeps ccLocal cf as) =
 
     unless (rs == ["clean"]) $ do
 
@@ -229,11 +229,11 @@ pkgToAction setup rs tgt ~(Pkg bs ts libs mt _ v v' ds cds bdeps ccLocal cf as c
 
         mapM_ g (bs ++ ts)
 
-    where g (Bin s t ls hs' atg gc' cSrc extra) =
-            atsBin (BinaryTarget (unpack <$> cf) atsToolConfig gc' (unpack <$> ls) [unpack s] hs' (unpackBoth . asTuple <$> atg) mempty (unpack t) (unpack <$> cSrc) (deps extra) Executable)
+    where g (Bin s t ls hs' atg gc' extra) =
+            atsBin (ATSTarget (unpack <$> cf) atsToolConfig gc' (unpack <$> ls) [unpack s] hs' (unpackBoth . asTuple <$> atg) mempty (unpack t) (deps extra) Executable)
 
-          h (Lib _ s t ls _ hs' lnk atg cSrc extra sta) =
-            atsBin (BinaryTarget (unpack <$> cf) atsToolConfig False (unpack <$> ls) (unpack <$> s) hs' (unpackBoth . asTuple <$> atg) (both unpack <$> lnk) (unpack t) (unpack <$> cSrc) (deps extra) (k sta))
+          h (Lib _ s t ls _ hs' lnk atg extra sta) =
+            atsBin (ATSTarget (unpack <$> cf) atsToolConfig False (unpack <$> ls) (unpack <$> s) hs' (unpackBoth . asTuple <$> atg) (both unpack <$> lnk) (unpack t) (deps extra) (k sta))
 
           k False = SharedLibrary
           k True  = StaticLibrary
@@ -241,12 +241,10 @@ pkgToAction setup rs tgt ~(Pkg bs ts libs mt _ v v' ds cds bdeps ccLocal cf as c
           atsToolConfig = ATSToolConfig v v' False (ccFromString cc')
 
           cDepsRules = unless (null as) $ do
-            let cedar = unpack cdir
-                atsSourceDirs = nub (takeDirectory . unpack <$> as)
-                targets = fmap (((cedar <> "/") <>) . (-<.> "c") . takeBaseName . unpack) as
-            want targets
-            hasPF <- patsFilter
-            mapM_ (cgen (ATSToolConfig v v' hasPF (ccFromString cc')) [".atspkg/deps", ".atspkg/config"]) atsSourceDirs
+              let targets = fmap (unpack . cTarget) as
+                  sources = fmap (unpack . atsSrc) as
+                  l x = ATSTarget undefined atsToolConfig False mempty mempty mempty x mempty undefined [".atskg/deps", ".atspkg/config"] undefined
+              zipWithM_ (cgen (l (unpackBoth . asTuple <$> (atsGen =<< as)))) sources targets
 
           cc' = maybe (unpack ccLocal) (<> "-gcc") tgt
           deps = (".atspkg/deps":) . (".atspkg/config":) . fmap unpack

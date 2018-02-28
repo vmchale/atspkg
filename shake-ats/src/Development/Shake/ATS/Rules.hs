@@ -12,14 +12,14 @@ import           Data.Semigroup                 (Semigroup (..))
 import qualified Data.Text.Lazy                 as TL
 import           Development.Shake              hiding (doesDirectoryExist)
 import           Development.Shake.ATS.Generate
-import           Development.Shake.ATS.Type     hiding (BinaryTarget (..))
+import           Development.Shake.ATS.Type     hiding (ATSTarget (..))
 import           Development.Shake.Cabal
 import           Development.Shake.FilePath
 import           Language.ATS.Generate
 import           System.Directory
 
 -- | Given a plain Haskell source file, generate a @.sats@ file containing
--- analogous types.
+-- the equivalent types.
 genATS :: FilePath -- ^ Haskell source
        -> FilePath -- ^ @.sats@ file to generate
        -> Bool -- ^ Whether to call cpphs preprocessor

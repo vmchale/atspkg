@@ -4,7 +4,6 @@ module Main ( main
             ) where
 
 import           Control.Composition
-import           Control.Lens               hiding (List, argument)
 import           Data.Bool                  (bool)
 import           Data.Maybe                 (fromMaybe)
 import           Data.Semigroup             (Semigroup (..))
@@ -13,8 +12,8 @@ import           Data.Version               hiding (Version (..))
 import           Development.Shake.ATS
 import           Development.Shake.FilePath
 import           Language.ATS.Package
+import           Lens.Micro
 import           Options.Applicative
-import qualified Paths_ats_pkg              as P
 import           System.Directory
 import           System.IO.Temp             (withSystemTempDirectory)
 
@@ -26,7 +25,7 @@ wrapper = info (helper <*> versionInfo <*> command')
     <> header "atspkg - a build tool for ATS\nsee 'man atspkg' for more detailed help")
 
 versionInfo :: Parser (a -> a)
-versionInfo = infoOption ("atspkg version: " ++ showVersion P.version) (short 'V' <> long "version" <> help "Show version")
+versionInfo = infoOption ("atspkg version: " ++ showVersion atspkgVersion) (short 'V' <> long "version" <> help "Show version")
 
 data Command = Install
              | Build { _targets    :: [String]

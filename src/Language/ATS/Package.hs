@@ -10,9 +10,9 @@ module Language.ATS.Package ( pkgToAction
                             -- * Ecosystem functionality
                             , displayList
                             , upgradeBin
-                            -- * Cabal helper functions
-                            , cabalHooks
-                            , atsPolyglotBuild
+                            , atspkgVersion
+                            -- * Functions involving the compiler
+                            , packageCompiler
                             -- * Types
                             , Version (..)
                             , Pkg (..)
@@ -30,8 +30,8 @@ module Language.ATS.Package ( pkgToAction
                             , dirLens
                             ) where
 
+import           Distribution.ATS.Version
 import           Language.ATS.Package.Build
-import           Language.ATS.Package.Build.Cabal
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Dependency
 import           Language.ATS.Package.Dhall

@@ -1,48 +1,55 @@
-name:                shake-ats
-version:             1.5.0.5
-synopsis:            Utilities for building ATS projects with shake
-description:         Various helper functions for building [ATS](http://www.ats-lang.org/) with the [shake](http://shakebuild.com/) library
-homepage:            https://github.com/vmchale/shake-ats#readme
-license:             BSD3
-license-file:        LICENSE
-author:              Vanessa McHale
-maintainer:          vamchale@gmail.com
-copyright:           Copyright: (c) 2018 Vanessa McHale
-category:            Development, Build, ATS, Shake
-build-type:          Simple
-extra-doc-files:     README.md
-cabal-version:       1.18
-
-Flag development {
-  Description: Enable `-Werror`
-  manual: True
-  default: False
-}
-
-library
-  hs-source-dirs:      src
-  exposed-modules:     Development.Shake.ATS
-  other-modules:       Development.Shake.ATS.Type
-                     , Development.Shake.ATS.Rules
-                     , Development.Shake.ATS.Environment
-                     , Development.Shake.ATS.Generate
-  build-depends:       base >= 4.7 && < 5
-                     , language-ats >= 0.3.0.3
-                     , shake-ext >= 2.6.0.0
-                     , hs2ats >= 0.2.0.1
-                     , directory
-                     , lens
-                     , text
-                     , dependency
-                     , shake
-                     , binary
-  default-language:    Haskell2010
-  if flag(development)
-    ghc-options:       -Werror
-  if impl(ghc >= 8.0)
-    ghc-options:       -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat
-  ghc-options:         -Wall
+cabal-version: 1.18
+name: shake-ats
+version: 1.5.0.6
+license: BSD3
+license-file: LICENSE
+copyright: Copyright: (c) 2018 Vanessa McHale
+maintainer: vamchale@gmail.com
+author: Vanessa McHale
+homepage: https://github.com/vmchale/shake-ats#readme
+synopsis: Utilities for building ATS projects with shake
+description:
+    Various helper functions for building [ATS](http://www.ats-lang.org/) with the [shake](http://shakebuild.com/) library
+category: Development, Build, ATS, Shake
+build-type: Simple
+extra-doc-files: README.md
 
 source-repository head
-  type:     darcs
-  location: https://hub.darcs.net/vmchale/ats
+    type: darcs
+    location: https://hub.darcs.net/vmchale/ats
+
+flag development
+    description:
+        Enable `-Werror`
+    default: False
+    manual: True
+
+library
+    exposed-modules:
+        Development.Shake.ATS
+    hs-source-dirs: src
+    other-modules:
+        Development.Shake.ATS.Type
+        Development.Shake.ATS.Rules
+        Development.Shake.ATS.Environment
+        Development.Shake.ATS.Generate
+    default-language: Haskell2010
+    ghc-options: -Wall
+    build-depends:
+        base >=4.7 && <5,
+        language-ats >=1.2.0.0,
+        shake-ext >=2.6.0.0,
+        hs2ats >=0.2.0.1,
+        directory -any,
+        microlens -any,
+        text -any,
+        dependency -any,
+        shake -any,
+        binary -any
+    
+    if flag(development)
+        ghc-options: -Werror
+    
+    if impl(ghc >=8.0)
+        ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
+                     -Wcompat

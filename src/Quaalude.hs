@@ -26,6 +26,7 @@ module Quaalude ( bool
                 , second
                 , getEnv
                 , exitWith
+                , showVersion
                 , ExitCode (ExitSuccess)
                 , MonadIO (..)
                 -- * "System.Process.Ext" reëxports
@@ -111,29 +112,32 @@ module Quaalude ( bool
                 , (%~)
                 ) where
 
-import           Control.Arrow                hiding ((<+>))
-import           Control.Lens                 hiding (both)
-import           Control.Monad.IO.Class
-import           Data.ByteString.Lazy         (ByteString)
-import           Network.HTTP.Client
-import           Network.HTTP.Client.TLS      (tlsManagerSettings)
-import           System.Posix.Files
 #if __GLASGOW_HASKELL__ < 804
 import           Data.Semigroup
 #endif
+import           Control.Arrow                hiding ((<+>))
 import           Control.Composition
 import           Control.Monad
+import           Control.Monad.IO.Class
 import           Data.Binary
 import           Data.Bool                    (bool)
+import           Data.ByteString.Lazy         (ByteString)
 import           Data.List
 import           Data.Maybe                   (fromMaybe)
 import           Data.Text.Lazy               (pack, unpack)
+import           Data.Version                 (showVersion)
 import           Development.Shake            hiding (getEnv)
 import           Development.Shake.FilePath
 import           Dhall                        hiding (bool)
+import           Lens.Micro                   hiding (both)
+import           Lens.Micro.Extras
+import           Lens.Micro.TH
+import           Network.HTTP.Client
+import           Network.HTTP.Client.TLS      (tlsManagerSettings)
 import           System.Directory             as X
 import           System.Environment           (getEnv)
 import           System.Exit                  (ExitCode (ExitSuccess), exitWith)
+import           System.Posix.Files
 import           System.Process               as X
 import           System.Process.Ext
 import           Text.PrettyPrint.ANSI.Leijen hiding (bool, (<>))

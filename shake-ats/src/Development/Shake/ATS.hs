@@ -5,34 +5,30 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 
 module Development.Shake.ATS ( -- * Shake Rules
-                               cgen
-                             , cgenPretty
-                             , cleanATS
+                               cleanATS
                              , atsBin
                              , atsLex
                              , cabalExport
-                             -- * Actions
-                             , patsHome
+                             , cgen
+                             , genATS
                              -- * Helper functions
                              , getSubdirs
                              , ccToString
                              , ccFromString
                              , ccToDir
-                             , compatible
                              , host
                              , patscc
                              , patsopt
+                             , withPF
                              -- Types
-                             , Version (..)
                              , ForeignCabal (..)
-                             , BinaryTarget (..)
+                             , ATSTarget (..)
                              , ATSToolConfig (..)
                              , CCompiler (..)
                              , ArtifactType (..)
                              ) where
 
 import           Control.Arrow
-import           Control.Lens
 import           Control.Monad
 import           Control.Monad.IO.Class
 import           Data.Bool                         (bool)
@@ -49,15 +45,10 @@ import           Development.Shake.C
 import           Development.Shake.FilePath
 import           Development.Shake.Version
 import           Language.ATS
+import           Lens.Micro
 import           System.Directory                  (copyFile, createDirectoryIfMissing, doesFileExist)
 import           System.Environment                (getEnv)
 import           System.Exit                       (ExitCode (ExitSuccess))
-
--- | Whether generated libraries are to be considered compatible.
-compatible :: CCompiler -> CCompiler -> Bool
-compatible GCCStd Clang = True
-compatible Clang GCCStd = True
-compatible x y          = x == y
 
 -- | Run @patsopt@ given information about various things
 atsCommand :: CmdResult r => ATSToolConfig
@@ -67,10 +58,20 @@ atsCommand :: CmdResult r => ATSToolConfig
 atsCommand tc sourceFile out = do
     path <- liftIO $ getEnv "PATH"
     home' <- home tc
-    h <- liftIO $ getEnv "HOME"
-    let env = patsEnv h home' path
+    let env = patsEnv home' path
     patsc <- patsopt tc
+
     command env patsc ["--output", out, "-dd", sourceFile, "-cc"]
+
+-- | Filter any generated errors with @pats-filter@.
+withPF :: Bool -> Action (Exit, Stderr String, Stdout String) -> Action (Exit, Stderr String, Stdout String)
+withPF False = id
+withPF True = \act -> do
+    ret@(Exit c, Stderr err, Stdout _) <- act :: Action (Exit, Stderr String, Stdout String)
+    cmd_ [Stdin err] Shell "pats-filter"
+    if c /= ExitSuccess
+        then error "patsopt failure"
+        else pure ret
 
 gcFlag :: Bool -> String
 gcFlag False = "-DATS_MEMALLOC_LIBC"
@@ -86,9 +87,10 @@ copySources (ATSToolConfig v v' _ _) sources =
         liftIO $ createDirectoryIfMissing True (home' ++ "/" ++ takeDirectory dep)
         liftIO $ copyFile dep (home' ++ "/" ++ dep)
 
--- This is the @$PATSHOMELOCS@ variable to be passed to the shell.
-patsHomeLocs :: FilePath -> Int -> String
-patsHomeLocs _ n = intercalate ":" $ (<> ".atspkg/contrib") . ("./" <>) <$> g
+-- | This is the @$PATSHOMELOCS@ variable to be passed to the shell.
+patsHomeLocs :: Int
+             -> String
+patsHomeLocs n = intercalate ":" $ (<> ".atspkg/contrib") . ("./" <>) <$> g
     where g = [ join $ replicate i "../" | i <- [0..n] ]
 
 makeCFlags :: [String] -- ^ Inputs
@@ -136,11 +138,11 @@ home tc = do
     h <- patsHome (compilerVer tc)
     pure $ h ++ "lib/ats2-postiats-" ++ show (libVersion tc)
 
-patsEnv :: FilePath -> FilePath -> FilePath -> [CmdOption]
-patsEnv h home' path = EchoStderr False :
+patsEnv :: FilePath -> FilePath -> [CmdOption]
+patsEnv home' path = EchoStderr False :
     zipWith AddEnv
         ["PATSHOME", "PATH", "PATSHOMELOCS"]
-        [home', home' ++ "/bin:" ++ path, patsHomeLocs h 5]
+        [home', home' ++ "/bin:" ++ path, patsHomeLocs 5]
 
 atsToC :: FilePath -> FilePath
 atsToC = (-<.> "c") . (".atspkg/c/" <>)
@@ -154,17 +156,14 @@ doLib :: ArtifactType -> Rules () -> Rules ()
 doLib Executable = pure mempty
 doLib _          = id
 
-atsBin :: BinaryTarget -> Rules ()
-atsBin tgt@BinaryTarget{..} = do
+atsBin :: ATSTarget -> Rules ()
+atsBin tgt@ATSTarget{..} = do
 
-    unless (null linkTargets) $
-        mapM_ (uncurry genLinks) linkTargets
+    mapM_ (uncurry genLinks) linkTargets
 
-    unless (null genTargets) $
-        mapM_ (uncurry3 genATS) genTargets
+    mapM_ (uncurry3 genATS) genTargets
 
-    unless (null hsLibs) $
-        mapM_ cabalExport hsLibs
+    mapM_ cabalExport hsLibs
 
     let cTargets = atsToC <$> src
 
@@ -178,7 +177,7 @@ atsBin tgt@BinaryTarget{..} = do
 
     cconfig' <- cconfig toolConfig libs gc (makeCFlags cFlags mempty (pure undefined) gc)
 
-    zipWithM_ (atsCGen toolConfig tgt) src cTargets
+    zipWithM_ (cgen tgt) src cTargets
 
     doLib tgtType (zipWithM_ (objectFileR (cc toolConfig) cconfig') cTargets (h' cTargets))
 
@@ -192,40 +191,21 @@ atsBin tgt@BinaryTarget{..} = do
 
         unit $ g tgtType (cc toolConfig) (h' cTargets) binTarget cconfig''
 
-atsCGen :: ATSToolConfig
-        -> BinaryTarget
-        -> FilePath -- ^ ATS source
-        -> FilePattern -- ^ Pattern for C file to be generated
-        -> Rules ()
-atsCGen tc BinaryTarget{..} atsSrc cFiles =
+cgen :: ATSTarget
+     -> FilePath -- ^ ATS source
+     -> FilePattern -- ^ Pattern for C file to be generated
+     -> Rules ()
+cgen ATSTarget{..} atsSrc cFiles =
     cFiles %> \out -> do
 
         -- tell shake which files to track and copy them to the appropriate
         -- directory
-        need (otherDeps ++ (TL.unpack . objectFile <$> hsLibs))
-        sources <- (<> cDeps) <$> transitiveDeps ((snd <$> linkTargets) <> ((^._2) <$> genTargets)) [atsSrc]
+        need (otherDeps <> (TL.unpack . objectFile <$> hsLibs))
+        sources <- transitiveDeps ((snd <$> linkTargets) <> ((^._2) <$> genTargets)) [atsSrc]
         need sources
-        copySources tc sources
+        copySources toolConfig sources
 
-        atsCommand tc atsSrc out
-
-cgen :: ATSToolConfig
-     -> [String] -- ^ Additional source files
-     -> FilePath -- ^ Directory containing ATS source code
-     -> Rules ()
-cgen tc extras dir =
-
-    "//*.c" %> \out -> do
-        need extras
-        let sourceFile = dir ++ "/" ++ (takeBaseName out -<.> "dats")
-        handleSource tc sourceFile
-        atsCommand tc sourceFile out
-
-handleSource :: ATSToolConfig -> FilePath -> Action ()
-handleSource tc sourceFile = do
-    sources <- transitiveDeps [] [sourceFile]
-    need sources
-    copySources tc sources
+        atsCommand toolConfig atsSrc out
 
 -- | This provides rules for generating C code from ATS source files in the
 trim :: String -> String
@@ -246,19 +226,3 @@ transitiveDeps gen ps = fmap join $ forM ps $ \p -> if p `elem` gen then pure me
     deps <- filterM (\f -> ((f `elem` gen) ||) <$> (liftIO . doesFileExist) f) $ fixDir dir . trim <$> getDependencies ats
     deps' <- transitiveDeps gen deps
     pure $ (p:deps) ++ deps'
-
--- | This uses @pats-filter@ to prettify the errors.
-cgenPretty :: ATSToolConfig
-           -> FilePath
-           -> Rules ()
-cgenPretty tc dir =
-
-    "//*.c" %> \out -> do
-
-        let sourceFile = dir ++ "/" ++ (takeBaseName out -<.> "dats")
-        handleSource tc sourceFile
-        (Exit c, Stderr err, Stdout _) :: (Exit, Stderr String, Stdout String) <- atsCommand tc sourceFile out
-        cmd_ [Stdin err] Shell "pats-filter"
-        if c /= ExitSuccess
-            then error "patscc failure"
-            else pure ()
