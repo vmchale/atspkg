@@ -1,5 +1,4 @@
-let dep = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/atspkg-prelude.dhall
-in
+let prelude = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/atspkg-prelude.dhall
 
 in λ(v : List Integer) → 
   prelude.dep //
