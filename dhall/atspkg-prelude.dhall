@@ -118,7 +118,7 @@ let makeNpmPkg =
     dep //
       { libName = rec.name
       , dir = ".atspkg/contrib/${rec.unpackDir}"
-      , url = "https://registry.npmjs.org/atscntrb-bucs320-divideconquer/-/atscntrb-bucs320-divideconquer-${showVersion rec.x}.tgz"
+      , url = "https://registry.npmjs.org/${rec.unpackDir}/-/${rec.unpackDir}-${showVersion rec.x}.tgz"
       , libVersion = rec.x
       }
 in
