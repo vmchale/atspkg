@@ -7,6 +7,7 @@
 - [ ] `shake-ats` should allow builds with `patscc` some other way
 - [ ] Set target triple in `shake-ext`?
 # Deficiencies
+- [ ] Build for files not in the current directory?
 - [ ] Installations should be installed locally based on configuration
   - [ ] calculus of compatibility? algebra of compatibility?
 - [ ] `atspkg` should be able to build `atslib` and thus work for
