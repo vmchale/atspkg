@@ -15,7 +15,8 @@ build-type: Custom
 extra-source-files:
     stack.yaml
     man/atspkg.1
-    config.dhall
+    dhall/config.dhall
+    dhall/atslib.dhall
 extra-doc-files: README.md
                  docs/manual.tex
 

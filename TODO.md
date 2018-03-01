@@ -21,6 +21,7 @@
 # Bugs
 - [ ] We should be able to build `.so` and `.a` files from one source file.
 - [ ] make paths portable for windows
+- [ ] We shouldn't include `ccomp/lib` when doing a cross build.
 # Documentation
 - [ ] Tutorial
 - [ ] User manual
@@ -28,3 +29,4 @@
 # Code Quality
 - [ ] Benchmark/test suite
 - [ ] Make a `Dhall` subdirectory for "library" functions
+- [ ] Instead of calling `atspkg install`, use the function.

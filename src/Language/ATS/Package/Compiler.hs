@@ -1,10 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell   #-}
 
 module Language.ATS.Package.Compiler
     ( packageCompiler
     , fetchCompiler
     , setupCompiler
     , cleanAll
+    , libInstall
     ) where
 
 import qualified Codec.Archive.Tar       as Tar
@@ -13,8 +15,7 @@ import           Control.Composition
 import           Control.Monad           (when)
 import qualified Data.ByteString.Lazy    as BS
 import           Data.Dependency
-import           Data.Maybe              (fromMaybe)
-import           Data.Semigroup
+import           Data.FileEmbed
 import           Network.HTTP.Client     hiding (decompress)
 import           Network.HTTP.Client.TLS (tlsManagerSettings)
 import           System.Directory
@@ -24,10 +25,12 @@ import           System.Posix.Files
 import           System.Process
 import           System.Process.Ext      (silentCreateProcess)
 
-compilerDir :: Maybe FilePath -> Version -> IO FilePath
-compilerDir mp v = makeAbsolute =<< dir
-    where def = (++ ("/.atspkg/" ++ show v)) <$> getEnv "HOME"
-          dir = fromMaybe <$> def <*> pure ((<> ('/' : show v)) <$> mp)
+libatsCfg :: String
+libatsCfg = $(embedStringFile "dhall/atslib.dhall")
+
+compilerDir :: Version -> IO FilePath
+compilerDir v = makeAbsolute =<< dir
+    where dir = (++ ("/.atspkg/" ++ show v)) <$> getEnv "HOME"
 
 packageCompiler :: FilePath -> IO ()
 packageCompiler directory = do
@@ -41,10 +44,10 @@ pkgUrl v = "https://github.com/vmchale/atspkg/releases/download/compiler/ATS2-Po
 withCompiler :: String -> Version -> IO ()
 withCompiler s v = putStrLn $ s ++ " compiler v" ++ show v ++ "..."
 
-fetchCompiler :: Maybe FilePath -> Version -> IO ()
-fetchCompiler mp v = do
+fetchCompiler :: Version -> IO ()
+fetchCompiler v = do
 
-    cd <- compilerDir mp v
+    cd <- compilerDir v
     needsSetup <- not <$> doesDirectoryExist cd
 
     when needsSetup $ do
@@ -62,10 +65,20 @@ make v cd =
     withCompiler "Building" v >>
     silentCreateProcess ((proc "make" []) { cwd = Just cd })
 
-install :: Version -> FilePath -> IO ()
-install v cd =
+libInstall :: FilePath -> String -> IO ()
+libInstall cd triple =
+    putStrLn "Installing cross libraries..." >>
+    writeFile (cd ++ "/atspkg.dhall") libatsCfg >>
+    silentCreateProcess ((proc "atspkg" ["install", "--target", triple]) { cwd = Just cd })
+
+install :: Maybe String
+        -> Version
+        -> FilePath
+        -> IO ()
+install tgt' v cd =
     withCompiler "Installing" v >>
-    silentCreateProcess ((proc "make" ["install"]) { cwd = Just cd })
+    silentCreateProcess ((proc "make" ["install"]) { cwd = Just cd }) >>
+    maybe mempty (libInstall cd) tgt'
 
 configure :: FilePath -> Version -> FilePath -> IO ()
 configure configurePath v cd = do
@@ -80,11 +93,11 @@ configure configurePath v cd = do
     silentCreateProcess ((proc configurePath ["--prefix", cd]) { cwd = Just cd })
 
 setupCompiler :: Maybe FilePath -> Version -> IO ()
-setupCompiler mp v = do
+setupCompiler tgt' v = do
 
-    cd <- compilerDir mp v
+    cd <- compilerDir v
 
-    biaxe [configure (cd ++ "/configure"), make, install] v cd
+    biaxe [configure (cd ++ "/configure"), make, install tgt'] v cd
 
     writeFile (cd ++ "/done") ""
 

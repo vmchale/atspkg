@@ -129,6 +129,7 @@ cconfig tc libs gc extras = do
     h' <- pkgHome cc'
     home' <- home tc
     let libs' = ("atslib" :) $ bool libs ("gc" : libs) gc
+    -- TODO only include /ccomp/atslib/lib if it's not a cross build
     pure $ CConfig [h ++ "ccomp/runtime/", h, h' ++ "include", ".atspkg/contrib"] libs' [h' ++ "lib", home' ++ "/ccomp/atslib/lib"] extras
 
 home :: MonadIO m => ATSToolConfig -> m String
@@ -214,15 +215,15 @@ trim :: String -> String
 trim = init . drop 1
 
 -- | Print any errors to standard error.
-maybeError :: (MonadIO m) => Either ATSError b -> m ()
-maybeError Right{}  = pure ()
-maybeError (Left y) = warnErr y
+maybeError :: (MonadIO m) => FilePath -> Either ATSError b -> m ()
+maybeError _ Right{}  = pure ()
+maybeError p (Left y) = warnErr p y
 
 transitiveDeps :: (MonadIO m) => [FilePath] -> [FilePath] -> m [FilePath]
 transitiveDeps _ [] = pure []
 transitiveDeps gen ps = fmap join $ forM ps $ \p -> if p `elem` gen then pure mempty else do
     contents <- liftIO $ readFile p
-    let (ats, err) = (fromRight mempty &&& maybeError) . parse $ contents
+    let (ats, err) = (fromRight mempty &&& maybeError p) . parseM $ contents
     err
     let dir = takeDirectory p
     deps <- filterM (\f -> ((f `elem` gen) ||) <$> (liftIO . doesFileExist) f) $ fixDir dir . trim <$> getDependencies ats

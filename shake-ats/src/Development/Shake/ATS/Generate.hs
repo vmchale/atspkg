@@ -6,7 +6,7 @@ import           Language.ATS
 import           Lens.Micro
 
 generateLinks :: String -> Either ATSError String
-generateLinks = fmap (printATS . generateLinks') . parse
+generateLinks = fmap (printATS . generateLinks') . parseM
 
 generateLinks' :: ATS a -> ATS a
 generateLinks' (ATS ds) = ATS (fmap g ds <> [macDecl]) --  ATS [Local undefined (ATS (fmap g ds <> [macDecl])) (ATS mempty)]

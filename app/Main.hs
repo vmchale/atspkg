@@ -27,7 +27,7 @@ wrapper = info (helper <*> versionInfo <*> command')
 versionInfo :: Parser (a -> a)
 versionInfo = infoOption ("atspkg version: " ++ showVersion atspkgVersion) (short 'V' <> long "version" <> help "Show version")
 
-data Command = Install
+data Command = Install { _archTarget :: Maybe String }
              | Build { _targets    :: [String]
                      , _archTarget :: Maybe String
                      , _rebuildAll :: Bool
@@ -53,7 +53,7 @@ data Command = Install
 
 command' :: Parser Command
 command' = hsubparser
-    (command "install" (info (pure Install) (progDesc "Install all binaries to $HOME/.local/bin"))
+    (command "install" (info install (progDesc "Install all binaries to $HOME/.local/bin"))
     <> command "clean" (info (pure Clean) (progDesc "Clean current project directory"))
     <> command "remote" (info fetch (progDesc "Fetch and install a binary package"))
     <> command "build" (info build' (progDesc "Build current package targets"))
@@ -65,6 +65,10 @@ command' = hsubparser
     <> command "check" (info check' (progDesc "Audit a package set to ensure it is well-typed."))
     <> command "list" (info (pure List) (progDesc "List available packages"))
     )
+
+install :: Parser Command
+install = Install
+    <$> triple
 
 check' :: Parser Command
 check' = Check
@@ -151,7 +155,7 @@ fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
     ps <- getSubdirs p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
     let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg False False mempty ["install"] Nothing 0)
-    bool (buildAll (Just pkgDir) >> a) a =<< check (Just pkgDir)
+    bool (buildAll Nothing (Just pkgDir) >> a) a =<< check (Just pkgDir)
 
 main :: IO ()
 main = execParser wrapper >>= run
@@ -160,20 +164,17 @@ runHelper :: Bool -> Bool -> [String] -> Maybe String -> Int -> IO ()
 runHelper rba lint rs tgt v = g . bool x y =<< check Nothing
     where g xs = mkPkg rba lint xs rs tgt v
           y = mempty
-          x = [buildAll Nothing]
+          x = [buildAll tgt Nothing]
 
 run :: Command -> IO ()
-run List = displayList "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
-run (Check p b) = print =<< checkPkg p b
-run Upgrade = upgradeBin "vmchale" "atspkg"
-run Nuke = cleanAll
-run (Fetch u) = fetchPkg u
-run Clean = mkPkg False True mempty ["clean"] Nothing 0
+run List                      = displayList "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
+run (Check p b)               = print =<< checkPkg p b
+run Upgrade                   = upgradeBin "vmchale" "atspkg"
+run Nuke                      = cleanAll
+run (Fetch u)                 = fetchPkg u
+run Clean                     = mkPkg False True mempty ["clean"] Nothing 0
 run (Build rs tgt rba v lint) = runHelper rba lint rs tgt v
-run (Test ts rba lint) = runHelper rba lint ("test" : ts) Nothing 0
-run (Run ts rba v lint) = runHelper rba lint ("run" : ts) Nothing v
-run c = runHelper False True rs Nothing 0
-    where rs = g c
-          g Install       = ["install"]
-          g (Valgrind ts) = "valgrind" : ts
-          g _             = undefined
+run (Test ts rba lint)        = runHelper rba lint ("test" : ts) Nothing 0
+run (Run ts rba v lint)       = runHelper rba lint ("run" : ts) Nothing v
+run (Install tgt)             = runHelper False True ["install"] tgt 0
+run (Valgrind ts)             = runHelper False True ("valgrind" : ts) Nothing 0

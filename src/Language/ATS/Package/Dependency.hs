@@ -21,6 +21,11 @@ import           Language.ATS.Package.PackageSet
 import           Language.ATS.Package.Type
 import           Quaalude
 
+getTgt :: CCompiler -> Maybe String
+getTgt (GCC x)   = x
+getTgt (GHC x _) = x
+getTgt _         = Nothing
+
 fetchDeps :: CCompiler -- ^ C compiler to use
           -> [IO ()] -- ^ Setup steps that can be performed concurrently
           -> [String] -- ^ ATS dependencies
@@ -42,12 +47,13 @@ fetchDeps cc' setup' deps cdeps atsBld cfgPath b' =
 
         -- Set up actions
         d <- (<> "lib/") <$> pkgHome cc'
-        let libs' = fmap (buildHelper False) (join deps')
+        let tgt' = getTgt cc'
+            libs' = fmap (buildHelper False) (join deps')
             unpacked = fmap (over dirLens (pack d <>)) <$> cdeps'
             clibs = fmap (buildHelper False) (join unpacked)
             atsLibs = fmap (buildHelper False) (join atsDeps')
             cBuild = mapM_ (setup cc') <$> transpose unpacked
-            atsBuild = mapM_ atsPkgSetup <$> transpose atsDeps'
+            atsBuild = mapM_ (atsPkgSetup tgt') <$> transpose atsDeps'
 
         -- Fetch all packages & build compiler
         parallel' $ join [ setup', libs', clibs, atsLibs ]
@@ -66,22 +72,26 @@ waitCreateProcess :: CreateProcess -> IO ()
 waitCreateProcess =
     maybeExit <=< waitForProcess <=< fmap (view _4) . createProcess
 
-atslibSetup :: String
-            -> FilePath
+atslibSetup :: Maybe String -- ^ Optional target triple
+            -> String -- ^ Library name
+            -> FilePath -- ^ Filepath
             -> IO ()
-atslibSetup lib' p = do
+atslibSetup tgt' lib' p = do
     putStrLn $ "installing " ++ lib' ++ "..."
     subdirs <- allSubdirs p
     pkgPath <- fromMaybe p <$> findFile subdirs "atspkg.dhall"
-    waitCreateProcess ((proc "atspkg" ["install"]) { cwd = Just (takeDirectory pkgPath), std_out = Inherit })
+    let installCmd = "install" : maybe mempty (("--target" :) . pure) tgt'
+        installDir = takeDirectory pkgPath
+    waitCreateProcess ((proc "atspkg" installCmd) { cwd = Just installDir, std_out = Inherit })
 
-atsPkgSetup :: ATSDependency
+atsPkgSetup :: Maybe String
+            -> ATSDependency
             -> IO ()
-atsPkgSetup (ATSDependency lib' dirName' _ _ _ _ _) = do
+atsPkgSetup tgt' (ATSDependency lib' dirName' _ _ _ _ _) = do
     lib'' <- (<> unpack lib') <$> pkgHome GCCStd
     b <- doesFileExist lib''
     unless b $ do
-        atslibSetup (unpack lib') (unpack dirName')
+        atslibSetup tgt' (unpack lib') (unpack dirName')
         writeFile lib'' ""
 
 setup :: CCompiler -- ^ C compiler to use

@@ -19,7 +19,7 @@ data UserConfig = UserConfig { defaultPkgs    :: Text
                              } deriving (Generic, Interpret, Binary)
 
 cfgFile :: String
-cfgFile = $(embedStringFile "config.dhall")
+cfgFile = $(embedStringFile "dhall/config.dhall")
 
 defaultFileConfig :: FilePath -> IO ()
 defaultFileConfig p = do

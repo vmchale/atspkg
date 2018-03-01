@@ -46,7 +46,7 @@ in
 
 let divideConquerPar =
   λ(x : List Integer) →
-    prelude.makeNpmPkg { x = x, name = "atscntrb-hx-divideconquerpar", unpackDir = "atscntrb-bucs320-divideconquer" }
+    prelude.makeNpmPkg { x = x, name = "atscntrb-hx-divideconquerpar", unpackDir = "atscntrb-bucs320-divideconquerpar" }
       // { libDeps = prelude.mapPlainDeps [ "atscntrb-hx-divideconquer" ] }
 in
 

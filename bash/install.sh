@@ -16,12 +16,15 @@ main() {
 
     latest="$(curl -s https://github.com/vmchale/atspkg/releases/latest/ | cut -d'"' -f2 | rev | cut -d'/' -f1 | rev)"
     binname=$(getTarget)
+    url="https://github.com/vmchale/atspkg/releases/download/$latest/$binname"
     mkdir -p "$HOME/.local/bin"
     local dest=$HOME/.local/bin/atspkg
     if which duma > /dev/null ; then
-        duma https://github.com/vmchale/atspkg/releases/download/"$latest"/"$binname" -O "$dest"
+        duma "$url" -O "$dest"
+    elif which wget > /dev/null ; then
+        wget "$url" -O "$dest"
     else
-        wget https://github.com/vmchale/atspkg/releases/download/"$latest"/"$binname" -O "$dest"
+        curl "$url" -o "$dest"
     fi
     chmod +x "$dest"
 

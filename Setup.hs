@@ -17,7 +17,7 @@ maybeInstallActions :: ConfigFlags -> IO ()
 maybeInstallActions cfs = bool nothing act cond
     where act = installActions
           nothing = pure mempty
-          cond = (mkFlagName "no-executable", True) `elem` configConfigurationsFlags cfs
+          cond = (mkFlagName "no-executable", True) `notElem` configConfigurationsFlags cfs
 
 main :: IO ()
 main = defaultMainWithHooks $

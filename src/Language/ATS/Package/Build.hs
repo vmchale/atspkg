@@ -36,15 +36,17 @@ wants :: Maybe FilePath -> IO Version
 wants p = compiler <$> getConfig p
 
 -- | Build in current directory or indicated directory
-buildAll :: Maybe FilePath -> IO ()
-buildAll p = on (>>) (=<< wants p) fetchDef setupDef
-    where fetchDef = fetchCompiler Nothing
-          setupDef = setupCompiler Nothing
+buildAll :: Maybe String
+         -> Maybe FilePath
+         -> IO ()
+buildAll tgt' p = on (>>) (=<< wants p) fetchDef setupDef
+    where fetchDef = fetchCompiler
+          setupDef = setupCompiler tgt'
 
 -- | Build a set of targets
 build :: [String] -- ^ Targets
       -> IO ()
-build rs = bool (mkPkgEmpty [buildAll Nothing]) (mkPkgEmpty mempty) =<< check Nothing
+build rs = bool (mkPkgEmpty [buildAll Nothing Nothing]) (mkPkgEmpty mempty) =<< check Nothing
     where mkPkgEmpty ts = mkPkg False True ts rs Nothing 1
 
 -- TODO clean generated ATS
@@ -56,18 +58,19 @@ mkClean = "clean" ~> do
     removeFilesAfter ".atspkg" ["//*"]
     removeFilesAfter "ats-deps" ["//*"]
 
-mkInstall :: Rules ()
-mkInstall =
+mkInstall :: Maybe String -> Rules ()
+mkInstall tgt =
     "install" ~> do
         config <- getConfig Nothing
         let libs = fmap (unpack . libTarget) . libraries $ config
             bins = fmap (unpack . target) . bin $ config
             incs = ((fmap unpack . includes) =<<) . libraries $ config
+            libDir = maybe mempty (<> "/") tgt
         need (bins <> libs)
         home <- liftIO $ getEnv "HOME"
         let g str = fmap (((home <> str) <>) . takeFileName)
             binDest =  g "/.local/bin" bins
-            libDest = ((home <> "/.atspkg/lib/") <>) . takeFileName <$> libs
+            libDest = ((home <> "/.atspkg/" <> libDir <> "lib/") <>) . takeFileName <$> libs
             inclDest = ((home <> "/.atspkg/include/") <>) . takeFileName <$> incs
         zipWithM_ copyFile' (bins ++ libs ++ incs) (binDest ++ libDest ++ inclDest)
         pa <- pandoc
@@ -193,8 +196,8 @@ setTargets rs bins mt = when (null rs) $
         (Just m) -> want . bool bins (manTarget m : bins) =<< pandoc
         Nothing  -> want bins
 
-bits :: [String] -> Rules ()
-bits rs = mconcat $ [ mkManpage, mkInstall, mkConfig ] <>
+bits :: Maybe String -> [String] -> Rules ()
+bits tgt rs = mconcat $ [ mkManpage, mkInstall tgt, mkConfig ] <>
     sequence [ mkRun, mkTest, mkValgrind ] rs
 
 pkgToTargets :: Pkg -> [FilePath] -> [FilePath]
@@ -217,7 +220,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts libs mt _ v v' ds cds bdeps ccLocal cf as) 
 
         mkUserConfig
 
-        ".atspkg/deps" %> \out -> do
+        specialDeps %> \out -> do
             (_, cfgBin') <- cfgBin
             need [ cfgBin', ".atspkg/config" ]
             liftIO $ fetchDeps (ccFromString cc') setup (unpack . fst <$> ds) (unpack . fst <$> cdps) (unpack . fst <$> bdeps) cfgBin' False >> writeFile out ""
@@ -225,7 +228,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts libs mt _ v v' ds cds bdeps ccLocal cf as) 
         let bins = unpack . target <$> bs
         setTargets rs bins mt
 
-        cDepsRules >> bits rs
+        cDepsRules >> bits tgt rs
 
         mapM_ h libs
 
@@ -245,10 +248,13 @@ pkgToAction setup rs tgt ~(Pkg bs ts libs mt _ v v' ds cds bdeps ccLocal cf as) 
           cDepsRules = unless (null as) $ do
               let targets = fmap (unpack . cTarget) as
                   sources = fmap (unpack . atsSrc) as
-              zipWithM_ (cgen atsToolConfig [".atspkg/deps", ".atspkg/config"] (fmap (unpack . ats) . atsGen =<< as)) sources targets
+              zipWithM_ (cgen atsToolConfig [specialDeps, ".atspkg/config"] (fmap (unpack . ats) . atsGen =<< as)) sources targets
 
           cc' = maybe (unpack ccLocal) (<> "-gcc") tgt
-          deps = (".atspkg/deps":) . (".atspkg/config":) . fmap unpack
+          deps = (specialDeps:) . (".atspkg/config":) . fmap unpack
 
           unpackBoth :: (Text, Text, Bool) -> (String, String, Bool)
           unpackBoth = over _1 unpack . over _2 unpack
+
+          specialDeps = ".atspkg/deps" ++ maybe mempty (<> "-") tgt
+
