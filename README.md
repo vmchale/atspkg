@@ -21,7 +21,7 @@ Things that `atspkg` will do for you:
   * Install `patscc` and other ATS tooling
   * Install manual pages and shell completions
   * Install ATS libraries
-  * Cross-compile ATS easily
+  * Cross-compile ATS
 
 Things that `atspkg` will not do for you:
 

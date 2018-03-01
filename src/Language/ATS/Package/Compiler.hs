@@ -12,17 +12,15 @@ module Language.ATS.Package.Compiler
 import qualified Codec.Archive.Tar       as Tar
 import           Codec.Compression.GZip  (compress, decompress)
 import           Control.Composition
-import           Control.Monad           (when)
+import           Control.Monad
 import qualified Data.ByteString.Lazy    as BS
 import           Data.Dependency
 import           Data.FileEmbed
 import           Network.HTTP.Client     hiding (decompress)
 import           Network.HTTP.Client.TLS (tlsManagerSettings)
-import           System.Directory
+import           Quaalude
 import           System.Environment      (getEnv)
 import           System.FilePath.Find    (find)
-import           System.Posix.Files
-import           System.Process
 import           System.Process.Ext      (silentCreateProcess)
 
 libatsCfg :: String
@@ -67,9 +65,11 @@ make v cd =
 
 libInstall :: FilePath -> String -> IO ()
 libInstall cd triple =
-    putStrLn "Installing cross libraries..." >>
-    writeFile (cd ++ "/atspkg.dhall") libatsCfg >>
-    silentCreateProcess ((proc "atspkg" ["install", "--target", triple]) { cwd = Just cd })
+    unless (triple == "musl") $ mconcat
+        [ putStrLn "Installing cross libraries..."
+        , writeFile (cd ++ "/atspkg.dhall") libatsCfg
+        , silentCreateProcess ((proc "atspkg" ["install", "--target", triple]) { cwd = Just cd })
+        ]
 
 install :: Maybe String
         -> Version

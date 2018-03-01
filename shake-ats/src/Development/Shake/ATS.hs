@@ -223,7 +223,7 @@ transitiveDeps :: (MonadIO m) => [FilePath] -> [FilePath] -> m [FilePath]
 transitiveDeps _ [] = pure []
 transitiveDeps gen ps = fmap join $ forM ps $ \p -> if p `elem` gen then pure mempty else do
     contents <- liftIO $ readFile p
-    let (ats, err) = (fromRight mempty &&& maybeError p) . parseM $ contents
+    let (ats, err) = (fromRight mempty &&& maybeError p) . parse $ contents
     err
     let dir = takeDirectory p
     deps <- filterM (\f -> ((f `elem` gen) ||) <$> (liftIO . doesFileExist) f) $ fixDir dir . trim <$> getDependencies ats

@@ -256,5 +256,4 @@ pkgToAction setup rs tgt ~(Pkg bs ts libs mt _ v v' ds cds bdeps ccLocal cf as) 
           unpackBoth :: (Text, Text, Bool) -> (String, String, Bool)
           unpackBoth = over _1 unpack . over _2 unpack
 
-          specialDeps = ".atspkg/deps" ++ maybe mempty (<> "-") tgt
-
+          specialDeps = ".atspkg/deps" ++ maybe mempty ("-" <>) tgt
