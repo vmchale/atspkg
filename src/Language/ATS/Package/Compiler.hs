@@ -6,7 +6,6 @@ module Language.ATS.Package.Compiler
     , fetchCompiler
     , setupCompiler
     , cleanAll
-    , libInstall
     ) where
 
 import qualified Codec.Archive.Tar       as Tar
