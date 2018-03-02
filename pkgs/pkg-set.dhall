@@ -11,7 +11,7 @@ in
 
 let gmp =
   λ(x : List Integer) →
-    prelude.makeNpmPkg { x = x, name = "atscnrb-libgmp", unpackDir = "atscntrb-libgmp" }
+    prelude.makeNpmPkg { x = x, name = "atscntrb-libgmp", unpackDir = "atscntrb-libgmp" }
 in
 
 let atomicOps =

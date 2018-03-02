@@ -46,10 +46,6 @@ getSubdirs p = do
             ss <- mapM getSubdirs ds'
             pure $ ds' <> join ss
 
--- libHSforeign-0.1.0.0-inplace-ghc8.2.2.so
--- libHSforeign-0.1.0.0-inplace.a
--- Foreign_stub.h
-
 -- | These rules take a @.cabal@ file and the @.o@ file to be produced from
 -- them, building the @.o@ file.
 cabalExport :: ForeignCabal -> Rules ()
@@ -67,6 +63,7 @@ cabalExport (ForeignCabal cbp' cf' obf') = do
         need (cf : fmap ((obfDir <> "/") <>) trDeps)
         command_ [Cwd obfDir] "cabal" ["new-build", "all"]
 
+        -- TODO move this to the @shake-ext@ package?
         ghcV <- quietly ghcVersion
         let subdir = takeDirectory cbp ++ "/"
             correctDir = (== "build")
