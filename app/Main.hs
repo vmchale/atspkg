@@ -33,6 +33,7 @@ data Command = Install { _archTarget :: Maybe String }
                      , _rebuildAll :: Bool
                      , _verbosity  :: Int
                      , _lint       :: Bool
+                     , _prof       :: Bool
                      }
              | Clean
              | Test { _targets    :: [String]
@@ -110,6 +111,12 @@ targetP completions' f s = f
     <> help ("Targets to " <> s)
     <> completions'))
 
+profile :: Parser Bool
+profile = switch
+    (long "profile"
+    <> short 'p'
+    <> help "Print profiling information for the build")
+
 rebuild :: Parser Bool
 rebuild = switch
     (long "rebuild"
@@ -134,6 +141,7 @@ build' = Build
     <*> rebuild
     <*> verbosity
     <*> noLint
+    <*> profile
 
 noLint :: Parser Bool
 noLint = fmap not
@@ -154,27 +162,27 @@ fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
     buildHelper True (ATSDependency lib dirName url' undefined undefined mempty mempty)
     ps <- getSubdirs p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
-    let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg False False mempty ["install"] Nothing 0)
+    let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg False False False mempty ["install"] Nothing 0)
     bool (buildAll Nothing (Just pkgDir) >> a) a =<< check (Just pkgDir)
 
 main :: IO ()
 main = execParser wrapper >>= run
 
-runHelper :: Bool -> Bool -> [String] -> Maybe String -> Int -> IO ()
-runHelper rba lint rs tgt v = g . bool x y =<< check Nothing
-    where g xs = mkPkg rba lint xs rs tgt v
+runHelper :: Bool -> Bool -> Bool -> [String] -> Maybe String -> Int -> IO ()
+runHelper rba lint tim rs tgt v = g . bool x y =<< check Nothing
+    where g xs = mkPkg rba lint tim xs rs tgt v
           y = mempty
           x = [buildAll tgt Nothing]
 
 run :: Command -> IO ()
-run List                      = displayList "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
-run (Check p b)               = print =<< checkPkg p b
-run Upgrade                   = upgradeBin "vmchale" "atspkg"
-run Nuke                      = cleanAll
-run (Fetch u)                 = fetchPkg u
-run Clean                     = mkPkg False True mempty ["clean"] Nothing 0
-run (Build rs tgt rba v lint) = runHelper rba lint rs tgt v
-run (Test ts rba lint)        = runHelper rba lint ("test" : ts) Nothing 0
-run (Run ts rba v lint)       = runHelper rba lint ("run" : ts) Nothing v
-run (Install tgt)             = runHelper False True ["install"] tgt 0
-run (Valgrind ts)             = runHelper False True ("valgrind" : ts) Nothing 0
+run List                          = displayList "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
+run (Check p b)                   = print =<< checkPkg p b
+run Upgrade                       = upgradeBin "vmchale" "atspkg"
+run Nuke                          = cleanAll
+run (Fetch u)                     = fetchPkg u
+run Clean                         = mkPkg False True False mempty ["clean"] Nothing 0
+run (Build rs tgt rba v lint tim) = runHelper rba lint tim rs tgt v
+run (Test ts rba lint)            = runHelper rba lint False ("test" : ts) Nothing 0
+run (Run ts rba v lint)           = runHelper rba lint False ("run" : ts) Nothing v
+run (Install tgt)                 = runHelper False True False ["install"] tgt 0
+run (Valgrind ts)                 = runHelper False True False ("valgrind" : ts) Nothing 0

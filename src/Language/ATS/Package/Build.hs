@@ -47,7 +47,7 @@ buildAll tgt' p = on (>>) (=<< wants p) fetchDef setupDef
 build :: [String] -- ^ Targets
       -> IO ()
 build rs = bool (mkPkgEmpty [buildAll Nothing Nothing]) (mkPkgEmpty mempty) =<< check Nothing
-    where mkPkgEmpty ts = mkPkg False True ts rs Nothing 1
+    where mkPkgEmpty ts = mkPkg False True False ts rs Nothing 1
 
 -- TODO clean generated ATS
 mkClean :: Rules ()
@@ -101,6 +101,7 @@ mkManpage = do
 cacheConfiguration :: Text -> IO Pkg
 cacheConfiguration = input auto
 
+-- FIXME this should cache results at the least.
 getConfig :: MonadIO m => Maybe FilePath -> m Pkg
 getConfig dir' = liftIO $ do
     d <- fromMaybe <$> fmap (<> "/atspkg.dhall") getCurrentDirectory <*> pure dir'
@@ -138,17 +139,21 @@ toVerbosity _ = Diagnostic -- really should be a warning
 
 options :: Bool -- ^ Whether to rebuild all targets
         -> Bool -- ^ Whether to run the linter
+        -> Bool -- ^ Whether to display profiling information for the build
         -> Int -- ^ Verbosity level
         -> [String] -- ^ A list of targets
         -> ShakeOptions
-options rba lint v rs = shakeOptions { shakeFiles = ".atspkg"
-                                     , shakeThreads = 4
-                                     , shakeLint = bool Nothing (Just LintBasic) lint
-                                     , shakeVersion = showVersion atspkgVersion
-                                     , shakeRebuild = rebuildTargets rba rs
-                                     , shakeChange = ChangeModtimeAndDigestInput
-                                     , shakeVerbosity = toVerbosity v
-                                     }
+options rba lint tim v rs = shakeOptions { shakeFiles = ".atspkg"
+                                         , shakeThreads = 4
+                                         , shakeLint = bool Nothing (Just LintBasic) lint
+                                         , shakeVersion = showVersion atspkgVersion
+                                         , shakeRebuild = rebuildTargets rba rs
+                                         , shakeChange = ChangeModtimeAndDigestInput
+                                         , shakeVerbosity = toVerbosity v
+                                         , shakeTimings = tim
+                                         -- shakeLintIgnore = TODO this should
+                                         -- include generated ATS?
+                                         }
 
 rebuildTargets :: Bool -- ^ Force rebuild of all targets
                -> [String] -- ^ Targets
@@ -164,19 +169,20 @@ cleanConfig _         = getConfig Nothing
 
 mkPkg :: Bool -- ^ Force rebuild
       -> Bool -- ^ Run linter
+      -> Bool -- ^ Print build profiling information
       -> [IO ()] -- ^ Setup
       -> [String] -- ^ Targets
       -> Maybe String -- ^ Target triple
       -> Int -- ^ Verbosity
       -> IO ()
-mkPkg rba lint setup rs tgt v = do
+mkPkg rba lint tim setup rs tgt v = do
     cfg <- cleanConfig rs
-    let opt = options rba lint v $ pkgToTargets cfg rs
+    let opt = options rba lint tim v $ pkgToTargets cfg rs
     shake opt $
         mconcat
             [ want (pkgToTargets cfg rs)
             , mkClean
-            , pkgToAction setup rs tgt =<< cleanConfig rs
+            , pkgToAction setup rs tgt cfg
             ]
     stopGlobalPool
 

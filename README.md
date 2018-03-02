@@ -17,11 +17,10 @@ Things that `atspkg` will do for you:
   * Track all file dependencies
   * Make contributing to your projects easier
   * Run builds in parallel (like `make`)
-  * Handle flags and libraries for garbage collection when specified
+  * Handle flags and libraries for garbage collection
   * Install `patscc` and other ATS tooling
   * Install manual pages and shell completions
   * Install ATS libraries
-  * Cross-compile ATS
 
 Things that `atspkg` will not do for you:
 

@@ -1,5 +1,3 @@
--- make ccomp/atslib/lib/libatslib.a
-
 {- Dhall prelude imports -}
 let map = https://ipfs.io/ipfs/QmQ8w5PLcsNz56dMvRtq54vbuPe9cNnCCUXAQp6xLc6Ccx/Prelude/List/map
 in
@@ -12,6 +10,13 @@ let mapDir =
     map Text Text
       (λ(x : Text) → "${rec.dir}/DATS/${x}.dats")
       rec.xs
+in
+
+let mapUtil =
+  λ(xs : List Text) →
+    map Text Text
+      (λ(x : Text) → "utils/atscc/DATS/atscc_${x}.dats")
+      xs
 in
 
 let mapPre =
@@ -46,7 +51,12 @@ in prelude.default //
           ]
       , includes = ([] : List Text)
       }
+    , prelude.staticLib //
+      { libTarget = "target/lib/libatsopt.a"
+      , name = "atsopt"
+      , src = mapUtil [ "main", "print", "util" ]
+      }
     ]
-  , cflags = [ "-fPIC" ] -- , "-O2" ]
+  , cflags = [ "-fPIC" ]
   , compiler = [0,3,10]
   }
