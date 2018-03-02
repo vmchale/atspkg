@@ -72,7 +72,7 @@ let pkgset =
   , atomicOps
   , gc
   , fastArithmetic [0,3,3,0]
-  , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,5]
+  , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,6]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall
   , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall [0,1,5]
   , https://raw.githubusercontent.com/vmchale/either/master/pkg.dhall [0,2,1]
