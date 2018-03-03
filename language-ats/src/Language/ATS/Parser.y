@@ -21,13 +21,13 @@ import Language.ATS.Lexer ( Token (..)
                           , get_staload
                           )
 
+import Control.Composition
+import Control.DeepSeq (NFData)
+import Control.Lens (over, _head)
 import qualified Data.Map as M
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
-import Control.Composition
 import Data.Char (toLower)
-import Control.DeepSeq (NFData)
-import Lens.Micro (over, _head)
 import GHC.Generics (Generic)
 import Prelude
 import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))

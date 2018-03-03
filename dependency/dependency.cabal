@@ -29,7 +29,7 @@ library
                      , ansi-wl-pprint
                      , containers
                      , recursion-schemes
-                     , microlens
+                     , lens
                      , transformers
                      , binary
                      , deepseq

@@ -1,10 +1,9 @@
 module Data.Dependency.Sort ( sortDeps
                             ) where
 
+import           Control.Lens
 import           Data.Dependency.Type
 import           Data.Graph
-import           Lens.Micro
-import           Lens.Micro.Extras
 
 asGraph :: [Dependency] -> (Graph, Vertex -> Dependency)
 asGraph ds = (f triple, keys)

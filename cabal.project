@@ -14,7 +14,7 @@ constraints:
   shake-ats +development,
   ats-setup +development,
   dependency +development,
-  hs2ats +development
+  hs2ats +development +no-executable
 
 allow-newer:
   hashable:base
@@ -22,17 +22,15 @@ allow-newer:
   lzma:base
   insert-ordered-containers:base
   recursion-schemes:template-haskell
-  alex:Cabal
-  comonad:Cabal
   cabal-doctest:base
   Cabal
 
+allow-boot-library-installs: True
 optimization: 2
 with-compiler: ghc-8.2.2
 tests: True
 benchmarks: True
 -- documentation: True
--- haddock-internal: True
 
 program-options
   happy-options: -gcsa

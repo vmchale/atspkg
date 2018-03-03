@@ -53,7 +53,7 @@ data ArtifactType = StaticLibrary
 
 -- | Information about where to find @patscc@ and @patsopt@.
 data ATSToolConfig = ATSToolConfig { libVersion  :: Version
-                                   , compilerVer :: Version
+                                   , compilerVer :: Version -- ^ Version of @patscc@ to be used.
                                    , hasPretty   :: Bool -- ^ Whether to display errors via @pats-filter@
                                    , cc          :: CCompiler -- ^ C compiler to be used
                                    } deriving (Generic, Binary)

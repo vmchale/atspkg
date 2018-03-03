@@ -134,5 +134,5 @@ pick :: Program -> IO ()
 pick (Program (Just p) False nc _)  = (genErr nc . parse) =<< readFile p
 pick (Program Nothing _ nc False)   = (genErr nc . parse) =<< getContents
 pick (Program Nothing _ _ True)     = defaultConfig ".atsfmt.toml"
-pick (Program (Just p) True True _) = inplace p (fmap printATS . fancyError . parse)
-pick (Program (Just p) True _ _)    = inplace p ((printCustom <=< fancyError) . parse)
+pick (Program (Just p) True True _) = inplace p (fmap ((<> "\n") . printATS) . fancyError . parse)
+pick (Program (Just p) True _ _)    = inplace p ((fmap (<> "\n") . printCustom <=< fancyError) . parse)

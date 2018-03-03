@@ -65,6 +65,7 @@ module Language.ATS.Types
 
 import           Control.Composition
 import           Control.DeepSeq          (NFData)
+import           Control.Lens
 import           Data.Function            (on)
 import           Data.Functor.Foldable    (ListF (Cons), ana, cata, embed, project)
 import           Data.Functor.Foldable.TH (makeBaseFunctor)
@@ -73,8 +74,6 @@ import           Data.Maybe               (isJust)
 import           Data.Semigroup           (Semigroup)
 import           GHC.Generics             (Generic)
 import           Language.ATS.Lexer       (Addendum (..))
-import           Lens.Micro
-import           Lens.Micro.TH
 
 type Fix = Either Int String
 

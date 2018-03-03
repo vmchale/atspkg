@@ -117,6 +117,7 @@ import           Data.Semigroup
 #endif
 import           Control.Arrow                hiding ((<+>))
 import           Control.Composition
+import           Control.Lens                 hiding (both)
 import           Control.Monad
 import           Control.Monad.IO.Class
 import           Data.Binary
@@ -129,9 +130,6 @@ import           Data.Version                 (showVersion)
 import           Development.Shake            hiding (getEnv)
 import           Development.Shake.FilePath
 import           Dhall                        hiding (bool)
-import           Lens.Micro                   hiding (both)
-import           Lens.Micro.Extras
-import           Lens.Micro.TH
 import           Network.HTTP.Client
 import           Network.HTTP.Client.TLS      (tlsManagerSettings)
 import           System.Directory             as X

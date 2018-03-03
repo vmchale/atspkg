@@ -151,8 +151,6 @@ options rba lint tim v rs = shakeOptions { shakeFiles = ".atspkg"
                                          , shakeChange = ChangeModtimeAndDigestInput
                                          , shakeVerbosity = toVerbosity v
                                          , shakeTimings = tim
-                                         -- shakeLintIgnore = TODO this should
-                                         -- include generated ATS?
                                          }
 
 rebuildTargets :: Bool -- ^ Force rebuild of all targets

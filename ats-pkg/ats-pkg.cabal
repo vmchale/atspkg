@@ -13,7 +13,6 @@ description:
 category: Development, ATS
 build-type: Custom
 extra-source-files:
-    stack.yaml
     man/atspkg.1
     dhall/config.dhall
     dhall/atslib.dhall
@@ -82,8 +81,7 @@ library
         containers -any,
         parallel-io -any,
         unix -any,
-        microlens -any,
-        microlens-th -any,
+        lens -any,
         dhall >=1.10.0,
         ansi-wl-pprint -any,
         shake-ats >=1.3.0.0,
@@ -112,7 +110,7 @@ executable atspkg
             base -any,
             ats-pkg -any,
             optparse-applicative -any,
-            microlens -any,
+            lens -any,
             shake-ats -any,
             temporary -any,
             directory -any,
