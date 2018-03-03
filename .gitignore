@@ -4,7 +4,7 @@ _darcs
 .stack-work
 tags
 dist
-*.out
+manual.out
 *.toc
 *.aux
 *.log
