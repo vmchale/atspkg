@@ -64,7 +64,7 @@ script:
       export BINPATH="$(find -name atspkg -executable | tail -n4 | head -n1)"
     fi
   - echo $BINPATH
-  - mv $BINPATH atspkg-$TARGET
+  - mv $BINPATH/atspkg atspkg-$TARGET
   - ls atspkg-$TARGET
   - |
     if [ `uname` = "Darwin" ]
