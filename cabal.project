@@ -2,8 +2,8 @@ packages: language-ats
         , ats-pkg
         , ats-format
         , shake-ext
-        , ats-pkg/shake-ats
-        , ats-pkg/dependency
+        , shake-ats
+        , dependency
         , hs2ats
 
 constraints:
