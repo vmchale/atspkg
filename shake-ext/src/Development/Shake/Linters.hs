@@ -27,6 +27,7 @@ checkDhall dh = do
     contents <- liftIO $ readFile dh
     command [Stdin contents] "dhall" []
 
+-- join fmap f = f . f
 trim :: String -> String
 trim = join fmap f
    where f = reverse . dropWhile isSpace

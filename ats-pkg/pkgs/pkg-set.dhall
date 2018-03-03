@@ -3,6 +3,20 @@ let prelude = https://raw.githubusercontent.com/vmchale/atspkg/master/ats-pkg/dh
 in
 
 {- Packages -}
+let makeGnuPkg = 
+  λ(rec : { version : List Integer, name: Text}) →
+    prelude.dep //
+      { libName = rec.name
+      , dir = "${rec.name}-${prelude.showVersion rec.version}"
+      , url = "https://mirrors.ocf.berkeley.edu/gnu/lib${rec.name}/lib${rec.name}-${prelude.showVersion rec.version}.tar.xz"
+      , libVersion = rec.version
+      }
+in
+
+let unistring =
+  makeGnuPkg { version = [0,9,9], name = "unistring" }
+in
+
 let fastArithmetic =
   λ(x : List Integer) →
     prelude.makeHsPkg { x = x, name = "fast-arithmetic" }
@@ -72,6 +86,7 @@ let pkgset =
   , atomicOps
   , gc
   , fastArithmetic [0,3,3,1]
+  , unistring
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,6]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,1]
   , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall [0,1,5]
