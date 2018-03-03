@@ -1,7 +1,11 @@
+{-# LANGUAGE CPP #-}
+
 module Development.Shake.CCJS ( ccjs
                               ) where
 
+#if __GLASGOW_HASKELL__ < 804
 import           Data.Semigroup
+#endif
 import           Development.Shake
 import           Development.Shake.FilePath
 import           System.Directory           (createDirectoryIfMissing)

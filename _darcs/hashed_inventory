@@ -1,4 +1,4 @@
-pristine:53a2212fed9e3bba0da8f7c60627813b0f0fd2426d30320f150373095ba194f2
+pristine:fa764647f5dac4c7e64fea0ac18df0e1c25726a38a0082929ef1d952f94af7ab
 [initial patch
 vanessa.mchale@reconfigure.io**20180125220434
  Ignore-this: 2b2e2e88df007aedb2e88cd79718d18
@@ -1544,3 +1544,13 @@ vanessa.mchale@reconfigure.io**20180302232857
  Ignore-this: 7cc19dd6a86fe8af12e76ee86ca4ff7c
 ] 
 hash: 0000011090-69a92d87b8814ba1d9ecd64e4b836febf73e91c737856e695ea113ad289342b1
+[refactor
+vanessa.mchale@reconfigure.io**20180303001457
+ Ignore-this: ca177e99c6b77b463eeb69907d0319ec
+] 
+hash: 0000092397-25d79e822b029e2944f651c11c392c0988be4c061bb2eb14169ed30d7a0e0089
+[refactor
+vanessa.mchale@reconfigure.io**20180303001537
+ Ignore-this: b2140f96a8526439d29caa1edbbe6084
+] 
+hash: 0000000369-9110182cd8353b58d65460e6a180a078c8129bf218c8b41fcf7b4499e3baaa41

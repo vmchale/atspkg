@@ -42,11 +42,9 @@ ci: install
     tomlcheck --file ats-format/.atsfmt.toml
     shellcheck ats-pkg/bash/install.sh
     hlint ats-pkg language-ats shake-ext ats-format
-    cd ats-pkg && stack build --test --no-run-tests --bench --no-run-benchmarks && weeder .
+    stack build --test --no-run-tests --bench --no-run-benchmarks && weeder .
     atspkg nuke
-    atspkg remote https://github.com/vmchale/polyglot/archive/0.4.13.tar.gz
     atspkg remote https://github.com/vmchale/polyglot/archive/master.zip
-# cd ats-format && stack build && weeder .
 
 pkg-install:
     @cabal new-build all

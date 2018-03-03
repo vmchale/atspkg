@@ -16,15 +16,16 @@ constraints:
   dependency +development,
   hs2ats +development
 
--- allow-newer:
---   hashable:base
---   integer-logarithms:base
---   lzma:base
---   insert-ordered-containers:base
---   recursion-schemes:template-haskell
---   alex:Cabal
---   comonad:Cabal
---   setup:base
+allow-newer:
+  hashable:base
+  integer-logarithms:base
+  lzma:base
+  insert-ordered-containers:base
+  recursion-schemes:template-haskell
+  alex:Cabal
+  comonad:Cabal
+  cabal-doctest:base
+  Cabal
 
 optimization: 2
 with-compiler: ghc-8.2.2

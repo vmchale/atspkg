@@ -41,6 +41,7 @@ library
         Development.Shake.TH
     default-language: Haskell2010
     ghc-options: -Wall
+    build-tools: cpphs
     build-depends:
         base >=4.10 && <5,
         shake -any,
