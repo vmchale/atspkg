@@ -1,0 +1,11 @@
+{
+adddir ./ats-pkg/polyglot
+adddir ./ats-pkg/polyglot/bash
+adddir ./ats-pkg/polyglot/compleat
+adddir ./ats-pkg/polyglot/man
+adddir ./ats-pkg/polyglot/src
+adddir ./ats-pkg/polyglot/target
+adddir ./ats-pkg/polyglot/test
+adddir ./ats-pkg/polyglot/test/data
+addfile ./language-ats/err
+}

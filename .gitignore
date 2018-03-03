@@ -1,3 +1,9 @@
+.ghc*
+*.c
+_darcs
+.stack-work
+tags
+dist
 *.out
 *.toc
 *.aux

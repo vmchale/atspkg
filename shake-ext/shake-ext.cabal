@@ -1,0 +1,59 @@
+cabal-version: 1.18
+name: shake-ext
+version: 2.7.0.2
+license: BSD3
+license-file: LICENSE
+copyright: Copyright: (c) 2018 Vanessa McHale
+maintainer: vamchale@gmail.com
+author: Vanessa McHale
+homepage: https://hub.darcs.net/vmchale/shake-ext
+synopsis: Helper functions for linting with shake
+description:
+    This package provides several linters out of the box, for use with [shake](http://shakebuild.com/).
+category: Development, Shake
+build-type: Simple
+extra-doc-files: README.md
+
+source-repository head
+    type: darcs
+    location: https://hub.darcs.net/vmchale/ats
+
+flag development
+    description:
+        Enable `-Werror`
+    default: False
+    manual: True
+
+library
+    exposed-modules:
+        Development.Shake.FileDetect
+        Development.Shake.Linters
+        Development.Shake.Man
+        Development.Shake.Check
+        Development.Shake.Clean
+        Development.Shake.Cabal
+        Development.Shake.Version
+        Development.Shake.C
+        Development.Shake.CCJS
+        Development.Shake.Elm
+    hs-source-dirs: src
+    other-modules:
+        Development.Shake.TH
+    default-language: Haskell2010
+    ghc-options: -Wall
+    build-depends:
+        base >=4.10 && <5,
+        shake -any,
+        mtl -any,
+        composition-prelude,
+        directory -any,
+        text -any,
+        Cabal >=2.0,
+        template-haskell -any
+    
+    if flag(development)
+        ghc-options: -Werror
+    
+    if impl(ghc >=8.0)
+        ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
+                     -Wcompat

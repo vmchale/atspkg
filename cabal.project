@@ -1,0 +1,38 @@
+packages: language-ats
+        , ats-pkg
+        , ats-format
+        , shake-ext
+        , ats-pkg/shake-ats
+        , ats-pkg/dependency
+        , hs2ats
+
+constraints:
+  ats-format +development,
+  ats-pkg +development,
+  shake-ext +development, 
+  language-ats +development,
+  shake-ats +development,
+  ats-setup +development,
+  dependency +development,
+  hs2ats +development
+
+-- allow-newer:
+--   hashable:base
+--   integer-logarithms:base
+--   lzma:base
+--   insert-ordered-containers:base
+--   recursion-schemes:template-haskell
+--   alex:Cabal
+--   comonad:Cabal
+--   setup:base
+
+optimization: 2
+with-compiler: ghc-8.2.2
+tests: True
+benchmarks: True
+-- documentation: True
+-- haddock-internal: True
+
+program-options
+  happy-options: -gcsa
+  alex-options: -g
