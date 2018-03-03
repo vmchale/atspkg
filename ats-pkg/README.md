@@ -98,7 +98,7 @@ atspkg run
 ## Examples
 
 You can find several examples with explanation
-[here](https://github.com/vmchale/atspkg/blob/master/EXAMPLES.md)
+[here](https://github.com/vmchale/atspkg/blob/master/ats-pkg/EXAMPLES.md)
 
 ## Global Configuration
 

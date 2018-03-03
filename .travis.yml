@@ -80,7 +80,9 @@ script:
 deploy:
   api_key:
     secure: "IZLQxO3HtTM2nqowxVOY3MhRhGZTElXUn0jpyPBkbrxLzk8Ykac15lSAGOs4MYo/GdKof8YYr2fHGChv7/PkF/HYSLFcDrY0UzpCP8QqANWjKbakQmVqU+YTtas3cq/Gk1l2tY9MGDNfMB7jk92Nh6BsA1TxReyziVPCDJv+z4UYZqQGhBxYQlVqHlcxYpS0p5gmXTFC8+io/ArGzC4jHqaZ+LmrzVMiXdDeQnVIOtQHbwWLwPb6mXBA8W5qC/IAgivb+w9aH86GUgML2t16b2/pCHQANigaeDTAseaU2PUv2fJTqexBfrAH34FJ+TQxROi8JpXu2/SVDuironTOPhUSnVd3aYNd64lOB80UmCxIWxYcYVA7olr6Qth1ZfKI0ks64sXJ7XlLDykCPqSTdnuiCEsqlHll+2ZA2uEHKuwRxMht/ZxKnW6a6GidaRp2cImBe7sMBQyiLYzf6+ZJQyy7H5beV9FsiTAyA4oxEGtl+220i0kwz6CV4+WXeoO7yv4TAKVfIEMjvHANV/kWEztuwcs3kIJzXJd1J/TdAneOHOCKGbnqDSDNeY48upwaPCQOnNA+RK4PYiA0YJ5zoq8hamtaMVzciGWMX3rFux9qC4wjgcTafFwyF3MSuF/TitAZI/xAtCOnCsZspuaBXI1nuoLoF61oixvD9xMeyNo="
-  file: atspkg-$TARGET atsfmt-$TARGET
+  files:
+    - atspkg-$TARGET 
+    - atsfmt-$TARGET
   on:
     tags: true
   provider: releases
