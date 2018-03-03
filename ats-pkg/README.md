@@ -98,7 +98,7 @@ atspkg run
 ## Examples
 
 You can find several examples with explanation
-[here](https://github.com/vmchale/atspkg/blob/master/ats-pkg/EXAMPLES.md)
+[here](https://github.com/vmchale/atspkg/blob/master/ats-pkg/EXAMPLES.md).
 
 ## Global Configuration
 
@@ -106,11 +106,17 @@ You can find several examples with explanation
 set a custom package set as follows:
 
 ```
-let cfg = 
-  { defaultPkgs = "https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/pkg-set.dhall"
-  , path = ([] : Optional Text)
-  , githubUsername = "YOUR_USERNAME"
-  }
+let version = "master"
+in
 
+let cfg =
+  { defaultPkgs = "https://raw.githubusercontent.com/vmchale/atspkg/${version}/ats-pkg/pkgs/pkg-set.dhall"
+  , path = ([] : Optional Text)
+  , githubUsername = "vmchale"
+  , filterErrors = False
+  }
 in cfg
 ```
+
+I recommend setting `version` to whichever branch your version of `atspkg` was
+built from.
