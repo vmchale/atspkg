@@ -37,10 +37,9 @@ ci: install
     yamllint .stylish-haskell.yaml
     yamllint .hlint.yaml
     yamllint .yamllint
-    yamllint ats-pkg/stack.yaml
-    yamllint ats-format/stack.yaml
+    yamllint stack.yaml
     tomlcheck --file ats-format/.atsfmt.toml
-    shellcheck ats-pkg/bash/install.sh
+    shellcheck bash/install.sh
     hlint ats-pkg language-ats shake-ext ats-format
     stack build --test --no-run-tests --bench --no-run-benchmarks && weeder .
     atspkg nuke
