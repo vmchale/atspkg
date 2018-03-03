@@ -9,6 +9,7 @@ module Development.Shake.ATS ( -- * Shake Rules
                              , atsBin
                              , cgen
                              , genATS
+                             , atsLex
                              -- * Helper functions
                              , getSubdirs
                              , ccToDir
