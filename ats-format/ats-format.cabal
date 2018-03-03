@@ -1,0 +1,59 @@
+cabal-version: 1.18
+name: ats-format
+version: 0.2.0.25
+license: BSD3
+license-file: LICENSE
+copyright: Copyright: (c) 2017-2018 Vanessa McHale
+maintainer: vamchale@gmail.com
+author: Vanessa McHale
+synopsis: A source-code formatter for ATS
+description:
+    An opinionated source-code formatter for [ATS](http://www.ats-lang.org/).
+category: Parser, Language, ATS, Development
+build-type: Custom
+extra-source-files:
+    stack.yaml
+    .atsfmt.toml
+    man/atsfmt.1
+extra-doc-files: README.md
+
+source-repository head
+    type: darcs
+    location: https://hub.darcs.net/vmchale/ats
+
+custom-setup
+    setup-depends: base -any,
+                   Cabal -any,
+                   cli-setup >=0.1.0.2
+
+flag development
+    description:
+        Enable `-Werror`
+    default: False
+    manual: True
+
+executable atsfmt
+    main-is: Main.hs
+    hs-source-dirs: app
+    other-modules:
+        Paths_ats_format
+    default-language: Haskell2010
+    ghc-options: -Wall
+    build-depends:
+        base >=4.10 && <5,
+        language-ats >=0.1.1.10,
+        optparse-applicative -any,
+        htoml-megaparsec >=1.1.0.0,
+        text -any,
+        ansi-wl-pprint -any,
+        directory -any,
+        unordered-containers -any,
+        process -any,
+        file-embed -any
+    
+    if flag(development)
+        ghc-options: -Werror
+    
+    if impl(ghc >=8.0)
+        ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
+                     -Wcompat
