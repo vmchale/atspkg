@@ -54,6 +54,8 @@ let dep =
     : List LibDep
   , libBldDeps = []
     : List LibDep
+  , libCDeps = []
+    : List LibDep
   , description = []
     : Optional Text
   }

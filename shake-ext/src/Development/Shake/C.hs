@@ -85,10 +85,11 @@ data CCompiler = GCC { _prefix :: Maybe String -- ^ Usually the target triple
 mapFlags :: String -> ([String] -> [String])
 mapFlags s = fmap (s <>)
 
-data CConfig = CConfig { includes  :: [String] -- ^ Directories to be included.
-                       , libraries :: [String] -- ^ Libraries against which to link.
-                       , libDirs   :: [String] -- ^ Directories to find libraries.
-                       , extras    :: [String] -- ^ Extra flags to be passed to the compiler
+data CConfig = CConfig { includes   :: [String] -- ^ Directories to be included.
+                       , libraries  :: [String] -- ^ Libraries against which to link.
+                       , libDirs    :: [String] -- ^ Directories to find libraries.
+                       , extras     :: [String] -- ^ Extra flags to be passed to the compiler
+                       , staticLink :: Bool -- ^ Whether to link against static versions of libraries
                        }
 
 -- | Rules for making a static library from C source files
@@ -122,7 +123,10 @@ ccAction cc sources out cfg =
     (command [EchoStderr False] (ccToString cc) . (("-o" : out : sources) <>) . cconfigToArgs) cfg
 
 cconfigToArgs :: CConfig -> [String]
-cconfigToArgs (CConfig is ls ds es) = join [ mapFlags "-I" is, mapFlags "-l" ls, mapFlags "-L" ds, es ]
+cconfigToArgs (CConfig is ls ds es sl) = join [ mapFlags "-I" is, mapFlags "-l" (g sl <$> ls), mapFlags "-L" ds, es ]
+    where g :: Bool -> (String -> String)
+          g False = id
+          g True  = (":lib" <>) . (<> ".a")
 
 dynLibR :: CCompiler
         -> [FilePath]

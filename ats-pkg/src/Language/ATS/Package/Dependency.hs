@@ -42,6 +42,7 @@ fetchDeps cc' setup' deps cdeps atsBld cfgPath b' =
 
         pkgSet <- unpack . defaultPkgs . decode <$> BSL.readFile cfgPath
         deps' <- setBuildPlan "ats" libDeps pkgSet deps
+        cdeps'' <- setBuildPlan "cbld" libCDeps pkgSet deps
         atsDeps' <- setBuildPlan "atsbld" libBldDeps pkgSet atsBld
         cdeps' <- setBuildPlan "c" libDeps pkgSet cdeps
 
@@ -49,7 +50,7 @@ fetchDeps cc' setup' deps cdeps atsBld cfgPath b' =
         d <- (<> "lib/") <$> pkgHome cc'
         let tgt' = getTgt cc'
             libs' = fmap (buildHelper False) (join deps')
-            unpacked = fmap (over dirLens (pack d <>)) <$> cdeps'
+            unpacked = fmap (over dirLens (pack d <>)) <$> (cdeps' <> cdeps'')
             clibs = fmap (buildHelper False) (join unpacked)
             atsLibs = fmap (buildHelper False) (join atsDeps')
             cBuild = mapM_ (setup cc') <$> transpose unpacked
@@ -87,7 +88,7 @@ atslibSetup tgt' lib' p = do
 atsPkgSetup :: Maybe String
             -> ATSDependency
             -> IO ()
-atsPkgSetup tgt' (ATSDependency lib' dirName' _ _ _ _ _) = do
+atsPkgSetup tgt' (ATSDependency lib' dirName' _ _ _ _ _ _) = do
     lib'' <- (<> unpack lib') <$> pkgHome GCCStd
     b <- doesFileExist lib''
     unless b $ do
@@ -97,7 +98,7 @@ atsPkgSetup tgt' (ATSDependency lib' dirName' _ _ _ _ _) = do
 setup :: CCompiler -- ^ C compiler to use
       -> ATSDependency -- ^ ATSDependency itself
       -> IO ()
-setup cc' (ATSDependency lib' dirName' _ _ _ _ _) = do
+setup cc' (ATSDependency lib' dirName' _ _ _ _ _ _) = do
     lib'' <- (<> unpack lib') <$> pkgHome cc'
     b <- doesFileExist lib''
     unless b $ do
@@ -124,7 +125,7 @@ zipResponse dirName response = do
     extractFilesFromArchive [options] (toArchive response)
 
 buildHelper :: Bool -> ATSDependency -> IO ()
-buildHelper b (ATSDependency lib' dirName' url'' _ _ _ _) = do
+buildHelper b (ATSDependency lib' dirName' url'' _ _ _ _ _) = do
 
     let (lib, dirName, url') = (lib', dirName', url'') & each %~ unpack
         isLib = bool "" "library " b
