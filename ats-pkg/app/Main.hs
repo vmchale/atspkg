@@ -175,7 +175,7 @@ runHelper rba lint tim rs tgt v = g . bool x y =<< check Nothing
           x = [buildAll tgt Nothing]
 
 run :: Command -> IO ()
-run List                          = displayList "https://raw.githubusercontent.com/vmchale/atspkg/master/pkgs/pkg-set.dhall"
+run List                          = displayList "https://raw.githubusercontent.com/vmchale/atspkg/master/ats-pkg/pkgs/pkg-set.dhall"
 run (Check p b)                   = print =<< checkPkg p b
 run Upgrade                       = upgradeBin "vmchale" "atspkg"
 run Nuke                          = cleanAll
