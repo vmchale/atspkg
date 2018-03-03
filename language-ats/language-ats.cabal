@@ -48,7 +48,6 @@ library
         recursion-schemes >=5.0.1,
         composition-prelude -any,
         containers -any,
-        mtl -any,
         transformers -any
     
     if flag(development)

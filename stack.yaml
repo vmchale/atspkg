@@ -19,4 +19,6 @@ extra-deps:
 flags:
   ats-pkg:
     development: false
+  hs2ats:
+    no-executable: false
 extra-package-dbs: []

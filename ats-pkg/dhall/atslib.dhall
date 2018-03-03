@@ -35,7 +35,7 @@ let mapML =
 in
 
 {- ATSPackage parts -}
-let prelude = https://raw.githubusercontent.com/vmchale/atspkg/master/dhall/atspkg-prelude.dhall
+let prelude = https://raw.githubusercontent.com/vmchale/atspkg/master/ats-pkg/dhall/atspkg-prelude.dhall
 
 in prelude.default //
   { libraries =

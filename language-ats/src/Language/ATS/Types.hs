@@ -48,7 +48,6 @@ module Language.ATS.Types
     , DataSortLeaf (..)
     , FixityState
     -- * Rewrites
-    , rewriteATS
     , rewriteDecl
     -- * Helper functions
     , defaultFixityState

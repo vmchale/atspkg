@@ -45,10 +45,8 @@ library
     build-depends:
         base >=4.10 && <5,
         shake -any,
-        mtl -any,
         composition-prelude,
         directory -any,
-        text -any,
         Cabal >=2.0,
         template-haskell -any
     
