@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell   #-}
 
+-- | This module contains functions for installing the @patscc@ compiler. It
+-- also includes functions for building @libatslib@.
 module Language.ATS.Package.Compiler
     ( packageCompiler
     , fetchCompiler

@@ -3,6 +3,8 @@
 module Language.ATS.Package.Dependency ( -- * Functions
                                          fetchDeps
                                        , buildHelper
+                                       -- * Types
+                                       , SetupScript
                                        ) where
 
 import qualified Codec.Archive.Tar                    as Tar
@@ -26,15 +28,21 @@ getTgt (GCC x)   = x
 getTgt (GHC x _) = x
 getTgt _         = Nothing
 
+type SetupScript = Maybe String -- ^ Optional target triple
+                     -> String -- ^ Library name
+                     -> FilePath -- ^ File path
+                     -> IO ()
+
 fetchDeps :: CCompiler -- ^ C compiler to use
           -> [IO ()] -- ^ Setup steps that can be performed concurrently
           -> [String] -- ^ ATS dependencies
           -> [String] -- ^ C Dependencies
           -> [String] -- ^ ATS build dependencies
           -> FilePath -- ^ Path to configuration file
+          -> SetupScript -- ^ How to install an ATS library
           -> Bool -- ^ Whether to perform setup anyhow.
           -> IO ()
-fetchDeps cc' setup' deps cdeps atsBld cfgPath b' =
+fetchDeps cc' setup' deps cdeps atsBld cfgPath als b' =
 
     unless (null deps && null cdeps && null atsBld && b') $ do
 
@@ -42,7 +50,6 @@ fetchDeps cc' setup' deps cdeps atsBld cfgPath b' =
 
         pkgSet <- unpack . defaultPkgs . decode <$> BSL.readFile cfgPath
         deps' <- setBuildPlan "ats" libDeps pkgSet deps
-        cdeps'' <- setBuildPlan "cbld" libCDeps pkgSet deps
         atsDeps' <- setBuildPlan "atsbld" libBldDeps pkgSet atsBld
         cdeps' <- setBuildPlan "c" libDeps pkgSet cdeps
 
@@ -50,11 +57,11 @@ fetchDeps cc' setup' deps cdeps atsBld cfgPath b' =
         d <- (<> "lib/") <$> pkgHome cc'
         let tgt' = getTgt cc'
             libs' = fmap (buildHelper False) (join deps')
-            unpacked = fmap (over dirLens (pack d <>)) <$> (cdeps' <> cdeps'')
+            unpacked = fmap (over dirLens (pack d <>)) <$> cdeps'
             clibs = fmap (buildHelper False) (join unpacked)
             atsLibs = fmap (buildHelper False) (join atsDeps')
             cBuild = mapM_ (setup cc') <$> transpose unpacked
-            atsBuild = mapM_ (atsPkgSetup tgt') <$> transpose atsDeps'
+            atsBuild = mapM_ (atsPkgSetup als tgt') <$> transpose atsDeps'
 
         -- Fetch all packages & build compiler
         parallel' $ join [ setup', libs', clibs, atsLibs ]
@@ -69,30 +76,15 @@ fetchDeps cc' setup' deps cdeps atsBld cfgPath b' =
 parallel' :: [IO ()] -> IO ()
 parallel' = parallel_ . fmap extraWorkerWhileBlocked
 
-waitCreateProcess :: CreateProcess -> IO ()
-waitCreateProcess =
-    maybeExit <=< waitForProcess <=< fmap (view _4) . createProcess
-
-atslibSetup :: Maybe String -- ^ Optional target triple
-            -> String -- ^ Library name
-            -> FilePath -- ^ Filepath
-            -> IO ()
-atslibSetup tgt' lib' p = do
-    putStrLn $ "installing " ++ lib' ++ "..."
-    subdirs <- allSubdirs p
-    pkgPath <- fromMaybe p <$> findFile subdirs "atspkg.dhall"
-    let installCmd = "install" : maybe mempty (("--target" :) . pure) tgt'
-        installDir = takeDirectory pkgPath
-    waitCreateProcess ((proc "atspkg" installCmd) { cwd = Just installDir, std_out = Inherit })
-
-atsPkgSetup :: Maybe String
+atsPkgSetup :: SetupScript
+            -> Maybe String
             -> ATSDependency
             -> IO ()
-atsPkgSetup tgt' (ATSDependency lib' dirName' _ _ _ _ _ _) = do
+atsPkgSetup als tgt' (ATSDependency lib' dirName' _ _ _ _ _ _) = do
     lib'' <- (<> unpack lib') <$> pkgHome GCCStd
     b <- doesFileExist lib''
     unless b $ do
-        atslibSetup tgt' (unpack lib') (unpack dirName')
+        als tgt' (unpack lib') (unpack dirName')
         writeFile lib'' ""
 
 setup :: CCompiler -- ^ C compiler to use

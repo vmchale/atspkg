@@ -20,6 +20,7 @@ import           Development.Shake.Check
 import           Development.Shake.Clean
 import           Development.Shake.Man
 import           Distribution.ATS.Version
+import           Language.ATS.Package.Build.IO
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Config
 import           Language.ATS.Package.Dependency
@@ -211,6 +212,17 @@ pkgToTargets _ ts        = ts
 noConstr :: ATSConstraint
 noConstr = ATSConstraint Nothing Nothing
 
+atslibSetup :: Maybe String -- ^ Optional target triple
+            -> String -- ^ Library name
+            -> FilePath -- ^ Filepath
+            -> IO ()
+atslibSetup tgt' lib' p = do
+    putStrLn $ "installing " ++ lib' ++ "..."
+    subdirs <- allSubdirs p
+    pkgPath <- fromMaybe p <$> findFile subdirs "atspkg.dhall"
+    let installDir = takeDirectory pkgPath
+    buildAll tgt' (Just installDir)
+
 pkgToAction :: [IO ()] -- ^ Setup actions to be performed
             -> [String] -- ^ Targets
             -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
@@ -227,7 +239,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts libs mt _ v v' ds cds bdeps ccLocal cf as) 
         specialDeps %> \out -> do
             (_, cfgBin') <- cfgBin
             need [ cfgBin', ".atspkg/config" ]
-            liftIO $ fetchDeps (ccFromString cc') setup (unpack . fst <$> ds) (unpack . fst <$> cdps) (unpack . fst <$> bdeps) cfgBin' False >> writeFile out ""
+            liftIO $ fetchDeps (ccFromString cc') setup (unpack . fst <$> ds) (unpack . fst <$> cdps) (unpack . fst <$> bdeps) cfgBin' atslibSetup False >> writeFile out ""
 
         let bins = unpack . target <$> bs
         setTargets rs bins mt

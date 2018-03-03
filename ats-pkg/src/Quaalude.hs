@@ -90,7 +90,7 @@ module Quaalude ( bool
                 , (<+>)
                 , text
                 , punctuate
-                , red
+                , dullred
                 , dullyellow
                 , hardline
                 , hang
