@@ -3,10 +3,6 @@
 This is a collection of several Haskell packages for use with the
 [ATS](http://ats-lang.org/) language.
 
-It contains primarily Haskell,
-[Alex](https://www.haskell.org/alex/doc/html/index.html),
-[Happy](https://www.haskell.org/happy/doc/html/), Dhall.
-
 ## Goals
 
 The following are goals of the libraries and tools contained herein:
