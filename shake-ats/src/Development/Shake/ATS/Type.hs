@@ -12,6 +12,7 @@ module Development.Shake.ATS.Type ( ForeignCabal (..)
 
 import           Data.Binary         (Binary (..))
 import           Data.Dependency     (Version (..))
+import           Data.Hashable       (Hashable)
 import qualified Data.Text.Lazy      as TL
 import           Development.Shake.C
 import           GHC.Generics        (Generic)
@@ -56,6 +57,7 @@ data ATSToolConfig = ATSToolConfig { libVersion  :: Version
                                    , compilerVer :: Version -- ^ Version of @patscc@ to be used.
                                    , hasPretty   :: Bool -- ^ Whether to display errors via @pats-filter@
                                    , cc          :: CCompiler -- ^ C compiler to be used
+                                   , linkStatic  :: Bool -- ^ Force static linking
                                    } deriving (Generic, Binary)
 
 -- | Type for binary and library builds with ATS.
@@ -76,4 +78,4 @@ data ATSTarget = ATSTarget { cFlags      :: [String] -- ^ Flags to be passed to 
 data ForeignCabal = ForeignCabal { projectFile :: Maybe TL.Text -- ^ @cabal.project@ file to track
                                  , cabalFile   :: TL.Text -- ^ @.cabal@ file associated with the library
                                  , objectFile  :: TL.Text -- ^ Object file to be generated
-                                 } deriving (Eq, Show, Generic, Binary)
+                                 } deriving (Eq, Show, Generic, Binary, Hashable)

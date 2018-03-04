@@ -8,6 +8,8 @@ module Language.ATS.Package.Compiler
     , fetchCompiler
     , setupCompiler
     , cleanAll
+    -- * Types
+    , SetupScript
     ) where
 
 import qualified Codec.Archive.Tar       as Tar
@@ -64,22 +66,28 @@ make v cd =
     withCompiler "Building" v >>
     silentCreateProcess ((proc "make" []) { cwd = Just cd })
 
-libInstall :: FilePath -> String -> IO ()
-libInstall cd triple =
+type SetupScript = Maybe String -- ^ Optional target triple
+                     -> String -- ^ Library name
+                     -> FilePath -- ^ File path
+                     -> IO ()
+
+libInstall :: SetupScript -> FilePath -> String -> IO ()
+libInstall atslibSetup cd triple =
     unless (triple == "musl") $ mconcat
         [ putStrLn "Installing cross libraries..."
         , writeFile (cd ++ "/atspkg.dhall") libatsCfg
-        , silentCreateProcess ((proc "atspkg" ["install", "--target", triple]) { cwd = Just cd })
+        , atslibSetup (Just triple) "atslib" cd
         ]
 
 install :: Maybe String
+        -> SetupScript
         -> Version
         -> FilePath
         -> IO ()
-install tgt' v cd =
+install tgt' als v cd =
     withCompiler "Installing" v >>
     silentCreateProcess ((proc "make" ["install"]) { cwd = Just cd }) >>
-    maybe mempty (libInstall cd) tgt'
+    maybe mempty (libInstall als cd) tgt'
 
 configure :: FilePath -> Version -> FilePath -> IO ()
 configure configurePath v cd = do
@@ -93,12 +101,12 @@ configure configurePath v cd = do
 
     silentCreateProcess ((proc configurePath ["--prefix", cd]) { cwd = Just cd })
 
-setupCompiler :: Maybe FilePath -> Version -> IO ()
-setupCompiler tgt' v = do
+setupCompiler :: SetupScript -> Maybe FilePath -> Version -> IO ()
+setupCompiler als tgt' v = do
 
     cd <- compilerDir v
 
-    biaxe [configure (cd ++ "/configure"), make, install tgt'] v cd
+    biaxe [configure (cd ++ "/configure"), make, install tgt' als] v cd
 
     writeFile (cd ++ "/done") ""
 

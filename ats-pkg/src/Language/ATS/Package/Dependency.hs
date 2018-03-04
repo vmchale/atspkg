@@ -16,7 +16,8 @@ import           Control.Concurrent.ParallelIO.Global
 import qualified Data.ByteString.Lazy                 as BSL
 import qualified Data.Text.Lazy                       as TL
 import           Development.Shake.ATS
-import           Language.ATS.Package.Build.IO
+import           Language.ATS.Package.Build.C
+import           Language.ATS.Package.Compiler        (SetupScript)
 import           Language.ATS.Package.Config
 import           Language.ATS.Package.Error
 import           Language.ATS.Package.PackageSet
@@ -27,11 +28,6 @@ getTgt :: CCompiler -> Maybe String
 getTgt (GCC x)   = x
 getTgt (GHC x _) = x
 getTgt _         = Nothing
-
-type SetupScript = Maybe String -- ^ Optional target triple
-                     -> String -- ^ Library name
-                     -> FilePath -- ^ File path
-                     -> IO ()
 
 fetchDeps :: CCompiler -- ^ C compiler to use
           -> [IO ()] -- ^ Setup steps that can be performed concurrently

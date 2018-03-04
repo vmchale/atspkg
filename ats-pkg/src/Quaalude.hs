@@ -1,6 +1,7 @@
 {-# LANGUAGE CPP #-}
 
-module Quaalude ( bool
+module Quaalude ( hex
+                , bool
                 , intersperse
                 , transpose
                 , sortBy
@@ -132,6 +133,7 @@ import           Development.Shake.FilePath
 import           Dhall                        hiding (bool)
 import           Network.HTTP.Client
 import           Network.HTTP.Client.TLS      (tlsManagerSettings)
+import           Numeric                      (showHex)
 import           System.Directory             as X
 import           System.Environment           (getEnv)
 import           System.Exit                  (ExitCode (ExitSuccess), exitWith)
@@ -141,6 +143,9 @@ import           System.Process.Ext
 import           Text.PrettyPrint.ANSI.Leijen hiding (bool, (<>))
 
 infixr 5 <#>
+
+hex :: Int -> String
+hex = flip showHex mempty
 
 -- | Same as "Text.PrettyPrint.ANSI.Leijen"'s @<$>@, but doesn't clash with the
 -- prelude.

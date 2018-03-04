@@ -20,7 +20,7 @@ import           Development.Shake.Check
 import           Development.Shake.Clean
 import           Development.Shake.Man
 import           Distribution.ATS.Version
-import           Language.ATS.Package.Build.IO
+import           Language.ATS.Package.Build.C
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Config
 import           Language.ATS.Package.Dependency
@@ -42,7 +42,7 @@ buildAll :: Maybe String
          -> IO ()
 buildAll tgt' p = on (>>) (=<< wants p) fetchDef setupDef
     where fetchDef = fetchCompiler
-          setupDef = setupCompiler tgt'
+          setupDef = setupCompiler atslibSetup tgt'
 
 -- | Build a set of targets
 build :: [String] -- ^ Targets
@@ -259,7 +259,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts libs mt _ v v' ds cds bdeps ccLocal cf as) 
           k False = SharedLibrary
           k True  = StaticLibrary
 
-          atsToolConfig = ATSToolConfig v v' False (ccFromString cc')
+          atsToolConfig = ATSToolConfig v v' False (ccFromString cc') False
 
           cDepsRules = unless (null as) $ do
               let targets = fmap (unpack . cTarget) as

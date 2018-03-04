@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: ats-pkg
-version: 2.7.0.17
+version: 2.7.0.18
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -48,12 +48,13 @@ library
         Paths_ats_pkg
         Distribution.ATS.Build
         Language.ATS.Package.Build
-        Language.ATS.Package.Build.IO
+        Language.ATS.Package.Build.C
         Language.ATS.Package.Compiler
         Language.ATS.Package.Config
         Language.ATS.Package.Dependency
         Language.ATS.Package.Dhall
         Language.ATS.Package.Error
+        Language.ATS.Package.Generic
         Language.ATS.Package.PackageSet
         Language.ATS.Package.Type
         Language.ATS.Package.Upgrade
@@ -78,10 +79,12 @@ library
         text -any,
         directory -any,
         process -any,
+        hashable,
         containers -any,
         parallel-io -any,
         unix -any,
         lens -any,
+        mtl,
         dhall >=1.10.0,
         ansi-wl-pprint -any,
         shake-ats >=1.3.0.0,

@@ -77,7 +77,7 @@ gcFlag True  = "-DATS_MEMALLOC_GCBDW"
 -- Copy source files to the appropriate place. This is necessary because
 -- @#include@s in ATS are weird.
 copySources :: ATSToolConfig -> [FilePath] -> Action ()
-copySources (ATSToolConfig v v' _ _) sources =
+copySources (ATSToolConfig v v' _ _ _) sources =
     forM_ sources $ \dep -> do
         h <- patsHome v'
         let home' = h ++ "lib/ats2-postiats-" ++ show v
@@ -129,7 +129,7 @@ cconfig tc libs gc extras = do
     home' <- home tc
     let libs' = ("atslib" :) $ bool libs ("gc" : libs) gc
     -- TODO only include /ccomp/atslib/lib if it's not a cross build
-    pure $ CConfig [h ++ "ccomp/runtime/", h, h' ++ "include", ".atspkg/contrib"] libs' [h' ++ "lib", home' ++ "/ccomp/atslib/lib"] extras True
+    pure $ CConfig [h ++ "ccomp/runtime/", h, h' ++ "include", ".atspkg/contrib"] libs' [h' ++ "lib", home' ++ "/ccomp/atslib/lib"] extras (linkStatic tc)
 
 home :: MonadIO m => ATSToolConfig -> m String
 home tc = do

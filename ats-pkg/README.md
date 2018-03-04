@@ -13,11 +13,9 @@ Things that `atspkg` will do for you:
   * Simplify distribution of your project
   * Enable Haskell builds that depend on ATS code
   * Enable ATS builds that depend on Haskell code
-  * Ensure reproducible builds via pinned compiler versions
   * Track all file dependencies
   * Make contributing to your projects easier
   * Run builds in parallel (like `make`)
-  * Handle flags and libraries for garbage collection
   * Install `patscc` and other ATS tooling
   * Install manual pages and shell completions
   * Install ATS libraries
@@ -28,15 +26,13 @@ Things that `atspkg` will not do for you:
   * Give you the full flexibility of the C/ATS ecosystem
   * Integrate with other ecosystems
   * Provide a centralized package repository
-  * Offer a common architecture for package builds
   * Cache builds locally (like `nix` or `cabal`)
 
 ### Example
 
-As an example, the following two lines will install `polyglot`:
+As an example, the following will install `polyglot`:
 
 ```bash
-curl -sSl https://raw.githubusercontent.com/vmchale/atspkg/master/bash/install.sh | bash -s
 atspkg remote https://github.com/vmchale/polyglot/archive/master.zip
 ```
 
