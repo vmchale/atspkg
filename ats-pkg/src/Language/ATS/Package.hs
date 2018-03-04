@@ -13,6 +13,8 @@ module Language.ATS.Package ( pkgToAction
                             , atspkgVersion
                             -- * Functions involving the compiler
                             , packageCompiler
+                            -- * Functions for generic packaging
+                            , atsInstallDirs
                             -- * Types
                             , Version (..)
                             , Pkg (..)
@@ -26,6 +28,11 @@ module Language.ATS.Package ( pkgToAction
                             , LibDep
                             , DepSelector
                             , PackageError (..)
+                            -- * Generic Packaging
+                            , Package (..)
+                            , InstallDirs (..)
+                            -- * Typeclasses
+                            , GenericPackage (..)
                             -- * Lenses
                             , dirLens
                             ) where
@@ -36,6 +43,7 @@ import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Dependency
 import           Language.ATS.Package.Dhall
 import           Language.ATS.Package.Error
+import           Language.ATS.Package.Generic
 import           Language.ATS.Package.PackageSet
 import           Language.ATS.Package.Type
 import           Language.ATS.Package.Upgrade
