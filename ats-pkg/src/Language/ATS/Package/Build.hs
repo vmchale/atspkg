@@ -102,7 +102,6 @@ mkManpage = do
 cacheConfiguration :: Text -> IO Pkg
 cacheConfiguration = input auto
 
--- FIXME this should cache results at the least.
 getConfig :: MonadIO m => Maybe FilePath -> m Pkg
 getConfig dir' = liftIO $ do
     d <- fromMaybe <$> fmap (<> "/atspkg.dhall") getCurrentDirectory <*> pure dir'

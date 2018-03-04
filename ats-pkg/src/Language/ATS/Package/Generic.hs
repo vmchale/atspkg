@@ -13,20 +13,30 @@ import           Control.Monad.Reader (ReaderT)
 import           Data.Hashable        (Hashable (..))
 import           Quaalude
 
-data InstallDirs a = InstallDirs { binDir     :: a -> FilePath
-                                 , libDir     :: a -> String -> FilePath
-                                 , includeDir :: a -> FilePath
+data InstallDirs a = InstallDirs { binDir      :: a -> FilePath
+                                 , libDir      :: a -> String -> FilePath
+                                 , includeDir  :: a -> FilePath
+                                 , includeDeps :: a -> [FilePath]
+                                 , libDeps     :: a -> [FilePath]
                                  }
 
 atsInstallDirs :: Hashable a => IO (InstallDirs a)
 atsInstallDirs = do
     h <- getEnv "HOME"
-    pure $ InstallDirs (pure $ h ++ "/.local/bin") (\pkg n -> "/.atspkg/lib/" ++ n ++ "/" ++ hex (hash pkg)) (pure $ h ++ "/.atspkg/include")
+    let binDir' = h ++ "/.local/bin"
+        includeDir' = h ++ "/.atspkg/include"
+        libDeps' = ["/.atspkg/lib"]
+        includeDeps' = ["/.atspkg/include"]
+    pure $ InstallDirs (pure binDir') (\pkg n -> "/.atspkg/lib/" ++ n ++ "/" ++ hex (hash pkg)) (pure includeDir') (pure includeDeps') (pure libDeps')
 
-newtype Package a b = Package { unPack :: ReaderT (InstallDirs a, [a]) IO b }
+-- | The package monad provides information about the package to be installed,
+-- in particular, the directory for installation and the directories for
+-- dependencies.
+newtype Package a b = Package { unPack :: ReaderT (InstallDirs a) IO b }
     deriving (Functor)
     deriving newtype (Applicative, Monad)
 
+-- | Any type implementing 'GenericPackage' can be depended on.
 class Hashable a => GenericPackage a where
 
     binRules :: a -> Package a ()

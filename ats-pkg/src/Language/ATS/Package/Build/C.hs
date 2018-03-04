@@ -1,8 +1,7 @@
 module Language.ATS.Package.Build.C ( clibSetup
-                                     , maybeExit
-                                     , pkgHome
-                                     , allSubdirs
-                                     ) where
+                                    , pkgHome
+                                    , allSubdirs
+                                    ) where
 
 import           Development.Shake.ATS
 import           Development.Shake.C
@@ -19,10 +18,6 @@ allSubdirs d = do
     ds <- filterM doesDirectoryExist d''
     ds' <- mapM allSubdirs ds
     pure $ join (ds : ds')
-
-maybeExit :: ExitCode -> IO ()
-maybeExit ExitSuccess = pure ()
-maybeExit x           = exitWith x
 
 clibSetup :: CCompiler -- ^ C compiler
           -> String -- ^ Library name
