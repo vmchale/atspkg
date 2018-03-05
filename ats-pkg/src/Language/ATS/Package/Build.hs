@@ -70,7 +70,7 @@ mkInstall tgt =
         need (bins <> libs)
         home <- liftIO $ getEnv "HOME"
         let g str = fmap (((home <> str) <>) . takeFileName)
-            binDest =  g "/.local/bin" bins
+            binDest =  g "/.local/bin/" bins
             libDest = ((home <> "/.atspkg/" <> libDir <> "lib/") <>) . takeFileName <$> libs
             inclDest = ((home <> "/.atspkg/include/") <>) . takeFileName <$> incs
         zipWithM_ copyFile' (bins ++ libs ++ incs) (binDest ++ libDest ++ inclDest)
