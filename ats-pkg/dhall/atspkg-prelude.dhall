@@ -114,7 +114,7 @@ let makePkg =
   λ(rec : { x : List Integer, name : Text, githubUsername : Text}) →
     dep //
       { libName = rec.name
-      , dir = "${patsHome}/${rec.name}"
+      , dir = "${patsHome}"
       , url = "https://github.com/${rec.githubUsername}/${rec.name}/archive/${showVersion rec.x}.tar.gz"
       , libVersion = rec.x
       }
