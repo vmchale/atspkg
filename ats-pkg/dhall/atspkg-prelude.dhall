@@ -4,7 +4,7 @@ in
 let map = https://ipfs.io/ipfs/QmQ8w5PLcsNz56dMvRtq54vbuPe9cNnCCUXAQp6xLc6Ccx/Prelude/List/map
 in
 
-{- Types for the record (and supporting functions -}
+{- Types for export and supporting functions -}
 let ATSConstraint = { lower : Optional (List Integer), upper : Optional (List Integer) }
 in
 
@@ -114,7 +114,7 @@ let makePkg =
   λ(rec : { x : List Integer, name : Text, githubUsername : Text}) →
     dep //
       { libName = rec.name
-      , dir = "${patsHome}"
+      , dir = "${patsHome}/${rec.name}"
       , url = "https://github.com/${rec.githubUsername}/${rec.name}/archive/${showVersion rec.x}.tar.gz"
       , libVersion = rec.x
       }
