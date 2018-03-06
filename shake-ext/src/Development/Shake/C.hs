@@ -14,7 +14,7 @@ module Development.Shake.C ( -- * Types
                            , cBin
                            , cToLib
                            -- * Actions
-                           , ccAction
+                           , binaryA
                            , staticLibA
                            , sharedLibA
                            -- * Helper functions
@@ -39,17 +39,21 @@ mkQualified pre suff = h [f suff, g pre]
           f = maybe id (flip mappend)
           h = foldr fmap id
 
+-- | The target triple of the host machine.
 host :: String
 host = arch ++ withManufacturer os
     where withManufacturer "darwin" = "-apple-" ++ os
           withManufacturer _        = "-unknown-" ++ os
 
+-- | Default @gcc@ available
 pattern GCCStd :: CCompiler
 pattern GCCStd = GCC Nothing
 
+-- | Default @ghc@ available
 pattern GHCStd :: CCompiler
 pattern GHCStd = GHC Nothing Nothing
 
+-- | Get the executable name associated with a 'CCompiler'
 ccToString :: CCompiler -> String
 ccToString Clang          = "clang"
 ccToString (Other s)      = s
@@ -62,6 +66,8 @@ arToString (GCC pre)   = mkQualified pre Nothing "ar"
 arToString (GHC pre _) = mkQualified pre Nothing "ar"
 arToString _           = "ar"
 
+-- | Attempt to parse a string as a 'CCompiler', defaulting to @cc@ if parsing
+-- fails.
 ccFromString :: String -> CCompiler
 ccFromString "gcc" = GCC Nothing
 ccFromString "clang" = Clang
@@ -70,8 +76,9 @@ ccFromString s
     | "gcc" `isSuffixOf` s = GCC (Just (reverse . drop 3 . reverse $ s))
     | "ghc" `isSuffixOf` s = GHC (Just (reverse . drop 3 . reverse $ s)) Nothing
     | "ghc" `isPrefixOf` s = GHC Nothing (Just (drop 3 s))
-ccFromString _ = GCC Nothing
+ccFromString _ = Other "cc"
 
+-- | A data type representing the C compiler to be used.
 data CCompiler = GCC { _prefix :: Maybe String -- ^ Usually the target triple
                      }
                | Clang
@@ -92,33 +99,37 @@ data CConfig = CConfig { includes   :: [String] -- ^ Directories to be included.
                        , staticLink :: Bool -- ^ Whether to link against static versions of libraries
                        }
 
--- | Rules for making a static library from C source files
+-- | Rules for making a static library from C source files. Unlike 'staticLibR',
+-- this also creates rules for creating object files.
 cToLib :: CCompiler
        -> [FilePath] -- ^ C source files
        -> FilePattern -- ^ Static libary output
        -> CConfig
        -> Rules ()
 cToLib cc sources lib cfg =
-    mconcat [ foldr (>>) (pure ()) objRules
+    mconcat [ mconcat objRules
             , staticLibR cc (g sources) lib cfg
             ]
     where objRules = objectFileR cc cfg <$> g sources <*> pure lib
           g = fmap (-<.> "o")
 
+-- | Rules for generating a binary from C source files. At most one can have the
+-- @main@ function.
 cBin :: CCompiler
      -> [FilePath] -- ^ C source files
      -> FilePattern -- ^ Binary file output
      -> CConfig
      -> Rules ()
-cBin cc sources bin cfg = bin %> \out -> ccAction cc sources out cfg
+cBin cc sources bin cfg = bin %> \out -> binaryA cc sources out cfg
 
-ccAction :: CmdResult r
+-- | This action builds a binary.
+binaryA :: CmdResult r
          => CCompiler
          -> [FilePath] -- ^ Source files
          -> FilePath -- ^ Binary file output
          -> CConfig
          -> Action r
-ccAction cc sources out cfg =
+binaryA cc sources out cfg =
     need sources >>
     (command [EchoStderr False] (ccToString cc) . (("-o" : out : sources) <>) . cconfigToArgs) cfg
 
@@ -128,9 +139,10 @@ cconfigToArgs (CConfig is ls ds es sl) = join [ mapFlags "-I" is, mapFlags "-l" 
           g False = id
           g True  = (":lib" <>) . (<> ".a")
 
+-- | These rules build a dynamic library (@.so@ on Linux).
 dynLibR :: CCompiler
-        -> [FilePath]
-        -> FilePattern
+        -> [FilePath] -- ^ C source files
+        -> FilePattern -- ^ Shared object file to be generated.
         -> CConfig
         -> Rules ()
 dynLibR cc objFiles shLib cfg =
@@ -138,6 +150,7 @@ dynLibR cc objFiles shLib cfg =
         need objFiles >>
         command [EchoStderr False] (ccToString cc) ("-shared" : "-o" : out : objFiles <> cconfigToArgs cfg)
 
+-- | These rules build an object file from a C source file.
 objectFileR :: CCompiler
             -> CConfig
             -> FilePath -- ^ C source file
@@ -176,7 +189,7 @@ sharedLibR :: CCompiler
 sharedLibR cc objFiles shrLib cfg =
     shrLib %> \out -> sharedLibA cc objFiles out cfg
 
-staticLibR :: CCompiler -- ^ ar binary
+staticLibR :: CCompiler
            -> [FilePath] -- ^ Object files to be linked
            -> FilePattern -- ^ File pattern for static library outputs
            -> CConfig

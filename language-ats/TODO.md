@@ -10,8 +10,6 @@
   - [ ] Add test suite for messages
 # Performance
 - [ ] Get rid of `identifierSpace`
-- [ ] Use threaded lexer/parser.
-- [ ] Handle `stadef mytkind = $extkind"atslib_linmap_avltree`
+- [ ] Handle `stadef mytkind = $extkind"atslib_linmap_avltree"`
 - [ ] Macros with `#else`
 - [ ] Boxed tuples/records
-- [ ] `1 + sizeof a` in static declarations?

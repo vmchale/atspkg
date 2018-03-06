@@ -9,11 +9,9 @@ main =
                   bgroup "format"
                       [ bench "lexATS (large)" $ nf lexATS l
                       , bench "parse (large)" $ nf parse l
-                      , bench "parseM (large)" $ nf parseM l
                       , bench "fmap printATS . parse (large)" $ nf (fmap printATS . parse) l
                       , bench "lexATS (medium)" $ nf lexATS m
                       , bench "parse (medium)" $ nf parse m
-                      , bench "parseM (medium)" $ nf parseM m
                       , bench "fmap printATS . parse (medium)" $ nf (fmap printATS . parse) m
                       ]
                 ]

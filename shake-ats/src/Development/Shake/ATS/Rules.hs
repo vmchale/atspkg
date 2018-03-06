@@ -21,13 +21,13 @@ import           System.Directory
 -- | Given a plain Haskell source file, generate a @.sats@ file containing
 -- the equivalent types.
 genATS :: FilePath -- ^ Haskell source
-       -> FilePath -- ^ @.sats@ file to generate
+       -> FilePattern -- ^ @.sats@ file to generate
        -> Bool -- ^ Whether to call cpphs preprocessor
        -> Rules ()
-genATS src target cpphs =
+genATS src' target cpphs' =
     target %> \out -> liftIO $ do
         createDirectoryIfMissing True (takeDirectory out)
-        genATSTypes src out cpphs
+        genATSTypes src' out cpphs'
 
 genLinks :: FilePath -> FilePath -> Rules ()
 genLinks dats link =
@@ -36,6 +36,7 @@ genLinks dats link =
         let proc = generateLinks contents
         writeFile out (either undefined id proc)
 
+-- | Get subdirectories recursively.
 getSubdirs :: FilePath -> IO [FilePath]
 getSubdirs p = do
     ds <- listDirectory p
@@ -87,8 +88,9 @@ atsLex latsIn fp =
         (Stdout contents) <- command [Stdin lats] "atslex" []
         liftIO $ writeFile out contents
 
-cleanATS :: Rules ()
-cleanATS = "clean" ~> do
-    removeFilesAfter "." ["//*.c", "//tags"]
-    removeFilesAfter ".atspkg" ["//*"]
-    removeFilesAfter "ats-deps" ["//*"]
+-- | Clean up after an ATS build.
+cleanATS :: Action ()
+cleanATS =
+    zipWithM_ removeFilesAfter
+        [".", ".atspkg", "ats-deps"]
+        [["//*.c", "//*_lats.dats", "//tags"], ["//*"], ["//*"]]

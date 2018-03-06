@@ -73,7 +73,7 @@ main :: IO ()
 main = execParser wrapper >>= pick
 
 printFail :: String -> IO a
-printFail = const exitFailure <=< hPutStr stderr
+printFail = pure exitFailure <=< hPutStr stderr
 
 defaultConfig :: FilePath -> IO ()
 defaultConfig = flip writeFile $(embedStringFile ".atsfmt.toml")

@@ -33,6 +33,7 @@ compilerDir :: Version -> IO FilePath
 compilerDir v = makeAbsolute =<< dir
     where dir = (++ ("/.atspkg/" ++ show v)) <$> getEnv "HOME"
 
+-- | Make a tarball from a directory containing the compiler.
 packageCompiler :: FilePath -> IO ()
 packageCompiler directory = do
     files <- find (pure True) (pure True) directory

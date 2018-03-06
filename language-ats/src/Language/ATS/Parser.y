@@ -403,6 +403,7 @@ StaticExpression : Name { StaticVal $1 }
                  | doubleParens { StaticVoid $1 }
                  | sif StaticExpression then StaticExpression else StaticExpression { Sif $2 $4 $6 } -- TODO separate type for static expressions
                  | identifierSpace { StaticVal (Unqualified $ to_string $1) }
+                 | identifierSpace StaticExpression { SCall (Unqualified $ to_string $1) [$2] }
                  | Name openParen StaticArgs closeParen { SCall $1 $3 }
                  | identifierSpace openParen StaticArgs closeParen { SCall (Unqualified $ to_string $1) $3 }
                  | StaticExpression semicolon StaticExpression { SPrecede $1 $3 }

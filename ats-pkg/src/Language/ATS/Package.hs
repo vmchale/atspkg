@@ -1,10 +1,7 @@
-module Language.ATS.Package ( pkgToAction
-                            , build
-                            , buildAll
+module Language.ATS.Package ( buildAll
                             , check
                             , mkPkg
                             , cleanAll
-                            , fetchDeps
                             , buildHelper
                             , checkPkg
                             -- * Ecosystem functionality
@@ -20,6 +17,7 @@ module Language.ATS.Package ( pkgToAction
                             , Pkg (..)
                             , Bin (..)
                             , Lib (..)
+                            , Src (..)
                             , ATSConstraint (..)
                             , ATSDependency (..)
                             , TargetPair (..)

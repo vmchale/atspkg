@@ -14,15 +14,34 @@ module Development.Shake.ATS ( -- * Shake Rules
                              , getSubdirs
                              , ccToDir
                              , withPF
+                             , defaultATSTarget
+                             , defaultATSToolConfig
                              -- * Environment/configuration
                              , patscc
                              , patsopt
-                             -- Types
+                             -- * Types
                              , ForeignCabal (..)
                              , ATSTarget (..)
                              , ATSToolConfig (..)
                              , CCompiler (..)
                              , ArtifactType (..)
+                             , ATSGen (..)
+                             -- * Lenses
+                             , atsTarget
+                             , cFlags
+                             , binTarget
+                             , cc
+                             , compilerVer
+                             , genTargets
+                             , hsLibs
+                             , libVersion
+                             , libs
+                             , linkStatic
+                             , linkTargets
+                             , otherDeps
+                             , src
+                             , tgtType
+                             , toolConfig
                              ) where
 
 import           Control.Arrow
@@ -61,9 +80,9 @@ atsCommand tc sourceFile out = do
     command env patsc ["--output", out, "-dd", sourceFile, "-cc"]
 
 -- | Filter any generated errors with @pats-filter@.
-withPF :: Bool -> Action (Exit, Stderr String, Stdout String) -> Action (Exit, Stderr String, Stdout String)
-withPF False = id
-withPF True = \act -> do
+withPF :: Action (Exit, Stderr String, Stdout String) -- ^ Result of a 'cmd' or 'command'
+       -> Action (Exit, Stderr String, Stdout String)
+withPF act = do
     ret@(Exit c, Stderr err, Stdout _) <- act :: Action (Exit, Stderr String, Stdout String)
     cmd_ [Stdin err] Shell "pats-filter"
     if c /= ExitSuccess
@@ -105,9 +124,6 @@ libToDirs :: [ForeignCabal] -> [String]
 libToDirs = fmap (takeDirectory . TL.unpack . h)
     where h (ForeignCabal mpr cf _) = fromMaybe cf mpr
 
-uncurry3 :: (a -> b -> c -> d) -> ((a, b, c) -> d)
-uncurry3 f (x, y, z) = f x y z
-
 -- | Location of @patscc@
 patscc :: MonadIO m => ATSToolConfig -> m String
 patscc = patsTool "patscc"
@@ -118,23 +134,23 @@ patsopt = patsTool "patsopt"
 
 patsTool :: MonadIO m => String -> ATSToolConfig -> m String
 patsTool tool tc = (<> prep) <$> ph
-    where ph = patsHome (compilerVer tc)
-          prep = "lib/ats2-postiats-" ++ show (libVersion tc) ++ "/bin/" ++ tool
+    where ph = patsHome (_compilerVer tc)
+          prep = "lib/ats2-postiats-" ++ show (_libVersion tc) ++ "/bin/" ++ tool
 
 cconfig :: MonadIO m => ATSToolConfig -> [String] -> Bool -> [String] -> m CConfig
-cconfig tc libs gc extras = do
-    h <- patsHome (compilerVer tc)
-    let cc' = cc tc
+cconfig tc libs' gc' extras = do
+    h <- patsHome (_compilerVer tc)
+    let cc' = _cc tc
     h' <- pkgHome cc'
     home' <- home tc
-    let libs' = ("atslib" :) $ bool libs ("gc" : libs) gc
+    let libs'' = ("atslib" :) $ bool libs' ("gc" : libs') gc'
     -- TODO only include /ccomp/atslib/lib if it's not a cross build
-    pure $ CConfig [h ++ "ccomp/runtime/", h, h' ++ "include", ".atspkg/contrib"] libs' [h' ++ "lib", home' ++ "/ccomp/atslib/lib"] extras (linkStatic tc)
+    pure $ CConfig [h ++ "ccomp/runtime/", h, h' ++ "include", ".atspkg/contrib"] libs'' [h' ++ "lib", home' ++ "/ccomp/atslib/lib"] extras (_linkStatic tc)
 
 home :: MonadIO m => ATSToolConfig -> m String
 home tc = do
-    h <- patsHome (compilerVer tc)
-    pure $ h ++ "lib/ats2-postiats-" ++ show (libVersion tc)
+    h <- patsHome (_compilerVer tc)
+    pure $ h ++ "lib/ats2-postiats-" ++ show (_libVersion tc)
 
 patsEnv :: FilePath -> FilePath -> [CmdOption]
 patsEnv home' path = EchoStderr False :
@@ -146,7 +162,7 @@ atsToC :: FilePath -> FilePath
 atsToC = (-<.> "c") . (".atspkg/c/" <>)
 
 ghcV :: [ForeignCabal] -> Action String
-ghcV hsLibs = case hsLibs of
+ghcV hsLibs' = case hsLibs' of
     [] -> pure undefined
     _  -> ghcVersion
 
@@ -154,50 +170,66 @@ doLib :: ArtifactType -> Rules () -> Rules ()
 doLib Executable = pure mempty
 doLib _          = id
 
+defaultATSTarget :: [FilePath] -- ^ ATS source files
+                 -> ArtifactType
+                 -> FilePath -- ^ Target
+                 -> ATSTarget
+defaultATSTarget sources tgt' out =
+    ATSTarget mempty defaultATSToolConfig False mempty sources mempty mempty mempty out mempty tgt'
+
+defaultATSToolConfig :: ATSToolConfig
+defaultATSToolConfig =
+    ATSToolConfig v v False (GCC Nothing) False
+        where v = Version [0,3,9]
+
+-- | Rules for generating binaries or libraries from ATS code. This is very
+-- general; use 'defaultATSTarget' for sensible defaults that can be modified
+-- with the provided lenses.
 atsBin :: ATSTarget -> Rules ()
 atsBin ATSTarget{..} = do
 
-    mapM_ (uncurry genLinks) linkTargets
+    mapM_ (uncurry genLinks) _linkTargets
 
-    mapM_ (uncurry3 genATS) genTargets
+    mapM_ (\(ATSGen x y z) -> genATS x y z) _genTargets
 
-    mapM_ cabalExport hsLibs
+    mapM_ cabalExport _hsLibs
 
-    let cTargets = atsToC <$> src
+    let cTargets = atsToC <$> _src
 
     let h Executable    = id
         h StaticLibrary = fmap (-<.> "o")
         h SharedLibrary = fmap (-<.> "o")
-        g Executable    = ccAction
+        g Executable    = binaryA
         g StaticLibrary = staticLibA
         g SharedLibrary = sharedLibA
-        h' = h tgtType
+        h' = h _tgtType
 
-    cconfig' <- cconfig toolConfig libs gc (makeCFlags cFlags mempty (pure undefined) gc)
+    cconfig' <- cconfig _toolConfig _libs _gc (makeCFlags _cFlags mempty (pure undefined) _gc)
 
-    let atsGen = (snd <$> linkTargets) <> ((^._2) <$> genTargets)
-        atsExtras = otherDeps <> (TL.unpack . objectFile <$> hsLibs)
-    zipWithM_ (cgen toolConfig atsExtras atsGen) src cTargets
+    let atsGen = (snd <$> _linkTargets) <> ((^.atsTarget) <$> _genTargets)
+        atsExtras = _otherDeps <> (TL.unpack . objectFile <$> _hsLibs)
+    zipWithM_ (cgen _toolConfig atsExtras atsGen) _src cTargets
 
-    doLib tgtType (zipWithM_ (objectFileR (cc toolConfig) cconfig') cTargets (h' cTargets))
+    doLib _tgtType (zipWithM_ (objectFileR (_cc _toolConfig) cconfig') cTargets (h' cTargets))
 
-    binTarget %> \_ -> do
+    _binTarget %> \_ -> do
 
         need (h' cTargets)
 
-        ghcV' <- ghcV hsLibs
+        ghcV' <- ghcV _hsLibs
 
-        cconfig'' <- cconfig toolConfig libs gc (makeCFlags cFlags hsLibs ghcV' gc)
+        cconfig'' <- cconfig _toolConfig _libs _gc (makeCFlags _cFlags _hsLibs ghcV' _gc)
 
-        unit $ g tgtType (cc toolConfig) (h' cTargets) binTarget cconfig''
+        unit $ g _tgtType (_cc _toolConfig) (h' cTargets) _binTarget cconfig''
 
+-- | Generate C code from ATS code.
 cgen :: ATSToolConfig
      -> [FilePath] -- ^ Extra files to track
      -> [FilePath] -- ^ ATS source that may be generated.
      -> FilePath -- ^ ATS source
      -> FilePattern -- ^ Pattern for C file to be generated
      -> Rules ()
-cgen toolConfig extras atsGens atsSrc cFiles =
+cgen toolConfig' extras atsGens atsSrc cFiles =
     cFiles %> \out -> do
 
         -- tell shake which files to track and copy them to the appropriate
@@ -205,9 +237,9 @@ cgen toolConfig extras atsGens atsSrc cFiles =
         need extras
         sources <- transitiveDeps atsGens [atsSrc]
         need sources
-        copySources toolConfig sources
+        copySources toolConfig' sources
 
-        atsCommand toolConfig atsSrc out
+        atsCommand toolConfig' atsSrc out
 
 -- | This provides rules for generating C code from ATS source files in the
 trim :: String -> String

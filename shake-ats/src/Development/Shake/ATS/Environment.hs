@@ -12,7 +12,8 @@ import           Development.Shake.FilePath
 import           System.Environment         (getEnv)
 
 -- | Given a C compiler, return the appropriate directory for its globally
--- installed artifacts.
+-- installed artifacts. This is used to keep libraries built for different
+-- platforms separate.
 ccToDir :: CCompiler -> String
 ccToDir (GCC (Just s)) = reverse (drop 1 $ reverse s) ++ "/"
 ccToDir _              = ""

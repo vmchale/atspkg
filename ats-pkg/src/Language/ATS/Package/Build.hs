@@ -63,17 +63,17 @@ mkInstall :: Maybe String -> Rules ()
 mkInstall tgt =
     "install" ~> do
         config <- getConfig Nothing
-        let libs = fmap (unpack . libTarget) . libraries $ config
+        let libs' = fmap (unpack . libTarget) . libraries $ config
             bins = fmap (unpack . target) . bin $ config
             incs = ((fmap unpack . includes) =<<) . libraries $ config
             libDir = maybe mempty (<> "/") tgt
-        need (bins <> libs)
+        need (bins <> libs')
         home <- liftIO $ getEnv "HOME"
         let g str = fmap (((home <> str) <>) . takeFileName)
             binDest =  g "/.local/bin/" bins
-            libDest = ((home <> "/.atspkg/" <> libDir <> "lib/") <>) . takeFileName <$> libs
+            libDest = ((home <> "/.atspkg/" <> libDir <> "lib/") <>) . takeFileName <$> libs'
             inclDest = ((home <> "/.atspkg/include/") <>) . takeFileName <$> incs
-        zipWithM_ copyFile' (bins ++ libs ++ incs) (binDest ++ libDest ++ inclDest)
+        zipWithM_ copyFile' (bins ++ libs' ++ incs) (binDest ++ libDest ++ inclDest)
         pa <- pandoc
         case man config of
             Just mt -> if not pa then pure () else do
@@ -227,7 +227,7 @@ pkgToAction :: [IO ()] -- ^ Setup actions to be performed
             -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
             -> Pkg -- ^ Package data type
             -> Rules ()
-pkgToAction setup rs tgt ~(Pkg bs ts libs mt _ v v' ds cds bdeps ccLocal cf as) =
+pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf as) =
 
     unless (rs == ["clean"]) $ do
 
@@ -245,7 +245,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts libs mt _ v v' ds cds bdeps ccLocal cf as) 
 
         cDepsRules >> bits tgt rs
 
-        mapM_ h libs
+        mapM_ h lbs
 
         mapM_ g (bs ++ ts)
 
@@ -268,7 +268,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts libs mt _ v v' ds cds bdeps ccLocal cf as) 
           cc' = maybe (unpack ccLocal) (<> "-gcc") tgt
           deps = (specialDeps:) . (".atspkg/config":) . fmap unpack
 
-          unpackBoth :: (Text, Text, Bool) -> (String, String, Bool)
-          unpackBoth = over _1 unpack . over _2 unpack
+          unpackBoth :: (Text, Text, Bool) -> ATSGen
+          unpackBoth (t, t', b)= ATSGen (unpack t) (unpack t') b
 
           specialDeps = ".atspkg/deps" ++ maybe mempty ("-" <>) tgt

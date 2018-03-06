@@ -36,6 +36,7 @@ data Command = Install { _archTarget :: Maybe String }
                      , _prof       :: Bool
                      }
              | Clean
+             | Pack { _target :: String }
              | Test { _targets    :: [String]
                     , _rebuildAll :: Bool
                     , _lint       :: Bool
@@ -65,7 +66,12 @@ command' = hsubparser
     <> command "run" (info run' (progDesc "Run generated binaries"))
     <> command "check" (info check' (progDesc "Audit a package set to ensure it is well-typed."))
     <> command "list" (info (pure List) (progDesc "List available packages"))
+    <> command "pack" (info pack (progDesc "Make a tarball for distributing the compiler"))
     )
+
+pack :: Parser Command
+pack = Pack
+    <$> targetP mempty id "package"
 
 install :: Parser Command
 install = Install
@@ -186,3 +192,4 @@ run (Test ts rba lint)            = runHelper rba lint False ("test" : ts) Nothi
 run (Run ts rba v lint)           = runHelper rba lint False ("run" : ts) Nothing v
 run (Install tgt)                 = runHelper False True False ["install"] tgt 0
 run (Valgrind ts)                 = runHelper False True False ("valgrind" : ts) Nothing 0
+run (Pack dir')                   = packageCompiler dir'

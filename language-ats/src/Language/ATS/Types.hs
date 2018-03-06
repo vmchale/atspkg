@@ -104,7 +104,7 @@ data Declaration a = Func { pos :: a, _fun :: Function a }
                    | AndDecl { andT :: Maybe (Type a), andPat :: Pattern a, _andExpr :: Expression a }
                    | Include String
                    | Load { static :: Bool, withOctothorpe :: Bool, qualName :: Maybe String, fileName :: String }
-                   | Stadef String (SortArgs a) (Either (StaticExpression a) (Type a))
+                   | Stadef String (SortArgs a) (Either (StaticExpression a) (Type a)) -- TODO (StaticExpression a, Maybe (Type a))
                    | CBlock String
                    | TypeDef a String (SortArgs a) (Type a)
                    | ViewTypeDef a String (SortArgs a) (Type a)
