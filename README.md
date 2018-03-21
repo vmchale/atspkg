@@ -17,6 +17,15 @@ The following are goals of the libraries and tools contained herein:
 
   * Make building ATS with Haskell dependencies easy
 
+## Tools
+
+* [ats-pkg](ats-pkg/README.md): package management
+* [ats-format](ats-format/README.md): automated formatter
+* [hs2ats](hs2ats/README.md): convert Haskell types to ATS types
+* [language-ats](language-ats/README.md): Haskell parser & pretty-printer for ATS
+
+More to come!
+
 ## Contents
 
 ```
