@@ -25,12 +25,12 @@ allow-newer:
   cabal-doctest:base
   Cabal
 
+with-compiler: ghc-8.2.2
 allow-boot-library-installs: True
 optimization: 2
-with-compiler: ghc-8.2.2
 tests: True
 benchmarks: True
-documentation: True
+-- documentation: True
 
 program-options
   happy-options: -gcsa

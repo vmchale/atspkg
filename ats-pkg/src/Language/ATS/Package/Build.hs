@@ -227,7 +227,7 @@ pkgToAction :: [IO ()] -- ^ Setup actions to be performed
             -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
             -> Pkg -- ^ Package data type
             -> Rules ()
-pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf as) =
+pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf as dl) =
 
     unless (rs == ["clean"]) $ do
 
@@ -258,7 +258,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf as) =
           k False = SharedLibrary
           k True  = StaticLibrary
 
-          atsToolConfig = ATSToolConfig v v' False (ccFromString cc') False
+          atsToolConfig = ATSToolConfig v v' False (ccFromString cc') (not dl)
 
           cDepsRules = unless (null as) $ do
               let targets = fmap (unpack . cTarget) as

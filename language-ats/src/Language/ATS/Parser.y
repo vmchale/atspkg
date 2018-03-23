@@ -217,6 +217,17 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
 
 %%
 
+some(p) : some(p) p { $2 : $1 }
+        | p { [$1] }
+
+many(p) : some(p) p { $2 : $1 }
+        | { [] }
+
+sep_by(p,sep) : p { [$1] }
+              | sep_by(p,sep) sep p { $3 : $1 }
+
+parens(p) : openParen p closeParen { $2 }
+
 ATS : Declarations { ATS $1 }
 
 -- | Parse declarations in a list
@@ -226,9 +237,7 @@ Declarations : { [] }
              | Declarations ValDecl { $2 ++ $1 }
              | Declarations local ATS in ATS end { Local $2 $3 $5 : $1 }
 
--- | Several comma-separated types
-TypeIn : Type { [$1] }
-       | TypeIn comma Type { $3 : $1 }
+TypeIn : sep_by(Type, comma) { $1 }
 
 -- | Several comma-separated types or static expressions
 TypeInExpr : Type { [$1] }
@@ -237,7 +246,7 @@ TypeInExpr : Type { [$1] }
            | TypeInExpr comma StaticExpression { ConcreteType $3 : $1 }
 
 -- | Parse a type
-Type : Name openParen TypeInExpr closeParen { Dependent $1 $3 }
+Type : Name parens(TypeInExpr) { Dependent $1 $2 }
      | Name doubleParens { Dependent $1 [] }
      | identifierSpace openParen TypeInExpr closeParen { Dependent (Unqualified $ to_string $1) $3 }
      | identifierSpace { Named (Unqualified $ to_string $1) }
@@ -298,8 +307,7 @@ Literal : uintLit { UintLit $1 }
         | doubleParens { VoidLiteral $1 }
 
 -- | Parse a list of comma-separated patterns
-PatternIn : Pattern { [$1] }
-          | PatternIn comma Pattern { $3 : $1 }
+PatternIn : sep_by(Pattern, comma) { $1 }
 
 -- | Parse a pattern match
 Pattern : Name { PName $1 [] }
@@ -551,14 +559,12 @@ RecordVal : IdentifierOr eq Expression { [($1, $3)] }
 Records : IdentifierOr eq Type { [($1, $3)] }
         | Records comma IdentifierOr eq Type { ($3, $5) : $1 }
 
-IdentifiersIn : IdentifierOr { [$1] }
-              | IdentifiersIn comma IdentifierOr { $3 : $1 }
+IdentifiersIn : sep_by(IdentifierOr, comma) { $1 }
 
 OfType : { Nothing }
        | of Type { Just $2 }
 
-StaticExpressionsIn : StaticExpression { [$1] }
-                    | StaticExpressionsIn comma StaticExpression { $3 : $1 }
+StaticExpressionsIn : sep_by(StaticExpression, comma) { $1 }
 
 -- | Parse a constructor for a sum type
 SumLeaf : vbar Universals identifier { Leaf $2 (to_string $3) [] Nothing }
@@ -792,7 +798,7 @@ Operators : Operator { [$1] }
           | Operators Operator { $2 : $1 }
           | Operators identifier { to_string $2 : $1 }
 
-StackFunction : openParen Args closeParen Signature Type plainArrow Expression { StackF $4 $2 $5 $7 }
+StackFunction : parens(Args) Signature Type plainArrow Expression { StackF $2 $1 $3 $5 }
 
 ValDecl : val Pattern colon Type eq PreExpression { [ Val (get_addendum $1) (Just $4) $2 $6 ] }
         | val Pattern eq Expression { [ Val (get_addendum $1) Nothing $2 $4 ] }

@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: language-ats
-version: 1.2.0.1
+version: 1.2.0.2
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -30,7 +30,7 @@ flag development
 library
     exposed-modules:
         Language.ATS
-    build-tools: happy -any, alex -any
+    build-tools: happy >= 1.17.1, alex -any
     hs-source-dirs: src
     other-modules:
         Language.ATS.Lexer

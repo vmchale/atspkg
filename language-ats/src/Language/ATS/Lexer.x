@@ -113,6 +113,8 @@ $in_r = $in_operator # [\>]
 tokens :-
 
     <0> $white+                  ;
+
+    -- (sort of) handle nested comments
     <one,two,three,one_c> "(*)"  ;
     <0> @block_comment_start     { tok (\p _ -> alex $ CommentBegin p) `andBegin` one }
     <0> @c_comment_start         { tok (\p _ -> alex $ CommentBegin p) `andBegin` one_c }
@@ -136,11 +138,14 @@ tokens :-
     <one_c> [^\*\/]+             { tok (\p s -> alex $ CommentContents p s) }
     <one_c> @comment_in+ / [^\/] { tok (\p s -> alex $ CommentContents p s) }
     <one_c> @comment_general     { tok (\p s -> alex $ CommentContents p s) }
-    <0> "//".*                   { tok (\p s -> alex $ CommentLex p s) }
+
+    -- comments and macros
     <0> "//".*                   { tok (\p s -> alex $ CommentLex p s) }
     <0> @c_block                 { tok (\p s -> alex $ CBlockLex p s) }
     <0> "#define".*              { tok (\p s -> alex $ MacroBlock p s) }
     <0> @if_block                { tok (\p s -> alex $ MacroBlock p s) }      
+
+    -- keywords
     <0> fun                      { tok (\p _ -> alex $ Keyword p KwFun) }
     <0> fn                       { tok (\p _ -> alex $ Keyword p KwFn) }
     <0> fnx                      { tok (\p _ -> alex $ Keyword p KwFnx) }
@@ -239,6 +244,8 @@ tokens :-
     <0> "fold@"                  { tok (\p s -> alex $ IdentifierSpace p s) }
     <0> "free@"                  { tok (\p s -> alex $ Identifier p s) }
     <0> @fixity_decl             { tok (\p s -> alex $ FixityTok p s) }
+
+    -- special symbols, literals, and identifiers
     <0> @double_parens           { tok (\p s -> alex $ DoubleParenTok p) }
     <0> @double_braces           { tok (\p s -> alex $ DoubleBracesTok p) }
     <0> @double_brackets         { tok (\p s -> alex $ DoubleBracketTok p) }
@@ -257,9 +264,9 @@ tokens :-
     <0> @operator                { tok (\p s -> alex $ Operator p s) }
     <0> @builtin                 { tok (\p s -> alex $ SpecialIdentifier p (tail s)) }
     <0> $special                 { tok (\p s -> alex $ Special p s) }
+    <0> @string                  { tok (\p s -> alex $ StringTok p s) }
     <0> @identifier / " "        { tok (\p s -> alex $ IdentifierSpace p s) } -- FIXME get rid of this for performance reasons
     <0> @identifier              { tok (\p s -> alex $ Identifier p s) }
-    <0> @string                  { tok (\p s -> alex $ StringTok p s) }
 
 {
 

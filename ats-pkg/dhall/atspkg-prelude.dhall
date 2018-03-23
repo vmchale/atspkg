@@ -106,6 +106,7 @@ let default
     , cflags = [ "-O2" ]
     , atsSource = []
       : List Src
+    , dynLink = False
     }
 in
 
