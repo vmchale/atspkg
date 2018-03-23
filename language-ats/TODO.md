@@ -13,3 +13,4 @@
 - [ ] Handle `stadef mytkind = $extkind"atslib_linmap_avltree"`
 - [ ] Macros with `#else`
 - [ ] Boxed tuples/records
+- [ ] Literals, etc. should only be lexed when in the right state

@@ -245,16 +245,12 @@ tokens :-
     <0> "free@"                  { tok (\p s -> alex $ Identifier p s) }
     <0> @fixity_decl             { tok (\p s -> alex $ FixityTok p s) }
 
-    -- special symbols, literals, and identifiers
+    -- special symbols, literals
     <0> @double_parens           { tok (\p s -> alex $ DoubleParenTok p) }
     <0> @double_braces           { tok (\p s -> alex $ DoubleBracesTok p) }
     <0> @double_brackets         { tok (\p s -> alex $ DoubleBracketTok p) }
     <0> @lambda                  { tok (\p s -> alex $ Arrow p s) }
     <0> @func_type               { tok (\p s -> alex $ FuncType p s) }
-    <0> @unsigned_lit            { tok (\p s -> alex $ UintTok p (read $ init s)) }
-    <0> @integer                 { tok (\p s -> alex $ IntTok p (read s)) } -- FIXME shouldn't fail silenty on overflow
-    <0> @float                   { tok (\p s -> alex $ FloatTok p (read s)) }
-    <0> @char_lit                { tok (\p s -> alex $ CharTok p (toChar s)) }
     <0> @at_brace                { tok (\p s -> alex $ Special p "@{") }
     <0> @at_tuple                { tok (\p s -> alex $ Special p "@(") }
     <0> @box_tuple               { tok (\p s -> alex $ Special p "'(") }
@@ -264,7 +260,15 @@ tokens :-
     <0> @operator                { tok (\p s -> alex $ Operator p s) }
     <0> @builtin                 { tok (\p s -> alex $ SpecialIdentifier p (tail s)) }
     <0> $special                 { tok (\p s -> alex $ Special p s) }
+
+    -- literals
+    <0> @unsigned_lit            { tok (\p s -> alex $ UintTok p (read $ init s)) }
+    <0> @integer                 { tok (\p s -> alex $ IntTok p (read s)) } -- FIXME shouldn't fail silenty on overflow
+    <0> @float                   { tok (\p s -> alex $ FloatTok p (read s)) }
+    <0> @char_lit                { tok (\p s -> alex $ CharTok p (toChar s)) }
     <0> @string                  { tok (\p s -> alex $ StringTok p s) }
+
+    -- identifiers
     <0> @identifier / " "        { tok (\p s -> alex $ IdentifierSpace p s) } -- FIXME get rid of this for performance reasons
     <0> @identifier              { tok (\p s -> alex $ Identifier p s) }
 
