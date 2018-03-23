@@ -31,6 +31,8 @@ module Development.Shake.ATS ( -- * Shake Rules
                              , cFlags
                              , binTarget
                              , cc
+                             , gc
+                             , hasPretty
                              , compilerVer
                              , genTargets
                              , hsLibs

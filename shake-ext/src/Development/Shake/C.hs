@@ -21,6 +21,7 @@ module Development.Shake.C ( -- * Types
                            , cconfigToArgs
                            , ccToString
                            , ccFromString
+                           , getCDepends
                            , host
                            ) where
 
@@ -31,7 +32,19 @@ import           Data.Semigroup
 #endif
 import           Development.Shake
 import           Development.Shake.FilePath
+import           System.Directory           (removeFile)
 import           System.Info
+
+-- | Given C source code, return a list of included files. This makes a call to
+-- either @clang@ or @gcc@, so it should be used sparingly.
+getCDepends :: CCompiler -- ^ Should be either @gcc@ or @clang@.
+            -> String -- ^ C source code
+            -> Action [FilePath]
+getCDepends cc' src = do
+    liftIO $ writeFile "shake.c" src
+    (Stdout o) <- command [] (ccToString cc') ["-MM", "shake.c"]
+    liftIO $ removeFile "shake.c"
+    pure (drop 1 . filter (/= "/") $ words o)
 
 mkQualified :: Monoid a => Maybe a -> Maybe a -> a -> a
 mkQualified pre suff = h [f suff, g pre]

@@ -6,8 +6,10 @@ darcs:
     darcs optimize pristine
     darcs optimize cache
 
-fmt-install:
-    @cabal new-build ats-format
+build:
+    @cabal new-build all
+
+fmt-install: build
     @cp ats-format/man/atsfmt.1 ~/.local/share/man/man1
     @cp $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) ~/.local/bin
 
@@ -45,8 +47,7 @@ ci: install
     atspkg nuke
     atspkg remote https://github.com/vmchale/polyglot/archive/master.zip
 
-pkg-install:
-    @cabal new-build all
+pkg-install: build
     @cp -f $(fd 'atspkg$' -IH dist-newstyle | tail -n1) ~/.local/bin
 
 install: fmt-install pkg-install
