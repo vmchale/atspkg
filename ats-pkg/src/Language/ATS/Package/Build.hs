@@ -5,7 +5,6 @@
 -- | This module holds various functions for turning a package into a set of rules
 -- or an 'IO ()'.
 module Language.ATS.Package.Build ( mkPkg
-                                  , pkgToAction
                                   , build
                                   , buildAll
                                   , check
