@@ -30,7 +30,7 @@ flag development
 library
     exposed-modules:
         Language.ATS
-    build-tools: happy >= 1.17.1, alex -any
+    build-tools: happy >=1.17.1, alex -any
     hs-source-dirs: src
     other-modules:
         Language.ATS.Lexer
