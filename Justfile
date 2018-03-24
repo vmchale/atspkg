@@ -41,11 +41,11 @@ ci: install
     yamllint .yamllint
     yamllint stack.yaml
     tomlcheck --file ats-format/.atsfmt.toml
-    shellcheck bash/install.sh
     hlint ats-pkg language-ats shake-ext ats-format
     stack build --test --no-run-tests --bench --no-run-benchmarks && weeder .
     atspkg nuke
     atspkg remote https://github.com/vmchale/polyglot/archive/master.zip
+# shellcheck bash/install.sh
 
 pkg-install: build
     @cp -f $(fd 'atspkg$' -IH dist-newstyle | tail -n1) ~/.local/bin
