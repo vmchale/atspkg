@@ -27,14 +27,14 @@ clibSetup cc' lib' p = do
 
     -- Find configure script and make it executable
     subdirs <- allSubdirs p
-    configurePath <- fromMaybe (p <> "/configure") <$> findFile subdirs "configure"
-    setFileMode configurePath ownerModes
+    configurePath <- findFile (p:subdirs) "configure"
+    fold (setFileMode <$> configurePath <*> pure ownerModes)
 
     -- Set environment variables for configure script
     h <- pkgHome cc'
     let procEnv = Just [("CC", ccToString cc'), ("CFLAGS" :: String, "-I" <> h <> "include"), ("PATH", "/usr/bin:/bin")]
 
-    biaxe [configure h configurePath procEnv, make, install] lib' p
+    biaxe [fold (configure h <$> configurePath <*> pure procEnv), make, install] lib' p
 
 configure :: FilePath -> FilePath -> Maybe [(String, String)] -> String -> FilePath -> IO ()
 configure prefixPath configurePath procEnv lib' p =
