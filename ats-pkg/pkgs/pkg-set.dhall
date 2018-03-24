@@ -20,7 +20,7 @@ in
 let bzip =
   prelude.dep //
     { libName = "bzip"
-    , dir = "bzip2-1.0.6"
+    , dir = ""
     , url = "http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz"
     , libVersion = [1,0,6]
     }
