@@ -170,6 +170,7 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     cloptr1Arrow { Arrow $$ "=<cloptr1>" }
     lincloptr1Arrow { Arrow $$ "=<lincloptr1>" }
     spear { Arrow $$ "=>>" }
+    proofArrow { Arrow $$ "=/=>" }
     lsqbracket { Special $$ "[" }
     rsqbracket { Special $$ "]" }
     string { StringTok _ $$ }
@@ -217,16 +218,26 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
 
 %%
 
-some(p) : some(p) p { $2 : $1 }
-        | p { [$1] }
+some(p)
+    : some(p) p { $2 : $1 }
+    | p { [$1] }
 
-many(p) : some(p) p { $2 : $1 }
-        | { [] }
+many(p)
+    : some(p) p { $2 : $1 }
+    | { [] }
 
 sep_by(p,sep) : p { [$1] }
               | sep_by(p,sep) sep p { $3 : $1 }
 
-parens(p) : openParen p closeParen { $2 }
+comma_sep(p)
+    : sep_by(p, comma) { $1 }
+
+between(p1,p,p2) : p1 p p2 { $2 }
+
+parens(p) : between(openParen, p, closeParen) { $1 }
+
+alt(p,q) : p { $1 }
+         | q { $1 }
 
 ATS : Declarations { ATS $1 }
 
@@ -237,13 +248,11 @@ Declarations : { [] }
              | Declarations ValDecl { $2 ++ $1 }
              | Declarations local ATS in ATS end { Local $2 $3 $5 : $1 }
 
-TypeIn : sep_by(Type, comma) { $1 }
+TypeIn : comma_sep(Type) { $1 }
 
--- | Several comma-separated types or static expressions
-TypeInExpr : Type { [$1] }
-           | StaticExpression { [ConcreteType $1] }
-           | TypeInExpr comma Type { $3 : $1 }
-           | TypeInExpr comma StaticExpression { ConcreteType $3 : $1 }
+ExprType : StaticExpression { ConcreteType $1 }
+
+TypeInExpr : comma_sep(alt(Type,ExprType)) { $1 }
 
 -- | Parse a type
 Type : Name parens(TypeInExpr) { Dependent $1 $2 }
@@ -273,8 +282,8 @@ Type : Name parens(TypeInExpr) { Dependent $1 $2 }
      | identifierSpace identifier { Dependent (Unqualified $ to_string $1) [Named (Unqualified $ to_string $2)] }
      | openParen TypeIn closeParen { Tuple $1 $2 }
      | openParen TypeIn closeParen lineComment { Tuple $1 $2 }
-     | openParen TypeIn rbrace {% left $ Expected $3 ")" "}" }
      | openParen Type closeParen { ParenType $1 $2 }
+     | openParen TypeIn rbrace {% left $ Expected $3 ")" "}" }
      | doubleParens { NoneType $1 }
      | Type where IdentifierOr SortArgs eq Type { WhereType $2 $1 $3 $4 $6 }
      | dollar {% left $ Expected $1 "Type" "$" }
@@ -307,7 +316,7 @@ Literal : uintLit { UintLit $1 }
         | doubleParens { VoidLiteral $1 }
 
 -- | Parse a list of comma-separated patterns
-PatternIn : sep_by(Pattern, comma) { $1 }
+PatternIn : comma_sep(Pattern) { $1 }
 
 -- | Parse a pattern match
 Pattern : Name { PName $1 [] }
@@ -319,7 +328,7 @@ Pattern : Name { PName $1 [] }
         | identifier Pattern { PSum (to_string $1) $2 }
         | identifierSpace Pattern { PSum (to_string $1) $2 }
         | openParen PatternIn vbar PatternIn closeParen { Proof $1 $2 $4 }
-        | openParen PatternIn closeParen { TuplePattern $2 }
+        | parens(PatternIn) { TuplePattern $1 }
         | Literal { PLiteral $1 }
         | Pattern when Expression { Guarded $2 $3 $1 }
         | at Pattern { AtPattern $1 $2 }
@@ -329,21 +338,24 @@ Pattern : Name { PName $1 [] }
         | minus {% left $ Expected $1 "Pattern" "-" }
         | plus {% left $ Expected $1 "Pattern" "+" }
 
--- | Parse a case expression
-Case : vbar Pattern CaseArrow Expression { [($2, $3, $4)] }
-     | Pattern CaseArrow Expression { [($1, $2, $3)] }
-     | Case vbar Pattern CaseArrow Expression { ($3, $4, $5) : $1 }
+-- | Common parser for @case@ expressions, @ifcase@ expressions, and @case@
+-- static expressions.
+case_pattern(pat,expr)
+    : vbar pat CaseArrow expr { [($2, $3, $4)] }
+    | pat CaseArrow expr { [($1, $2, $3)] }
+    | case_pattern(pat, expr) vbar pat CaseArrow expr { ($3, $4, $5) : $1 }
 
-IfCase : vbar Expression CaseArrow Expression { [($2, $3, $4)] }
-       | Expression CaseArrow Expression { [($1, $2, $3)] }
-       | IfCase vbar Expression CaseArrow Expression { ($3, $4, $5) : $1 }
+Case : case_pattern(Pattern, Expression) { $1 }
+
+StaticCase : case_pattern(Pattern, StaticExpression) { $1 }
+
+IfCase : case_pattern(Expression, Expression) { $1 }
 
 ExpressionPrf : ExpressionIn { (Nothing, $1) }
               | ExpressionIn vbar ExpressionIn { (Just $1, $3) } -- FIXME only passes one proof?
 
 -- | A list of comma-separated expressions
-ExpressionIn : Expression { [$1] }
-             | ExpressionIn comma Expression { $3 : $1 }
+ExpressionIn : comma_sep(Expression) { $1 }
 
 Tuple : PreExpression comma PreExpression { [$3, $1] }
       | Tuple comma PreExpression { $3 : $1 }
@@ -351,6 +363,7 @@ Tuple : PreExpression comma PreExpression { [$3, $1] }
 -- | Parse an arrow in a case statement
 CaseArrow : plainArrow { Plain $1 }
           | spear { Spear $1 }
+          | proofArrow { ProofArrow $1 }
           | minus {% left $ Expected $1 "Arrow" "-" }
           | eq {% left $ Expected $1 "Arrow" "=" }
           | minus {% left $ Expected $1 "Arrow" "-" }
@@ -397,8 +410,7 @@ Call : Name doubleParens { Call $1 [] [] Nothing [] }
      | Name openParen ExpressionPrf end {% left $ Expected $4 ")" "end"}
      | Name openParen ExpressionPrf else {% left $ Expected $4 ")" "else"}
 
-StaticArgs : StaticExpression { [$1] }
-           | StaticArgs comma StaticExpression { $3 : $1 }
+StaticArgs : comma_sep(StaticExpression) { $1 }
 
 StaticDecls : StaticDeclaration { [$1] }
             | StaticDecls StaticDeclaration { $2 : $1 }
@@ -417,9 +429,10 @@ StaticExpression : Name { StaticVal $1 }
                  | StaticExpression semicolon StaticExpression { SPrecede $1 $3 }
                  | UnOp StaticExpression { SUnary $1 $2 }
                  | identifierSpace doubleParens { SCall (Unqualified $ to_string $1) [] }
-                 | let StaticDecls in end { SLet $1 $2 Nothing }
+                 | let StaticDecls comment_after(in) end { SLet $1 $2 Nothing }
                  | let StaticDecls in StaticExpression end { SLet $1 $2 (Just $4) }
                  | openParen StaticExpression closeParen { $2 }
+                 | case StaticExpression of StaticCase { SCase $1 $2 $4 }
 
 -- | Parse an expression that can be called without parentheses
 PreExpression : identifier lsqbracket PreExpression rsqbracket { Index $2 (Unqualified $ to_string $1) $3 }
@@ -436,7 +449,7 @@ PreExpression : identifier lsqbracket PreExpression rsqbracket { Index $2 (Unqua
               | PreExpression dot identifierSpace { Access $2 $1 (Unqualified $ to_string $3) }
               | if Expression then Expression { If $2 $4 Nothing}
               | if Expression then Expression else Expression { If $2 $4 (Just $6) }
-              | let ATS in end { Let $1 $2 Nothing }
+              | let ATS comment_after(in) end { Let $1 $2 Nothing }
               | let ATS in Expression end { Let $1 $2 (Just $4) }
               | let ATS in Expression vbar {% left $ Expected $5 "end" "|" }
               | lambda Pattern LambdaArrow Expression { Lambda $1 $3 $2 $4 }
@@ -492,8 +505,7 @@ Sort : t0pPlain { T0p None }
      | IdentifierOr { NamedSort $1 }
      | IdentifierOr plus { NamedSort ($1 <> "+") }
 
-QuantifierArgs : IdentifierOr { [$1] }
-               | QuantifierArgs comma IdentifierOr { $3 : $1 }
+QuantifierArgs : comma_sep(IdentifierOr) { $1 }
                | { [] }
 
 Existential : lsqbracket QuantifierArgs colon Sort vbar StaticExpression rsqbracket { Existential $2 False (Just $4) (Just $6) }
@@ -525,8 +537,12 @@ MaybeImplicit : Implicits { $1 }
 ImplExpression : StaticExpression { Left $1 }
                | Expression { Right $1 }
 
+comment_after(p) : p { $1 }
+                 | p Comment { $1 }
+                 | p lineComment { $1 }
+
 -- | Parse the details of an implementation
-Implementation : Universals FunName MaybeImplicit Universals FunArgs eq Expression { Implement $6 $1 $3 $4 $2 $5 (Right $7) }
+Implementation : comment_after(Universals) FunName MaybeImplicit Universals FunArgs eq Expression { Implement $6 $1 $3 $4 $2 $5 (Right $7) }
 
 StaticImplementation : Universals FunName MaybeImplicit Universals FunArgs eq StaticExpression { Implement $6 $1 $3 $4 $2 $5 (Left $7) }
 
@@ -559,12 +575,12 @@ RecordVal : IdentifierOr eq Expression { [($1, $3)] }
 Records : IdentifierOr eq Type { [($1, $3)] }
         | Records comma IdentifierOr eq Type { ($3, $5) : $1 }
 
-IdentifiersIn : sep_by(IdentifierOr, comma) { $1 }
+IdentifiersIn : comma_sep(IdentifierOr) { $1 }
 
 OfType : { Nothing }
        | of Type { Just $2 }
 
-StaticExpressionsIn : sep_by(StaticExpression, comma) { $1 }
+StaticExpressionsIn : comma_sep(StaticExpression) { $1 }
 
 -- | Parse a constructor for a sum type
 SumLeaf : vbar Universals identifier { Leaf $2 (to_string $3) [] Nothing }
@@ -913,6 +929,7 @@ data ATSError = Expected AlexPosn String String
 unmatched :: AlexPosn -> String -> Doc
 unmatched l chr = "unmatched" <+> squotes (text chr) <+> "at" <+> pretty l <> linebreak 
 
+-- ors = bear
 bear :: Bool -> [Doc] -> Doc
 bear _ [] = mempty
 bear False [x, y] = x <+> "or" <+> y

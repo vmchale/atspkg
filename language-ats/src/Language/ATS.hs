@@ -89,6 +89,9 @@ parseM = parseWithCtx defaultFixityState stripComments
 parse :: String -> Either ATSError (ATS AlexPosn)
 parse = parseWithCtx defaultFixityState id
 
+lexErr :: Either String a -> Either ATSError a
+lexErr = over _Left LexError
+
 stripComments :: [Token] -> [Token]
 stripComments = filter nc
     where nc CommentLex{}      = False
@@ -99,9 +102,9 @@ stripComments = filter nc
 
 -- | Parse with some fixity declarations already in scope.
 parseWithCtx :: FixityState AlexPosn -> ([Token] -> [Token]) -> String -> Either ATSError (ATS AlexPosn)
-parseWithCtx st p = stateParse <=< lexErr
+parseWithCtx st p = stateParse <=< lex'
     where withSt = flip runStateT st
-          lexErr = over _Left LexError . fmap p . lexATS
+          lex' = lexErr . fmap p . lexATS
           stateParse = fmap rewriteATS' . withSt . parseATS
 
 -- | Extract a list of files that some code depends on.

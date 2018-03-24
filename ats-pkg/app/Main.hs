@@ -53,8 +53,8 @@ data Command = Install { _archTarget :: Maybe String }
              | Check { _filePath :: String, _details :: Bool }
              | List
 
-command' :: Parser Command
-command' = hsubparser
+userCmd :: Parser Command
+userCmd = hsubparser
     (command "install" (info install (progDesc "Install all binaries to $HOME/.local/bin"))
     <> command "clean" (info (pure Clean) (progDesc "Clean current project directory"))
     <> command "remote" (info fetch (progDesc "Fetch and install a binary package"))
@@ -66,6 +66,14 @@ command' = hsubparser
     <> command "run" (info run' (progDesc "Run generated binaries"))
     <> command "check" (info check' (progDesc "Audit a package set to ensure it is well-typed."))
     <> command "list" (info (pure List) (progDesc "List available packages"))
+    )
+
+command' :: Parser Command
+command' = userCmd <|> internalCmd
+
+internalCmd :: Parser Command
+internalCmd = subparser
+    (internal
     <> command "pack" (info pack (progDesc "Make a tarball for distributing the compiler"))
     )
 

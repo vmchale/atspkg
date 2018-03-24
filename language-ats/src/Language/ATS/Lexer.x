@@ -133,8 +133,10 @@ tokens :-
     <three> [^\*\/]+             { tok (\p s -> alex $ CommentContents p s) }
     <three> @comment_in+ / [^\/] { tok (\p s -> alex $ CommentContents p s) }
     <three> @comment_general     { tok (\p s -> alex $ CommentContents p s) }
-    <one_c> @c_comment_end   { tok (\p _ -> alex $ CommentEnd p) `andBegin` 0 }
-    <one_c> @c_comment_start { tok (\p _ -> alexError ("at " <> show (pretty p) <> ": Nested C comments of depth > 1 are not supported.")) }
+
+    -- C-style nested comments
+    <one_c> @c_comment_end       { tok (\p _ -> alex $ CommentEnd p) `andBegin` 0 }
+    <one_c> @c_comment_start     { tok (\p _ -> alexError ("at " <> show (pretty p) <> ": Nested C comments of depth > 1 are not supported.")) }
     <one_c> [^\*\/]+             { tok (\p s -> alex $ CommentContents p s) }
     <one_c> @comment_in+ / [^\/] { tok (\p s -> alex $ CommentContents p s) }
     <one_c> @comment_general     { tok (\p s -> alex $ CommentContents p s) }

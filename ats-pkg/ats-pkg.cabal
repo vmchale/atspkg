@@ -25,7 +25,7 @@ source-repository head
 
 custom-setup
     setup-depends: base -any,
-                   Cabal >=2.0,
+                   Cabal >=2.2,
                    cli-setup >=0.2.0.1
 
 flag development

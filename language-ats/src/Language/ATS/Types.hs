@@ -173,7 +173,8 @@ data Type a = Tuple a [Type a]
 -- | A type for @=>@, @=\<cloref1>@, etc.
 data LambdaType a = Plain a
                   | Full a String
-                  | Spear a
+                  | Spear a -- @=>>@
+                  | ProofArrow a -- @=/=>@
                   deriving (Show, Eq, Generic, NFData)
 
 data Name a = Unqualified String
@@ -267,6 +268,7 @@ data StaticExpression a = StaticVal (Name a)
                         | SCall (Name a) [StaticExpression a]
                         | SUnary (UnOp a) (StaticExpression a)
                         | SLet a [Declaration a] (Maybe (StaticExpression a))
+                        | SCase Addendum (StaticExpression a) [(Pattern a, LambdaType a, StaticExpression a)]
                         deriving (Show, Eq, Generic, NFData)
 
 -- | A (possibly effectful) expression.

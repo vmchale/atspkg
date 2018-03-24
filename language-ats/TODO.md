@@ -12,5 +12,6 @@
 - [ ] Error messages
   - [ ] Add test suite for messages
 # Performance
+- [ ] `ByteString` lexer?
 - [ ] Get rid of `identifierSpace`
 - [ ] Literals, etc. should only be lexed when in the right state

@@ -50,9 +50,10 @@ instance Pretty (Name a) where
     pretty (FieldName _ n n') = text n <> "." <> text n'
 
 instance Pretty (LambdaType a) where
-    pretty Plain{}    = "=>"
-    pretty Spear{}    = "=>>"
-    pretty (Full _ v) = "=<" <> text v <> ">"
+    pretty Plain{}      = "=>"
+    pretty Spear{}      = "=>>"
+    pretty ProofArrow{} = "=/=>"
+    pretty (Full _ v)   = "=<" <> text v <> ">"
 
 instance Pretty (BinOp a) where
     pretty Mult               = "*"
@@ -182,9 +183,11 @@ instance Eq a => Pretty (Expression a) where
         prettyIfCase []              = mempty
         prettyIfCase [(s, l, t)]     = "|" <+> s <+> pretty l <+> t
         prettyIfCase ((s, l, t): xs) = prettyIfCase xs $$ "|" <+> s <+> pretty l <+> t
-        prettyCases []              = mempty
-        prettyCases [(s, l, t)]     = "|" <+> pretty s <+> pretty l <+> t
-        prettyCases ((s, l, t): xs) = prettyCases xs $$ "|" <+> pretty s <+> pretty l <+> t -- FIXME can leave space with e.g. => \n begin ...
+
+prettyCases :: (Pretty a, Pretty b) => [(a, b, Doc)] -> Doc
+prettyCases []              = mempty
+prettyCases [(s, l, t)]     = "|" <+> pretty s <+> pretty l <+> t
+prettyCases ((s, l, t): xs) = prettyCases xs $$ "|" <+> pretty s <+> pretty l <+> t -- FIXME can leave space with e.g. => \n begin ...
 
 noParens :: Doc -> Bool
 noParens = all (`notElem` ("()" :: String)) . show
@@ -247,6 +250,7 @@ instance Eq a => Pretty (StaticExpression a) where
         a (SLetF _ e e') = flatAlt
             ("let" <$> indent 2 (pretty e) <$> endLet e')
             ("let" <+> pretty e <$> endLet e')
+        a (SCaseF ad e sls) = "case" <> pretty ad <+> e <+> "of" <$> indent 2 (prettyCases sls)
 
 instance Eq a => Pretty (Sort a) where
     pretty (T0p ad)           = "t@ype" <> pretty ad
@@ -351,8 +355,6 @@ glue Comment{} _                   = True
 glue (Func _ Fnx{}) (Func _ And{}) = True
 glue Assume{} Assume{}             = True
 glue _ _                           = False
-
-{-# INLINE glue #-}
 
 concatSame :: Eq a => [Declaration a] -> Doc
 concatSame []  = mempty
