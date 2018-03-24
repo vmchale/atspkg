@@ -44,7 +44,7 @@ configure prefixPath configurePath procEnv lib' p =
 make :: String -> FilePath -> IO ()
 make lib' p =
     putStrLn ("building " ++ lib' ++ "...") >>
-    silentCreateProcess ((proc "make" []) { cwd = Just p })
+    silentCreateProcess ((proc "make" ["-j4"]) { cwd = Just p })
 
 install :: String -> FilePath -> IO ()
 install lib' p =

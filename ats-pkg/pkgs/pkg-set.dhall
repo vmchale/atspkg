@@ -17,6 +17,24 @@ let unistring =
   makeGnuPkg { version = [0,9,9], name = "unistring" }
 in
 
+let bzip =
+  prelude.dep //
+    { libName = "bzip"
+    , dir = "bzip2-1.0.6"
+    , url = "http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz"
+    , libVersion = [1,0,6]
+    }
+in
+
+let xzUtils =
+  prelude.dep //
+    { libName = "xz-utils"
+    , dir = "xz-utils-5.2.3"
+    , url = "https://tukaani.org/xz/xz-5.2.3.tar.gz"
+    , libVersion = [5,2,3]
+    }
+in
+
 let fastArithmetic =
   λ(x : List Integer) →
     prelude.makeHsPkg { x = x, name = "fast-arithmetic" }
@@ -87,6 +105,8 @@ let pkgset =
   , gc
   , fastArithmetic [0,3,3,1]
   , unistring
+  , xzUtils
+  , bzip
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,6]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,1]
   , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall [0,1,5]
