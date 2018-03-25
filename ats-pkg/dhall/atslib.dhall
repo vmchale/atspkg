@@ -37,10 +37,10 @@ in
 {- ATSPackage parts -}
 let prelude = https://raw.githubusercontent.com/vmchale/atspkg/master/ats-pkg/dhall/atspkg-prelude.dhall
 
-in prelude.default //
+in prelude.default ⫽
   { libraries =
     [
-      prelude.staticLib //
+      prelude.staticLib ⫽
       { libTarget = "target/lib/libatslib.a"
       , name = "atslib"
       , src =
@@ -51,7 +51,7 @@ in prelude.default //
           ]
       , includes = ([] : List Text)
       }
-    , prelude.staticLib //
+    , prelude.staticLib ⫽
       { libTarget = "target/lib/libatsopt.a"
       , name = "atsopt"
       , src = mapUtil [ "main", "print", "util" ]

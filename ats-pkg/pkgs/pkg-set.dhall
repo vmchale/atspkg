@@ -5,7 +5,7 @@ in
 {- Packages -}
 let makeGnuPkg = 
   λ(rec : { version : List Integer, name: Text}) →
-    prelude.dep //
+    prelude.dep ⫽
       { libName = rec.name
       , dir = "${rec.name}-${prelude.showVersion rec.version}"
       , url = "https://mirrors.ocf.berkeley.edu/gnu/lib${rec.name}/lib${rec.name}-${prelude.showVersion rec.version}.tar.xz"
@@ -18,7 +18,7 @@ let unistring =
 in
 
 let xzUtils =
-  prelude.dep //
+  prelude.dep ⫽
     { libName = "xz-utils"
     , dir = "xz-utils-5.2.3"
     , url = "https://tukaani.org/xz/xz-5.2.3.tar.gz"
@@ -29,7 +29,7 @@ in
 let fastArithmetic =
   λ(x : List Integer) →
     prelude.makeHsPkg { x = x, name = "fast-arithmetic" }
-      // { libDeps = prelude.mapPlainDeps [ "atscntrb-hx-intinf" ], description = [ "Number theory & combinatorics library written in ATS" ] : Optional Text }
+      ⫽ { libDeps = prelude.mapPlainDeps [ "atscntrb-hx-intinf" ], description = [ "Number theory & combinatorics library written in ATS" ] : Optional Text }
 in
 
 let gmp =
@@ -38,7 +38,7 @@ let gmp =
 in
 
 let atomicOps =
-  prelude.dep //
+  prelude.dep ⫽
     { libName = "atomic-ops"
     , dir = "atomic-ops-7.6.2"
     , url = "https://github.com/ivmai/libatomic_ops/releases/download/v7.6.2/libatomic_ops-7.6.2.tar.gz"
@@ -47,7 +47,7 @@ let atomicOps =
 in
 
 let gc =
-  prelude.dep //
+  prelude.dep ⫽
     { libName = "gc"
     , dir = "gc-7.6.4"
     , url = "https://github.com/ivmai/bdwgc/releases/download/v7.6.4/gc-7.6.4.tar.gz"
@@ -59,13 +59,13 @@ in
 let divideConquer =
   λ(x : List Integer) →
     prelude.makeNpmPkg { x = x, name = "atscntrb-hx-divideconquer", unpackDir = "atscntrb-bucs320-divideconquer" }
-      // { libDeps = prelude.mapPlainDeps [ "atscntrb-hx-fworkshop", "atscntrb-hx-threadkit" ] }
+      ⫽ { libDeps = prelude.mapPlainDeps [ "atscntrb-hx-fworkshop", "atscntrb-hx-threadkit" ] }
 in
 
 let divideConquerPar =
   λ(x : List Integer) →
     prelude.makeNpmPkg { x = x, name = "atscntrb-hx-divideconquerpar", unpackDir = "atscntrb-bucs320-divideconquerpar" }
-      // { libDeps = prelude.mapPlainDeps [ "atscntrb-hx-divideconquer" ] }
+      ⫽ { libDeps = prelude.mapPlainDeps [ "atscntrb-hx-divideconquer" ] }
 in
 
 let fworkshop =
@@ -76,13 +76,13 @@ in
 let intinf =
   λ(x : List Integer) →
     prelude.makeNpmPkg { x = x, name = "atscntrb-hx-intinf", unpackDir = "atscntrb-hx-intinf" }
-      // { libDeps = prelude.mapPlainDeps [ "atscntrb-libgmp" ] }
+      ⫽ { libDeps = prelude.mapPlainDeps [ "atscntrb-libgmp" ] }
 in
 
 let threadkit =
   λ(x : List Integer) →
     prelude.makeNpmPkg { x = x, name = "atscntrb-hx-threadkit", unpackDir = "atscntrb-hx-threadkit" }
-      // { libDeps = prelude.mapPlainDeps [ "atscntrb-libgmp" ] }
+      ⫽ { libDeps = prelude.mapPlainDeps [ "atscntrb-libgmp" ] }
 in
 
 let pkgset =
