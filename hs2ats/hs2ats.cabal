@@ -1,94 +1,111 @@
-name:                hs2ats
-version:             0.2.1.7
-synopsis:            Create ATS types from Haskell types
-description:         This package enables scanning Haskell source files for data types and then generating [ATS](http://www.ats-lang.org/) types from them.
-homepage:            https://github.com/vmchale/hs2ats#readme
-license:             BSD3
-license-file:        LICENSE
-author:              Vanessa McHale
-maintainer:          vamchale@gmail.com
-copyright:           Copyright: (c) 2018 Vanessa McHale
-category:            Language, Haskell, ATS
-build-type:          Simple
-cabal-version:       1.18
-
-Flag development {
-  Description: Enable `-Werror`
-  manual: True
-  default: False
-}
-
-Flag no-executable {
-  Description: Don't generate an executable
-  default: True
-}
-
-library
-  hs-source-dirs:      src
-  exposed-modules:     Language.ATS.Generate
-                     , Language.ATS.Generate.Error
-  build-depends:       base >= 4.7 && < 5
-                     , haskell-src-exts
-                     , language-ats >= 1.0.0.0
-                     , casing
-                     , lens
-                     , optparse-generic
-                     , ansi-wl-pprint
-                     , composition-prelude
-                     , deepseq
-                     , cpphs
-  default-language:    Haskell2010
-  if flag(development)
-    ghc-options:       -Werror
-  if impl(ghc >= 8.0)
-    ghc-options:       -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat
-  ghc-options:         -Wall
-
-executable hs2ats
-  hs-source-dirs:      app
-  if flag(no-executable)
-    buildable:         False
-  main-is:             Main.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , hs2ats
-  default-language:    Haskell2010
-  if flag(development)
-    ghc-options:       -Werror
-  if impl(ghc >= 8.0)
-    ghc-options:       -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat
-  ghc-options:         -Wall
-
-test-suite hs2ats-test
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      test
-  main-is:             Spec.hs
-  build-depends:       base
-                     , hs2ats
-                     , hspec
-                     , hspec-dirstream
-                     , system-filepath
-  if flag(development)
-    ghc-options:       -Werror
-  if impl(ghc >= 8.0)
-    ghc-options:       -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
-  default-language:    Haskell2010
-
-benchmark hs2ats-bench
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      bench
-  main-is:             Bench.hs
-  build-depends:       base
-                     , hs2ats
-                     , criterion
-  if flag(development)
-    ghc-options:       -Werror
-  if impl(ghc >= 8.0)
-    ghc-options:       -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat
-  ghc-options:         -Wall
-  default-language:    Haskell2010
+cabal-version: 1.18
+name: hs2ats
+version: 0.2.1.8
+license: BSD3
+license-file: LICENSE
+copyright: Copyright: (c) 2018 Vanessa McHale
+maintainer: vamchale@gmail.com
+author: Vanessa McHale
+homepage: https://github.com/vmchale/hs2ats#readme
+synopsis: Create ATS types from Haskell types
+description:
+    This package enables scanning Haskell source files for data types and then generating [ATS](http://www.ats-lang.org/) types from them.
+category: Language, Haskell, ATS
+build-type: Simple
 
 source-repository head
-  type:     git
-  location: https://github.com/vmchale/hs2ats
+    type: git
+    location: https://github.com/vmchale/hs2ats
+
+flag development
+    description:
+        Enable `-Werror`
+    default: False
+    manual: True
+
+flag no-executable
+    description:
+        Don't generate an executable
+
+library
+    exposed-modules:
+        Language.ATS.Generate
+        Language.ATS.Generate.Error
+    hs-source-dirs: src
+    default-language: Haskell2010
+    ghc-options: -Wall
+    build-depends:
+        base >=4.7 && <5,
+        haskell-src-exts -any,
+        language-ats >=1.0.0.0,
+        casing -any,
+        microlens -any,
+        optparse-generic -any,
+        ansi-wl-pprint -any,
+        composition-prelude -any,
+        deepseq -any,
+        cpphs -any
+    
+    if flag(development)
+        ghc-options: -Werror
+    
+    if impl(ghc >=8.0)
+        ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
+                     -Wcompat
+
+executable hs2ats
+    main-is: Main.hs
+    hs-source-dirs: app
+    default-language: Haskell2010
+    ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall
+    build-depends:
+        base -any,
+        hs2ats -any
+    
+    if flag(no-executable)
+        buildable: False
+    
+    if flag(development)
+        ghc-options: -Werror
+    
+    if impl(ghc >=8.0)
+        ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
+                     -Wcompat
+
+test-suite hs2ats-test
+    type: exitcode-stdio-1.0
+    main-is: Spec.hs
+    hs-source-dirs: test
+    default-language: Haskell2010
+    ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall
+    build-depends:
+        base -any,
+        hs2ats -any,
+        hspec -any,
+        hspec-dirstream -any,
+        system-filepath -any
+    
+    if flag(development)
+        ghc-options: -Werror
+    
+    if impl(ghc >=8.0)
+        ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
+                     -Wcompat
+
+benchmark hs2ats-bench
+    type: exitcode-stdio-1.0
+    main-is: Bench.hs
+    hs-source-dirs: bench
+    default-language: Haskell2010
+    ghc-options: -Wall
+    build-depends:
+        base -any,
+        hs2ats -any,
+        criterion -any
+    
+    if flag(development)
+        ghc-options: -Werror
+    
+    if impl(ghc >=8.0)
+        ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
+                     -Wcompat

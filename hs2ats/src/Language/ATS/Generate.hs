@@ -13,7 +13,6 @@ module Language.ATS.Generate
     ) where
 
 import           Control.Arrow
-import           Control.Lens                 (over, _head)
 import           Data.Bool                    (bool)
 import           Data.Char                    (toUpper)
 import           Data.Either                  (lefts, rights)
@@ -23,6 +22,7 @@ import           Language.ATS.Generate.Error
 import           Language.Haskell.Exts
 import           Language.Haskell.Exts.Syntax as HS
 import           Language.Preprocessor.Cpphs  (defaultCpphsOptions, runCpphs)
+import           Lens.Micro                   (over, _head)
 import           Options.Generic
 import           Text.Casing                  (quietSnake)
 

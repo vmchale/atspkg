@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: shake-ext
-version: 2.7.0.3
+version: 2.7.0.4
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -41,11 +41,10 @@ library
         Development.Shake.TH
     default-language: Haskell2010
     ghc-options: -Wall
-    build-tools: cpphs
     build-depends:
         base >=4.10 && <5,
         shake -any,
-        composition-prelude,
+        composition-prelude -any,
         directory -any,
         Cabal >=2.0,
         template-haskell -any

@@ -4,7 +4,6 @@ module Main ( main
             ) where
 
 import           Control.Composition
-import           Control.Lens               hiding (List, argument)
 import           Data.Bool                  (bool)
 import           Data.Maybe                 (fromMaybe)
 import           Data.Semigroup             (Semigroup (..))
@@ -13,6 +12,7 @@ import           Data.Version               hiding (Version (..))
 import           Development.Shake.ATS
 import           Development.Shake.FilePath
 import           Language.ATS.Package
+import           Lens.Micro
 import           Options.Applicative
 import           System.Directory
 import           System.IO.Temp             (withSystemTempDirectory)

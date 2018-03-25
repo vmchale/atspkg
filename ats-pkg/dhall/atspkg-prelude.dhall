@@ -35,7 +35,7 @@ let patsHome =
 in
 
 let showVersion =
-  λ(x : List Integer) → concatMapSep "." Integer (Integer/show) x
+  λ(x : List Integer) → concatMapSep "." Integer Integer/show x
 in
 
 let none = [] : Optional (List Integer)
@@ -70,11 +70,11 @@ let common =
 in
 
 let bin =
-  common // { gcBin = False }
+  common ⫽ { gcBin = False }
 in
 
 let lib =
-  common //
+  common ⫽
     { links = ([] : List { _1 : Text, _2 : Text })
     , includes = ([] : List Text)
     , static = False
@@ -82,7 +82,7 @@ let lib =
 in
 
 let staticLib =
-  lib // { static = True }
+  lib ⫽ { static = True }
 in
 
 let default
@@ -113,30 +113,30 @@ in
 {- Package functions -}
 let makePkg =
   λ(rec : { x : List Integer, name : Text, githubUsername : Text}) →
-    dep //
+    dep ⫽
       { libName = rec.name
       , dir = "${patsHome}"
-      , url = "https://github.com/${rec.githubUsername}/${rec.name}/archive/${showVersion rec.x}.tar.gz"
+      , url = "https:⫽github.com/${rec.githubUsername}/${rec.name}/archive/${showVersion rec.x}.tar.gz"
       , libVersion = rec.x
       }
 in
 
 let makeNpmPkg =
   λ(rec : { x : List Integer, name : Text, unpackDir : Text }) →
-    dep //
+    dep ⫽
       { libName = rec.name
       , dir = "${patsHome}/${rec.unpackDir}"
-      , url = "https://registry.npmjs.org/${rec.unpackDir}/-/${rec.unpackDir}-${showVersion rec.x}.tgz"
+      , url = "https:⫽registry.npmjs.org/${rec.unpackDir}/-/${rec.unpackDir}-${showVersion rec.x}.tgz"
       , libVersion = rec.x
       }
 in
 
 let makeHsPkg =
   λ(rec : { x : List Integer, name : Text }) →
-    dep //
+    dep ⫽
       { libName = rec.name
       , dir = "${patsHome}"
-      , url = "https://hackage.haskell.org/package/${rec.name}-${showVersion rec.x}/${rec.name}-${showVersion rec.x}.tar.gz"
+      , url = "https:⫽hackage.haskell.org/package/${rec.name}-${showVersion rec.x}/${rec.name}-${showVersion rec.x}.tar.gz"
       , libVersion = rec.x
       }
 in
@@ -144,7 +144,7 @@ in
 let makePkgDescr =
   λ(x : { x : List Integer, name : Text, githubUsername : Text, description : Text }) →
     makePkg { x = x.x, name = x.name, githubUsername = x.githubUsername }
-      // { description = [ x.description ] : Optional Text }
+      ⫽ { description = [ x.description ] : Optional Text }
 in
 
 {- We collect everything in a single record for convenience -}

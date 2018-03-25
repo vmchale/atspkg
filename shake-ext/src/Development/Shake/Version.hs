@@ -6,6 +6,12 @@ module Development.Shake.Version ( ghcVersion
                                  , pandocVersion
                                  ) where
 
+import           Development.Shake
 import           Development.Shake.TH
 
-$(mkVersions ["pandoc", "ghc", "cabal"])
+ghcVersion :: Action String
+ghcVersion = do
+    ~(Stdout o) <- command mempty "ghc" ["--numeric-version"]
+    pure o
+
+$(mkVersions ["pandoc", "cabal"])

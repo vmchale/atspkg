@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP             #-}
 {-# LANGUAGE PatternSynonyms #-}
 
 -- | This module provides functions for easy C builds of binaries, static
@@ -27,9 +26,7 @@ module Development.Shake.C ( -- * Types
 
 import           Control.Monad
 import           Data.List                  (isPrefixOf, isSuffixOf)
-#if __GLASGOW_HASKELL__ < 804
 import           Data.Semigroup
-#endif
 import           Development.Shake
 import           Development.Shake.FilePath
 import           System.Directory           (removeFile)

@@ -19,6 +19,7 @@
                               , get_staload
                               ) where
 
+import Data.Char (chr)
 import Data.Bool (bool)
 import Control.DeepSeq (NFData)
 import GHC.Generics (Generic)
@@ -275,6 +276,34 @@ tokens :-
     <0> @identifier              { tok (\p s -> alex $ Identifier p s) }
 
 {
+
+nested_comment :: AlexInput -> Int -> Alex Token
+nested_comment _ _ = do
+
+    input <- alexGetInput
+    go 1 input
+
+    where go :: Int -> AlexInput -> Alex Token
+          go 0 input = alexSetInput input >> alexMonadScan
+          go n input = do
+            case alexGetByte input of
+                Nothing -> err input
+                Just (c, input) -> do
+                    case chr (fromIntegral c) of
+                        '*' -> do
+                            case alexGetByte input of
+                                Nothing -> err input
+                                Just (41,input) -> go (n-1) input
+                                Just (_,input) -> go n input
+                        '(' -> do
+                            case alexGetByte input of
+                                Nothing -> err input
+                                Just (c,input) -> go (bool id (+1) (c==42) $ n) input
+                        _ -> go n input
+
+          err (pos,_,_,_) =
+            let (AlexPn _ line col) = pos
+            in alexError ("Error in nested comment at line " ++ show line ++ ", column " ++ show col)
 
 alex :: a -> Alex a
 alex = pure
@@ -572,7 +601,7 @@ alexEOF = pure End
 
 -- | This function turns a string into a stream of tokens for the parser.
 lexATS :: String -> Either String [Token]
-lexATS str = runAlex str $ loop
+lexATS str = runAlex str loop
 
 loop :: Alex [Token]
 loop = do

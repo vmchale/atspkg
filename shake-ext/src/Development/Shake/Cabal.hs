@@ -1,5 +1,3 @@
-{-# LANGUAGE CPP #-}
-
 module Development.Shake.Cabal ( getCabalDeps
                                , getCabalDepsV
                                , getCabalDepsA
@@ -18,9 +16,7 @@ import           Control.Composition
 import           Control.Monad
 import           Data.Foldable                         (toList)
 import           Data.Maybe                            (catMaybes)
-#if __GLASGOW_HASKELL__ < 804
 import           Data.Semigroup
-#endif
 import           Development.Shake                     hiding (doesFileExist)
 import qualified Development.Shake                     as Shake
 import           Distribution.ModuleName

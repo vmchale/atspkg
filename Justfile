@@ -36,6 +36,7 @@ poly:
 
 ci: install
     @cabal new-test all
+    shellcheck bash/install.sh
     yamllint .stylish-haskell.yaml
     yamllint .hlint.yaml
     yamllint .yamllint
@@ -45,7 +46,6 @@ ci: install
     stack build --test --no-run-tests --bench --no-run-benchmarks && weeder .
     atspkg nuke
     atspkg remote https://github.com/vmchale/polyglot/archive/master.zip
-# shellcheck bash/install.sh
 
 pkg-install: build
     @cp -f $(fd 'atspkg$' -IH dist-newstyle | tail -n1) ~/.local/bin

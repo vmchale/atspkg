@@ -1,5 +1,3 @@
-{-# LANGUAGE CPP #-}
-
 module Quaalude ( hex
                 , bool
                 , intersperse
@@ -114,12 +112,8 @@ module Quaalude ( hex
                 , (%~)
                 ) where
 
-#if __GLASGOW_HASKELL__ < 804
-import           Data.Semigroup
-#endif
 import           Control.Arrow                hiding ((<+>))
 import           Control.Composition
-import           Control.Lens                 hiding (both)
 import           Control.Monad
 import           Control.Monad.IO.Class
 import           Data.Binary
@@ -128,11 +122,15 @@ import           Data.ByteString.Lazy         (ByteString)
 import           Data.Foldable
 import           Data.List
 import           Data.Maybe                   (fromMaybe)
+import           Data.Semigroup
 import           Data.Text.Lazy               (pack, unpack)
 import           Data.Version                 (showVersion)
 import           Development.Shake            hiding (getEnv)
 import           Development.Shake.FilePath
 import           Dhall                        hiding (bool)
+import           Lens.Micro                   hiding (both)
+import           Lens.Micro.Extras
+import           Lens.Micro.TH
 import           Network.HTTP.Client
 import           Network.HTTP.Client.TLS      (tlsManagerSettings)
 import           Numeric                      (showHex)

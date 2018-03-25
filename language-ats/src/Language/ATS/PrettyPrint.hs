@@ -15,9 +15,9 @@ module Language.ATS.PrettyPrint ( printATS
                                 ) where
 
 import           Control.Composition          hiding ((&))
-import           Control.Lens                 hiding (op, pre)
 import           Data.Functor.Foldable        (cata)
 import           Language.ATS.Types
+import           Lens.Micro
 import           Prelude                      hiding ((<$>))
 import           Text.PrettyPrint.ANSI.Leijen hiding (bool)
 
