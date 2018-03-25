@@ -46,7 +46,7 @@ library
         shake -any,
         composition-prelude -any,
         directory -any,
-        Cabal >=2.0,
+        Cabal >=2.2,
         template-haskell -any
     
     if flag(development)

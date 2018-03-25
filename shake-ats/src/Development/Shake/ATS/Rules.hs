@@ -69,7 +69,7 @@ cabalExport (ForeignCabal cbp' cf' obf') = do
         let subdir = takeDirectory cbp ++ "/"
             correctDir = (== "build")
             endsBuild = correctDir . last . splitPath
-            pkgDir = subdir ++ "dist-newstyle/build/" ++ platform ++ "/ghc-" ++ ghcV ++ "/" ++ libName ++ "-" ++ showVersion v ++ "/"
+            pkgDir = subdir ++ "dist-newstyle/build/" ++ platform ++ "/ghc-" ++ ghcV ++ "/" ++ libName ++ "-" ++ prettyShow v ++ "/"
 
         dir <- filter endsBuild <$> liftIO (getSubdirs pkgDir)
         let obj = head dir ++ "/" ++ takeFileName obf

@@ -43,7 +43,7 @@ maybeCleanBuild :: LocalBuildInfo -> IO ()
 maybeCleanBuild li =
     let cf = configConfigurationsFlags (configFlags li) in
 
-    unless ((mkFlagName "development", True) `elem` cf) $
+    unless ((mkFlagName "development", True) `elem` unFlagAssignment cf) $
         putStrLn "Cleaning up ATS dependencies..." >>
         cleanATSCabal
 
@@ -83,7 +83,7 @@ fetchDependencies cfs =
     bool act nothing cond
     where act = (>> stopGlobalPool) . parallel_ . fmap fetchDependency
           nothing = pure mempty
-          cond = (mkFlagName "with-atsdeps", False) `elem` configConfigurationsFlags cfs
+          cond = (mkFlagName "with-atsdeps", False) `elem` unFlagAssignment (configConfigurationsFlags cfs)
 
 fetchDependency :: ATSDependency -> IO ()
 fetchDependency (ATSDependency libNameATS dirName url) = do

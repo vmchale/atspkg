@@ -42,6 +42,7 @@ module Quaalude ( hex
                 , thread
                 -- * Dhall reëxports
                 , Interpret
+                , Inject
                 , Generic
                 , Binary
                 , input

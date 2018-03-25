@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: ats-pkg
-version: 2.7.1.2
+version: 2.8.0.0
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -71,7 +71,7 @@ library
         file-embed -any,
         shake -any,
         bzlib -any,
-        Cabal >=2.0.0.0,
+        Cabal >=2.2.0.0,
         lzma -any,
         tar -any,
         zlib -any,

@@ -116,7 +116,7 @@ let makePkg =
     dep ⫽
       { libName = rec.name
       , dir = "${patsHome}"
-      , url = "https:⫽github.com/${rec.githubUsername}/${rec.name}/archive/${showVersion rec.x}.tar.gz"
+      , url = "https://github.com/${rec.githubUsername}/${rec.name}/archive/${showVersion rec.x}.tar.gz"
       , libVersion = rec.x
       }
 in
@@ -126,7 +126,7 @@ let makeNpmPkg =
     dep ⫽
       { libName = rec.name
       , dir = "${patsHome}/${rec.unpackDir}"
-      , url = "https:⫽registry.npmjs.org/${rec.unpackDir}/-/${rec.unpackDir}-${showVersion rec.x}.tgz"
+      , url = "https://registry.npmjs.org/${rec.unpackDir}/-/${rec.unpackDir}-${showVersion rec.x}.tgz"
       , libVersion = rec.x
       }
 in
@@ -136,7 +136,7 @@ let makeHsPkg =
     dep ⫽
       { libName = rec.name
       , dir = "${patsHome}"
-      , url = "https:⫽hackage.haskell.org/package/${rec.name}-${showVersion rec.x}/${rec.name}-${showVersion rec.x}.tar.gz"
+      , url = "https://hackage.haskell.org/package/${rec.name}-${showVersion rec.x}/${rec.name}-${showVersion rec.x}.tar.gz"
       , libVersion = rec.x
       }
 in

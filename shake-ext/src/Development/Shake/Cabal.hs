@@ -8,26 +8,27 @@ module Development.Shake.Cabal ( getCabalDeps
                                , platform
                                , hsCompiler
                                -- * Reëxports from "Distribution.Version"
-                               , showVersion
+                               , prettyShow
                                ) where
 
 import           Control.Arrow
 import           Control.Composition
 import           Control.Monad
-import           Data.Foldable                         (toList)
-import           Data.Maybe                            (catMaybes)
+import           Data.Foldable                          (toList)
+import           Data.Maybe                             (catMaybes)
 import           Data.Semigroup
-import           Development.Shake                     hiding (doesFileExist)
-import qualified Development.Shake                     as Shake
+import           Development.Shake                      hiding (doesFileExist)
+import qualified Development.Shake                      as Shake
 import           Distribution.ModuleName
 import           Distribution.PackageDescription
-import           Distribution.PackageDescription.Parse
+import           Distribution.PackageDescription.Parsec
+import           Distribution.Pretty
 import           Distribution.Types.CondTree
 import           Distribution.Types.PackageId
-import           Distribution.Verbosity                as Distribution
+import           Distribution.Verbosity                 as Distribution
 import           Distribution.Version
-import           System.Directory                      (doesFileExist)
-import           System.Info                           (arch, os)
+import           System.Directory                       (doesFileExist)
+import           System.Info                            (arch, os)
 
 data HsCompiler = GHC { _suff :: Maybe String -- ^ Compiler version
                       }

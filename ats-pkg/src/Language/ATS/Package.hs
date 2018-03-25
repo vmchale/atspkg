@@ -3,6 +3,8 @@ module Language.ATS.Package ( buildAll
                             , mkPkg
                             , cleanAll
                             , buildHelper
+                            -- * Dhall verification helpers
+                            , checkPkgSet
                             , checkPkg
                             -- * Ecosystem functionality
                             , displayList

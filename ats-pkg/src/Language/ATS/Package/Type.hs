@@ -37,6 +37,7 @@ data ATSConstraint = ATSConstraint { lower :: Maybe Version
                                    }
                 deriving (Eq, Show, Generic, Binary, Interpret, Hashable)
 
+deriving newtype instance Inject Version
 deriving newtype instance Interpret Version
 deriving newtype instance Hashable Version
 

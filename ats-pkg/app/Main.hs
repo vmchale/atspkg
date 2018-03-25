@@ -51,6 +51,7 @@ data Command = Install { _archTarget :: Maybe String }
                    , _lint       :: Bool
                    }
              | Check { _filePath :: String, _details :: Bool }
+             | CheckSet { _filePath :: String, _details :: Bool }
              | List
 
 userCmd :: Parser Command
@@ -64,7 +65,8 @@ userCmd = hsubparser
     <> command "upgrade" (info (pure Upgrade) (progDesc "Upgrade to the latest version of atspkg"))
     <> command "valgrind" (info valgrind (progDesc "Run generated binaries through valgrind"))
     <> command "run" (info run' (progDesc "Run generated binaries"))
-    <> command "check" (info check' (progDesc "Audit a package set to ensure it is well-typed."))
+    <> command "check" (info check' (progDesc "Check that a pkg.dhall file is well-typed."))
+    <> command "check-set" (info checkSet (progDesc "Audit a package set to ensure it is well-typed."))
     <> command "list" (info (pure List) (progDesc "List available packages"))
     )
 
@@ -85,10 +87,18 @@ install :: Parser Command
 install = Install
     <$> triple
 
+checkSet :: Parser Command
+checkSet = CheckSet
+    <$> targetP dhallCompletions id "check"
+    <*> details
+
 check' :: Parser Command
 check' = Check
-    <$> targetP dhallCompletions id "check"
-    <*> switch
+    <$> targetP dhallCompletions id "check-set"
+    <*> details
+
+details :: Parser Bool
+details = switch
     (long "detailed"
     <> short 'd'
     <> help "Enable detailed error messages")
@@ -190,7 +200,8 @@ runHelper rba lint tim rs tgt v = g . bool x y =<< check Nothing
 
 run :: Command -> IO ()
 run List                          = displayList "https://raw.githubusercontent.com/vmchale/atspkg/master/ats-pkg/pkgs/pkg-set.dhall"
-run (Check p b)                   = print =<< checkPkg p b
+run (Check p b)                   = print . ($ Version [0,1,0]) =<< checkPkg p b
+run (CheckSet p b)                = print =<< checkPkgSet p b
 run Upgrade                       = upgradeBin "vmchale" "atspkg"
 run Nuke                          = cleanAll
 run (Fetch u)                     = fetchPkg u
