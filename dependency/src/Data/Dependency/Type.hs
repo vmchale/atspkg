@@ -33,7 +33,6 @@ import           Data.Functor.Foldable
 import           Data.Functor.Foldable.TH
 import           Data.List                    (intercalate)
 import qualified Data.Map                     as M
-import           Data.Semigroup
 import qualified Data.Set                     as S
 import           GHC.Generics                 (Generic)
 import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>))

@@ -1,7 +1,6 @@
 module Development.Shake.Elm ( elmMake
                              ) where
 
-import           Data.Semigroup
 import           Development.Shake
 
 elmMake :: [FilePath] -- ^ Source files

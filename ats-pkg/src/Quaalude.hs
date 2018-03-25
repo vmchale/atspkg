@@ -18,7 +18,6 @@ module Quaalude ( hex
                 , isSuffixOf
                 , on
                 , both
-                , (<>)
                 , (***)
                 , (&&&)
                 , (<=<)
@@ -123,7 +122,6 @@ import           Data.ByteString.Lazy         (ByteString)
 import           Data.Foldable
 import           Data.List
 import           Data.Maybe                   (fromMaybe)
-import           Data.Semigroup
 import           Data.Text.Lazy               (pack, unpack)
 import           Data.Version                 (showVersion)
 import           Development.Shake            hiding (getEnv)

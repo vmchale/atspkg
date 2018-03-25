@@ -26,7 +26,6 @@ module Development.Shake.C ( -- * Types
 
 import           Control.Monad
 import           Data.List                  (isPrefixOf, isSuffixOf)
-import           Data.Semigroup
 import           Development.Shake
 import           Development.Shake.FilePath
 import           System.Directory           (removeFile)

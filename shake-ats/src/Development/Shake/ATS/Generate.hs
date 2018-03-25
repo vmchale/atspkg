@@ -1,7 +1,6 @@
 module Development.Shake.ATS.Generate ( generateLinks
                                       ) where
 
-import           Data.Semigroup
 import           Language.ATS
 import           Lens.Micro
 

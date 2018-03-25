@@ -1,7 +1,6 @@
 module Development.Shake.CCJS ( ccjs
                               ) where
 
-import           Data.Semigroup
 import           Development.Shake
 import           Development.Shake.FilePath
 import           System.Directory           (createDirectoryIfMissing)

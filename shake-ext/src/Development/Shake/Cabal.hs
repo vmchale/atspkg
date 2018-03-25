@@ -16,7 +16,6 @@ import           Control.Composition
 import           Control.Monad
 import           Data.Foldable                          (toList)
 import           Data.Maybe                             (catMaybes)
-import           Data.Semigroup
 import           Development.Shake                      hiding (doesFileExist)
 import qualified Development.Shake                      as Shake
 import           Distribution.ModuleName
