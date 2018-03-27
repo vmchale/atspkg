@@ -134,7 +134,7 @@ toVerbosity 0 = Normal
 toVerbosity 1 = Loud
 toVerbosity 2 = Chatty
 toVerbosity 3 = Diagnostic
-toVerbosity _ = Diagnostic -- really should be a warning
+toVerbosity _ = Diagnostic -- should be a warning
 
 options :: Bool -- ^ Whether to rebuild all targets
         -> Bool -- ^ Whether to run the linter

@@ -16,7 +16,7 @@ installActions = sequence_
 maybeInstallActions :: ConfigFlags -> IO ()
 maybeInstallActions cfs = bool nothing act cond
     where act = installActions
-          nothing = pure mempty
+          nothing = mempty
           cond = (mkFlagName "no-executable", True) `notElem` unFlagAssignment (configConfigurationsFlags cfs)
 
 main :: IO ()

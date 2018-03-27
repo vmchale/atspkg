@@ -1,6 +1,3 @@
-new:
-    cabal new-build hs2ats ats-format dependency shake-ext shake-ats --project-file=cabal.project.new
-
 latex:
     cd ats-pkg/docs && pdflatex manual.tex && pdflatex manual.tex
 

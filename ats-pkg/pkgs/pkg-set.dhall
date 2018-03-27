@@ -18,12 +18,13 @@ let unistring =
 in
 
 let xzUtils =
-  prelude.dep ⫽
-    { libName = "xz-utils"
-    , dir = "xz-utils-5.2.3"
-    , url = "https://tukaani.org/xz/xz-5.2.3.tar.gz"
-    , libVersion = [5,2,3]
-    }
+  λ(x : List Integer) →
+    prelude.dep ⫽
+      { libName = "xz-utils"
+      , dir = "xz-utils-${prelude.showVersion x}"
+      , url = "https://tukaani.org/xz/xz-${prelude.showVersion x}.tar.gz"
+      , libVersion = x
+      }
 in
 
 let fastArithmetic =
@@ -96,7 +97,7 @@ let pkgset =
   , gc
   , fastArithmetic [0,3,3,1]
   , unistring
-  , xzUtils
+  , xzUtils [5,2,3]
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,6]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,1]
   , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall [0,1,5]
