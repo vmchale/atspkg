@@ -1,5 +1,5 @@
 module Language.ATS.Package.Build.C ( clibSetup
-                                    , pkgHome
+                                    , cpkgHome
                                     , allSubdirs
                                     ) where
 
@@ -7,8 +7,8 @@ import           Development.Shake.ATS
 import           Development.Shake.C
 import           Quaalude
 
-pkgHome :: CCompiler -> IO FilePath
-pkgHome cc' = (++ ("/.atspkg/" ++ ccToDir cc')) <$> getEnv "HOME"
+cpkgHome :: CCompiler -> IO FilePath
+cpkgHome cc' = (++ ("/.atspkg/" ++ ccToDir cc')) <$> getEnv "HOME"
 
 allSubdirs :: FilePath -> IO [FilePath]
 allSubdirs [] = pure mempty
@@ -31,7 +31,7 @@ clibSetup cc' lib' p = do
     fold (setFileMode <$> configurePath <*> pure ownerModes)
 
     -- Set environment variables for configure script
-    h <- pkgHome cc'
+    h <- cpkgHome cc'
     let procEnv = Just [("CC", ccToString cc'), ("CFLAGS" :: String, "-I" <> h <> "include"), ("PATH", "/usr/bin:/bin")]
 
     biaxe [fold (configure h <$> configurePath <*> pure procEnv), make, install] lib' p

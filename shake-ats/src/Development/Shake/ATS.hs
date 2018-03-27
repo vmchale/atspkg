@@ -14,8 +14,6 @@ module Development.Shake.ATS ( -- * Shake Rules
                              , getSubdirs
                              , ccToDir
                              , withPF
-                             , defaultATSTarget
-                             , defaultATSToolConfig
                              -- * Environment/configuration
                              , patscc
                              , patsopt
@@ -33,10 +31,10 @@ module Development.Shake.ATS ( -- * Shake Rules
                              , cc
                              , gc
                              , hasPretty
-                             , compilerVer
                              , genTargets
                              , hsLibs
-                             , libVersion
+                             , patsHome
+                             , patsHomeLocs
                              , libs
                              , linkStatic
                              , linkTargets
@@ -51,7 +49,6 @@ import           Control.Monad
 import           Control.Monad.IO.Class
 import           Data.Bool                         (bool)
 import           Data.Either                       (fromRight)
-import           Data.List                         (intercalate)
 import           Data.Maybe                        (fromMaybe)
 import           Data.Semigroup                    (Semigroup (..))
 import qualified Data.Text.Lazy                    as TL
@@ -75,9 +72,8 @@ atsCommand :: CmdResult r => ATSToolConfig
                           -> Action r
 atsCommand tc sourceFile out = do
     path <- liftIO $ getEnv "PATH"
-    home' <- home tc
-    let env = patsEnv home' path
-    patsc <- patsopt tc
+    let env = patsEnv tc path
+        patsc = patsopt tc
 
     command env patsc ["--output", out, "-dd", sourceFile, "-cc"]
 
@@ -98,18 +94,10 @@ gcFlag True  = "-DATS_MEMALLOC_GCBDW"
 -- Copy source files to the appropriate place. This is necessary because
 -- @#include@s in ATS are weird.
 copySources :: ATSToolConfig -> [FilePath] -> Action ()
-copySources (ATSToolConfig v v' _ _ _) sources =
+copySources (ATSToolConfig home' _ _ _ _) sources =
     forM_ sources $ \dep -> do
-        h <- patsHome v'
-        let home' = h ++ "lib/ats2-postiats-" ++ show v
         liftIO $ createDirectoryIfMissing True (home' ++ "/" ++ takeDirectory dep)
         liftIO $ copyFile dep (home' ++ "/" ++ dep)
-
--- | This is the @$PATSHOMELOCS@ variable to be passed to the shell.
-patsHomeLocs :: Int
-             -> String
-patsHomeLocs n = intercalate ":" $ (<> ".atspkg/contrib") . ("./" <>) <$> g
-    where g = [ join $ replicate i "../" | i <- [0..n] ]
 
 makeCFlags :: [String] -- ^ Inputs
            -> [ForeignCabal] -- ^ Haskell libraries
@@ -127,38 +115,30 @@ libToDirs = fmap (takeDirectory . TL.unpack . h)
     where h (ForeignCabal mpr cf _) = fromMaybe cf mpr
 
 -- | Location of @patscc@
-patscc :: MonadIO m => ATSToolConfig -> m String
+patscc :: ATSToolConfig -> String
 patscc = patsTool "patscc"
 
 -- | Location of @patsopt@
-patsopt :: MonadIO m => ATSToolConfig -> m String
+patsopt :: ATSToolConfig -> String
 patsopt = patsTool "patsopt"
 
-patsTool :: MonadIO m => String -> ATSToolConfig -> m String
-patsTool tool tc = (<> prep) <$> ph
-    where ph = patsHome (_compilerVer tc)
-          prep = "lib/ats2-postiats-" ++ show (_libVersion tc) ++ "/bin/" ++ tool
+patsTool :: String -> ATSToolConfig -> String
+patsTool tool tc = _patsHome tc ++ "/bin/" ++ tool
 
 cconfig :: MonadIO m => ATSToolConfig -> [String] -> Bool -> [String] -> m CConfig
 cconfig tc libs' gc' extras = do
-    h <- patsHome (_compilerVer tc)
+    let h = _patsHome tc
     let cc' = _cc tc
     h' <- pkgHome cc'
-    home' <- home tc
     let libs'' = ("atslib" :) $ bool libs' ("gc" : libs') gc'
     -- TODO only include /ccomp/atslib/lib if it's not a cross build
-    pure $ CConfig [h ++ "ccomp/runtime/", h, h' ++ "include", ".atspkg/contrib"] libs'' [h' ++ "lib", home' ++ "/ccomp/atslib/lib"] extras (_linkStatic tc)
+    pure $ CConfig [h ++ "/ccomp/runtime/", h, h' ++ "include", ".atspkg/contrib"] libs'' [h' ++ "lib", _patsHome tc ++ "/ccomp/atslib/lib"] extras (_linkStatic tc)
 
-home :: MonadIO m => ATSToolConfig -> m String
-home tc = do
-    h <- patsHome (_compilerVer tc)
-    pure $ h ++ "lib/ats2-postiats-" ++ show (_libVersion tc)
-
-patsEnv :: FilePath -> FilePath -> [CmdOption]
-patsEnv home' path = EchoStderr False :
+patsEnv :: ATSToolConfig -> FilePath -> [CmdOption]
+patsEnv cfg path = EchoStderr False :
     zipWith AddEnv
         ["PATSHOME", "PATH", "PATSHOMELOCS"]
-        [home', home' ++ "/bin:" ++ path, patsHomeLocs 5]
+        [_patsHome cfg, _patsHome cfg ++ "/bin:" ++ path, _patsHomeLocs cfg]
 
 atsToC :: FilePath -> FilePath
 atsToC = (-<.> "c") . (".atspkg/c/" <>)
@@ -171,18 +151,6 @@ ghcV hsLibs' = case hsLibs' of
 doLib :: ArtifactType -> Rules () -> Rules ()
 doLib Executable = pure mempty
 doLib _          = id
-
-defaultATSTarget :: [FilePath] -- ^ ATS source files
-                 -> ArtifactType
-                 -> FilePath -- ^ Target
-                 -> ATSTarget
-defaultATSTarget sources tgt' out =
-    ATSTarget mempty defaultATSToolConfig False mempty sources mempty mempty mempty out mempty tgt'
-
-defaultATSToolConfig :: ATSToolConfig
-defaultATSToolConfig =
-    ATSToolConfig v v False (GCC Nothing) False
-        where v = Version [0,3,9]
 
 -- | Rules for generating binaries or libraries from ATS code. This is very
 -- general; use 'defaultATSTarget' for sensible defaults that can be modified

@@ -8,11 +8,13 @@ module Language.ATS.Package.Build ( mkPkg
                                   , build
                                   , buildAll
                                   , check
+                                  , home'
                                   ) where
 
 import           Control.Concurrent.ParallelIO.Global
 import qualified Data.ByteString                      as BS
 import qualified Data.ByteString.Lazy                 as BSL
+import           Data.List                            (intercalate)
 import           Development.Shake.ATS
 import           Development.Shake.C                  (ccFromString)
 import           Development.Shake.Check
@@ -221,6 +223,26 @@ atslibSetup tgt' lib' p = do
     let installDir = takeDirectory pkgPath
     buildAll tgt' (Just installDir)
 
+-- | The directory @~/.atspkg@
+pkgHome :: MonadIO m => CCompiler -> m String
+pkgHome cc' = liftIO $ (++ ("/.atspkg/" ++ ccToDir cc')) <$> getEnv "HOME"
+
+-- | The directory that will be @PATSHOME@.
+patsHomeAtsPkg :: MonadIO m => Version -> m String
+patsHomeAtsPkg v = fmap (++ (show v ++ "/")) (pkgHome (GCC Nothing))
+
+home' :: MonadIO m => Version -- ^ Compiler version
+                   -> Version -- ^ Library version
+                   -> m String
+home' compV libV = do
+    h <- patsHomeAtsPkg compV
+    pure $ h ++ "lib/ats2-postiats-" ++ show libV
+
+-- | This is the @$PATSHOMELOCS@ variable to be passed to the shell.
+patsHomeLocsAtsPkg :: Int -> String
+patsHomeLocsAtsPkg n = intercalate ":" $ (<> ".atspkg/contrib") . ("./" <>) <$> g
+    where g = [ join $ replicate i "../" | i <- [0..n] ]
+
 pkgToAction :: [IO ()] -- ^ Setup actions to be performed
             -> [String] -- ^ Targets
             -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
@@ -242,27 +264,29 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf as dl
         let bins = unpack . target <$> bs
         setTargets rs bins mt
 
-        cDepsRules >> bits tgt rs
+        ph <- home' v' v
 
-        mapM_ h lbs
+        cDepsRules ph >> bits tgt rs
 
-        mapM_ g (bs ++ ts)
+        mapM_ (h ph) lbs
 
-    where g (Bin s t ls hs' atg gc' extra) =
-            atsBin (ATSTarget (unpack <$> cf) atsToolConfig gc' (unpack <$> ls) [unpack s] hs' (unpackBoth . asTuple <$> atg) mempty (unpack t) (deps extra) Executable)
+        mapM_ (g ph) (bs ++ ts)
 
-          h (Lib _ s t ls _ hs' lnk atg extra sta) =
-            atsBin (ATSTarget (unpack <$> cf) atsToolConfig False (unpack <$> ls) (unpack <$> s) hs' (unpackBoth . asTuple <$> atg) (both unpack <$> lnk) (unpack t) (deps extra) (k sta))
+    where g ph (Bin s t ls hs' atg gc' extra) =
+            atsBin (ATSTarget (unpack <$> cf) (atsToolConfig ph) gc' (unpack <$> ls) [unpack s] hs' (unpackBoth . asTuple <$> atg) mempty (unpack t) (deps extra) Executable)
+
+          h ph (Lib _ s t ls _ hs' lnk atg extra sta) =
+            atsBin (ATSTarget (unpack <$> cf) (atsToolConfig ph) False (unpack <$> ls) (unpack <$> s) hs' (unpackBoth . asTuple <$> atg) (both unpack <$> lnk) (unpack t) (deps extra) (k sta))
 
           k False = SharedLibrary
           k True  = StaticLibrary
 
-          atsToolConfig = ATSToolConfig v v' False (ccFromString cc') (not dl)
+          atsToolConfig ph = ATSToolConfig ph (patsHomeLocsAtsPkg 5) False (ccFromString cc') (not dl)
 
-          cDepsRules = unless (null as) $ do
+          cDepsRules ph = unless (null as) $ do
               let targets = fmap (unpack . cTarget) as
                   sources = fmap (unpack . atsSrc) as
-              zipWithM_ (cgen atsToolConfig [specialDeps, ".atspkg/config"] (fmap (unpack . ats) . atsGen =<< as)) sources targets
+              zipWithM_ (cgen (atsToolConfig ph) [specialDeps, ".atspkg/config"] (fmap (unpack . ats) . atsGen =<< as)) sources targets
 
           cc' = maybe (unpack ccLocal) (<> "-gcc") tgt
           deps = (specialDeps:) . (".atspkg/config":) . fmap unpack

@@ -38,6 +38,7 @@ library
     build-depends:
         base >=4.11 && <5,
         hashable -any,
+        composition-prelude,
         language-ats -any,
         shake-ext >=2.7.0.5,
         hs2ats >=0.2.0.1,

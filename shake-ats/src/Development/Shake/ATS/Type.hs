@@ -24,9 +24,9 @@ module Development.Shake.ATS.Type ( ForeignCabal (..)
                                   , genTargets
                                   , hsLibs
                                   , libs
+                                  , patsHome
+                                  , patsHomeLocs
                                   , tgtType
-                                  , compilerVer
-                                  , libVersion
                                   , linkTargets
                                   ) where
 
@@ -74,11 +74,11 @@ data ArtifactType = StaticLibrary
                   deriving (Generic, Binary)
 
 -- | Information about where to find @patscc@ and @patsopt@.
-data ATSToolConfig = ATSToolConfig { _libVersion  :: Version -- ^ Standard library version to be used.
-                                   , _compilerVer :: Version -- ^ Version of @patscc@ to be used.
-                                   , _hasPretty   :: Bool -- ^ Whether to display errors via @pats-filter@
-                                   , _cc          :: CCompiler -- ^ C compiler to be used
-                                   , _linkStatic  :: Bool -- ^ Force static linking
+data ATSToolConfig = ATSToolConfig { _patsHome     :: String -- ^ Value to be used for @PATSHOME@.
+                                   , _patsHomeLocs :: String -- ^ Value to be used for @PATSHOMELOCS@.
+                                   , _hasPretty    :: Bool -- ^ Whether to display errors via @pats-filter@
+                                   , _cc           :: CCompiler -- ^ C compiler to be used
+                                   , _linkStatic   :: Bool -- ^ Force static linking
                                    } deriving (Generic, Binary)
 
 data ATSGen = ATSGen { hsFile     :: FilePath -- ^ Haskell file containing types
