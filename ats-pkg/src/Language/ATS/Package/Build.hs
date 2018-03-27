@@ -8,7 +8,6 @@ module Language.ATS.Package.Build ( mkPkg
                                   , build
                                   , buildAll
                                   , check
-                                  , home'
                                   ) where
 
 import           Control.Concurrent.ParallelIO.Global

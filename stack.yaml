@@ -9,11 +9,10 @@ packages:
   - 'dependency'
   - 'hs2ats'
 extra-deps:
-  - composition-prelude-1.3.0.4
+  - composition-prelude-1.3.0.8
   - dhall-1.12.0
   - bzlib-0.5.0.5
   - casing-0.1.2.1
-# - Cabal-2.2.0.0
   - cli-setup-0.2.0.1
   - hspec-dirstream-0.4.0.0
   - dirstream-1.0.3

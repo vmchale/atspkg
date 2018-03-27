@@ -1,12 +1,10 @@
 module Development.Shake.ATS.Environment ( fixDir
                                          , pkgHome
-                                         , patsHomeAtsPkg
                                          , ccToDir
                                          ) where
 
 import           Control.Monad.IO.Class
 import qualified Data.Text.Lazy             as TL
-import           Development.Shake.ATS.Type
 import           Development.Shake.C
 import           Development.Shake.FilePath
 import           System.Environment         (getEnv)
@@ -21,10 +19,6 @@ ccToDir _              = ""
 -- | The directory @~/.atspkg@
 pkgHome :: MonadIO m => CCompiler -> m String
 pkgHome cc' = liftIO $ (++ ("/.atspkg/" ++ ccToDir cc')) <$> getEnv "HOME"
-
--- | The directory that will be @PATSHOME@.
-patsHomeAtsPkg :: MonadIO m => Version -> m String
-patsHomeAtsPkg v = fmap (++ (show v ++ "/")) (pkgHome (GCC Nothing))
 
 fixDir :: FilePath -> String -> String
 fixDir p =
