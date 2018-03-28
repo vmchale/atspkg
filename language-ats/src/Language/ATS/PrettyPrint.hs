@@ -526,6 +526,10 @@ prettySortArgs :: (Pretty a) => Maybe [a] -> Doc
 prettySortArgs Nothing   = mempty
 prettySortArgs (Just as) = prettyArgs' ", " "(" ")" as
 
+maybeT :: Pretty a => Maybe a -> Doc
+maybeT (Just x) = ":" <+> pretty x
+maybeT Nothing  = mempty
+
 instance Eq a => Pretty (Declaration a) where
     pretty (Exception s t)                  = "exception" <+> text s <+> "of" <+> pretty t
     pretty (AbsType _ s as t)               = "abstype" <+> text s <> prettySortArgs as <> prettyMaybeType t
@@ -586,7 +590,7 @@ instance Eq a => Pretty (Declaration a) where
     pretty (Stadef i as (Right t))          = "stadef" <+> text i <+> prettySortArgs as <+> "=" <+> pretty t
     pretty (Stadef i as (Left se))          = "stadef" <+> text i <+> prettySortArgs as <+> "=" <+> pretty se
     pretty (AndD d (Stadef i as (Right t))) = pretty d <+> "and" <+> text i <+> prettySortArgs as <+> "=" <+> pretty t
-    pretty (AndD d (Stadef i as (Left se))) = pretty d <+> "and" <+> text i <+> prettySortArgs as <+> "=" <+> pretty se
+    pretty (AndD d (Stadef i as (Left (se, mt)))) = pretty d <+> "and" <+> text i <+> prettySortArgs as <+> "=" <+> pretty se <> maybeT mt
     pretty (AbsView _ i as t)               = "absview" <+> text i <> prettySortArgs as <> prettyMaybeType t
     pretty (AbsVT0p _ i as t)               = "absvt@ype" <+> text i <> prettySortArgs as <> prettyMaybeType t
     pretty (AbsT0p _ i Nothing t)           = "abst@ype" <+> text i <+> "=" <+> pretty t

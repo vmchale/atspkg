@@ -689,7 +689,10 @@ AndSort : AndSort and IdentifierOr eq Sort { AndD $1 (SortDef $2 $3 (Left $5)) }
         | sortdef IdentifierOr eq Universal { SortDef $1 $2 (Right $4) }
 
 StaticDef : eq Type { Right $2 }
-          | eq StaticExpression { Left $2 }
+          | eq StaticExpression MaybeAnnot { Left ($2, $3) }
+
+MaybeAnnot : colon Type { Just $2 }
+           | { Nothing }
 
 AndStadef : stadef IdentifierOr SortArgs StaticDef { Stadef $2 $3 $4 }
           | stadef Operator SortArgs StaticDef { Stadef $2 $3 $4 }

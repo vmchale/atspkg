@@ -86,7 +86,7 @@ library
         microlens -any,
         microlens-th -any,
         mtl -any,
-        dhall >=1.12.0,
+        dhall >=1.11.0 && <= 1.12.0,
         ansi-wl-pprint -any,
         shake-ats >=1.6.0.0,
         shake-ext >=2.6.0.0,

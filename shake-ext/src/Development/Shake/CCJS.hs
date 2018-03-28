@@ -5,7 +5,9 @@ import           Development.Shake
 import           Development.Shake.FilePath
 import           System.Directory           (createDirectoryIfMissing)
 
-ccjs :: [FilePath] -> FilePattern -> Rules ()
+ccjs :: [FilePath] -- ^ JavaScript source files
+     -> FilePattern -- ^ File pattern for build output
+     -> Rules ()
 ccjs sources fp =
     fp %> \out -> do
         need sources

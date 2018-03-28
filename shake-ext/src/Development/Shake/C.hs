@@ -31,8 +31,9 @@ import           Development.Shake.FilePath
 import           System.Directory           (removeFile)
 import           System.Info
 
--- | Given C source code, return a list of included files. This makes a call to
--- either @clang@ or @gcc@, so it should be used sparingly.
+-- | Given C source code, return a list of included files. This writes to a file
+-- and then makes a call to either @clang@ or @gcc@, so it should be used
+-- sparingly.
 getCDepends :: CCompiler -- ^ Should be either @gcc@ or @clang@.
             -> String -- ^ C source code
             -> Action [FilePath]
@@ -62,7 +63,7 @@ pattern GCCStd = GCC Nothing
 pattern GHCStd :: CCompiler
 pattern GHCStd = GHC Nothing Nothing
 
--- | Get the executable name associated with a 'CCompiler'
+-- | Get the executable name for a 'CCompiler'
 ccToString :: CCompiler -> String
 ccToString Clang          = "clang"
 ccToString (Other s)      = s
@@ -122,8 +123,8 @@ cToLib cc sources lib cfg =
     where objRules = objectFileR cc cfg <$> g sources <*> pure lib
           g = fmap (-<.> "o")
 
--- | Rules for generating a binary from C source files. At most one can have the
--- @main@ function.
+-- | Rules for generating a binary from C source files. Can have at most have
+-- one @main@ function.
 cBin :: CCompiler
      -> [FilePath] -- ^ C source files
      -> FilePattern -- ^ Binary file output
@@ -131,17 +132,18 @@ cBin :: CCompiler
      -> Rules ()
 cBin cc sources bin cfg = bin %> \out -> binaryA cc sources out cfg
 
--- | This action builds a binary.
+-- | This action builds an executable.
 binaryA :: CmdResult r
          => CCompiler
          -> [FilePath] -- ^ Source files
-         -> FilePath -- ^ Binary file output
+         -> FilePath -- ^ Executable output
          -> CConfig
          -> Action r
 binaryA cc sources out cfg =
     need sources >>
     (command [EchoStderr False] (ccToString cc) . (("-o" : out : sources) <>) . cconfigToArgs) cfg
 
+-- | Generate compiler flags for a given configuration.
 cconfigToArgs :: CConfig -> [String]
 cconfigToArgs (CConfig is ls ds es sl) = join [ mapFlags "-I" is, mapFlags "-l" (g sl <$> ls), mapFlags "-L" ds, es ]
     where g :: Bool -> (String -> String)
