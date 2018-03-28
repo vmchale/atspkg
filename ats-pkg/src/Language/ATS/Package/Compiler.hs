@@ -68,9 +68,9 @@ make v cd =
     silentCreateProcess ((proc "make" []) { cwd = Just cd })
 
 type SetupScript = Maybe String -- ^ Optional target triple
-                     -> String -- ^ Library name
-                     -> FilePath -- ^ File path
-                     -> IO ()
+                 -> String -- ^ Library name
+                 -> FilePath -- ^ File path
+                 -> IO ()
 
 libInstall :: SetupScript -> FilePath -> String -> IO ()
 libInstall atslibSetup cd triple =

@@ -6,6 +6,7 @@
 - [ ] Macros with `#else`
 - [ ] Boxed tuples/records
 - [ ] Handle `stadef mytkind = $extkind"atslib_linmap_avltree"`
+- [ ] Sort annotations for viewtypes etc.
 # Deficiencies
 - [ ] Error messages
   - [ ] Add test suite for messages

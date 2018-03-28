@@ -105,9 +105,9 @@ data Declaration a = Func { pos :: a, _fun :: Function a }
                    | AndDecl { andT :: Maybe (Type a), andPat :: Pattern a, _andExpr :: Expression a }
                    | Include String
                    | Load { static :: Bool, withOctothorpe :: Bool, qualName :: Maybe String, fileName :: String }
-                   | Stadef String (SortArgs a) (Either (StaticExpression a, Maybe (Type a)) (Type a))
+                   | Stadef String (SortArgs a) (Either (StaticExpression a, Maybe (Sort a)) (Type a))
                    | CBlock String
-                   | TypeDef a String (SortArgs a) (Type a)
+                   | TypeDef a String (SortArgs a) (Type a) (Maybe (Sort a))
                    | ViewTypeDef a String (SortArgs a) (Type a)
                    | SumType { typeName :: String, typeArgs :: SortArgs a, _leaves :: [Leaf a] }
                    | SumViewType { typeName :: String, typeArgs :: SortArgs a, _leaves :: [Leaf a] }

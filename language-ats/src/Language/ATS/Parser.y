@@ -691,7 +691,7 @@ AndSort : AndSort and IdentifierOr eq Sort { AndD $1 (SortDef $2 $3 (Left $5)) }
 StaticDef : eq Type { Right $2 }
           | eq StaticExpression MaybeAnnot { Left ($2, $3) }
 
-MaybeAnnot : colon Type { Just $2 }
+MaybeAnnot : colon Sort { Just $2 }
            | { Nothing }
 
 AndStadef : stadef IdentifierOr SortArgs StaticDef { Stadef $2 $3 $4 }
@@ -759,7 +759,7 @@ SumDecl : datatype IdentifierOr SortArgs eq Leaves { SumType $2 $3 $5 }
         | dataview IdentifierOr SortArgs eq lineComment Leaves { DataView $1 $2 $3 $6 }
 
 -- | Parse a declaration defining a type
-TypeDecl : typedef IdentifierOr SortArgs eq Type { TypeDef $1 $2 $3 $5 }
+TypeDecl : typedef IdentifierOr SortArgs eq Type MaybeAnnot { TypeDef $1 $2 $3 $5 $6 }
          | vtypedef IdentifierOr SortArgs eq Type { ViewTypeDef $1 $2 $3 $5 }
          | extern vtypedef string SortArgs eq Type { Extern $1 $ ViewTypeDef $2 $3 $4 $6 }
          | abst0p IdentifierOr SortArgs MaybeType { AbsT0p $1 $2 $3 $4 }

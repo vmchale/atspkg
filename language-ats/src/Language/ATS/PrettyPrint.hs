@@ -575,7 +575,7 @@ instance Eq a => Pretty (Declaration a) where
     pretty (Extern _ d)                     = "extern" <$> pretty d
     pretty (DataProp _ s as ls)             = "dataprop" <+> text s <> prettySortArgs as <+> "=" <$> prettyDL ls
     pretty (ViewTypeDef _ s as t)           = "vtypedef" <+> text s <> prettySortArgs as <+> "=" <#> pretty t
-    pretty (TypeDef _ s as t)               = "typedef" <+> text s <> prettySortArgs as <+> "=" <+> pretty t
+    pretty (TypeDef _ s as t ms)            = "typedef" <+> text s <> prettySortArgs as <+> "=" <+> pretty t <> maybeT ms
     pretty (AbsProp _ n as)                 = "absprop" <+> text n <+> prettyArgs as
     pretty (Assume n NoA e)                 = "assume" </> pretty n <+> "=" </> pretty e
     pretty (Assume n as e)                  = "assume" </> pretty n <> prettyArgs as <+> "=" </> pretty e
@@ -588,7 +588,7 @@ instance Eq a => Pretty (Declaration a) where
     pretty (FixityDecl f ss)                = pretty f <+> hsep (fmap text ss)
     pretty (StaVal us i t)                  = "val" </> mconcat (fmap pretty us) <+> text i <+> ":" <+> pretty t
     pretty (Stadef i as (Right t))          = "stadef" <+> text i <+> prettySortArgs as <+> "=" <+> pretty t
-    pretty (Stadef i as (Left se))          = "stadef" <+> text i <+> prettySortArgs as <+> "=" <+> pretty se
+    pretty (Stadef i as (Left (se, mt)))    = "stadef" <+> text i <+> prettySortArgs as <+> "=" <+> pretty se <> maybeT mt
     pretty (AndD d (Stadef i as (Right t))) = pretty d <+> "and" <+> text i <+> prettySortArgs as <+> "=" <+> pretty t
     pretty (AndD d (Stadef i as (Left (se, mt)))) = pretty d <+> "and" <+> text i <+> prettySortArgs as <+> "=" <+> pretty se <> maybeT mt
     pretty (AbsView _ i as t)               = "absview" <+> text i <> prettySortArgs as <> prettyMaybeType t
