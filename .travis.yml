@@ -35,6 +35,7 @@ matrix:
     - env: TARGET=x86_64-apple-darwin
 
 before_install:
+  - rm -rf $HOME/.stack
   - mkdir -p ~/.local/bin
   - export PATH=$HOME/.local/bin:$PATH
   - |
