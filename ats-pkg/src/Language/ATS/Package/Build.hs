@@ -44,6 +44,13 @@ buildAll tgt' p = on (>>) (=<< wants p) fetchDef setupDef
     where fetchDef = fetchCompiler
           setupDef = setupCompiler atslibSetup tgt'
 
+build' :: FilePath -- ^ Directory
+       -> Maybe String -- ^ Target triple
+       -> [String] -- ^ Targets
+       -> IO ()
+build' dir tgt' rs = withCurrentDirectory dir (mkPkgEmpty mempty)
+    where mkPkgEmpty ts = mkPkg False True False ts rs tgt' 1
+
 -- | Build a set of targets
 build :: [String] -- ^ Targets
       -> IO ()
@@ -217,10 +224,10 @@ atslibSetup :: Maybe String -- ^ Optional target triple
             -> IO ()
 atslibSetup tgt' lib' p = do
     putStrLn $ "installing " ++ lib' ++ "..."
-    subdirs <- allSubdirs p
+    subdirs <- (p:) <$> allSubdirs p
     pkgPath <- fromMaybe p <$> findFile subdirs "atspkg.dhall"
     let installDir = takeDirectory pkgPath
-    buildAll tgt' (Just installDir)
+    build' installDir tgt' mempty
 
 -- | The directory @~/.atspkg@
 pkgHome :: MonadIO m => CCompiler -> m String

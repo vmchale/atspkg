@@ -88,6 +88,7 @@ install :: Maybe String
 install tgt' als v cd =
     withCompiler "Installing" v >>
     silentCreateProcess ((proc "make" ["install"]) { cwd = Just cd }) >>
+    writeFile (cd ++ "/done") "" >>
     maybe mempty (libInstall als cd) tgt'
 
 configure :: FilePath -> Version -> FilePath -> IO ()
@@ -108,8 +109,6 @@ setupCompiler als tgt' v = do
     cd <- compilerDir v
 
     biaxe [configure (cd ++ "/configure"), make, install tgt' als] v cd
-
-    writeFile (cd ++ "/done") ""
 
 cleanAll :: IO ()
 cleanAll = do
