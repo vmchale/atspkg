@@ -20,9 +20,9 @@ in
 let ssl =
   prelude.dep ⫽
     { libName = "openssl"
-    , dir = "openssl-1.0.2o"
-    , url = "https://www.openssl.org/source/openssl-1.0.2o.tar.gz"
-    , libVersion = [1,0,2]
+    , dir = "openssl-1.1.0h"
+    , url = "https://www.openssl.org/source/openssl-1.1.0h.tar.gz"
+    , libVersion = [1,1,0]
     }
 in
 
