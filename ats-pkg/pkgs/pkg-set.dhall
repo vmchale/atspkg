@@ -17,6 +17,16 @@ let unistring =
   makeGnuPkg { version = [0,9,9], name = "unistring" }
 in
 
+let curl = 
+  λ(x : List Integer) →
+    prelude.dep ⫽
+      { libName = "curl"
+      , dir = "curl-${prelude.showVersion x}"
+      , url = "https://curl.haxx.se/download/curl-${prelude.showVersion x}.tar.gz"
+      , libVersion = x
+      }
+in
+
 let xzUtils =
   λ(x : List Integer) →
     prelude.dep ⫽
@@ -109,6 +119,7 @@ let pkgset =
   , unistring
   , xzUtils [5,2,3]
   , git [0,27,0]
+  , curl [7,59,0]
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,6]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,1]
   , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall [0,1,5]
