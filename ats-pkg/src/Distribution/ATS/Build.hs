@@ -24,7 +24,9 @@ modifyBuildInfo :: String -> BuildInfo -> BuildInfo
 modifyBuildInfo libDir bi = let olds = extraLibDirs bi
     in bi { extraLibDirs = (libDir <>) <$> olds }
 
-modifyConf :: String -> LocalBuildInfo -> LocalBuildInfo
+modifyConf :: FilePath -- ^ New library directory (absolute)
+           -> LocalBuildInfo
+           -> LocalBuildInfo
 modifyConf libDir bi = let old = localPkgDescr bi
     in bi { localPkgDescr = modifyPkgDescr libDir old }
 
@@ -36,6 +38,7 @@ modifyLibrary :: String -> Library -> Library
 modifyLibrary libDir lib = let old = libBuildInfo lib
     in lib { libBuildInfo = modifyBuildInfo libDir old }
 
+-- | Write a dummy file that will allow packaging to work.
 writeDummyFile :: IO ()
 writeDummyFile =
     createDirectoryIfMissing True "dist-newstyle/lib" >>

@@ -13,6 +13,7 @@
 - [ ] `atspkg` should be able to build `atslib` and thus work for
   cross-compilation.
 - [ ] `triple` should be a configuration option
+- [ ] Make cross builds work for `Distribution.ATS`
 # Generalizations
 - [ ] Make a `generic-package` library for `.a`, `.so`, and binary builds.
 # Bugs

@@ -34,7 +34,13 @@ clibSetup cc' lib' p = do
     h <- cpkgHome cc'
     let procEnv = Just [("CC", ccToString cc'), ("CFLAGS" :: String, "-I" <> h <> "include"), ("PATH", "/usr/bin:/bin")]
 
-    biaxe [fold (configure h <$> configurePath <*> pure procEnv), make, install] lib' p
+    biaxe [fold (configure h <$> configurePath <*> pure procEnv), cmake, make, install] lib' p
+
+cmake :: String -> FilePath -> IO ()
+cmake _ p = do
+    b <- doesFileExist (p ++ "/CMakeLists.txt")
+    let run = silentCreateProcess ((proc "cmake" ["."]) { cwd = Just p })
+    bool mempty run b
 
 configure :: FilePath -> FilePath -> Maybe [(String, String)] -> String -> FilePath -> IO ()
 configure prefixPath configurePath procEnv lib' p =

@@ -47,6 +47,16 @@ let atomicOps =
     }
 in
 
+let git =
+  λ(v : List Integer) →
+    prelude.dep ⫽
+      { libName = "git2"
+      , dir = "git2-${prelude.showVersion v}"
+      , url = "https://github.com/libgit2/libgit2/archive/v${prelude.showVersion v}.tar.gz"
+      , libVersion = v
+      }
+in
+
 let gc =
   prelude.dep ⫽
     { libName = "gc"
@@ -98,6 +108,7 @@ let pkgset =
   , fastArithmetic [0,3,3,1]
   , unistring
   , xzUtils [5,2,3]
+  , git [0,27,0]
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,6]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,1]
   , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall [0,1,5]

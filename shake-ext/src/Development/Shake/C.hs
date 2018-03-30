@@ -13,6 +13,7 @@ module Development.Shake.C ( -- * Types
                            , cBin
                            , cToLib
                            -- * Actions
+                           , pkgConfig
                            , binaryA
                            , staticLibA
                            , sharedLibA
@@ -30,6 +31,15 @@ import           Development.Shake
 import           Development.Shake.FilePath
 import           System.Directory           (removeFile)
 import           System.Info
+
+-- cmake?? make (??)
+
+-- | Given a package name or path to a @.pc@ file, output flags for C compiler.
+pkgConfig :: String -> Action [String]
+pkgConfig pkg = do
+    (Stdout o) <- command [] "pkg-config" ["--cflags", pkg]
+    (Stdout o') <- command [] "pkg-config" ["--libs", pkg]
+    pure (words o <> words o')
 
 -- | Given C source code, return a list of included files. This writes to a file
 -- and then makes a call to either @clang@ or @gcc@, so it should be used
