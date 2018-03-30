@@ -35,31 +35,33 @@ clibSetup cc' lib' p = do
     h <- cpkgHome cc'
     let procEnv = Just [("CC", ccToString cc'), ("CFLAGS" :: String, "-I" <> h <> "include"), ("PATH", "/usr/bin:/bin")]
 
-    biaxe [fold (configure h <$> configurePath <*> pure procEnv), cmake cmakeLists, make, install] lib' p
+    biaxe [fold (configure h <$> configurePath <*> pure procEnv), cmake h cmakeLists, make, install] lib' p
 
-cmake :: Maybe FilePath -> String -> FilePath -> IO ()
-cmake Nothing _ _ = mempty
-cmake (Just cfgLists) _ _ = do
+cmake :: FilePath -> Maybe FilePath -> String -> FilePath -> IO ()
+cmake _ Nothing _ _ = mempty
+cmake prefixPath (Just cfgLists) _ _ = do
     let p = takeDirectory cfgLists
-    silentCreateProcess ((proc "cmake" [p]) { cwd = Just p })
+    silentCreateProcess ((proc "cmake" ["-DCMAKE_INSTALL_PREFIX:PATH=" ++ prefixPath, p]) { cwd = Just p })
 
 configure :: FilePath -> FilePath -> Maybe [(String, String)] -> String -> FilePath -> IO ()
 configure prefixPath configurePath procEnv lib' p =
     putStrLn ("configuring " ++ lib' ++ "...") >>
     silentCreateProcess ((proc configurePath ["--prefix", prefixPath, "--host", host]) { cwd = Just p, env = procEnv })
 
+findMakefile :: FilePath -> IO FilePath
+findMakefile p = do
+    subdirs <- allSubdirs p
+    mp <- findFile (p:subdirs) "Makefile"
+    pure $ maybe p takeDirectory mp
+
 make :: String -> FilePath -> IO ()
 make lib' p = do
     putStrLn ("building " ++ lib' ++ "...")
-    subdirs <- allSubdirs p
-    mp <- findFile (p:subdirs) "Makefile"
-    let p' = maybe p takeDirectory mp
+    p' <- findMakefile p
     silentCreateProcess ((proc "make" ["-j4"]) { cwd = Just p' })
 
 install :: String -> FilePath -> IO ()
 install lib' p = do
     putStrLn ("installing " ++ lib' ++ "...")
-    subdirs <- allSubdirs p
-    mp <- findFile (p:subdirs) "Makefile"
-    let p' = maybe p takeDirectory mp
+    p' <- findMakefile p
     silentCreateProcess ((proc "make" ["install"]) { cwd = Just p' })
