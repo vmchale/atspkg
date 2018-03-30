@@ -1,13 +1,7 @@
-{-# LANGUAGE DataKinds         #-}
-{-# LANGUAGE DeriveAnyClass    #-}
-{-# LANGUAGE DeriveGeneric     #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE PatternSynonyms   #-}
-{-# LANGUAGE TypeOperators     #-}
+{-# LANGUAGE PatternSynonyms #-}
 
 module Language.ATS.Generate
-    ( exec
-    , generateATS
+    ( generateATS
     , genATSTypes
     , ErrM
     ) where
@@ -23,13 +17,7 @@ import           Language.Haskell.Exts
 import           Language.Haskell.Exts.Syntax as HS
 import           Language.Preprocessor.Cpphs  (defaultCpphsOptions, runCpphs)
 import           Lens.Micro                   (over, _head)
-import           Options.Generic
 import           Text.Casing                  (quietSnake)
-
-data Program = Program { src    :: FilePath <?> "Haskell source file"
-                       , target :: FilePath <?> "ATS target"
-                       , cpphs  :: Bool <?> "Use cpphs as a preprocessor"
-                       } deriving (Generic, ParseRecord)
 
 convertConventions :: String -> String
 convertConventions = filterKeys . quietSnake
@@ -186,8 +174,3 @@ genATSTypes p p' withCPP = do
     contents <- proc =<< readFile p
     let warnDo (x, es) = mapM_ displayErr es >> writeFile p' x
     either displayErr warnDo (generateATS p contents)
-
-exec :: IO ()
-exec = do
-    x <- getRecord "Generate ATS types for Haskell source code" :: IO Program
-    genATSTypes (unHelpful . src $ x) (unHelpful . target $ x) (unHelpful . cpphs $ x)

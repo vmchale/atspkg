@@ -5,6 +5,8 @@
 This is a build system for ATS written in Haskell and configured with Dhall. It
 is not fully working, but the configuration format is now stable.
 
+`atspkg` works quite well as a build system, and less well as a package manager.
+
 ## Features & Non-Features
 
 Things that `atspkg` will do for you:
