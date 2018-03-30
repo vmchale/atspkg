@@ -17,6 +17,7 @@ let unistring =
   makeGnuPkg { version = [0,9,9], name = "unistring" }
 in
 
+-- FIXME this should be more general
 let ssl =
   prelude.dep ⫽
     { libName = "openssl"
@@ -84,7 +85,7 @@ let git =
       , dir = "libgit2-${prelude.showVersion v}"
       , url = "https://github.com/libgit2/libgit2/archive/v${prelude.showVersion v}.tar.gz"
       , libVersion = v
-      , libDeps = prelude.mapPlainDeps [ "curl", "openssl" ]
+      , libDeps = prelude.mapPlainDeps [ "curl" ]
       }
 in
 
