@@ -49,11 +49,17 @@ configure prefixPath configurePath procEnv lib' p =
     silentCreateProcess ((proc configurePath ["--prefix", prefixPath, "--host", host]) { cwd = Just p, env = procEnv })
 
 make :: String -> FilePath -> IO ()
-make lib' p =
-    putStrLn ("building " ++ lib' ++ "...") >>
-    silentCreateProcess ((proc "make" ["-j4"]) { cwd = Just p })
+make lib' p = do
+    putStrLn ("building " ++ lib' ++ "...")
+    subdirs <- allSubdirs p
+    mp <- findFile (p:subdirs) "Makefile"
+    let p' = maybe p takeDirectory mp
+    silentCreateProcess ((proc "make" ["-j4"]) { cwd = Just p' })
 
 install :: String -> FilePath -> IO ()
-install lib' p =
-    putStrLn ("installing " ++ lib' ++ "...") >>
-    silentCreateProcess ((proc "make" ["install"]) { cwd = Just p })
+install lib' p = do
+    putStrLn ("installing " ++ lib' ++ "...")
+    subdirs <- allSubdirs p
+    mp <- findFile (p:subdirs) "Makefile"
+    let p' = maybe p takeDirectory mp
+    silentCreateProcess ((proc "make" ["install"]) { cwd = Just p' })

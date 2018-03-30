@@ -51,7 +51,7 @@ let git =
   λ(v : List Integer) →
     prelude.dep ⫽
       { libName = "git2"
-      , dir = "libgit2-${prelude.showVersion v}"
+      , dir = ""
       , url = "https://github.com/libgit2/libgit2/archive/v${prelude.showVersion v}.tar.gz"
       , libVersion = v
       }
