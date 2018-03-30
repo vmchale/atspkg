@@ -22,7 +22,7 @@ let ssh2 =
     prelude.dep ⫽
       { libName = "ssh2"
       , dir = "ssh2-${prelude.showVersion x}"
-      , url = "https://www.libssh2.org/download/libssh2-${prelude.showVersion x}.gz"
+      , url = "https://www.libssh2.org/download/libssh2-${prelude.showVersion x}.tar.gz"
       , libVersion = x
       }
 in
