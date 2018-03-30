@@ -13,8 +13,8 @@ extra-deps:
   - dhall-1.12.0
   - bzlib-0.5.0.5
   - casing-0.1.2.1
-  - cli-setup-0.2.0.1
-  - hspec-dirstream-0.4.0.0
+  - cli-setup-0.2.0.2
+  - hspec-dirstream-1.0.0.0
   - dirstream-1.0.3
   - htoml-megaparsec-1.1.0.1
 flags:

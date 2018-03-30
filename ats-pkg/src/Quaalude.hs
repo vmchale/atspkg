@@ -91,6 +91,7 @@ module Quaalude ( hex
                 , text
                 , punctuate
                 , dullred
+                , linebreak
                 , dullyellow
                 , hardline
                 , hang

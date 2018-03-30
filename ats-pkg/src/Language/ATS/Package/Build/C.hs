@@ -37,6 +37,7 @@ clibSetup cc' lib' p = do
 
     biaxe [fold (configure h <$> configurePath <*> pure procEnv), cmake h cmakeLists, make, install] lib' p
 
+-- TODO only do this if @./configure@ is missing
 cmake :: FilePath -> Maybe FilePath -> String -> FilePath -> IO ()
 cmake _ Nothing _ _ = mempty
 cmake prefixPath (Just cfgLists) _ _ = do
@@ -51,8 +52,9 @@ configure prefixPath configurePath procEnv lib' p =
 findMakefile :: FilePath -> IO FilePath
 findMakefile p = do
     subdirs <- allSubdirs p
+    mc <- findFile (p:subdirs) "configure"
     mp <- findFile (p:subdirs) "Makefile"
-    pure $ maybe p takeDirectory mp
+    pure $ maybe (maybe p takeDirectory mp) takeDirectory mc
 
 make :: String -> FilePath -> IO ()
 make lib' p = do

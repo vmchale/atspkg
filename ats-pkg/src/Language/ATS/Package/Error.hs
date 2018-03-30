@@ -21,7 +21,7 @@ data PackageError = Unrecognized String
                   | DepErr ResolveError
 
 instance Pretty PackageError where
-    pretty (Unrecognized t) = dullred "Error:" <+> "Unrecognized archive format when unpacking" <#> hang 2 (text t)
+    pretty (Unrecognized t) = dullred "Error:" <+> "Unrecognized archive format when unpacking" <#> hang 2 (text t) <> linebreak
     pretty (DepErr d)       = pretty d
 
 -- TODO monaderror?

@@ -17,6 +17,15 @@ let unistring =
   makeGnuPkg { version = [0,9,9], name = "unistring" }
 in
 
+let ssl =
+  prelude.dep ⫽
+    { libName = "openssl"
+    , dir = "openssl-1.0.2o"
+    , url = "https://www.openssl.org/source/openssl-1.0.2o.tar.gz"
+    , libVersion = [1,0,2]
+    }
+in
+
 let ssh2 = 
   λ(x : List Integer) →
     prelude.dep ⫽
@@ -75,7 +84,7 @@ let git =
       , dir = "libgit2-${prelude.showVersion v}"
       , url = "https://github.com/libgit2/libgit2/archive/v${prelude.showVersion v}.tar.gz"
       , libVersion = v
-      , libDeps = prelude.mapPlainDeps [ "curl" ]
+      , libDeps = prelude.mapPlainDeps [ "curl", "ssl" ]
       }
 in
 
@@ -133,6 +142,7 @@ let pkgset =
   , git [0,27,0]
   , curl [7,59,0]
   , ssh2 [1,8,0]
+  , ssl
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,6]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,1]
   , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall [0,1,5]
