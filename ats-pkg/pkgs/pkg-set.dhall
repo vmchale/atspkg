@@ -64,6 +64,7 @@ let git =
       , dir = "libgit2-${prelude.showVersion v}"
       , url = "https://github.com/libgit2/libgit2/archive/v${prelude.showVersion v}.tar.gz"
       , libVersion = v
+      , libDeps = prelude.mapPlainDeps [ "curl" ]
       }
 in
 
