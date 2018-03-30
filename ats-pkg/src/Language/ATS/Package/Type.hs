@@ -46,6 +46,7 @@ type LibDep = (Text, ATSConstraint)
 -- | You likely want 'libDeps' or 'libBldDeps'
 type DepSelector = ATSDependency -> [LibDep]
 
+-- TODO add a field for configure stage??
 -- | Type for a dependency
 data ATSDependency = ATSDependency { libName     :: Text -- ^ Library name, e.g.
                                    , dir         :: Text -- ^ Directory we should unpack to
