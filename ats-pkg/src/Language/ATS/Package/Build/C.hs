@@ -28,19 +28,20 @@ clibSetup cc' lib' p = do
     -- Find configure script and make it executable
     subdirs <- allSubdirs p
     configurePath <- findFile (p:subdirs) "configure"
+    cmakeLists <- findFile (p:subdirs) "CMakeLists.txt"
     fold (setFileMode <$> configurePath <*> pure ownerModes)
 
     -- Set environment variables for configure script
     h <- cpkgHome cc'
     let procEnv = Just [("CC", ccToString cc'), ("CFLAGS" :: String, "-I" <> h <> "include"), ("PATH", "/usr/bin:/bin")]
 
-    biaxe [fold (configure h <$> configurePath <*> pure procEnv), cmake, make, install] lib' p
+    biaxe [fold (configure h <$> configurePath <*> pure procEnv), cmake cmakeLists, make, install] lib' p
 
-cmake :: String -> FilePath -> IO ()
-cmake _ p = do
-    b <- doesFileExist (p ++ "/CMakeLists.txt")
-    let run = silentCreateProcess ((proc "cmake" ["."]) { cwd = Just p })
-    bool mempty run b
+cmake :: Maybe FilePath -> String -> FilePath -> IO ()
+cmake Nothing _ _ = mempty
+cmake (Just cfgLists) _ _ = do
+    let p = takeDirectory cfgLists
+    silentCreateProcess ((proc "cmake" [p]) { cwd = Just p })
 
 configure :: FilePath -> FilePath -> Maybe [(String, String)] -> String -> FilePath -> IO ()
 configure prefixPath configurePath procEnv lib' p =
