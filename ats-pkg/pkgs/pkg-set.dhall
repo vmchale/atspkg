@@ -17,7 +17,7 @@ let unistring =
   makeGnuPkg { version = [0,9,9], name = "unistring" }
 in
 
--- openssl, mpfr4, mpc3
+-- TODO set build scripts openssl, mpfr4, mpc3
 let ssh2 = 
   λ(x : List Integer) →
     prelude.dep ⫽

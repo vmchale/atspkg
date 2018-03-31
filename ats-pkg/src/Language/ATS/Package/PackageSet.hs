@@ -26,7 +26,7 @@ instance Pretty Version where
     pretty v = text (show v)
 
 instance Pretty ATSDependency where
-    pretty (ATSDependency ln _ url md v _ _ _) = dullyellow (text (unpack ln)) <#> indent 4 (g md "url:" <+> text (unpack url) <#> "version:" <+> pretty v) <> hardline
+    pretty (ATSDependency ln _ url md v _ _ _ _) = dullyellow (text (unpack ln)) <#> indent 4 (g md "url:" <+> text (unpack url) <#> "version:" <+> pretty v) <> hardline
         where g (Just d) = ("description:" <+> text (unpack d) <#>)
               g Nothing  = id
 

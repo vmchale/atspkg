@@ -56,6 +56,7 @@ data ATSDependency = ATSDependency { libName     :: Text -- ^ Library name, e.g.
                                    , libDeps     :: [LibDep] -- ^ Dependencies to be unpacked
                                    , libBldDeps  :: [LibDep] -- ^ Dependencies to be built
                                    , libCDeps    :: [LibDep] -- ^ C dependencies to be built
+                                   , script      :: [Text] -- ^ Optional build script for C library
                                    }
                    deriving (Eq, Show, Generic, Interpret, Binary, Hashable)
 

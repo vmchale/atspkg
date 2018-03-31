@@ -58,6 +58,8 @@ let dep =
     : List LibDep
   , description = []
     : Optional Text
+  , script = []
+    : List Text
   }
 in
 
