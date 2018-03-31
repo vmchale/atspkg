@@ -49,21 +49,21 @@ configure prefixPath configurePath procEnv lib' p =
     putStrLn ("configuring " ++ lib' ++ "...") >>
     silentCreateProcess ((proc configurePath ["--prefix", prefixPath, "--host", host]) { cwd = Just p, env = procEnv })
 
-findMakefile :: FilePath -> IO FilePath
+{-findMakefile :: FilePath -> IO FilePath
 findMakefile p = do
     subdirs <- allSubdirs p
     mc <- findFile (p:subdirs) "configure"
     mp <- findFile (p:subdirs) "Makefile"
-    pure $ maybe (maybe p takeDirectory mp) takeDirectory mc
+    pure $ maybe (maybe p takeDirectory mp) takeDirectory mc-}
 
 make :: String -> FilePath -> IO ()
 make lib' p = do
     putStrLn ("building " ++ lib' ++ "...")
-    p' <- findMakefile p
-    silentCreateProcess ((proc "make" ["-j4"]) { cwd = Just p' })
+    -- p' <- findMakefile p
+    silentCreateProcess ((proc "make" ["-j4"]) { cwd = Just p })
 
 install :: String -> FilePath -> IO ()
 install lib' p = do
     putStrLn ("installing " ++ lib' ++ "...")
-    p' <- findMakefile p
-    silentCreateProcess ((proc "make" ["install"]) { cwd = Just p' })
+    -- p' <- findMakefile p
+    silentCreateProcess ((proc "make" ["install"]) { cwd = Just p })
