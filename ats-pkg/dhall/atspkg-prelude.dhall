@@ -150,15 +150,7 @@ let makePkgDescr =
 in
 
 {- We collect everything in a single record for convenience -}
-{ Bin = Bin
-, Lib = Lib
-, Src = Src
-, LibDep = LibDep
-, LinkType = LinkType
-, ForeignCabal = ForeignCabal
-, TargetPair = TargetPair
-, ATSConstraint = ATSConstraint
-, showVersion = showVersion
+{ showVersion = showVersion
 , makePkg = makePkg
 , bin = bin
 , lib = lib

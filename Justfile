@@ -34,7 +34,13 @@ debian:
 poly:
     @poly -e data
 
-ci: install
+dhall-check:
+    atspkg check-set ats-pkg/pkgs/pkg-set.dhall
+    cat ats-pkg/dhall/atslib.dhall | dhall
+    cat ats-pkg/dhall/config.dhall | dhall
+    cat ats-pkg/dhall/atspkg-prelude.dhall | dhall
+
+ci: dhall-check install
     @cabal new-test all
     shellcheck bash/install.sh
     yamllint .stylish-haskell.yaml
