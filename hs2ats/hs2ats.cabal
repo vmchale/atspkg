@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: hs2ats
-version: 0.2.1.9
+version: 0.3.0.0
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -12,6 +12,9 @@ description:
     This package enables scanning Haskell source files for data types and then generating [ATS](http://www.ats-lang.org/) types from them.
 category: Language, Haskell, ATS
 build-type: Simple
+extra-source-files:
+  test/data/*.hs
+  test/data/*.out
 
 source-repository head
     type: git

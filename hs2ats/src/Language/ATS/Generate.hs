@@ -3,7 +3,6 @@
 module Language.ATS.Generate
     ( generateATS
     , genATSTypes
-    , ErrM
     ) where
 
 import           Control.Arrow
@@ -160,7 +159,9 @@ extends =
 
 -- | Given a string containing Haskell, return a string containing ATS and
 -- a list of warnings.
-generateATS :: FilePath -> String -> ErrM (String, [GenerateError])
+generateATS :: FilePath -- ^ Name of source file
+            -> String -- ^ Source file contents
+            -> ErrM (String, [GenerateError])
 generateATS file hsSrc = modulePrint <$> case parseModuleWithMode extends hsSrc of
     ParseOk x            -> Right x
     ParseFailed loc' msg -> syntaxError (loc' { srcFilename = file }) msg
@@ -168,7 +169,10 @@ generateATS file hsSrc = modulePrint <$> case parseModuleWithMode extends hsSrc 
 process :: FilePath -> String -> IO String
 process p = fmap (unlines . drop 1 . lines) . runCpphs defaultCpphsOptions p
 
-genATSTypes :: FilePath -> FilePath -> Bool -> IO ()
+genATSTypes :: FilePath -- ^ Haskell source file
+            -> FilePath -- ^ @.sats@ file to be generated
+            -> Bool -- ^ Whether to use pre-process the Haskell source (use this if you use @{#- LANGUAGE CPP #-}@ anywhere)
+            -> IO ()
 genATSTypes p p' withCPP = do
     let proc = bool pure (process p) withCPP
     contents <- proc =<< readFile p

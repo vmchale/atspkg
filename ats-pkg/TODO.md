@@ -7,7 +7,6 @@
 - [ ] `shake-ats` should allow builds with `patscc` some other way
 - [ ] Set target triple in `shake-ext`?
 # Deficiencies
-- [ ] Build for files not in the current directory?
 - [ ] Installations should be installed locally based on configuration
   - [ ] calculus of compatibility? algebra of compatibility?
 - [ ] `atspkg` should be able to build `atslib` and thus work for
@@ -21,7 +20,7 @@
 - [ ] We should be able to build `.so` and `.a` files from one source file.
 - [ ] make paths portable for windows
 - [ ] We shouldn't include `ccomp/lib` when doing a cross build.
-- [ ] Always try to build `libats` with the same compiler version?
+- [ ] Always try to build `libats` with the right compiler version
 - [ ] Generated code causes lint check failure?
 # Documentation
 - [ ] Tutorial

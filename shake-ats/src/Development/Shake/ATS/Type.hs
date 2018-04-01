@@ -10,6 +10,7 @@ module Development.Shake.ATS.Type ( ForeignCabal (..)
                                   , ArtifactType (..)
                                   , ATSToolConfig (..)
                                   , ATSGen (..)
+                                  , HATSGen (..)
                                   -- * Lenses
                                   , atsTarget
                                   , hasPretty
@@ -81,10 +82,16 @@ data ATSToolConfig = ATSToolConfig { _patsHome     :: String -- ^ Value to be us
                                    , _linkStatic   :: Bool -- ^ Force static linking
                                    } deriving (Generic, Binary)
 
+data HATSGen = HATSGen { satsFile :: FilePath -- ^ @.sats@ file containing type definitions
+                       , hatsFile :: FilePath -- ^ @.hats@ file to be generated for library distribution
+                       } deriving (Generic, Binary)
+
 data ATSGen = ATSGen { hsFile     :: FilePath -- ^ Haskell file containing types
                      , _atsTarget :: FilePath -- ^ ATS file to be generated
                      , cpphs      :: Bool -- ^ Whether to use the C preprocessor on the Haskell code
                      } deriving (Generic, Binary)
+
+-- TODO split off haskell-related types and leave it more general??
 
 -- | Type for binary and library builds with ATS.
 data ATSTarget = ATSTarget { _cFlags      :: [String] -- ^ Flags to be passed to the C compiler
@@ -94,7 +101,7 @@ data ATSTarget = ATSTarget { _cFlags      :: [String] -- ^ Flags to be passed to
                            , _src         :: [FilePath] -- ^ ATS source files. If building an executable, at most one may contain @main0@.
                            , _hsLibs      :: [ForeignCabal] -- ^ Cabal-based Haskell libraries.
                            , _genTargets  :: [ATSGen] -- ^ Files to be run through @hs2ats@.
-                           , _linkTargets :: [(FilePath, FilePath)] -- ^ Targets for @_link.hats@ generation.
+                           , _linkTargets :: [HATSGen] -- ^ Targets for @_link.hats@ generation.
                            , _binTarget   :: FilePath -- ^ Target
                            , _otherDeps   :: [FilePath] -- ^ Other files to track.
                            , _tgtType     :: ArtifactType -- ^ Build type

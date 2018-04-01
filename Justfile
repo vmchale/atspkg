@@ -40,7 +40,7 @@ dhall-check:
     cat ats-pkg/dhall/config.dhall | dhall
     cat ats-pkg/dhall/atspkg-prelude.dhall | dhall
 
-ci: dhall-check install
+ci: install
     @cabal new-test all
     shellcheck bash/install.sh
     yamllint .stylish-haskell.yaml

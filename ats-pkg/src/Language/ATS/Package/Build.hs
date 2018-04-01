@@ -191,9 +191,6 @@ mkPkg rba lint tim setup rs tgt v = do
             ]
     stopGlobalPool
 
-asTuple :: TargetPair -> (Text, Text, Bool)
-asTuple (TargetPair s t b) = (s, t, b)
-
 mkConfig :: Rules ()
 mkConfig =
     ".atspkg/config" %> \out -> do
@@ -279,10 +276,10 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf as dl
         mapM_ (g ph) (bs ++ ts)
 
     where g ph (Bin s t ls hs' atg gc' extra) =
-            atsBin (ATSTarget (unpack <$> cf) (atsToolConfig ph) gc' (unpack <$> ls) [unpack s] hs' (unpackBoth . asTuple <$> atg) mempty (unpack t) (deps extra) Executable)
+            atsBin (ATSTarget (unpack <$> cf) (atsToolConfig ph) gc' (unpack <$> ls) [unpack s] hs' (unpackTgt <$> atg) mempty (unpack t) (deps extra) Executable)
 
           h ph (Lib _ s t ls _ hs' lnk atg extra sta) =
-            atsBin (ATSTarget (unpack <$> cf) (atsToolConfig ph) False (unpack <$> ls) (unpack <$> s) hs' (unpackBoth . asTuple <$> atg) (both unpack <$> lnk) (unpack t) (deps extra) (k sta))
+            atsBin (ATSTarget (unpack <$> cf) (atsToolConfig ph) False (unpack <$> ls) (unpack <$> s) hs' (unpackTgt <$> atg) (unpackLinks <$> lnk) (unpack t) (deps extra) (k sta))
 
           k False = SharedLibrary
           k True  = StaticLibrary
@@ -297,7 +294,10 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf as dl
           cc' = maybe (unpack ccLocal) (<> "-gcc") tgt
           deps = (specialDeps:) . (".atspkg/config":) . fmap unpack
 
-          unpackBoth :: (Text, Text, Bool) -> ATSGen
-          unpackBoth (t, t', b)= ATSGen (unpack t) (unpack t') b
+          unpackLinks :: (Text, Text) -> HATSGen
+          unpackLinks (t, t') = HATSGen (unpack t) (unpack t')
+
+          unpackTgt :: TargetPair -> ATSGen
+          unpackTgt (TargetPair t t' b) = ATSGen (unpack t) (unpack t') b
 
           specialDeps = ".atspkg/deps" ++ maybe mempty ("-" <>) tgt

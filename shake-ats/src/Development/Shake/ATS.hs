@@ -5,11 +5,14 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 
 module Development.Shake.ATS ( -- * Shake Rules
-                               cleanATS
-                             , atsBin
+                               atsBin
                              , cgen
                              , genATS
                              , atsLex
+                             , cabalForeign
+                             , hsAts
+                             -- * Shake actions
+                             , cleanATS
                              -- * Helper functions
                              , getSubdirs
                              , ccToDir
@@ -24,6 +27,7 @@ module Development.Shake.ATS ( -- * Shake Rules
                              , CCompiler (..)
                              , ArtifactType (..)
                              , ATSGen (..)
+                             , HATSGen (..)
                              -- * Lenses
                              , atsTarget
                              , cFlags
@@ -114,11 +118,11 @@ libToDirs :: [ForeignCabal] -> [String]
 libToDirs = fmap (takeDirectory . TL.unpack . h)
     where h (ForeignCabal mpr cf _) = fromMaybe cf mpr
 
--- | Location of @patscc@
+-- | Absolute path to @patscc@
 patscc :: ATSToolConfig -> String
 patscc = patsTool "patscc"
 
--- | Location of @patsopt@
+-- | Absolute path to @patsopt@
 patsopt :: ATSToolConfig -> String
 patsopt = patsTool "patsopt"
 
@@ -152,17 +156,23 @@ doLib :: ArtifactType -> Rules () -> Rules ()
 doLib Executable = pure mempty
 doLib _          = id
 
+hsAts :: ATSGen -> Rules ()
+hsAts (ATSGen x y z) = genATS x y z
+
+satsGen :: HATSGen -> Rules ()
+satsGen (HATSGen x y) = genLinks x y
+
 -- | Rules for generating binaries or libraries from ATS code. This is very
 -- general; use 'defaultATSTarget' for sensible defaults that can be modified
 -- with the provided lenses.
 atsBin :: ATSTarget -> Rules ()
 atsBin ATSTarget{..} = do
 
-    mapM_ (uncurry genLinks) _linkTargets
+    mapM_ satsGen _linkTargets
 
-    mapM_ (\(ATSGen x y z) -> genATS x y z) _genTargets
+    mapM_ hsAts _genTargets
 
-    mapM_ cabalExport _hsLibs
+    mapM_ cabalForeign _hsLibs
 
     let cTargets = atsToC <$> _src
 
@@ -176,7 +186,7 @@ atsBin ATSTarget{..} = do
 
     cconfig' <- cconfig _toolConfig _libs _gc (makeCFlags _cFlags mempty (pure undefined) _gc)
 
-    let atsGen = (snd <$> _linkTargets) <> ((^.atsTarget) <$> _genTargets)
+    let atsGen = (hatsFile <$> _linkTargets) <> ((^.atsTarget) <$> _genTargets)
         atsExtras = _otherDeps <> (TL.unpack . objectFile <$> _hsLibs)
     zipWithM_ (cgen _toolConfig atsExtras atsGen) _src cTargets
 

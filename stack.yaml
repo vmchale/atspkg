@@ -1,5 +1,5 @@
 ---
-resolver: nightly-2018-03-29
+resolver: nightly-2018-03-31
 packages:
   - 'ats-pkg'
   - 'language-ats'

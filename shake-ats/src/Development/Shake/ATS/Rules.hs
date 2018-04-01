@@ -1,6 +1,6 @@
 module Development.Shake.ATS.Rules ( atsLex
                                    , cleanATS
-                                   , cabalExport
+                                   , cabalForeign
                                    , getSubdirs
                                    , genATS
                                    , genLinks
@@ -49,8 +49,8 @@ getSubdirs p = do
 
 -- | These rules take a @.cabal@ file and the @.o@ file to be produced from
 -- them, building the @.o@ file.
-cabalExport :: ForeignCabal -> Rules ()
-cabalExport (ForeignCabal cbp' cf' obf') = do
+cabalForeign :: ForeignCabal -> Rules ()
+cabalForeign (ForeignCabal cbp' cf' obf') = do
 
     let cf = TL.unpack cf'
         cbp = maybe cf TL.unpack cbp'
@@ -78,7 +78,7 @@ cabalExport (ForeignCabal cbp' cf' obf') = do
         let hdr = dropExtension obj ++ "_stub.h"
         liftIO $ copyFile hdr (takeDirectory out ++ "/" ++ takeFileName hdr)
 
--- | Build a @.lats@ file.
+-- | Build a @.lats@ file using @atslex@.
 atsLex :: FilePath -- ^ Filepath of @.lats@ file
        -> FilePattern -- ^ File pattern for generated output
        -> Rules ()

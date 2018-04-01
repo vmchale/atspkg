@@ -17,7 +17,6 @@ let unistring =
   makeGnuPkg { version = [0,9,9], name = "unistring" }
 in
 
--- TODO set build scripts openssl, mpfr4, mpc3
 let ssh2 = 
   λ(x : List Integer) →
     prelude.dep ⫽
@@ -134,7 +133,7 @@ let pkgset =
   , git [0,27,0]
   , curl [7,59,0]
   , ssh2 [1,8,0]
-  , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,6]
+  , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,7]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,1]
   , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall [0,1,5]
   , https://raw.githubusercontent.com/vmchale/either/master/pkg.dhall [0,2,2]
