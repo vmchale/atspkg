@@ -43,7 +43,7 @@ to $HOME/.local/share/man/man1
 
 **check** - Check a pkg.dhall file to make sure it is well-typed.
 
-**check-setup** - Check a package set to make sure it is well-typed.
+**check-set** - Check a package set to make sure it is well-typed.
 
 **list** - List all available packages in current package set.
 
