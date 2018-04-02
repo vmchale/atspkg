@@ -29,6 +29,20 @@ in
 let Src = { atsSrc : Text, cTarget : Text, atsGen : List TargetPair, extras : List Text }
 in
 
+let src =
+  λ(x : { atsSrc : Text, cTarget : Text }) → 
+    { atsSrc = x.atsSrc
+    , cTarget = x.cTarget
+    , atsGen = []
+      : List TargetPair
+    , extras = []
+      : List Text
+    }
+in
+
+let mapSrc = λ(x : List { atsSrc : Text, cTarget : Text}) → map { atsSrc : Text, cTarget : Text } Src src x
+in
+
 {- Helper functions -}
 let patsHome =
   ".atspkg/contrib"
@@ -159,6 +173,8 @@ in
 , default = default
 , plainDeps = plainDeps
 , mapPlainDeps = mapPlainDeps
+, src = src
+, mapSrc = mapSrc
 , makePkgDescr = makePkgDescr
 , makeHsPkg = makeHsPkg
 , makeNpmPkg = makeNpmPkg
