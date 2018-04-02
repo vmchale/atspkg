@@ -1,9 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Distribution.ATS ( cleanATSCabal
-                        , fetchDependencies
-                        -- * Types
-                        , Version (..)
+module Distribution.ATS ( -- * Types
+                          Version (..)
                         , ATSDependency (..)
                         -- * Libraries
                         , libgmp
@@ -50,7 +48,8 @@ maybeCleanBuild li =
 -- | This generates user hooks for a Cabal distribution that has some ATS
 -- library dependencies. This will *not* do anything with the ATS source files,
 -- but it *will* download any files necessary for the bundled C to compile.
-atsUserHooks :: [ATSDependency] -> UserHooks
+atsUserHooks :: [ATSDependency] -- ^ List of ATS dependencies
+             -> UserHooks
 atsUserHooks deps = simpleUserHooks { preConf = \_ flags -> fetchDependencies flags deps >> pure emptyHookedBuildInfo
                                     , postBuild = \_ _ _ -> maybeCleanBuild
                                     }

@@ -1,8 +1,12 @@
 {-# LANGUAGE PatternSynonyms #-}
 
 module Language.ATS.Generate
-    ( generateATS
+    ( -- * Functions
+      generateATS
     , genATSTypes
+    -- * Types
+    , ErrM
+    , GenerateError (..)
     ) where
 
 import           Control.Arrow

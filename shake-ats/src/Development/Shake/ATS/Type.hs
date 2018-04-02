@@ -29,6 +29,8 @@ module Development.Shake.ATS.Type ( ForeignCabal (..)
                                   , patsHomeLocs
                                   , tgtType
                                   , linkTargets
+                                  , cpphs
+                                  , hsFile
                                   ) where
 
 import           Data.Binary         (Binary (..))
@@ -86,9 +88,9 @@ data HATSGen = HATSGen { satsFile :: FilePath -- ^ @.sats@ file containing type 
                        , hatsFile :: FilePath -- ^ @.hats@ file to be generated for library distribution
                        } deriving (Generic, Binary)
 
-data ATSGen = ATSGen { hsFile     :: FilePath -- ^ Haskell file containing types
+data ATSGen = ATSGen { _hsFile    :: FilePath -- ^ Haskell file containing types
                      , _atsTarget :: FilePath -- ^ ATS file to be generated
-                     , cpphs      :: Bool -- ^ Whether to use the C preprocessor on the Haskell code
+                     , _cpphs     :: Bool -- ^ Whether to use the C preprocessor on the Haskell code
                      } deriving (Generic, Binary)
 
 -- TODO split off haskell-related types and leave it more general??

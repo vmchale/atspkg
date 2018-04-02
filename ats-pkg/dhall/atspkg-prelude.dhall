@@ -163,6 +163,9 @@ let makePkgDescr =
       ⫽ { description = [ x.description ] : Optional Text }
 in
 
+let cabalDir = "dist-newstyle/lib"
+in
+
 {- We collect everything in a single record for convenience -}
 { showVersion = showVersion
 , makePkg = makePkg
@@ -179,4 +182,5 @@ in
 , makeHsPkg = makeHsPkg
 , makeNpmPkg = makeNpmPkg
 , patsHome = patsHome
+, cabalDir = cabalDir
 }

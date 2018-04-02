@@ -16,8 +16,8 @@ atsPolyglotBuild = defaultMainWithHooks cabalHooks
 
 configureCabal :: IO LocalBuildInfo -> IO LocalBuildInfo
 configureCabal = (<*>) $ do
-    build mempty
-    libDir <- (<> "/") <$> getCurrentDirectory
+    build ["install"]
+    libDir <- (<> "/lib") <$> getCurrentDirectory -- (<> "/.atspkg") <$> getEnv "HOME"
     pure (modifyConf libDir)
 
 modifyBuildInfo :: String -> BuildInfo -> BuildInfo
@@ -38,15 +38,8 @@ modifyLibrary :: String -> Library -> Library
 modifyLibrary libDir lib = let old = libBuildInfo lib
     in lib { libBuildInfo = modifyBuildInfo libDir old }
 
--- | Write a dummy file that will allow packaging to work.
-writeDummyFile :: IO ()
-writeDummyFile =
-    createDirectoryIfMissing True "dist-newstyle/lib" >>
-    writeFile "dist-newstyle/lib/empty" ""
-
 -- | This uses the users hooks as is @simpleUserHooks@, modified to build the
 -- ATS library.
 cabalHooks :: UserHooks
 cabalHooks = let defConf = confHook simpleUserHooks
-    in simpleUserHooks { preConf = \_ _ -> writeDummyFile >> pure emptyHookedBuildInfo
-                       , confHook = configureCabal .* defConf }
+    in simpleUserHooks { confHook = configureCabal .* defConf }

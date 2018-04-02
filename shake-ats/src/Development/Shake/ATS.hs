@@ -46,6 +46,8 @@ module Development.Shake.ATS ( -- * Shake Rules
                              , src
                              , tgtType
                              , toolConfig
+                             , cpphs
+                             , hsFile
                              ) where
 
 import           Control.Arrow

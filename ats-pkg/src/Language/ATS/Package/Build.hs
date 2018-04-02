@@ -259,6 +259,8 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf as dl
 
         mkUserConfig
 
+        want (unpack . cTarget <$> as)
+
         specialDeps %> \out -> do
             (_, cfgBin') <- cfgBin
             need [ cfgBin', ".atspkg/config" ]

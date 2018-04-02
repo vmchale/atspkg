@@ -13,8 +13,8 @@ description:
 category: Language, Haskell, ATS
 build-type: Simple
 extra-source-files:
-  test/data/*.hs
-  test/data/*.out
+    test/data/*.hs
+    test/data/*.out
 
 source-repository head
     type: git
@@ -33,8 +33,9 @@ flag no-executable
 library
     exposed-modules:
         Language.ATS.Generate
-        Language.ATS.Generate.Error
     hs-source-dirs: src
+    other-modules:
+        Language.ATS.Generate.Error
     default-language: Haskell2010
     ghc-options: -Wall
     build-depends:
