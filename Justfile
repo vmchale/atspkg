@@ -56,7 +56,6 @@ ci: install
     atspkg remote https://hackage.haskell.org/package/fast-arithmetic-0.3.3.4/fast-arithmetic-0.3.3.4.tar.gz
 
 pkg-install: build
-    @strip $(fd 'atspkg$' -IH dist-newstyle | tail -n1)
     @cp -f $(fd 'atspkg$' -IH dist-newstyle | tail -n1) ~/.local/bin
 
 install: fmt-install pkg-install
