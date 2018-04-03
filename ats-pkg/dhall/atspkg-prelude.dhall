@@ -29,6 +29,14 @@ in
 let Src = { atsSrc : Text, cTarget : Text, atsGen : List TargetPair, extras : List Text }
 in
 
+let Script = { configure : Optional Text, build : Text, install : Text }
+in
+
+let script = 
+  λ(x : {dir : Text, target : Optional Text}) →
+    { configure = [ "./configure --prefix=${x.dir}" ] : Optional Text, build = "make -j4", install = "make install" } : Script
+in
+
 let src =
   λ(x : { atsSrc : Text, cTarget : Text }) → 
     { atsSrc = x.atsSrc
