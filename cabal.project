@@ -5,7 +5,6 @@ packages: language-ats
         , shake-ats
         , dependency
         , hs2ats
-        , fast-arithmetic
 
 constraints:
   ats-format +development,
@@ -15,17 +14,16 @@ constraints:
   shake-ats +development,
   ats-setup +development,
   dependency +development,
-  hs2ats +development +no-executable,
-  fast-arithmetic +development
+  hs2ats +development +no-executable
 
 allow-newer:
   megaparsec
 
 allow-boot-library-installs: True
 optimization: 2
--- tests: True
--- benchmarks: True
-documentation: True
+tests: True
+benchmarks: True
+-- documentation: True
 
 program-options
   happy-options: -gcsa

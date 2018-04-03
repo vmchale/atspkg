@@ -12,7 +12,6 @@ description:
 category: Parser, Language, ATS, Development
 build-type: Custom
 extra-source-files:
-    stack.yaml
     .atsfmt.toml
     man/atsfmt.1
 extra-doc-files: README.md
@@ -40,7 +39,7 @@ executable atsfmt
     default-language: Haskell2010
     ghc-options: -Wall
     build-depends:
-        base >=4.10 && <5,
+        base >=4.9 && <5,
         language-ats >=0.1.1.10,
         optparse-applicative -any,
         htoml-megaparsec >=1.1.0.0,

@@ -4,6 +4,10 @@ in
 let concat = https://ipfs.io/ipfs/QmQ8w5PLcsNz56dMvRtq54vbuPe9cNnCCUXAQp6xLc6Ccx/Prelude/List/concat
 in
 
+{- ATSPackage parts -}
+let prelude = https://raw.githubusercontent.com/vmchale/atspkg/master/ats-pkg/dhall/atspkg-prelude.dhall
+in
+
 {- Helper functions -}
 let mapDir =
   λ(rec : {dir : Text, xs : List Text }) →
@@ -32,11 +36,6 @@ in
 let mapML =
   λ(xs : List Text) →
     mapDir { dir = "libats/ML", xs = xs }
-in
-
-{- ATSPackage parts -}
-let prelude = https://raw.githubusercontent.com/vmchale/atspkg/master/ats-pkg/dhall/atspkg-prelude.dhall
-
 in
 
 let atslib =

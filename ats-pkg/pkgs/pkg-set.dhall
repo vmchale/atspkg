@@ -17,16 +17,6 @@ let unistring =
   makeGnuPkg { version = [0,9,9], name = "unistring" }
 in
 
-let ssh2 = 
-  λ(x : List Integer) →
-    prelude.dep ⫽
-      { libName = "ssh2"
-      , dir = "ssh2-${prelude.showVersion x}"
-      , url = "https://www.libssh2.org/download/libssh2-${prelude.showVersion x}.tar.gz"
-      , libVersion = x
-      }
-in
-
 let curl = 
   λ(x : List Integer) →
     prelude.dep ⫽
@@ -132,7 +122,6 @@ let pkgset =
   , xzUtils [5,2,3]
   , git [0,27,0]
   , curl [7,59,0]
-  , ssh2 [1,8,0]
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,7]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,1]
   , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall [0,1,5]

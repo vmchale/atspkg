@@ -10,19 +10,20 @@ import           Distribution.Simple.LocalBuildInfo
 import           Language.ATS.Package.Build
 import           Quaalude
 
--- | Use this in place of 'defaultMain' for a simple build.
+-- | Use this in place of 'defaultMain' for a simple build. It may be necessary
+-- to use this in place of 'defaultMain' in any downstream packages as well.
 atsPolyglotBuild :: IO ()
 atsPolyglotBuild = defaultMainWithHooks cabalHooks
 
 configureCabal :: IO LocalBuildInfo -> IO LocalBuildInfo
 configureCabal = (<*>) $ do
-    build ["install"]
-    libDir <- (<> "/lib") <$> getCurrentDirectory -- (<> "/.atspkg") <$> getEnv "HOME"
+    flip when (build ["install"]) =<< doesFileExist "atspkg.dhall"
+    libDir <- (<> "/.atspkg/lib/") <$> getEnv "HOME"
     pure (modifyConf libDir)
 
 modifyBuildInfo :: String -> BuildInfo -> BuildInfo
 modifyBuildInfo libDir bi = let olds = extraLibDirs bi
-    in bi { extraLibDirs = (libDir <>) <$> olds }
+    in bi { extraLibDirs = libDir : olds }
 
 modifyConf :: FilePath -- ^ New library directory (absolute)
            -> LocalBuildInfo
