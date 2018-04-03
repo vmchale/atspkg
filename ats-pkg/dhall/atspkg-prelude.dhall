@@ -38,7 +38,7 @@ let script =
 in
 
 let src =
-  λ(x : { atsSrc : Text, cTarget : Text }) → 
+  λ(x : { atsSrc : Text, cTarget : Text }) →
     { atsSrc = x.atsSrc
     , cTarget = x.cTarget
     , atsGen = []

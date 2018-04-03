@@ -4,6 +4,7 @@ module Main ( main
             ) where
 
 import           Control.Composition
+import           Control.Monad
 import           Data.Bool                  (bool)
 import           Data.Maybe                 (fromMaybe)
 import           Data.Semigroup             (Semigroup (..))
@@ -200,8 +201,8 @@ runHelper rba lint tim rs tgt v = g . bool x y =<< check Nothing
 
 run :: Command -> IO ()
 run List                          = displayList "https://raw.githubusercontent.com/vmchale/atspkg/master/ats-pkg/pkgs/pkg-set.dhall"
-run (Check p b)                   = print . ($ Version [0,1,0]) =<< checkPkg p b
-run (CheckSet p b)                = print =<< checkPkgSet p b
+run (Check p b)                   = void $ ($ Version [0,1,0]) <$> checkPkg p b
+run (CheckSet p b)                = void $ checkPkgSet p b
 run Upgrade                       = upgradeBin "vmchale" "atspkg"
 run Nuke                          = cleanAll
 run (Fetch u)                     = fetchPkg u

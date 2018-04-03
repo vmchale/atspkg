@@ -18,7 +18,7 @@ import           Language.ATS.Package.Type
 import           Quaalude
 
 newtype ATSPackageSet = ATSPackageSet { _atsPkgSet :: [ ATSDependency ] }
-    deriving (Interpret, Show)
+    deriving (Interpret)
 
 makeLenses ''ATSPackageSet
 

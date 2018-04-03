@@ -72,7 +72,7 @@ script:
     else
       mv $BINPATH/atspkg atspkg-$TARGET
     fi
-  - ls atspkg-$TARGET
+  - strip atspkg-$TARGET
   - |
     if [ `uname` = "Darwin" ]
     then
@@ -82,7 +82,7 @@ script:
     fi
   - echo $BINPATH
   - mv $BINPATH atsfmt-$TARGET
-  - ls atsfmt-$TARGET
+  - strip atspkg-$TARGET
 
 deploy:
   api_key:
