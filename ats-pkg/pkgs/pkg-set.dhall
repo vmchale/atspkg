@@ -24,7 +24,6 @@ let curl =
       , dir = "curl-${prelude.showVersion x}"
       , url = "https://curl.haxx.se/download/curl-${prelude.showVersion x}.tar.gz"
       , libVersion = x
-      , libDeps = prelude.mapPlainDeps [ "ssh2" ]
       }
 in
 
