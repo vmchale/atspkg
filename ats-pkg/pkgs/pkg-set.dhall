@@ -43,7 +43,7 @@ let curl =
       , dir = "curl-${prelude.showVersion x}"
       , url = "https://curl.haxx.se/download/curl-${prelude.showVersion x}.tar.gz"
       , libVersion = x
-      , libDeps = prelude.mapPlainDeps [ "ssh2" ]
+      -- , libDeps = prelude.mapPlainDeps [ "ssh2" ]
       }
 in
 
@@ -84,7 +84,7 @@ let git =
       , dir = "libgit2-${prelude.showVersion v}"
       , url = "https://github.com/libgit2/libgit2/archive/v${prelude.showVersion v}.tar.gz"
       , libVersion = v
-      , libDeps = prelude.mapPlainDeps [ "curl", "openssl" ]
+      , libDeps = prelude.mapPlainDeps [ "curl" [ -- , "openssl" ]
       }
 in
 
@@ -141,8 +141,8 @@ let pkgset =
   , xzUtils [5,2,3]
   , git [0,27,0]
   , curl [7,59,0]
-  , ssh2 [1,8,0]
-  , ssl
+  -- , ssh2 [1,8,0]
+  -- , ssl
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,6]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,1]
   , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall [0,1,5]
