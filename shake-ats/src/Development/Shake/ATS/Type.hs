@@ -31,6 +31,7 @@ module Development.Shake.ATS.Type ( ForeignCabal (..)
                                   , linkTargets
                                   , cpphs
                                   , hsFile
+                                  , strip
                                   ) where
 
 import           Data.Binary         (Binary (..))
@@ -107,6 +108,7 @@ data ATSTarget = ATSTarget { _cFlags      :: [String] -- ^ Flags to be passed to
                            , _binTarget   :: FilePath -- ^ Target
                            , _otherDeps   :: [FilePath] -- ^ Other files to track.
                            , _tgtType     :: ArtifactType -- ^ Build type
+                           , _strip       :: Bool -- ^ Whether to strip generated artifacts
                            } deriving (Generic, Binary)
 
 -- | Data type containing information about Haskell components of a build. Any

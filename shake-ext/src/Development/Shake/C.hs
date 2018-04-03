@@ -17,6 +17,7 @@ module Development.Shake.C ( -- * Types
                            , binaryA
                            , staticLibA
                            , sharedLibA
+                           , stripA
                            -- * Helper functions
                            , cconfigToArgs
                            , ccToString
@@ -81,6 +82,11 @@ ccToString (GCC pre)      = mkQualified pre Nothing "gcc"
 ccToString (GHC pre suff) = mkQualified pre suff "ghc"
 ccToString CompCert       = "ccomp"
 
+stripToString :: CCompiler -> String
+stripToString (GCC pre)   = mkQualified pre Nothing "strip"
+stripToString (GHC pre _) = mkQualified pre Nothing "strip"
+stripToString _           = "strip"
+
 arToString :: CCompiler -> String
 arToString (GCC pre)   = mkQualified pre Nothing "ar"
 arToString (GHC pre _) = mkQualified pre Nothing "ar"
@@ -142,13 +148,19 @@ cBin :: CCompiler
      -> Rules ()
 cBin cc sources bin cfg = bin %> \out -> binaryA cc sources out cfg
 
+stripA :: CmdResult r
+       => FilePath -- ^ Build product to be stripped
+       -> CCompiler -- ^ C compiler
+       -> Action r
+stripA out cc = command mempty (stripToString cc) [out]
+
 -- | This action builds an executable.
 binaryA :: CmdResult r
-         => CCompiler
-         -> [FilePath] -- ^ Source files
-         -> FilePath -- ^ Executable output
-         -> CConfig
-         -> Action r
+        => CCompiler
+        -> [FilePath] -- ^ Source files
+        -> FilePath -- ^ Executable output
+        -> CConfig
+        -> Action r
 binaryA cc sources out cfg =
     need sources >>
     (command [EchoStderr False] (ccToString cc) . (("-o" : out : sources) <>) . cconfigToArgs) cfg

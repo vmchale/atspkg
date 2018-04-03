@@ -48,6 +48,7 @@ module Development.Shake.ATS ( -- * Shake Rules
                              , toolConfig
                              , cpphs
                              , hsFile
+                             , strip
                              ) where
 
 import           Control.Arrow
@@ -203,6 +204,7 @@ atsBin ATSTarget{..} = do
         cconfig'' <- cconfig _toolConfig _libs _gc (makeCFlags _cFlags _hsLibs ghcV' _gc)
 
         unit $ g _tgtType (_cc _toolConfig) (h' cTargets) _binTarget cconfig''
+        bool (pure ()) (stripA _binTarget (_cc _toolConfig)) _strip
 
 -- | Generate C code from ATS code.
 cgen :: ATSToolConfig
