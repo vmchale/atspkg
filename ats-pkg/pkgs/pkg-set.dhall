@@ -118,13 +118,13 @@ in
 let intinf =
   λ(x : List Integer) →
     prelude.makeNpmPkg { x = x, name = "atscntrb-hx-intinf", unpackDir = "atscntrb-hx-intinf" }
-      ⫽ { libDeps = prelude.mapPlainDeps [ "atscntrb-libgmp" ] }
+      ⫽ { libDeps = prelude.mapPlainDeps [ "atscntrb-hx-libgmp" ] }
 in
 
 let threadkit =
   λ(x : List Integer) →
     prelude.makeNpmPkg { x = x, name = "atscntrb-hx-threadkit", unpackDir = "atscntrb-hx-threadkit" }
-      ⫽ { libDeps = prelude.mapPlainDeps [ "atscntrb-libgmp" ] }
+      ⫽ { libDeps = prelude.mapPlainDeps [ "atscntrb-hx-libgmp" ] }
 in
 
 let pkgset =
