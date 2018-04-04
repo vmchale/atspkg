@@ -117,7 +117,7 @@ in
 
 let intinf =
   λ(x : List Integer) →
-    prelude.makeNpmPkg { x = x, name = "atscntrb-hx-intinf", unpackDir = "atscntrb-hx-ntinf" }
+    prelude.makeNpmPkg { x = x, name = "atscntrb-hx-intinf", unpackDir = "atscntrb-hx-intinf" }
       ⫽ { libDeps = prelude.mapPlainDeps [ "atscntrb-libgmp" ] }
 in
 
