@@ -144,8 +144,8 @@ cconfig tc libs' gc' extras = do
 patsEnv :: ATSToolConfig -> FilePath -> [CmdOption]
 patsEnv cfg path = EchoStderr False :
     zipWith AddEnv
-        ["PATSHOME", "PATH", "PATSHOMELOCS"]
-        [_patsHome cfg, _patsHome cfg ++ "/bin:" ++ path, _patsHomeLocs cfg]
+        ["PATSHOME", "PATH", "PATSHOMELOCS", "LIBGMP"]
+        [_patsHome cfg, _patsHome cfg ++ "/bin:" ++ path, _patsHomeLocs cfg ]
 
 atsToC :: FilePath -> FilePath
 atsToC = (-<.> "c") . (".atspkg/c/" <>)
@@ -164,6 +164,8 @@ hsAts (ATSGen x y z) = genATS x y z
 
 satsGen :: HATSGen -> Rules ()
 satsGen (HATSGen x y) = genLinks x y
+
+-- /.atspkg/contrib/atscntrb-hx-libgmp
 
 -- | Rules for generating binaries or libraries from ATS code. This is very
 -- general; use 'defaultATSTarget' for sensible defaults that can be modified

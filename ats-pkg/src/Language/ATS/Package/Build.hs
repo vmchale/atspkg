@@ -94,7 +94,7 @@ mkInstall tgt =
             Just com -> if not co then pure () else do
                 let com' = unpack com
                     comDest = home <> "/.compleat/" <> takeFileName com'
-                need [com']
+                need [com'] -- FIXME do this all in one step
                 copyFile' com' comDest
             Nothing -> pure ()
 

@@ -5,6 +5,7 @@ packages: language-ats
         , shake-ats
         , dependency
         , hs2ats
+        , fast-arithmetic
 
 constraints:
   ats-format +development,
