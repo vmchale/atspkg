@@ -148,6 +148,7 @@ data DataPropLeaf a = DataPropLeaf { propU :: [Universal a], _propExpr1 :: Expre
 
 -- | A type for parsed ATS types
 data Type a = Tuple a [Type a]
+            | BoxTuple a [Type a]
             | Named (Name a)
             | Ex (Existential a) (Maybe (Type a))
             | ForA (Universal a) (Type a)
@@ -314,7 +315,8 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                   | ProofExpr a (Expression a) (Expression a)
                   | TypeSignature (Expression a) (Type a)
                   | WhereExp (Expression a) (ATS a)
-                  | TupleEx a [Expression a] -- TODO support boxed tuples
+                  | TupleEx a [Expression a]
+                  | BoxTupleEx a [Expression a]
                   | While a (Expression a) (Expression a)
                   | Actions (ATS a)
                   | Begin a (Expression a)

@@ -165,6 +165,7 @@ instance Eq a => Pretty (Expression a) where
         a (TypeSignatureF e t)         = e <+> ":" <+> pretty t
         a (WhereExpF e d)              = e <+> "where" <$> braces (" " <> nest 2 (pretty d) <> " ")
         a (TupleExF _ es)              = parens (mconcat $ punctuate ", " (reverse es))
+        a (BoxTupleExF _ es)           = "'(" <> mconcat (punctuate ", " (reverse es)) <> ")"
         a (WhileF _ e e')              = "while" <> parens e <> e'
         a (ActionsF as)                = "{" <$> indent 2 (pretty as) <$> "}"
         a UnderscoreLitF{}             = "_"
@@ -266,7 +267,7 @@ instance Eq a => Pretty (Type a) where
         a (NamedF n)                       = pretty n
         a (ViewTypeF _ t)                  = "view@" <> parens t
         a (ExF e (Just t))
-            | head (show t) == '['         = pretty e <> t -- FIXME this is a hack
+            | head (show t) == '['         = pretty e <> t -- FIXME this is kinda dumb
             | otherwise                    = pretty e <+> t
         a (ExF e Nothing)                  = pretty e
         a (DependentF n@SpecialName{} [t]) = pretty n <+> pretty t
@@ -282,6 +283,7 @@ instance Eq a => Pretty (Type a) where
         a (ProofTypeF _ t t')              = parens (prettyArgsG "" "" t <+> "|" <+> t')
         a (ConcreteTypeF e)                = pretty e
         a (TupleF _ ts)                    = parens (mconcat (punctuate ", " (fmap pretty (reverse ts))))
+        a (BoxTupleF _ ts)                 = "'(" <> mconcat (punctuate ", " (fmap pretty (reverse ts))) <> ")"
         a (RefTypeF t)                     = "&" <> t
         a (FunctionTypeF s t t')           = t <+> string s <+> t'
         a (ViewLiteralF c)                 = "view" <> pretty c

@@ -1,3 +1,4 @@
+⅋ ⊸
 # Features
 - [ ] `fetching...` should include version number.
 - [ ] shell completions should list targets (?)

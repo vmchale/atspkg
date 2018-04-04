@@ -117,7 +117,7 @@ in
 
 let intinf =
   λ(x : List Integer) →
-    prelude.makeNpmPkg { x = x, name = "atscntrb-hx-intinf", unpackDir = "atscntrb-hx-intinf" }
+    prelude.makeNpmPkg { x = x, name = "atscntrb-hx-intinf", unpackDir = "atscntrb-hx-ntinf" }
       ⫽ { libDeps = prelude.mapPlainDeps [ "atscntrb-libgmp" ] }
 in
 
@@ -131,7 +131,7 @@ let pkgset =
   [ divideConquer [1,0,5]
   , divideConquerPar [1,0,9]
   , fworkshop [1,0,2]
-  , intinf [1,0,0]
+  , intinf [1,0,8]
   , threadkit [1,0,3]
   , gmp [1,0,4]
   , atomicOps

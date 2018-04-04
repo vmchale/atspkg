@@ -12,6 +12,6 @@ import           Development.Shake.TH
 ghcVersion :: Action String
 ghcVersion = do
     ~(Stdout o) <- command mempty "ghc" ["--numeric-version"]
-    pure o
+    pure (head (lines o))
 
 $(mkVersions ["pandoc", "cabal"])

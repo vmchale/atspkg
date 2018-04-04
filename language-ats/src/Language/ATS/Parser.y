@@ -146,6 +146,7 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     identifierSpace { $$@IdentifierSpace{} }
     closeParen { Special $$ ")" }
     openParen { Special $$ "(" }
+    boxTuple { Special $$ "'(" }
     colon { SignatureTok $$ "" }
     signature { SignatureTok _ $$ }
     comma { Special $$ "," }
@@ -282,6 +283,8 @@ Type : Name parens(TypeInExpr) { Dependent $1 $2 }
      | identifierSpace identifier { Dependent (Unqualified $ to_string $1) [Named (Unqualified $ to_string $2)] }
      | openParen TypeIn closeParen { Tuple $1 $2 }
      | openParen TypeIn closeParen lineComment { Tuple $1 $2 }
+     | boxTuple TypeIn closeParen { BoxTuple $1 $2 }
+     | boxTuple TypeIn closeParen lineComment { BoxTuple $1 $2 }
      | openParen Type closeParen { ParenType $1 $2 }
      | openParen TypeIn rbrace {% left $ Expected $3 ")" "}" }
      | doubleParens { NoneType $1 }
@@ -439,6 +442,7 @@ PreExpression : identifier lsqbracket PreExpression rsqbracket { Index $2 (Unqua
               | Literal { $1 }
               | Call { $1 }
               | openParen Tuple closeParen { TupleEx $1 $2 }
+              | boxTuple Tuple closeParen { BoxTupleEx $1 $2 }
               | case Expression of Case { Case $3 $1 $2 $4 }
               | ifcase IfCase { IfCase $1 $2 }
               | openParen Expression closeParen { ParenExpr $1 $2 }
