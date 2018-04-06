@@ -133,7 +133,7 @@ let pkgset =
   , fworkshop [1,0,2]
   , intinf [1,0,8]
   , threadkit [1,0,3]
-  , gmp [1,0,0]
+  , gmp [1,0,1]
   , atomicOps
   , gc
   , fastArithmetic [0,3,3,1]
