@@ -66,6 +66,7 @@ in
 let gmp =
   λ(x : List Integer) →
     prelude.makeNpmPkg { x = x, name = "atscntrb-hx-libgmp", unpackDir = "atscntrb-libgmp" }
+      ⫽ { url = "https://registry.npmjs.org/atscntrb-hx-libgmp/-/$atscntrb-hx-libgmp-${prelude.showVersion x}.tgz" }
 in
 
 let atomicOps =
