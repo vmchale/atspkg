@@ -244,7 +244,7 @@ tokens :-
     <0> exception                { tok (\p _ -> alex $ Keyword p KwException) }
     <0> "$list_vt"               { tok (\p _ -> alex $ Keyword p (KwListLit "_vt")) }
     <0> "$list"                  { tok (\p _ -> alex $ Keyword p (KwListLit mempty)) }
-    <0> "fold@"                  { tok (\p s -> alex $ IdentifierSpace p s) }
+    <0> "fold@"                  { tok (\p s -> alex $ Identifier p s) }
     <0> "free@"                  { tok (\p s -> alex $ Identifier p s) }
     <0> @fixity_decl             { tok (\p s -> alex $ FixityTok p s) }
 

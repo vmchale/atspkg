@@ -49,6 +49,8 @@ fetchDeps cc' setup' deps cdeps atsBld cfgPath als b' =
         atsDeps' <- setBuildPlan "atsbld" libBldDeps pkgSet atsBld
         cdeps' <- setBuildPlan "c" libDeps pkgSet cdeps
 
+        -- ~/.atspkg/0.3.10/lib/ats2-postiats-0.3.9/c
+
         -- Set up actions
         d <- (<> "lib/") <$> cpkgHome cc'
         let tgt' = getTgt cc'

@@ -70,7 +70,7 @@ in
 
 {- Default configurations -}
 let dep =
-  { dir = ".atspkg/contrib"
+  { dir = patsHome
   , libVersion = [0,1,0]
   , libDeps = []
     : List LibDep

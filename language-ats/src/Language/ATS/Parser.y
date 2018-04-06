@@ -456,6 +456,7 @@ PreExpression : identifier lsqbracket PreExpression rsqbracket { Index $2 (Unqua
               | let ATS comment_after(in) end { Let $1 $2 Nothing }
               | let ATS in Expression end { Let $1 $2 (Just $4) }
               | let ATS in Expression vbar {% left $ Expected $5 "end" "|" }
+              | let ATS fun {% left $ Expected $3 "in" "fun" }
               | lambda Pattern LambdaArrow Expression { Lambda $1 $3 $2 $4 }
               | llambda Pattern LambdaArrow Expression { LinearLambda $1 $3 $2 $4 }
               | addrAt PreExpression { AddrAt $1 $2 }
@@ -892,7 +893,8 @@ Declaration : include string { Include $2 }
             | overload BinOp with identifierSpace of intLit { OverloadOp $1 $2 (Unqualified $ to_string $4) (Just $6) }
             | overload identifierSpace with Name { OverloadIdent $1 (to_string $2) $4 Nothing }
             | overload identifierSpace with identifierSpace of intLit { OverloadIdent $1 (to_string $2) (Unqualified $ to_string $4) (Just $6) }
-            | overload tilde with identifierSpace of intLit { OverloadIdent $1 "~" (Unqualified $ to_string $4) (Just $6) } -- FIXME figure out a general solution.
+            | overload tilde with identifier { OverloadIdent $1 "~" (Unqualified $ to_string $4) Nothing } -- FIXME figure out a general solution.
+            | overload tilde with identifierSpace of intLit { OverloadIdent $1 "~" (Unqualified $ to_string $4) (Just $6) }
             | overload lsqbracket rsqbracket with identifierSpace of intLit { OverloadIdent $1 "[]" (Unqualified $ to_string $5) (Just $7) }
             | overload dot identifierSpace with Name { OverloadIdent $1 ('.' : (to_string $3)) $5 Nothing }
             | assume identifierSpace eq Type { Assume (Unqualified (to_string $2)) [NoArgs] $4 }

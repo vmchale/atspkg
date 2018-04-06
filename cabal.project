@@ -5,7 +5,6 @@ packages: language-ats
         , shake-ats
         , dependency
         , hs2ats
-        , fast-arithmetic
 
 constraints:
   ats-format +development,
@@ -24,7 +23,7 @@ allow-boot-library-installs: True
 optimization: 2
 tests: True
 benchmarks: True
--- documentation: True
+documentation: True
 
 program-options
   happy-options: -gcsa
