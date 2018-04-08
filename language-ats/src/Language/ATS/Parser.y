@@ -892,6 +892,7 @@ Declaration : include string { Include $2 }
             | overload BinOp with customOperator { OverloadOp $1 $2 (Unqualified $ to_string $4) Nothing }
             | overload BinOp with identifierSpace of intLit { OverloadOp $1 $2 (Unqualified $ to_string $4) (Just $6) }
             | overload identifierSpace with Name { OverloadIdent $1 (to_string $2) $4 Nothing }
+            | overload identifierSpace with identifierSpace { OverloadIdent $1 (to_string $2) (Unqualified $ to_string $4) Nothing }
             | overload identifierSpace with identifierSpace of intLit { OverloadIdent $1 (to_string $2) (Unqualified $ to_string $4) (Just $6) }
             | overload tilde with identifier { OverloadIdent $1 "~" (Unqualified $ to_string $4) Nothing } -- FIXME figure out a general solution.
             | overload tilde with identifierSpace of intLit { OverloadIdent $1 "~" (Unqualified $ to_string $4) (Just $6) }
