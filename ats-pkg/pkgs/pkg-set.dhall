@@ -88,6 +88,15 @@ let git =
       }
 in
 
+let toml =
+  prelude.dep ⫽
+    { libName = "toml"
+    , dir = "toml-0.1.0"
+    , url = "https://github.com/cktan/tomlc99/archive/master.zip"
+    , libVersion = [0,1,0]
+    }
+in
+
 let gc =
   prelude.dep ⫽
     { libName = "gc"
