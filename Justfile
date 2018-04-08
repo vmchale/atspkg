@@ -53,7 +53,7 @@ ci: install
     stack build --test --no-run-tests --bench --no-run-benchmarks && weeder .
     atspkg nuke
     atspkg remote https://github.com/vmchale/polyglot/archive/master.zip
-    atspkg remote https://hackage.haskell.org/package/fast-arithmetic-0.3.3.4/fast-arithmetic-0.3.3.4.tar.gz
+    atspkg remote https://hackage.haskell.org/package/fast-arithmetic-0.3.3.5/fast-arithmetic-0.3.3.5.tar.gz
 
 pkg-install: build
     @cp -f $(fd 'atspkg$' -IH dist-newstyle | tail -n1) ~/.local/bin

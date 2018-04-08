@@ -41,5 +41,5 @@ data GenerateError = Unsupported String
 
 instance Pretty GenerateError where
     pretty (Unsupported s)            = dullyellow "Warning:" <+> "skipping unsupported construct" <$$> indent 2 (squotes (text s)) <> linebreak
-    pretty (HaskellSyntaxError loc s) = red "Error:" <+> "failed to parse" <+> text (show loc) <> colon <$$> indent 2 (text s) <> linebreak
-    pretty (Internal s)               = red "Error:" <+> "internal error: " <$$> indent 2 (text s) <> linebreak
+    pretty (HaskellSyntaxError loc s) = dullred "Error:" <+> "failed to parse" <+> text (show loc) <> colon <$$> indent 2 (text s) <> linebreak
+    pretty (Internal s)               = dullred "Error:" <+> "internal error: " <$$> indent 2 (text s) <> linebreak

@@ -1,6 +1,7 @@
 # ATSPackage
 
 [![Build Status](https://travis-ci.org/vmchale/atspkg.svg?branch=master)](https://travis-ci.org/vmchale/atspkg)
+[![Hackage](https://img.shields.io/hackage/v/ats-pkg.svg)](http://hackage.haskell.org/package/ats-pkg)
 
 This is a build system for ATS written in Haskell and configured with Dhall. It
 is not fully working, but the configuration format is now stable.
