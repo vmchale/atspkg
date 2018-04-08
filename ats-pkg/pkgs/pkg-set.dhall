@@ -150,6 +150,7 @@ let pkgset =
   , xzUtils [5,2,3]
   , git [0,27,0]
   , curl [7,59,0]
+  , toml
   -- , ssh2 [1,8,0]
   -- , ssl
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,7]
