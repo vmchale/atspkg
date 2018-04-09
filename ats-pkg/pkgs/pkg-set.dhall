@@ -153,7 +153,7 @@ let pkgset =
   , toml
   -- , ssh2 [1,8,0]
   -- , ssl
-  , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,7]
+  , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,8]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,1]
   , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall [0,1,6]
   , https://raw.githubusercontent.com/vmchale/either/master/pkg.dhall [0,2,2]
