@@ -74,7 +74,8 @@ finish ln dep' =
 
 buildSequence :: [Dependency] -> [[Dependency]]
 buildSequence = reverse . groupBy independent . sortDeps
-    where independent (Dependency ln ls _) (Dependency ln' ls' _) = ln' `notElem` (fst <$> ls) && ln `notElem` (fst <$> ls')
+    where independent (Dependency ln ls _) (Dependency ln' ls' _) =
+            ln' `notElem` (fst <$> ls) && ln `notElem` (fst <$> ls')
 
 iterateM :: (Monad m) => Int -> (a -> m a) -> a -> m [a]
 iterateM 0 _ _ = pure []
@@ -87,15 +88,14 @@ saturateDeps ps = resolve <=< saturateDeps' ps
           n = length (toList ps)
 
 saturateDeps' :: PackageSet Dependency -> Dependency -> DepM (S.Set Dependency)
-saturateDeps' (PackageSet ps) dep = do
-    deps <- sequence [ lookupMap lib ps | lib <- fst <$> _libDependencies dep ]
-    list <- (:) dep <$> traverse (lookupSet Nothing mempty) deps
-    pure $ S.fromList list
+saturateDeps' (PackageSet ps) dep = S.fromList <$> list
+    where list = (:) dep <$> (traverse (lookupSet Nothing mempty) =<< deps)
+          deps = sequence [ lookupMap lib ps | lib <- fst <$> _libDependencies dep ]
 
 run :: ResolveState a -> DepM a
 run = flip evalTardisT (id, mempty) . unResolve
 
--- | Heuristics:
+-- | Dependency resolution is guided by the following:
 --
 -- 1. Always use a newer version when possible
 --
@@ -107,9 +107,11 @@ run = flip evalTardisT (id, mempty) . unResolve
 --
 -- 5. Specify an error if a package is not present
 --
+-- 6. Present a solution whenever one exists.
+--
 -- This doesn't do any package resolution beyond versioning.
 resolveDependencies :: PackageSet Dependency -> [Dependency] -> DepM [[Dependency]]
-resolveDependencies ps = select . getLatest <=< fmap (buildSequence . toList) . saturated
+resolveDependencies ps = select . getLatest <=< fmap (buildSequence . toList) . saturate
     where select = fmap (fmap (fmap snd))
-          saturated dep = S.unions <$> traverse (saturateDeps ps) dep
+          saturate = fmap S.unions . traverse (saturateDeps ps)
           getLatest = run . traverse (traverse (latest ps))

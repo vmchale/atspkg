@@ -10,6 +10,7 @@
 - [ ] Handle `stadef mytkind = $extkind"atslib_linmap_avltree"`
 - [ ] Sort annotations for viewtypes etc.
 - [ ] `$tup(x, y)` syntax?
+- [ ] `stadef x: bool = z`
 # Deficiencies
 - [ ] Error messages
   - [ ] Add test suite for messages

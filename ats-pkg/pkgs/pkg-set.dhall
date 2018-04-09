@@ -91,7 +91,7 @@ in
 let toml =
   prelude.dep ⫽
     { libName = "toml"
-    , dir = "toml-0.1.0"
+    , dir = "${prelude.patsHome}/toml-0.1.0"
     , url = "https://github.com/cktan/tomlc99/archive/master.zip"
     , libVersion = [0,1,0]
     }

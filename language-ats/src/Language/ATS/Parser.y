@@ -513,6 +513,7 @@ Sort : t0pPlain { T0p None }
 QuantifierArgs : comma_sep(IdentifierOr) { $1 }
                | { [] }
 
+-- FIXME handle [l:addr;n:int]
 Existential : lsqbracket QuantifierArgs colon Sort vbar StaticExpression rsqbracket { Existential $2 False (Just $4) (Just $6) }
             | lsqbracket QuantifierArgs colon Sort rsqbracket { Existential $2 False (Just $4) Nothing }
             | openExistential QuantifierArgs colon Sort rsqbracket { Existential $2 True (Just $4) Nothing }
@@ -870,7 +871,9 @@ Declaration : include string { Include $2 }
             | cblock { CBlock $1 }
             | datasort identifierSpace eq DataSortLeaves { DataSort $1 (to_string $2) $4 }
             | macdef IdentifierOr doubleParens eq Expression { MacDecl $1 $2 [] $5 }
+            | macdef customOperator doubleParens eq Expression { MacDecl $1 (to_string $2) [] $5 }
             | macdef IdentifierOr openParen IdentifiersIn closeParen eq Expression { MacDecl $1 $2 $4 $7 }
+            | macdef customOperator openParen IdentifiersIn closeParen eq Expression { MacDecl $1 (to_string $2) $4 $7 }
             | lineComment { Comment (to_string $1) }
             | Comment { $1 }
             | Load underscore eq string { Load (fst $1) (get_staload $ snd $1) (Just "_") $4 }
