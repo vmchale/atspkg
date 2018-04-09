@@ -137,8 +137,8 @@ cconfig tc libs' gc' extras = do
     let h = _patsHome tc
     let cc' = _cc tc
     h' <- pkgHome cc'
+    -- FIXME only bother with atslib if it's unnecessary?
     let libs'' = ("atslib" :) $ bool libs' ("gc" : libs') gc'
-    -- TODO only include /ccomp/atslib/lib if it's not a cross build
     pure $ CConfig [h ++ "/ccomp/runtime/", h, h' ++ "include", ".atspkg/contrib"] libs'' [h' ++ "lib", _patsHome tc ++ "/ccomp/atslib/lib"] extras (_linkStatic tc)
 
 patsEnv :: ATSToolConfig -> FilePath -> [CmdOption]

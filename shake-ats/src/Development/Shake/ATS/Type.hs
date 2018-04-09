@@ -83,6 +83,7 @@ data ATSToolConfig = ATSToolConfig { _patsHome     :: String -- ^ Value to be us
                                    , _hasPretty    :: Bool -- ^ Whether to display errors via @pats-filter@
                                    , _cc           :: CCompiler -- ^ C compiler to be used
                                    , _linkStatic   :: Bool -- ^ Force static linking
+                                   -- , _linkATSLib :: Bool -- ^ Whether to link against atslib
                                    } deriving (Generic, Binary)
 
 data HATSGen = HATSGen { satsFile :: FilePath -- ^ @.sats@ file containing type definitions
