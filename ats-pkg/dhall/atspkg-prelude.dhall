@@ -112,6 +112,9 @@ in
 let Solver = constructors < PatsSolve : {} | Z3 : {} | Ignore : {} >
 in
 
+let solver = Solver.PatsSolve {=}
+in
+
 let ignore = Solver.Ignore {=}
 in
 
@@ -137,7 +140,7 @@ let default
     , atsSource = []
       : List Src
     , dynLink = True
-    , extSolve = ignore
+    , extSolve = solver
     }
 in
 
@@ -198,4 +201,6 @@ in
 , makeNpmPkg = makeNpmPkg
 , patsHome = patsHome
 , cabalDir = cabalDir
+, solver = solver
+, ignore = ignore
 }
