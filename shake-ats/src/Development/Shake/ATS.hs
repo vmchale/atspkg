@@ -87,7 +87,7 @@ atsCommand tc sourceFile out = do
                 Ignore -> ("--constraint-ignore":)
                 _      -> id
 
-    command env patsc (f ["--constraint-ignore", "--output", out, "-dd", sourceFile, "-cc"])
+    command env patsc (f ["--output", out, "-dd", sourceFile, "-cc"])
 
 -- | Filter any generated errors with @pats-filter@.
 withPF :: Action (Exit, Stderr String, Stdout String) -- ^ Result of a 'cmd' or 'command'
