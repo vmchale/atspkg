@@ -96,6 +96,7 @@ arToString _           = "ar"
 -- fails.
 ccFromString :: String -> CCompiler
 ccFromString "gcc" = GCC Nothing
+ccFromString "ccomp" = CompCert
 ccFromString "clang" = Clang
 ccFromString "ghc" = GHC Nothing Nothing
 ccFromString s
@@ -104,6 +105,8 @@ ccFromString s
     | "ghc" `isPrefixOf` s = GHC Nothing (Just (drop 3 s))
 ccFromString _ = Other "cc"
 
+-- ALSO consider using Haskell -> C -> ICC ??
+-- TODO ICC??
 -- | A data type representing the C compiler to be used.
 data CCompiler = GCC { _prefix :: Maybe String -- ^ Usually the target triple
                      }

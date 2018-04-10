@@ -83,7 +83,7 @@ atsCommand tc sourceFile out = do
     path <- liftIO $ getEnv "PATH"
     let env = patsEnv tc path
         patsc = patsopt tc
-        f = case (_solver tc) of
+        f = case _solver tc of
                 Ignore -> ("--constraint-ignore":)
                 _      -> id
 
