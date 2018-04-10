@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-duplicate-exports #-}
 {-# LANGUAGE DeriveAnyClass             #-}
 {-# LANGUAGE DeriveDataTypeable         #-}
 {-# LANGUAGE DeriveFoldable             #-}
@@ -29,6 +30,7 @@ module Language.ATS.Types
     , ExpressionF (..)
     , Implementation (..)
     , BinOp (..)
+    , BinOp (Con)
     , UnOp (..)
     , TypeF (..)
     , Existential (..)
@@ -261,6 +263,11 @@ data BinOp a = Add
              | SpecialInfix a String
              deriving (Show, Eq, Generic, NFData)
 
+
+pattern Con :: a -> BinOp a
+pattern Con l = SpecialInfix l "::"
+
+
 data StaticExpression a = StaticVal (Name a)
                         | StaticBinary (BinOp a) (StaticExpression a) (StaticExpression a)
                         | StaticInt Int
@@ -472,6 +479,8 @@ rewriteATS st = cata a where
         | compareFixity st op' op'' = Binary op'' e (Binary op' e' e'')
     a (BinaryF Add e (BinList Add es))               = BinList Add (e : es)
     a (BinaryF Add e e')                             = BinList Add [e, e']
+    a (BinaryF Con{} e (BinList Add es))             = BinList (SpecialInfix undefined "::") (e : es)
+    a (BinaryF Con{} e e')                           = BinList (SpecialInfix undefined "::") [e, e']
     a (ParenExprF _ e@Precede{})                     = e
     a (ParenExprF _ e@PrecedeList{})                 = e
     a (WhereExpF e (ATS ds))                         = WhereExp e (ATS (rewriteDecl st <$> ds))

@@ -457,6 +457,7 @@ PreExpression : identifier lsqbracket PreExpression rsqbracket { Index $2 (Unqua
               | let ATS in Expression end { Let $1 $2 (Just $4) }
               | let ATS in Expression vbar {% left $ Expected $5 "end" "|" }
               | let ATS fun {% left $ Expected $3 "in" "fun" }
+              | let ATS plainArrow {% left $ Expected $3 "in" "=>" } 
               | lambda Pattern LambdaArrow Expression { Lambda $1 $3 $2 $4 }
               | llambda Pattern LambdaArrow Expression { LinearLambda $1 $3 $2 $4 }
               | addrAt PreExpression { AddrAt $1 $2 }

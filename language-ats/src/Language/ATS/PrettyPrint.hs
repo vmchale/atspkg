@@ -132,6 +132,7 @@ instance Eq a => Pretty (Expression a) where
         a (ParenExprF _ e)              = parens e
         a (UnaryF op e) = pretty op <> pretty e
         a (BinListF op@Add es)          = prettyBinary (pretty op) es
+        a (BinListF op@Con{} es)        = prettyBinary (pretty op) es
         a (BinaryF op e e')
             | splits op = e </> pretty op <+> e'
             | otherwise = e <+> pretty op <+> e'

@@ -119,7 +119,7 @@ let default
     , man = ([] : Optional Text)
     , completions = ([] : Optional Text)
     , version = [0,3,9]
-    , compiler = [0,3,9]
+    , compiler = [0,3,10]
     , dependencies = []
       : List LibDep
     , clib = []
