@@ -28,6 +28,7 @@ module Development.Shake.ATS ( -- * Shake Rules
                              , ArtifactType (..)
                              , ATSGen (..)
                              , HATSGen (..)
+                             , Solver (..)
                              -- * Lenses
                              , atsTarget
                              , cFlags
@@ -49,6 +50,7 @@ module Development.Shake.ATS ( -- * Shake Rules
                              , cpphs
                              , hsFile
                              , strip
+                             , solver
                              ) where
 
 import           Control.Arrow
@@ -81,8 +83,11 @@ atsCommand tc sourceFile out = do
     path <- liftIO $ getEnv "PATH"
     let env = patsEnv tc path
         patsc = patsopt tc
+        f = case (_solver tc) of
+                Ignore -> ("--constraint-ignore":)
+                _      -> id
 
-    command env patsc ["--output", out, "-dd", sourceFile, "-cc"]
+    command env patsc (f ["--constraint-ignore", "--output", out, "-dd", sourceFile, "-cc"])
 
 -- | Filter any generated errors with @pats-filter@.
 withPF :: Action (Exit, Stderr String, Stdout String) -- ^ Result of a 'cmd' or 'command'
@@ -101,7 +106,7 @@ gcFlag True  = "-DATS_MEMALLOC_GCBDW"
 -- Copy source files to the appropriate place. This is necessary because
 -- @#include@s in ATS are weird.
 copySources :: ATSToolConfig -> [FilePath] -> Action ()
-copySources (ATSToolConfig home' _ _ _ _) sources =
+copySources (ATSToolConfig home' _ _ _ _ _) sources =
     forM_ sources $ \dep -> do
         liftIO $ createDirectoryIfMissing True (home' ++ "/" ++ takeDirectory dep)
         liftIO $ copyFile dep (home' ++ "/" ++ dep)

@@ -170,6 +170,7 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     cloref1Arrow { Arrow $$ "=<cloref1>" }
     cloptr1Arrow { Arrow $$ "=<cloptr1>" }
     lincloptr1Arrow { Arrow $$ "=<lincloptr1>" }
+    lincloref1Arrow { Arrow $$ "=<lin,cloref1>" }
     spear { Arrow $$ "=>>" }
     proofArrow { Arrow $$ "=/=>" }
     lsqbracket { Special $$ "[" }
@@ -376,6 +377,7 @@ LambdaArrow : plainArrow { Plain $1 }
             | cloref1Arrow { Full $1 "cloref1" } -- FIXME this is a bad heuristic
             | cloptr1Arrow { Full $1 "cloptr1" }
             | lincloptr1Arrow { Full $1 "lincloptr1" }
+            | lincloref1Arrow { Full $1 "lin,cloref1" }
             | minus {% left $ Expected $1 "Arrow" "-" }
             | openParen {% left $ Expected $1 "Arrow" "(" }
             | closeParen {% left $ Expected $1 "Arrow" ")" }

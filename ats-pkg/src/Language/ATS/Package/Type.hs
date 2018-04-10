@@ -72,6 +72,9 @@ data TargetPair = TargetPair { hs    :: Text
 
 deriving instance Interpret ForeignCabal
 
+deriving instance Hashable Solver
+deriving instance Interpret Solver
+
 data Src = Src { atsSrc  :: Text
                , cTarget :: Text
                , atsGen  :: [TargetPair]
@@ -117,5 +120,6 @@ data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , cflags       :: [Text] -- ^ List of flags to pass to the C compiler
                , atsSource    :: [Src] -- ^ ATS source to be compile to C.
                , dynLink      :: Bool -- ^ Don't link statically, instead, use libraries installed by @atspkg@.
+               , extSolve     :: Solver -- ^ Solver to use.
                }
          deriving (Generic, Interpret, Binary, Hashable)

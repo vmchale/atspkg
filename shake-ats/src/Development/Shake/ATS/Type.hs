@@ -11,6 +11,7 @@ module Development.Shake.ATS.Type ( ForeignCabal (..)
                                   , ATSToolConfig (..)
                                   , ATSGen (..)
                                   , HATSGen (..)
+                                  , Solver (..)
                                   -- * Lenses
                                   , atsTarget
                                   , hasPretty
@@ -32,6 +33,7 @@ module Development.Shake.ATS.Type ( ForeignCabal (..)
                                   , cpphs
                                   , hsFile
                                   , strip
+                                  , solver
                                   ) where
 
 import           Data.Binary         (Binary (..))
@@ -77,12 +79,18 @@ data ArtifactType = StaticLibrary
                   | SharedLibrary
                   deriving (Generic, Binary)
 
+data Solver = PatsSolve
+            | Z3
+            | Ignore
+            deriving (Generic, Binary)
+
 -- | Information about where to find @patscc@ and @patsopt@.
 data ATSToolConfig = ATSToolConfig { _patsHome     :: String -- ^ Value to be used for @PATSHOME@.
                                    , _patsHomeLocs :: String -- ^ Value to be used for @PATSHOMELOCS@.
                                    , _hasPretty    :: Bool -- ^ Whether to display errors via @pats-filter@
                                    , _cc           :: CCompiler -- ^ C compiler to be used
                                    , _linkStatic   :: Bool -- ^ Force static linking
+                                   , _solver       :: Solver
                                    -- , _linkATSLib :: Bool -- ^ Whether to link against atslib
                                    } deriving (Generic, Binary)
 
