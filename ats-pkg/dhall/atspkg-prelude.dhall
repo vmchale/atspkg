@@ -109,7 +109,7 @@ let staticLib =
   lib ⫽ { static = True }
 in
 
-let Solver = constructors < PatsSolve | Z3 | Ignore >
+let Solver = constructors < PatsSolve : {} | Z3 : {} | Ignore : {} >
 in
 
 let ignore = Solver.Ignore {=}
