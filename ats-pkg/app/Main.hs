@@ -41,6 +41,7 @@ data Command = Install { _archTarget :: Maybe String }
              | Test { _targets    :: [String]
                     , _rebuildAll :: Bool
                     , _lint       :: Bool
+                    , _prof       :: Bool
                     }
              | Fetch { _url :: String }
              | Nuke
@@ -50,6 +51,7 @@ data Command = Install { _archTarget :: Maybe String }
                    , _rebuildAll :: Bool
                    , _verbosity  :: Int
                    , _lint       :: Bool
+                   , _prof       :: Bool
                    }
              | Check { _filePath :: String, _details :: Bool }
              | CheckSet { _filePath :: String, _details :: Bool }
@@ -116,12 +118,14 @@ run' = Run
     <*> rebuild
     <*> verbosity
     <*> noLint
+    <*> profile
 
 test' :: Parser Command
 test' = Test
     <$> targets "test"
     <*> rebuild
     <*> noLint
+    <*> profile
 
 valgrind :: Parser Command
 valgrind = Valgrind <$> targets "run with valgrind"
@@ -208,8 +212,8 @@ run Nuke                          = cleanAll
 run (Fetch u)                     = fetchPkg u
 run Clean                         = mkPkg False True False mempty ["clean"] Nothing 0
 run (Build rs tgt rba v lint tim) = runHelper rba lint tim rs tgt v
-run (Test ts rba lint)            = runHelper rba lint False ("test" : ts) Nothing 0
-run (Run ts rba v lint)           = runHelper rba lint False ("run" : ts) Nothing v
+run (Test ts rba lint tim)        = runHelper rba lint tim ("test" : ts) Nothing 0
+run (Run ts rba v lint tim)       = runHelper rba lint tim ("run" : ts) Nothing v
 run (Install tgt)                 = runHelper False True False ["install"] tgt 0
 run (Valgrind ts)                 = runHelper False True False ("valgrind" : ts) Nothing 0
 run (Pack dir')                   = packageCompiler dir'
