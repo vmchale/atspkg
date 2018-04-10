@@ -34,7 +34,7 @@ $digit = 0-9
 $octal = 0-7
 
 -- Characters
-$special = [\+\-\&\|\[\]\{\}\(\)\_\=\!\%\^\$\@\;\~\,\.\\\#\<\>\:\?]
+$special = [\+\-\*\&\|\[\]\{\}\(\)\_\=\!\%\^\$\@\;\~\,\.\\\#\<\>\:\?]
 $alpha = [a-zA-Z]
 $terminal = $printable # $white
 $esc_char = \27
