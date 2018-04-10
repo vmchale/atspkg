@@ -109,6 +109,12 @@ let staticLib =
   lib ⫽ { static = True }
 in
 
+let Solver = constructors < PatsSolve | Z3 | Ignore >
+in
+
+let ignore = Solver.Ignore {=}
+in
+
 let default
   = { bin = []
       : List Bin
@@ -131,6 +137,7 @@ let default
     , atsSource = []
       : List Src
     , dynLink = True
+    , extSolve = ignore
     }
 in
 
