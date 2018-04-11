@@ -77,7 +77,6 @@ test-suite language-ats-test
     
     if impl(ghc >=8.0)
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
-                     -Wcompat
 
 benchmark language-ats-bench
     type: exitcode-stdio-1.0
@@ -95,4 +94,3 @@ benchmark language-ats-bench
     
     if impl(ghc >=8.0)
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
-                     -Wcompat

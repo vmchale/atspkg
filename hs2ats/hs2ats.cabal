@@ -54,7 +54,6 @@ library
     
     if impl(ghc >=8.0)
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
-                     -Wcompat
 
 executable hs2ats
     main-is: Main.hs
@@ -74,7 +73,6 @@ executable hs2ats
     
     if impl(ghc >=8.0)
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
-                     -Wcompat
 
 test-suite hs2ats-test
     type: exitcode-stdio-1.0
@@ -94,7 +92,6 @@ test-suite hs2ats-test
     
     if impl(ghc >=8.0)
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
-                     -Wcompat
 
 benchmark hs2ats-bench
     type: exitcode-stdio-1.0
@@ -112,4 +109,3 @@ benchmark hs2ats-bench
     
     if impl(ghc >=8.0)
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
-                     -Wcompat

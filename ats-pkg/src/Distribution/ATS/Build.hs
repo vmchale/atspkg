@@ -10,20 +10,19 @@ import           Distribution.Simple.LocalBuildInfo
 import           Language.ATS.Package.Build
 import           Quaalude
 
--- | Use this in place of 'defaultMain' for a simple build. It may be necessary
--- to use this in place of 'defaultMain' in any downstream packages as well.
+-- | Use this in place of 'defaultMain' for a simple build.
 atsPolyglotBuild :: IO ()
 atsPolyglotBuild = defaultMainWithHooks cabalHooks
 
 configureCabal :: IO LocalBuildInfo -> IO LocalBuildInfo
 configureCabal = (<*>) $ do
-    flip when (build ["install"]) =<< doesFileExist "atspkg.dhall"
-    libDir <- (<> "/.atspkg/lib/") <$> getEnv "HOME"
+    build mempty
+    libDir <- (<> "/") <$> getCurrentDirectory
     pure (modifyConf libDir)
 
 modifyBuildInfo :: String -> BuildInfo -> BuildInfo
 modifyBuildInfo libDir bi = let olds = extraLibDirs bi
-    in bi { extraLibDirs = libDir : olds }
+    in bi { extraLibDirs = (libDir <>) <$> olds }
 
 modifyConf :: FilePath -- ^ New library directory (absolute)
            -> LocalBuildInfo
@@ -39,8 +38,15 @@ modifyLibrary :: String -> Library -> Library
 modifyLibrary libDir lib = let old = libBuildInfo lib
     in lib { libBuildInfo = modifyBuildInfo libDir old }
 
+-- | Write a dummy file that will allow packaging to work.
+writeDummyFile :: IO ()
+writeDummyFile =
+    createDirectoryIfMissing True "dist-newstyle/lib" >>
+    writeFile "dist-newstyle/lib/empty" ""
+
 -- | This uses the users hooks as is @simpleUserHooks@, modified to build the
 -- ATS library.
 cabalHooks :: UserHooks
 cabalHooks = let defConf = confHook simpleUserHooks
-    in simpleUserHooks { confHook = configureCabal .* defConf }
+    in simpleUserHooks { preConf = \_ _ -> writeDummyFile >> pure emptyHookedBuildInfo
+                       , confHook = configureCabal .* defConf }
