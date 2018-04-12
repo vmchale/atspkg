@@ -1,6 +1,6 @@
 {
-module Language.C.Includes ( byteStringToIncludes
-                           ) where
+module Language.C.Dependency ( byteStringToIncludes
+                             ) where
 
 import Data.Bool (bool)
 import qualified Data.Text.Lazy as TL
