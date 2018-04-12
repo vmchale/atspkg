@@ -77,7 +77,7 @@ nested_comment = go 1 =<< alexGetInput
                 alexError ("Error in nested comment at line " ++ show line ++ ", column " ++ show col)
 
 extractDeps :: [Token] -> [FilePath]
-extractDeps [] = []
+extractDeps [] = mempty
 extractDeps (Include:StringTok s:xs) = toInclude s : extractDeps xs
 extractDeps (_:xs) = extractDeps xs
 
@@ -91,7 +91,7 @@ loop :: Alex [Token]
 loop = do
     tok' <- alexMonadScan
     case tok' of
-        End -> pure []
-        _ -> fmap (tok' :) loop
+        End -> pure mempty
+        _ -> fmap (tok' :) <$> loop
 
 }
