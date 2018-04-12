@@ -13,6 +13,16 @@ let makeGnuPkg =
       }
 in
 
+let atsIncludes = 
+  λ(x : List Integer) →
+    prelude.dep ⫽
+      { libName = "ats-includes"
+      , dir = "ats-includes-${prelude.showVersion x}"
+      , url = "https://github.com/vmchale/atspkg/releases/download/compiler/ATS2-Postiats-${prelude.showVersion x}.tar.gz"
+      , libVersion = x
+      }
+in
+
 let unistring =
   makeGnuPkg { version = [0,9,9], name = "unistring" }
 in
@@ -88,15 +98,6 @@ let git =
       }
 in
 
-let toml =
-  prelude.dep ⫽
-    { libName = "toml"
-    , dir = "${prelude.patsHome}/toml-0.1.0"
-    , url = "https://github.com/cktan/tomlc99/archive/master.zip"
-    , libVersion = [0,1,0]
-    }
-in
-
 let gc =
   prelude.dep ⫽
     { libName = "gc"
@@ -150,7 +151,7 @@ let pkgset =
   , xzUtils [5,2,3]
   , git [0,27,0]
   , curl [7,59,0]
-  , toml
+  , atsIncludes [0,3,10]
   -- , ssh2 [1,8,0]
   -- , ssl
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,8]
