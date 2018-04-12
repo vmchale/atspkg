@@ -48,5 +48,5 @@ writeDummyFile =
 -- ATS library.
 cabalHooks :: UserHooks
 cabalHooks = let defConf = confHook simpleUserHooks
-    in simpleUserHooks { preConf = \_ _ -> writeDummyFile >> pure emptyHookedBuildInfo
+    in simpleUserHooks { preConf = (writeDummyFile >>) .* preConf simpleUserHooks
                        , confHook = configureCabal .* defConf }

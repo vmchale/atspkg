@@ -5,6 +5,7 @@ packages: language-ats
         , shake-ats
         , dependency
         , hs2ats
+        , cdeps
 
 constraints:
   ats-format +development,
@@ -14,7 +15,8 @@ constraints:
   shake-ats +development,
   ats-setup +development,
   dependency +development,
-  hs2ats +development +no-executable
+  hs2ats +development +no-executable,
+  cdeps +development
 
 allow-boot-library-installs: True
 optimization: 2
