@@ -46,13 +46,11 @@ library
     build-depends:
         array -any,
         base >=4.11 && <5,
-        bytestring -any,
         Cabal >=2.2,
         composition-prelude -any,
         cpphs -any,
         directory -any,
         shake -any,
-        text -any,
         template-haskell -any
     
     if flag(development)
