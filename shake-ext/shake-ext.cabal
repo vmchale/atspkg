@@ -45,7 +45,9 @@ library
     build-depends:
         array -any,
         base >=4.11 && <5,
+        bytestring,
         Cabal >=2.2,
+        cdeps,
         composition-prelude -any,
         cpphs -any,
         directory -any,

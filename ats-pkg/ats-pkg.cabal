@@ -74,7 +74,6 @@ library
         Cabal >=2.2.0.0,
         lzma -any,
         tar -any,
-        cdeps,
         zlib -any,
         http-client-tls -any,
         text -any,
@@ -121,6 +120,8 @@ executable atspkg
             directory -any,
             composition-prelude -any,
             text -any,
+            cdeps,
+            bytestring,
             shake -any
     
     if flag(no-executable)

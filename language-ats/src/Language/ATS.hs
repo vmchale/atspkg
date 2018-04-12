@@ -62,14 +62,11 @@ module Language.ATS ( -- * Functions for working with syntax
 import           Control.Monad
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.State
-import qualified Data.ByteString.Lazy         as BSL
-import           Data.Text.Lazy.Encoding      (encodeUtf8)
 import           GHC.IO.Handle.FD             (stderr)
 import           Language.ATS.Lexer
 import           Language.ATS.Parser
 import           Language.ATS.PrettyPrint
 import           Language.ATS.Types
-import           Language.C.Dependency
 import           Lens.Micro
 import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
 

@@ -9,4 +9,3 @@ main = hspec $
         parallel $ it "should work" $ do
             getIncludes "#include \"header.h\"" `shouldBe` (Right ["header.h"])
             getIncludes "#include \\\n\"gmp.cats\"" `shouldBe` (Right ["gmp.cats"])
-

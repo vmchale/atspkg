@@ -25,10 +25,11 @@ tokens :-
     "//".*                       ;
 
     "/*"                         { \_ _ -> nested_comment }
+
     @include                     { \_ _ -> alex Include }
     @string                      { tok (\_ s -> alex (StringTok (TL.unpack (decodeUtf8 s)))) }
 
-    \.                           ;
+    $printable                   ;
 
 {
 
@@ -76,7 +77,7 @@ nested_comment = go 1 =<< alexGetInput
                 alexError ("Error in nested comment at line " ++ show line ++ ", column " ++ show col)
 
 extractDeps :: [Token] -> [FilePath]
-extractDeps [] = mempty
+extractDeps [] = []
 extractDeps (Include:StringTok s:xs) = toInclude s : extractDeps xs
 extractDeps (_:xs) = extractDeps xs
 
@@ -90,7 +91,7 @@ loop :: Alex [Token]
 loop = do
     tok' <- alexMonadScan
     case tok' of
-        End -> pure mempty
-        _ -> (tok' :) <$> loop
+        End -> pure []
+        _ -> fmap (tok' :) loop
 
 }
