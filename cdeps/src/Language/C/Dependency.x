@@ -92,6 +92,6 @@ loop = do
     tok' <- alexMonadScan
     case tok' of
         End -> pure mempty
-        _ -> fmap (tok' :) <$> loop
+        _ -> (tok' :) <$> loop
 
 }
