@@ -1,5 +1,5 @@
 {
-module Language.C.Dependency ( byteStringToIncludes
+module Language.C.Dependency ( getIncludes
                              ) where
 
 import Data.Bool (bool)
@@ -46,8 +46,8 @@ alexEOF :: Alex Token
 alexEOF = pure End
 
 -- | Given a 'ByteString' containing C, return a list of filepaths to depend on.
-byteStringToIncludes :: BSL.ByteString -> Either String [FilePath]
-byteStringToIncludes = fmap extractDeps . lexC
+getIncludes :: BSL.ByteString -> Either String [FilePath]
+getIncludes = fmap extractDeps . lexC
 
 nested_comment :: Alex Token
 nested_comment = go 1 =<< alexGetInput

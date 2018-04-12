@@ -1,8 +1,10 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 import           Language.C.Dependency
 import           Test.Hspec
 
 main :: IO ()
 main = hspec $
-    describe "head'" $
-        parallel $ it "gets the head of an infinite list" $
-            head' [1..] `shouldBe` (Just 1 :: Maybe Integer)
+    describe "byteStringIncludes" $
+        parallel $ it "should work" $
+            getIncludes "#include \"header.h\"" `shouldBe` (Right ["header.h"])
