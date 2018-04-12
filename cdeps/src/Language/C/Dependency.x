@@ -17,19 +17,19 @@ $inner_char = [^\\]
 @esc_char = \\ $special_char
 @string = \" (@esc_char | $inner_char)* \"
 
+@include = "#include" | "#include" (" "+) \\\n
+
 tokens :-
 
-    <0> $white+                  ;
-    <0> "//".*                   ;
+    $white+                      ;
+    "//".*                       ;
 
-    <0,splice> $white+           ;
-
-    <0,splice> "--".*            ;
     "/*"                         { \_ _ -> nested_comment }
-    "#include"                   { \_ _ -> alex Include }
+    @include                     { \_ _ -> alex Include }
     @string                      { tok (\_ s -> alex (StringTok (TL.unpack (decodeUtf8 s)))) }
 
-    $printable*                  ;
+    \.                           ;
+
 {
 
 data Token = Include
@@ -78,8 +78,11 @@ nested_comment = go 1 =<< alexGetInput
 
 extractDeps :: [Token] -> [FilePath]
 extractDeps [] = mempty
-extractDeps (Include:StringTok s:xs) = s : extractDeps xs
+extractDeps (Include:StringTok s:xs) = toInclude s : extractDeps xs
 extractDeps (_:xs) = extractDeps xs
+
+toInclude :: String -> FilePath
+toInclude = tail . init
 
 lexC :: BSL.ByteString -> Either String [Token]
 lexC = flip runAlex loop
