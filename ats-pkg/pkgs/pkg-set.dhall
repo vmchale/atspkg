@@ -17,7 +17,7 @@ let atsIncludes =
   λ(x : List Integer) →
     prelude.dep ⫽
       { libName = "ats-includes"
-      , dir = "ats-includes-${prelude.showVersion x}"
+      , dir = "${prelude.patsHome}/ats-includes-${prelude.showVersion x}"
       , url = "https://github.com/vmchale/atspkg/releases/download/compiler/ATS2-Postiats-${prelude.showVersion x}.tar.gz"
       , libVersion = x
       }
