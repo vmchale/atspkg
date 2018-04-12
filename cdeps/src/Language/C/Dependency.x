@@ -17,7 +17,7 @@ $inner_char = [^\\]
 @esc_char = \\ $special_char
 @string = \" (@esc_char | $inner_char)* \"
 
-@include = "#include" | "#include" (" "+) \\\n
+@include = "#include" | "#include" $white+ \\\n
 
 tokens :-
 
