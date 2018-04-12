@@ -35,7 +35,6 @@ tokens :-
 data Token = Include
            | StringTok String
            | End
-           deriving (Eq)
 
 tok f (p,_,s,_) len = f p (BSL.take len s)
 
@@ -90,7 +89,8 @@ lexC = flip runAlex loop
 loop :: Alex [Token]
 loop = do
     tok' <- alexMonadScan
-    if tok' == End then pure []
-        else (tok' :) <$> loop
+    case tok' of
+        End -> pure mempty
+        _ -> (tok' :) <$> loop
 
 }

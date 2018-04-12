@@ -1,18 +1,16 @@
 name:                cdeps
 version:             0.1.0.0
--- synopsis:
--- description:
+synopsis:            Extract dependencies from C code.
+description:         This package provides the ability to extract dependencies from C code, for use with [shake](https://shakebuild.com) or otherwise.
 homepage:            https://github.com/vmchale/cdeps#readme
 license:             BSD3
 license-file:        LICENSE
 author:              Vanessa McHale
 maintainer:          vamchale@gmail.com
 copyright:           Copyright: (c) 2018 Vanessa McHale
---category:            Web
+category:            Development, C, Language
 build-type:          Simple
 extra-doc-files:     README.md
-extra-source-files:  stack.yaml
-                   , cabal.project.local
 cabal-version:       1.18
 
 Flag development {

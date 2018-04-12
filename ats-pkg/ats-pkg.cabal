@@ -74,6 +74,7 @@ library
         Cabal >=2.2.0.0,
         lzma -any,
         tar -any,
+        cdeps,
         zlib -any,
         http-client-tls -any,
         text -any,
