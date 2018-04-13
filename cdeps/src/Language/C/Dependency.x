@@ -1,11 +1,19 @@
 {
 module Language.C.Dependency ( getIncludes
+                             , getCDepends
                              ) where
 
+import Data.List (groupBy)
+import Data.Maybe (fromMaybe)
+import Control.Monad.IO.Class
+import System.Directory (doesFileExist)
 import Data.Bool (bool)
 import qualified Data.Text.Lazy as TL
 import Data.Text.Lazy.Encoding (decodeUtf8)
 import qualified Data.ByteString.Lazy as BSL
+import System.FilePath (takeDirectory)
+import System.Environment (lookupEnv)
+import Control.Monad
 
 }
 
@@ -93,5 +101,27 @@ loop = do
     case tok' of
         End -> pure mempty
         _ -> (tok' :) <$> loop
+
+includes' :: BSL.ByteString -> [FilePath]
+includes' = either error id . getIncludes
+
+split :: String -> [String]
+split = filter (/= ":") . groupBy g
+    where g ':' _ = False
+          g _ ':' = False
+          g _ _   = True
+
+-- | Get any filepaths that were @#include@-ed in a C source file.
+getCDepends :: MonadIO m
+            => [FilePath] -- ^ Directories to search in
+            -> FilePath -- ^ Path to C source file
+            -> m [FilePath]
+getCDepends incls src = liftIO $ do
+    contents <- BSL.readFile src
+    envPath <- fromMaybe mempty <$> lookupEnv "C_INCLUDE_PATH"
+    let incl = includes' contents
+        dir = takeDirectory src
+        allDirs = dir : incls <> split envPath
+    filterM doesFileExist ((<>) <$> allDirs <*> incl)
 
 }

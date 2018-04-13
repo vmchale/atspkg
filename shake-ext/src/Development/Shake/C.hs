@@ -22,30 +22,14 @@ module Development.Shake.C ( -- * Types
                            , cconfigToArgs
                            , ccToString
                            , ccFromString
-                           , getCDepends
                            , host
                            ) where
 
 import           Control.Monad
-import qualified Data.ByteString.Lazy       as BSL
 import           Data.List                  (isPrefixOf, isSuffixOf)
 import           Development.Shake
 import           Development.Shake.FilePath
-import           Language.C.Dependency
 import           System.Info
-
--- cmake?? make (??)
-
-includes' :: BSL.ByteString -> [FilePath]
-includes' = either error id . getIncludes
-
-getCDepends :: FilePath
-            -> Action [FilePath]
-getCDepends src = do
-    contents <- liftIO $ BSL.readFile src
-    let incl = includes' contents
-        dir = takeDirectory src
-    filterM doesFileExist ((dir <>) <$> incl)
 
 -- | Given a package name or path to a @.pc@ file, output flags for C compiler.
 pkgConfig :: String -> Action [String]

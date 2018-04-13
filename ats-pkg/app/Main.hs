@@ -6,7 +6,6 @@ module Main ( main
 import           Control.Composition
 import           Control.Monad
 import           Data.Bool                  (bool)
-import qualified Data.ByteString.Lazy       as BSL
 import           Data.Maybe                 (fromMaybe)
 import           Data.Semigroup             (Semigroup (..))
 import qualified Data.Text.Lazy             as TL
@@ -14,11 +13,9 @@ import           Data.Version               hiding (Version (..))
 import           Development.Shake.ATS
 import           Development.Shake.FilePath
 import           Language.ATS.Package
-import           Language.C.Dependency
 import           Lens.Micro
 import           Options.Applicative
 import           System.Directory
-import           System.Exit                (exitFailure)
 import           System.IO.Temp             (withSystemTempDirectory)
 
 -- TODO command to list available packages.
@@ -56,7 +53,6 @@ data Command = Install { _archTarget :: Maybe String }
                    , _lint       :: Bool
                    , _prof       :: Bool
                    }
-             | Dump { _target :: String }
              | Check { _filePath :: String, _details :: Bool }
              | CheckSet { _filePath :: String, _details :: Bool }
              | List
@@ -86,10 +82,6 @@ internalCmd = subparser
     (internal
     <> command "pack" (info pack (progDesc "Make a tarball for distributing the compiler"))
     )
-
-dump :: Parser Command
-dump = Dump
-    <$> targetP cCompletions id "dump"
 
 pack :: Parser Command
 pack = Pack
@@ -215,11 +207,6 @@ runHelper rba lint tim rs tgt v = g . bool x y =<< check Nothing
           y = mempty
           x = [buildAll tgt Nothing]
 
-getIncludes' :: BSL.ByteString -> IO [FilePath]
-getIncludes' s = case getIncludes s of
-    Right x -> pure x
-    Left y  -> putStrLn y >> exitFailure
-
 run :: Command -> IO ()
 run List                          = displayList "https://raw.githubusercontent.com/vmchale/atspkg/master/ats-pkg/pkgs/pkg-set.dhall"
 run (Check p b)                   = void $ ($ Version [0,1,0]) <$> checkPkg p b
@@ -234,4 +221,3 @@ run (Run ts rba v lint tim)       = runHelper rba lint tim ("run" : ts) Nothing 
 run (Install tgt)                 = runHelper False True False ["install"] tgt 0
 run (Valgrind ts)                 = runHelper False True False ("valgrind" : ts) Nothing 0
 run (Pack dir')                   = packageCompiler dir'
-run (Dump cSrc)                   = (mapM_ putStrLn <=< getIncludes') =<< BSL.readFile cSrc

@@ -120,8 +120,6 @@ executable atspkg
             directory -any,
             composition-prelude -any,
             text -any,
-            cdeps,
-            bytestring,
             shake -any
     
     if flag(no-executable)
