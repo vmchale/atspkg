@@ -44,7 +44,7 @@ ci: install
     yamllint .yamllint
     yamllint stack.yaml
     tomlcheck --file ats-format/.atsfmt.toml
-    hlint ats-pkg language-ats shake-ext ats-format
+    hlint ats-pkg language-ats shake-ext ats-format cdeps
     stack build --test --no-run-tests --bench --no-run-benchmarks && weeder .
     atspkg nuke
     atspkg remote https://github.com/vmchale/polyglot/archive/master.zip
