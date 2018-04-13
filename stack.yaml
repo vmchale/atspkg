@@ -19,8 +19,8 @@ extra-deps:
   - dirstream-1.0.3
   - htoml-megaparsec-1.1.0.3
 flags:
-  ats-pkg:
-    development: false
   hs2ats:
+    no-executable: false
+  cdeps:
     no-executable: false
 extra-package-dbs: []
