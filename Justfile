@@ -14,6 +14,10 @@ fmt-install: build
     @strip $(fd 'atsfmt$' -IH dist-newstyle | tail -n1)
     @cp $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) ~/.local/bin
 
+cdeps: build
+    @strip $(fd -t x 'cdeps$' -IH dist-newstyle) 
+    @cp $(fd -t x 'cdeps$' -IH dist-newstyle) ~/.local/bin
+
 approve FILE:
     @atsfmt language-ats/test/data/{{ FILE }} -o > language-ats/test/data/$(echo {{ FILE }} | sed 's/\(dats\|hats\|sats\)/out/')
     sed -i '$d' language-ats/test/data/$(echo {{ FILE }} | sed 's/\(dats\|hats\|sats\)/out/')

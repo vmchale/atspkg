@@ -71,7 +71,6 @@ userCmd = hsubparser
     <> command "check" (info check' (progDesc "Check that a pkg.dhall file is well-typed."))
     <> command "check-set" (info checkSet (progDesc "Audit a package set to ensure it is well-typed."))
     <> command "list" (info (pure List) (progDesc "List available packages"))
-    <> command "dump" (info dump (progDesc "Dump all files that need to be included to build a given C file."))
     )
 
 command' :: Parser Command
@@ -112,9 +111,6 @@ ftypeCompletions ext = completer . bashCompleter $ "file -X '!*." ++ ext ++ "' -
 
 dhallCompletions :: Mod ArgumentFields a
 dhallCompletions = ftypeCompletions "dhall"
-
-cCompletions :: Mod ArgumentFields a
-cCompletions = ftypeCompletions "c"
 
 run' :: Parser Command
 run' = Run
