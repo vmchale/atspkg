@@ -8,6 +8,7 @@ packages:
   - 'shake-ats'
   - 'dependency'
   - 'hs2ats'
+  - 'cdeps'
 extra-deps:
   - composition-prelude-1.3.0.8
   - dhall-1.12.0
