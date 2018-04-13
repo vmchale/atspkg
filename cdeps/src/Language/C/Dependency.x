@@ -53,7 +53,7 @@ alex = pure
 alexEOF :: Alex Token
 alexEOF = pure End
 
--- | Given a 'ByteString' containing C, return a list of filepaths to depend on.
+-- | Given a 'ByteString' containing C, return a list of filepaths it @#include@s.
 getIncludes :: BSL.ByteString -> Either String [FilePath]
 getIncludes = fmap extractDeps . lexC
 

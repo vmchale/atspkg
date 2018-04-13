@@ -9,15 +9,6 @@ darcs:
 build:
     @cabal new-build all
 
-fmt-install: build
-    @cp ats-format/man/atsfmt.1 ~/.local/share/man/man1
-    @strip $(fd 'atsfmt$' -IH dist-newstyle | tail -n1)
-    @cp $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) ~/.local/bin
-
-cdeps: build
-    @strip $(fd -t x 'cdeps$' -IH dist-newstyle) 
-    @cp $(fd -t x 'cdeps$' -IH dist-newstyle) ~/.local/bin
-
 approve FILE:
     @atsfmt language-ats/test/data/{{ FILE }} -o > language-ats/test/data/$(echo {{ FILE }} | sed 's/\(dats\|hats\|sats\)/out/')
     sed -i '$d' language-ats/test/data/$(echo {{ FILE }} | sed 's/\(dats\|hats\|sats\)/out/')
@@ -59,10 +50,13 @@ ci: install
     atspkg remote https://github.com/vmchale/polyglot/archive/master.zip
     atspkg remote https://hackage.haskell.org/package/fast-arithmetic-0.3.3.5/fast-arithmetic-0.3.3.5.tar.gz
 
-pkg-install: build
+install: build
+    @cp ats-format/man/atsfmt.1 ~/.local/share/man/man1
+    @strip $(fd 'atsfmt$' -IH dist-newstyle | tail -n1)
+    @cp $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) ~/.local/bin
     @cp -f $(fd 'atspkg$' -IH dist-newstyle | tail -n1) ~/.local/bin
-
-install: fmt-install pkg-install
+    @strip $(fd -t x 'cdeps$' -IH dist-newstyle) 
+    @cp $(fd -t x 'cdeps$' -IH dist-newstyle) ~/.local/bin
 
 size:
     @sn d $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) $(fd 'atspkg$' -IH dist-newstyle | tail -n1)

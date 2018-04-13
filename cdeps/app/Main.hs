@@ -17,21 +17,17 @@ data Command = Dump FilePath [FilePath]
 
 dump :: Parser Command
 dump = Dump
-    <$> targetP cCompletions id
+    <$> target
     <*> includes'
 
-ftypeCompletions :: String -> Mod ArgumentFields a
-ftypeCompletions ext = completer . bashCompleter $ "file -X '!*." ++ ext ++ "' -o plusdirs"
-
 cCompletions :: Mod ArgumentFields a
-cCompletions = ftypeCompletions "c"
+cCompletions = completer . bashCompleter $ "file -X '!*.c' -o plusdirs"
 
-targetP :: Mod ArgumentFields String -> (Parser String -> a) -> a
-targetP completions' f = f
-    (argument str
+target :: Parser FilePath
+target = argument str
     (metavar "SOURCE"
     <> help "C source file"
-    <> completions'))
+    <> cCompletions)
 
 run :: Command -> IO ()
 run (Dump cSrc is) = (mapM_ putStrLn <=< getCDepends is) cSrc
