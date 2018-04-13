@@ -6,7 +6,6 @@ license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
 maintainer: vamchale@gmail.com
 author: Vanessa McHale
-homepage: https://github.com/vmchale/cdeps#readme
 synopsis: Extract dependencies from C code.
 description:
     This package provides the ability to extract dependencies from C code, for use with [shake](https://shakebuild.com) or otherwise.
@@ -16,7 +15,7 @@ extra-doc-files: README.md
 
 source-repository head
     type: git
-    location: https://github.com/vmchale/cdeps
+    location: https://github.com/vmchale/atspkg
 
 flag development
     description:

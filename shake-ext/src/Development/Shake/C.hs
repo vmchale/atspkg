@@ -18,6 +18,8 @@ module Development.Shake.C ( -- * Types
                            , staticLibA
                            , sharedLibA
                            , stripA
+                           -- * Reëxports from "Language.C.Dependency"
+                           , getCDepends
                            -- * Helper functions
                            , cconfigToArgs
                            , ccToString
@@ -29,6 +31,7 @@ import           Control.Monad
 import           Data.List                  (isPrefixOf, isSuffixOf)
 import           Development.Shake
 import           Development.Shake.FilePath
+import           Language.C.Dependency
 import           System.Info
 
 -- | Given a package name or path to a @.pc@ file, output flags for C compiler.
