@@ -191,6 +191,15 @@ in
 
 {- We collect everything in a single record for convenience -}
 { Debian = Debian
+, Src = Src
+, Bin = Bin
+, ATSConstraint = ATSConstraint
+, Lib = Lib
+, LibDep = LibDep
+, LinkType = LinkType
+, ForeignCabal = ForeignCabal
+, TargetPair = TargetPair
+, Script = Script
 , showVersion = showVersion
 , makePkg = makePkg
 , bin = bin
