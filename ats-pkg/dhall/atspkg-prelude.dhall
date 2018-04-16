@@ -190,7 +190,8 @@ let cabalDir = "dist-newstyle/lib"
 in
 
 {- We collect everything in a single record for convenience -}
-{ showVersion = showVersion
+{ Debian = Debian
+, showVersion = showVersion
 , makePkg = makePkg
 , bin = bin
 , lib = lib
