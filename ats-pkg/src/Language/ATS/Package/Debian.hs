@@ -24,7 +24,7 @@ data Debian = Debian { package     :: Text
                      , maintainer  :: Text
                      , description :: Text
                      , target      :: Text
-                     , manpage     :: Text
+                     , manpage     :: Maybe Text
                      , binaries    :: [Text]
                      -- , libraries :: [Text]
                      }
