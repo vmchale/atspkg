@@ -166,7 +166,7 @@ rebuildTargets :: Bool -- ^ Force rebuild of all targets
                -> [(Rebuild, String)]
 rebuildTargets rba rs = foldMap g [ (rba, (RebuildNow ,) <$> patterns rs) ]
     where g (b, ts) = bool mempty ts b
-          patterns = thread (mkPattern <$> ["c", "o", "so", "a"])
+          patterns = thread (mkPattern <$> ["c", "o", "so", "a", "deb"])
           mkPattern ext = ("//*." <> ext :)
 
 cleanConfig :: (MonadIO m) => [String] -> m Pkg
