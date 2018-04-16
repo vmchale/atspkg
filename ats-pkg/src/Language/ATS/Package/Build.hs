@@ -224,7 +224,7 @@ atslibSetup tgt' lib' p = do
     subdirs <- (p:) <$> allSubdirs p
     pkgPath <- fromMaybe p <$> findFile subdirs "atspkg.dhall"
     let installDir = takeDirectory pkgPath
-    build' installDir tgt' mempty
+    build' installDir tgt' ["install"]
 
 -- | The directory @~/.atspkg@
 pkgHome :: MonadIO m => CCompiler -> m String
