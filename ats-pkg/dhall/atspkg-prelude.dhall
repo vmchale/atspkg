@@ -32,7 +32,7 @@ in
 let Script = { configure : Optional Text, build : Text, install : Text }
 in
 
-let Debian = { package : Text, version : List Integer, maintainer : Text, description : Text, target : Text, manpage : Optional Text, binaries : List Text }
+let Debian = { package : Text, version : List Integer, maintainer : Text, description : Text, target : Text, manpage : Text, binaries : List Text }
 in
 
 let script = 
