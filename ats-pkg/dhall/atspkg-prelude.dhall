@@ -32,6 +32,9 @@ in
 let Script = { configure : Optional Text, build : Text, install : Text }
 in
 
+let Debian = { package : Text, version : List Integer, maintainer : Text, description : Text, target : Text, manpage : Text, binaries : List Text }
+in
+
 let script = 
   λ(x : {dir : Text, target : Optional Text}) →
     { configure = [ "./configure --prefix=${x.dir}" ] : Optional Text, build = "make -j4", install = "make install" } : Script
@@ -141,6 +144,8 @@ let default
       : List Src
     , dynLink = True
     , extSolve = solver
+    , debPkg = []
+      : Optional Debian
     }
 in
 

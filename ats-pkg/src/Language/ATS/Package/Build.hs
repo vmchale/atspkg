@@ -23,6 +23,7 @@ import           Distribution.ATS.Version
 import           Language.ATS.Package.Build.C
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Config
+import           Language.ATS.Package.Debian          hiding (target)
 import           Language.ATS.Package.Dependency
 import           Language.ATS.Package.Type
 import           Quaalude
@@ -251,7 +252,7 @@ pkgToAction :: [IO ()] -- ^ Setup actions to be performed
             -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
             -> Pkg -- ^ Package data type
             -> Rules ()
-pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf as dl slv) =
+pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf as dl slv deb) =
 
     unless (rs == ["clean"]) $ do
 
@@ -277,6 +278,8 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf as dl
         mapM_ (h ph) lbs
 
         mapM_ (g ph) (bs ++ ts)
+
+        fold (debRules <$> deb)
 
     where g ph (Bin s t ls hs' atg gc' extra) =
             atsBin (ATSTarget (unpack <$> cf) (atsToolConfig ph) gc' (unpack <$> ls) [unpack s] hs' (unpackTgt <$> atg) mempty (unpack t) (deps extra) Executable True)

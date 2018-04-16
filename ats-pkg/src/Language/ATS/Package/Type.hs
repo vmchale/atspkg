@@ -28,8 +28,9 @@ module Language.ATS.Package.Type ( -- * Types
                                  ) where
 
 import           Data.Dependency
-import           Data.Hashable         (Hashable)
+import           Data.Hashable               (Hashable)
 import           Development.Shake.ATS
+import           Language.ATS.Package.Debian
 import           Quaalude
 
 data ATSConstraint = ATSConstraint { lower :: Maybe Version
@@ -38,8 +39,6 @@ data ATSConstraint = ATSConstraint { lower :: Maybe Version
                 deriving (Eq, Show, Generic, Binary, Interpret, Hashable)
 
 deriving newtype instance Inject Version
-deriving newtype instance Interpret Version
-deriving newtype instance Hashable Version
 
 type LibDep = (Text, ATSConstraint)
 
@@ -121,5 +120,6 @@ data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , atsSource    :: [Src] -- ^ ATS source to be compile to C.
                , dynLink      :: Bool -- ^ Don't link statically, instead, use libraries installed by @atspkg@.
                , extSolve     :: Solver -- ^ Solver to use.
+               , debPkg       :: Maybe Debian -- ^ Optional specificiation as a debian package.
                }
          deriving (Generic, Interpret, Binary, Hashable)

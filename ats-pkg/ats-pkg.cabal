@@ -7,6 +7,7 @@ copyright: Copyright: (c) 2018 Vanessa McHale
 maintainer: vamchale@gmail.com
 author: Vanessa McHale
 homepage: https://github.com/vmchale/atspkg#readme
+bug-reports: https://github.com/vmchale/atspkg/issues
 synopsis: A build tool for ATS
 description:
     A collection of scripts to simplify building ATS projects.
@@ -58,6 +59,7 @@ library
         Language.ATS.Package.PackageSet
         Language.ATS.Package.Type
         Language.ATS.Package.Upgrade
+        Language.ATS.Package.Debian
         Distribution.ATS.Version
         System.Process.Ext
         Quaalude
