@@ -154,6 +154,7 @@ let pkgset =
   , atsIncludes [0,3,10]
   -- , ssh2 [1,8,0]
   -- , ssl
+  , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall [0,1,0]
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,8]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,1]
   , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall [0,1,6]
