@@ -182,6 +182,19 @@ let default
     }
 in
 
+let debian =
+  λ(project : Text) →
+  { package = project
+  , target = "target/${project}.deb"
+  , manpage = []
+    : Optional Text
+  , binaries = []
+    : List Text
+  , libraries = []
+    : List Text
+  }
+in
+
 {- Package functions -}
 let makePkg =
   λ(rec : { x : List Integer, name : Text, githubUsername : Text}) →
