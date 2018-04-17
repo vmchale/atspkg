@@ -264,4 +264,5 @@ in
 , cabalDir = cabalDir
 , solver = solver
 , ignore = ignore
+, debian = debian
 }
