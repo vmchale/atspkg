@@ -48,21 +48,28 @@ control Debian{..} = intercalate "\n"
 debRules :: Debian -> Rules ()
 debRules deb =
     unpack (target deb) %> \out -> do
+
         need (unpack <$> binaries deb)
+
         let packDir = unpack (package deb)
             makeRel = (("target/" ++ packDir ++ "/") ++)
             debianDir = makeRel "/DEBIAN"
             binDir = makeRel "/usr/local/bin"
             libDir = makeRel "/usr/local/lib"
             manDir = makeRel "/usr/local/share/man/man1"
+
         mapM_ (liftIO . createDirectoryIfMissing True)
             [ binDir, debianDir, manDir ]
+
         fold $ do
             mp <- manpage deb
             pure $
                 need [unpack mp] >>
                 copyFile' (unpack mp) (manDir ++ "/" ++ takeFileName (unpack mp))
+
         zipWithM_ copyFile' (unpack <$> binaries deb) (((binDir ++ "/") ++) . unpack <$> binaries deb)
         zipWithM_ copyFile' (unpack <$> libraries deb) (((libDir ++ "/") ++) . unpack <$> libraries deb)
+
         writeFileChanged (debianDir ++ "/control") (control deb)
+
         command [Cwd "target"] "dpkg-deb" ["--build", packDir, dropDirectory1 out]
