@@ -23,7 +23,7 @@ import           Distribution.ATS.Version
 import           Language.ATS.Package.Build.C
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Config
-import           Language.ATS.Package.Debian          hiding (target)
+import           Language.ATS.Package.Debian          hiding (libraries, target)
 import           Language.ATS.Package.Dependency
 import           Language.ATS.Package.Type
 import           Quaalude

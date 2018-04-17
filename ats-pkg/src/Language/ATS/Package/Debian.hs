@@ -27,7 +27,7 @@ data Debian = Debian { package     :: Text
                      , target      :: Text
                      , manpage     :: Maybe Text
                      , binaries    :: [Text]
-                     -- , libraries :: [Text]
+                     , libraries   :: [Text]
                      }
                      deriving (Generic, Hashable, Binary, Interpret)
 
@@ -53,6 +53,7 @@ debRules deb =
             makeRel = (("target/" ++ packDir ++ "/") ++)
             debianDir = makeRel "/DEBIAN"
             binDir = makeRel "/usr/local/bin"
+            libDir = makeRel "/usr/local/lib"
             manDir = makeRel "/usr/local/share/man/man1"
         mapM_ (liftIO . createDirectoryIfMissing True)
             [ binDir, debianDir, manDir ]
@@ -62,5 +63,6 @@ debRules deb =
                 need [unpack mp] >>
                 copyFile' (unpack mp) (manDir ++ "/" ++ takeFileName (unpack mp))
         zipWithM_ copyFile' (unpack <$> binaries deb) (((binDir ++ "/") ++) . unpack <$> binaries deb)
+        zipWithM_ copyFile' (unpack <$> libraries deb) (((libDir ++ "/") ++) . unpack <$> libraries deb)
         writeFileChanged (debianDir ++ "/control") (control deb)
         command [Cwd "target"] "dpkg-deb" ["--build", packDir, dropDirectory1 out]

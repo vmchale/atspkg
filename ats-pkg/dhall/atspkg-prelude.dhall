@@ -20,19 +20,52 @@ in
 let TargetPair = { hs : Text, ats : Text, cpphs : Bool }
 in
 
-let Bin = { src : Text, target : Text, libs : List Text, hsDeps : List ForeignCabal , hs2ats : List TargetPair, gcBin : Bool, extras : List Text }
+let Bin =
+  { src : Text
+  , target : Text
+  , libs : List Text
+  , hsDeps : List ForeignCabal
+  , hs2ats : List TargetPair
+  , gcBin : Bool
+  , extras : List Text
+  }
 in
 
-let Lib = { name : Text, src : List Text, libTarget : Text, libs : List Text, includes : List Text, hsDeps : List ForeignCabal, links : List LinkType, hs2ats : List TargetPair, extras : List Text, static : Bool }
+let Lib =
+  { name : Text
+  , src : List Text
+  , libTarget : Text
+  , libs : List Text
+  , includes : List Text
+  , hsDeps : List ForeignCabal
+  , links : List LinkType
+  , hs2ats : List TargetPair
+  , extras : List Text
+  , static : Bool
+  }
 in
 
-let Src = { atsSrc : Text, cTarget : Text, atsGen : List TargetPair, extras : List Text }
+let Src =
+  { atsSrc : Text
+  , cTarget : Text
+  , atsGen : List TargetPair
+  , extras : List Text
+  }
 in
 
 let Script = { configure : Optional Text, build : Text, install : Text }
 in
 
-let Debian = { package : Text, version : List Integer, maintainer : Text, description : Text, target : Text, manpage : Optional Text, binaries : List Text }
+let Debian =
+  { package : Text
+  , version : List Integer
+  , maintainer : Text
+  , description : Text
+  , target : Text
+  , manpage : Optional Text
+  , binaries : List Text
+  , libraries : List Text 
+  }
 in
 
 let script = 
