@@ -1,3 +1,6 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+{-# LANGUAGE FlexibleInstances #-}
+
 module Quaalude ( hex
                 , bool
                 , intersperse
@@ -146,6 +149,12 @@ infixr 5 <#>
 
 hex :: Int -> String
 hex = flip showHex mempty
+
+instance Semigroup (Action ()) where
+    (<>) a b = a >> b
+
+instance Monoid (Action ()) where
+    mempty = pure ()
 
 -- | Same as "Text.PrettyPrint.ANSI.Leijen"'s @<$>@, but doesn't clash with the
 -- prelude.

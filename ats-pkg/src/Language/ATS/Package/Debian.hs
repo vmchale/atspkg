@@ -2,6 +2,7 @@
 {-# LANGUAGE DeriveAnyClass             #-}
 {-# LANGUAGE DeriveGeneric              #-}
 {-# LANGUAGE DerivingStrategies         #-}
+{-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE RecordWildCards            #-}
 {-# LANGUAGE StandaloneDeriving         #-}
@@ -24,7 +25,7 @@ data Debian = Debian { package     :: Text
                      , maintainer  :: Text
                      , description :: Text
                      , target      :: Text
-                     , manpage     :: Text
+                     , manpage     :: Maybe Text
                      , binaries    :: [Text]
                      -- , libraries :: [Text]
                      }
@@ -47,7 +48,7 @@ control Debian{..} = intercalate "\n"
 debRules :: Debian -> Rules ()
 debRules deb =
     unpack (target deb) %> \out -> do
-        need (unpack <$> (manpage deb : binaries deb))
+        need (unpack <$> binaries deb)
         let packDir = unpack (package deb)
             makeRel = (("target/" ++ packDir ++ "/") ++)
             debianDir = makeRel "/DEBIAN"
@@ -55,7 +56,11 @@ debRules deb =
             manDir = makeRel "/usr/local/share/man/man1"
         mapM_ (liftIO . createDirectoryIfMissing True)
             [ binDir, debianDir, manDir ]
-        copyFile' (unpack (manpage deb)) (manDir ++ "/" ++ takeFileName (unpack (manpage deb)))
+        fold $ do
+            mp <- manpage deb
+            pure $
+                need [unpack mp] >>
+                copyFile' (unpack mp) (manDir ++ "/" ++ takeFileName (unpack mp))
         zipWithM_ copyFile' (unpack <$> binaries deb) (((binDir ++ "/") ++) . unpack <$> binaries deb)
         writeFileChanged (debianDir ++ "/control") (control deb)
         command [Cwd "target"] "dpkg-deb" ["--build", packDir, dropDirectory1 out]
