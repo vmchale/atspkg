@@ -23,7 +23,7 @@ import Language.ATS.Lexer ( Token (..)
 
 import Control.Composition
 import Control.DeepSeq (NFData)
-import Lens.Micro (over, _head)
+import Control.Lens (over, _head)
 import qualified Data.Map as M
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State

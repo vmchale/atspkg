@@ -1,5 +1,5 @@
 ---
-resolver: nightly-2018-04-16
+resolver: nightly-2018-04-18
 packages:
   - 'ats-pkg'
   - 'language-ats'
@@ -18,7 +18,6 @@ extra-deps:
   - hspec-dirstream-1.0.0.0
   - dirstream-1.0.3
   - htoml-megaparsec-1.1.0.3
-  - micro-recursion-schemes-5.0.2.1
 flags:
   hs2ats:
     no-executable: false

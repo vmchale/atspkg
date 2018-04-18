@@ -85,8 +85,6 @@ library
         containers -any,
         parallel-io -any,
         unix -any,
-        microlens -any,
-        microlens-th -any,
         mtl -any,
         dhall >=1.11.0 && <=1.12.0,
         ansi-wl-pprint -any,
@@ -96,6 +94,7 @@ library
         zip-archive -any,
         ansi-wl-pprint -any,
         binary -any,
+        lens,
         dependency -any,
         filemanip -any
     
@@ -116,8 +115,8 @@ executable atspkg
             base -any,
             ats-pkg -any,
             optparse-applicative -any,
-            microlens -any,
             shake-ats -any,
+            lens,
             temporary -any,
             directory -any,
             composition-prelude -any,

@@ -54,6 +54,7 @@ module Development.Shake.ATS ( -- * Shake Rules
                              ) where
 
 import           Control.Arrow
+import           Control.Lens
 import           Control.Monad
 import           Control.Monad.IO.Class
 import           Data.Bool                         (bool)
@@ -69,7 +70,6 @@ import           Development.Shake.C
 import           Development.Shake.FilePath
 import           Development.Shake.Version
 import           Language.ATS
-import           Lens.Micro
 import           System.Directory                  (copyFile, createDirectoryIfMissing, doesFileExist)
 import           System.Environment                (getEnv)
 import           System.Exit                       (ExitCode (ExitSuccess))

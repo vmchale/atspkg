@@ -38,7 +38,7 @@ library
         ansi-wl-pprint -any,
         containers -any,
         recursion-schemes -any,
-        microlens -any,
+        lens -any,
         transformers -any,
         binary -any,
         deepseq -any,

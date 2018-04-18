@@ -36,13 +36,13 @@ module Development.Shake.ATS.Type ( ForeignCabal (..)
                                   , solver
                                   ) where
 
+import           Control.Lens
 import           Data.Binary         (Binary (..))
 import           Data.Dependency     (Version (..))
 import           Data.Hashable       (Hashable)
 import qualified Data.Text.Lazy      as TL
 import           Development.Shake.C
 import           GHC.Generics        (Generic)
-import           Lens.Micro.TH
 
 -- We should have four build types:
 --
@@ -127,6 +127,4 @@ data ForeignCabal = ForeignCabal { projectFile :: Maybe TL.Text -- ^ @cabal.proj
                                  , objectFile  :: TL.Text -- ^ Object file to be generated
                                  } deriving (Eq, Show, Generic, Binary, Hashable)
 
-makeLenses ''ATSGen
-makeLenses ''ATSTarget
-makeLenses ''ATSToolConfig
+mconcat <$> traverse makeLenses [''ATSGen, ''ATSTarget, ''ATSToolConfig]

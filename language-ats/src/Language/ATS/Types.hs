@@ -66,6 +66,8 @@ module Language.ATS.Types
 
 import           Control.Composition
 import           Control.DeepSeq          (NFData)
+import           Control.Lens
+import           Control.Monad
 import           Data.Function            (on)
 import           Data.Functor.Foldable    (ListF (Cons), ana, cata, embed, project)
 import           Data.Functor.Foldable.TH (makeBaseFunctor)
@@ -74,8 +76,6 @@ import           Data.Maybe               (isJust)
 import           Data.Semigroup           (Semigroup)
 import           GHC.Generics             (Generic)
 import           Language.ATS.Lexer       (Addendum (..))
-import           Lens.Micro
-import           Lens.Micro.TH
 
 type Fix = Either Int String
 
@@ -380,17 +380,8 @@ data PreFunction a = PreF { fname         :: Name a -- ^ Function name
                           }
                           deriving (Show, Eq, Generic, NFData)
 
-makeBaseFunctor ''Pattern
-makeBaseFunctor ''Expression
-makeBaseFunctor ''StaticExpression
-makeBaseFunctor ''Type
-makeLenses ''Leaf
-makeLenses ''Declaration
-makeLenses ''PreFunction
-makeLenses ''Implementation
-makeLenses ''DataPropLeaf
-makeLenses ''Function
-makeLenses ''Type
+join <$> traverse makeBaseFunctor [''Pattern, ''Expression, ''StaticExpression, ''Type]
+join <$> traverse makeLenses [''Leaf, ''Declaration, ''PreFunction, ''Implementation, ''DataPropLeaf, ''Function, ''Type]
 
 exprLens :: Eq a => FixityState a -> ASetter s t (Expression a) (Expression a) -> s -> t
 exprLens st = flip over (rewriteATS st)
