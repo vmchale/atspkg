@@ -51,6 +51,7 @@ module Development.Shake.ATS ( -- * Shake Rules
                              , hsFile
                              , strip
                              , solver
+                             , linkATSLib
                              ) where
 
 import           Control.Arrow
