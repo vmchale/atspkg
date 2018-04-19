@@ -121,5 +121,6 @@ data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , dynLink      :: Bool -- ^ Don't link statically, instead, use libraries installed by @atspkg@.
                , extSolve     :: Solver -- ^ Solver to use.
                , debPkg       :: Maybe Debian -- ^ Optional specificiation as a debian package.
+               , atsLib       :: Bool -- ^ Whether to link/build @atslib@.
                }
          deriving (Generic, Interpret, Binary, Hashable)

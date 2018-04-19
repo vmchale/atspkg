@@ -106,7 +106,7 @@ gcFlag True  = "-DATS_MEMALLOC_GCBDW"
 -- Copy source files to the appropriate place. This is necessary because
 -- @#include@s in ATS are weird.
 copySources :: ATSToolConfig -> [FilePath] -> Action ()
-copySources (ATSToolConfig home' _ _ _ _ _) sources =
+copySources (ATSToolConfig home' _ _ _ _ _ _) sources =
     forM_ sources $ \dep -> do
         liftIO $ createDirectoryIfMissing True (home' ++ "/" ++ takeDirectory dep)
         liftIO $ copyFile dep (home' ++ "/" ++ dep)
@@ -140,10 +140,11 @@ patsTool tool tc = _patsHome tc ++ "/bin/" ++ tool
 cconfig :: MonadIO m => ATSToolConfig -> [String] -> Bool -> [String] -> m CConfig
 cconfig tc libs' gc' extras = do
     let h = _patsHome tc
-    let cc' = _cc tc
+        cc' = _cc tc
+        f = bool id ("atslib":) (_linkATSLib tc)
     h' <- pkgHome cc'
     -- FIXME only bother with atslib if it's unnecessary?
-    let libs'' = ("atslib" :) $ bool libs' ("gc" : libs') gc'
+    let libs'' = f $ bool libs' ("gc" : libs') gc'
     pure $ CConfig [h ++ "/ccomp/runtime/", h, h' ++ "include", ".atspkg/contrib"] libs'' [h' ++ "lib", _patsHome tc ++ "/ccomp/atslib/lib"] extras (_linkStatic tc)
 
 patsEnv :: ATSToolConfig -> FilePath -> [CmdOption]

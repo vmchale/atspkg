@@ -179,6 +179,7 @@ let default
     , extSolve = solver
     , debPkg = []
       : Optional Debian
+    , atsLib = True
     }
 in
 

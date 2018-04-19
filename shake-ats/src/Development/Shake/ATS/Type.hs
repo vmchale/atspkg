@@ -34,6 +34,7 @@ module Development.Shake.ATS.Type ( ForeignCabal (..)
                                   , hsFile
                                   , strip
                                   , solver
+                                  , linkATSLib
                                   ) where
 
 import           Control.Lens
@@ -91,7 +92,7 @@ data ATSToolConfig = ATSToolConfig { _patsHome     :: String -- ^ Value to be us
                                    , _cc           :: CCompiler -- ^ C compiler to be used
                                    , _linkStatic   :: Bool -- ^ Force static linking
                                    , _solver       :: Solver
-                                   -- , _linkATSLib :: Bool -- ^ Whether to link against atslib
+                                   , _linkATSLib   :: Bool -- ^ Whether to link against atslib
                                    } deriving (Generic, Binary)
 
 data HATSGen = HATSGen { satsFile :: FilePath -- ^ @.sats@ file containing type definitions
