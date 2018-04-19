@@ -1,5 +1,4 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-{-# LANGUAGE FlexibleInstances #-}
 
 module Quaalude ( hex
                 , bool
@@ -141,18 +140,18 @@ import           System.Exit                  (ExitCode (ExitSuccess), exitWith)
 import           System.Posix.Files
 import           System.Process               as X
 import           System.Process.Ext
-import           Text.PrettyPrint.ANSI.Leijen hiding (bool, (<>))
+import           Text.PrettyPrint.ANSI.Leijen hiding (bool, (<$>), (<>))
 
 infixr 5 <#>
 
 hex :: Int -> String
 hex = flip showHex mempty
 
-instance Semigroup (Action ()) where
-    (<>) a b = a >> b
+instance Semigroup a => Semigroup (Action a) where
+    (<>) a b = (<>) <$> a <*> b
 
-instance Monoid (Action ()) where
-    mempty = pure ()
+instance Monoid a => Monoid (Action a) where
+    mempty = pure mempty
 
 -- | Same as "Text.PrettyPrint.ANSI.Leijen"'s @<$>@, but doesn't clash with the
 -- prelude.
