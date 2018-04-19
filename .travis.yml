@@ -81,6 +81,7 @@ script:
   - echo $BINPATH
   - mv $BINPATH atsfmt-$TARGET
   - strip atspkg-$TARGET
+  - du -h atspkg-$TARGET
   - strip atsfmt-$TARGET
 
 deploy:
