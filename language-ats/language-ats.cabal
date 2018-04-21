@@ -43,8 +43,8 @@ library
     build-depends:
         base >=4.10 && <5,
         array -any,
-        recursion-schemes >= 5.0.1,
-        lens,
+        recursion-schemes >=5.0.1,
+        lens -any,
         deepseq -any,
         ansi-wl-pprint >=0.6.8,
         composition-prelude -any,

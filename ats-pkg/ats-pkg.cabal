@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: ats-pkg
-version: 2.10.0.10
+version: 2.10.0.11
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -28,6 +28,17 @@ custom-setup
     setup-depends: base -any,
                    Cabal >=2.2,
                    cli-setup >=0.2.0.1
+
+flag profile
+  description: Enable profiling
+  default: False
+  manual: True
+
+flag eventlog
+    description:
+        Enable event logging
+    default: False
+    manual: True
 
 flag development
     description:
@@ -94,7 +105,7 @@ library
         zip-archive -any,
         ansi-wl-pprint -any,
         binary -any,
-        lens,
+        lens -any,
         dependency -any,
         filemanip -any
     
@@ -110,13 +121,19 @@ executable atspkg
     ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall
                  -Wincomplete-uni-patterns -Wincomplete-record-updates
     
+    if flag(eventlog)
+        ghc-options: -eventlog -with-rtsopts=-l
+
+    if flag(profile)
+        ghc-options: -with-rtsopts=-h
+    
     if !flag(no-executable)
         build-depends:
             base -any,
             ats-pkg -any,
             optparse-applicative -any,
             shake-ats -any,
-            lens,
+            lens -any,
             temporary -any,
             directory -any,
             composition-prelude -any,

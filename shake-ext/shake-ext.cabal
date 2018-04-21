@@ -45,7 +45,7 @@ library
     build-depends:
         base >=4.11 && <5,
         Cabal >=2.2,
-        cdeps,
+        cdeps -any,
         composition-prelude -any,
         cpphs -any,
         directory -any,

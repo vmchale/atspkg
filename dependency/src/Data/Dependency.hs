@@ -72,6 +72,7 @@ finish ln dep' =
 
         Left err -> lift (Left err)
 
+-- | This splits dependencies into phases
 buildSequence :: [Dependency] -> [[Dependency]]
 buildSequence = reverse . groupBy independent . sortDeps
     where independent (Dependency ln ls _) (Dependency ln' ls' _) =
