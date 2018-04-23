@@ -162,6 +162,7 @@ let pkgset =
   , git [0,27,0]
   , curl [7,59,0]
   , atsIncludes [0,3,10]
+  , cairo [1,15,12]
   , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall [0,2,3]
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,8]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,1]
