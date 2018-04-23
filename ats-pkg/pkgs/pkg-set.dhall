@@ -23,6 +23,16 @@ let atsIncludes =
       }
 in
 
+let cairo =
+  λ(x : List Integer) →
+    prelude.dep ⫽
+      { libName = "cairo"
+      , dir = "cairo-${prelude.showVersion x}"
+      , url = "http://cairographics.org/snapshots/cairo-${prelude.showVersion x}.tar.xz"
+      , libVersion = x
+      }
+in
+
 let unistring =
   makeGnuPkg { version = [0,9,9], name = "unistring" }
 in
