@@ -157,10 +157,12 @@ patsEnv cfg path = EchoStderr False :
 atsToC :: FilePath -> FilePath
 atsToC = (-<.> "c") . (".atspkg/c/" <>)
 
-ghcV :: [ForeignCabal] -> Action String
-ghcV hsLibs' = case hsLibs' of
-    [] -> pure undefined
-    _  -> ghcVersion
+ghcV :: CCompiler -> [ForeignCabal] -> Action String
+ghcV (GHC _ suff) hsLibs' = maybe def' (fmap (drop 1)) (pure <$> suff) where
+    def' = case hsLibs' of
+        [] -> pure undefined
+        _  -> quietly ghcVersion
+ghcV _ _ = pure undefined
 
 doLib :: ArtifactType -> Rules () -> Rules ()
 doLib Executable = pure mempty
@@ -184,7 +186,7 @@ atsBin ATSTarget{..} = do
 
     mapM_ hsAts _genTargets
 
-    mapM_ cabalForeign _hsLibs
+    mapM_ (cabalForeign (_cc _toolConfig)) _hsLibs
 
     let cTargets = atsToC <$> _src
 
@@ -208,7 +210,7 @@ atsBin ATSTarget{..} = do
 
         need (h' cTargets)
 
-        ghcV' <- ghcV _hsLibs
+        ghcV' <- ghcV (_cc _toolConfig) _hsLibs
 
         cconfig'' <- cconfig _toolConfig _libs _gc (makeCFlags _cFlags _hsLibs ghcV' _gc)
 

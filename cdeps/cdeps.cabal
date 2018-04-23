@@ -27,7 +27,6 @@ flag no-executable
     description:
         Disable building the executable
     default: False
-    manual: True
 
 library
     exposed-modules:

@@ -55,8 +55,6 @@ install: build
     @strip $(fd 'atsfmt$' -IH dist-newstyle | tail -n1)
     @cp $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) ~/.local/bin
     @cp -f $(fd 'atspkg$' -IH dist-newstyle | tail -n1) ~/.local/bin
-    @strip $(fd -t x 'cdeps$' -IH dist-newstyle) 
-    @cp $(fd -t x 'cdeps$' -IH dist-newstyle) ~/.local/bin
 
 size:
     @sn d $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) $(fd 'atspkg$' -IH dist-newstyle | tail -n1)

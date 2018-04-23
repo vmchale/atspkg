@@ -16,7 +16,8 @@ constraints:
   ats-setup +development,
   dependency +development,
   hs2ats +development +no-executable,
-  cdeps +development
+  cdeps +development +no-executable,
+  lens -test-doctests
 
 allow-boot-library-installs: True
 optimization: 2
