@@ -37,7 +37,7 @@ library
     default-language: Haskell2010
     ghc-options: -Wall
     build-depends:
-        base >=4.8 && <5,
+        base >=4.11 && <5,
         text -any,
         bytestring -any,
         array -any,

@@ -146,7 +146,7 @@ let pkgset =
   , gmp [1,0,1]
   , atomicOps
   , gc
-  , fastArithmetic [0,3,3,1]
+  , fastArithmetic [0,6,0,1]
   , unistring
   , xzUtils [5,2,3]
   , git [0,27,0]
