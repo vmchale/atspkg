@@ -4,7 +4,7 @@
 -- libraries, and dynamic libraries.
 module Development.Shake.C ( -- * Types
                              CConfig (..)
-                           , CCompiler (GCC, Clang, GHC, Other, GCCStd, GHCStd, CompCert)
+                           , CCompiler (ICC, GCC, Clang, GHC, Other, GCCStd, GHCStd, CompCert)
                            -- * Rules
                            , staticLibR
                            , sharedLibR
@@ -63,6 +63,7 @@ pattern GHCStd = GHC Nothing Nothing
 
 -- | Get the executable name for a 'CCompiler'
 ccToString :: CCompiler -> String
+ccToString ICC            = "icc"
 ccToString Clang          = "clang"
 ccToString (Other s)      = s
 ccToString (GCC pre)      = mkQualified pre Nothing "gcc"
@@ -82,6 +83,7 @@ arToString _           = "ar"
 -- | Attempt to parse a string as a 'CCompiler', defaulting to @cc@ if parsing
 -- fails.
 ccFromString :: String -> CCompiler
+ccFromString "icc" = ICC
 ccFromString "gcc" = GCC Nothing
 ccFromString "ccomp" = CompCert
 ccFromString "clang" = Clang
@@ -102,6 +104,7 @@ data CCompiler = GCC { _prefix :: Maybe String -- ^ Usually the target triple
                      , _postfix :: Maybe String -- ^ The compiler version
                      }
                | CompCert
+               | ICC
                | Other String
                deriving (Eq)
 
