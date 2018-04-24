@@ -19,6 +19,12 @@ allSubdirs d = do
     ds' <- mapM allSubdirs ds
     pure $ join (ds : ds')
 
+
+ccForConfig :: CCompiler -> String
+ccForConfig = g . ccToString
+    where g "icc" = "gcc"
+          g x     = x
+
 clibSetup :: CCompiler -- ^ C compiler
           -> String -- ^ Library name
           -> FilePath -- ^ Filepath to unpack to
@@ -33,7 +39,7 @@ clibSetup cc' lib' p = do
 
     -- Set environment variables for configure script
     h <- cpkgHome cc'
-    let procEnv = Just [("CC", ccToString cc'), ("CFLAGS" :: String, "-I" <> h <> "include"), ("PATH", "/usr/bin:/bin")]
+    let procEnv = Just [("CC", ccForConfig cc'), ("CFLAGS" :: String, "-I" <> h <> "include"), ("PATH", "/usr/bin:/bin")]
 
     biaxe [fold (configure h <$> configurePath <*> pure procEnv), cmake h cmakeLists, make, install] lib' p
 
