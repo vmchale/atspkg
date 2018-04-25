@@ -22,7 +22,7 @@ allSubdirs d = do
 
 ccForConfig :: CCompiler -> String
 ccForConfig = g . ccToString
-    where g "icc" = "gcc"
+    where g "icc" = "cc"
           g x     = x
 
 clibSetup :: CCompiler -- ^ C compiler
@@ -43,7 +43,6 @@ clibSetup cc' lib' p = do
 
     biaxe [fold (configure h <$> configurePath <*> pure procEnv), cmake h cmakeLists, make, install] lib' p
 
--- TODO only do this if @./configure@ is missing
 cmake :: FilePath -> Maybe FilePath -> String -> FilePath -> IO ()
 cmake _ Nothing _ _ = mempty
 cmake prefixPath (Just cfgLists) _ _ = do

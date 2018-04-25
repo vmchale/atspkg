@@ -10,12 +10,11 @@ module Language.ATS.Package.Build ( mkPkg
                                   , check
                                   ) where
 
-import           Control.Concurrent.ParallelIO.Global
-import qualified Data.ByteString                      as BS
-import qualified Data.ByteString.Lazy                 as BSL
-import           Data.List                            (intercalate)
+import qualified Data.ByteString                 as BS
+import qualified Data.ByteString.Lazy            as BSL
+import           Data.List                       (intercalate)
 import           Development.Shake.ATS
-import           Development.Shake.C                  (ccFromString)
+import           Development.Shake.C             (ccFromString)
 import           Development.Shake.Check
 import           Development.Shake.Clean
 import           Development.Shake.Man
@@ -23,7 +22,7 @@ import           Distribution.ATS.Version
 import           Language.ATS.Package.Build.C
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Config
-import           Language.ATS.Package.Debian          hiding (libraries, target)
+import           Language.ATS.Package.Debian     hiding (libraries, target)
 import           Language.ATS.Package.Dependency
 import           Language.ATS.Package.Type
 import           Quaalude
@@ -107,15 +106,14 @@ mkManpage = do
         Just _ -> bool (pure ()) manpages b
         _      -> pure ()
 
-cacheConfiguration :: Text -> IO Pkg
-cacheConfiguration = input auto
-
+-- FIXME this doesn't rebuild when it should; it should rebuild when
+-- @atspkg.dhall@ changes.
 getConfig :: MonadIO m => Maybe FilePath -> m Pkg
 getConfig dir' = liftIO $ do
     d <- fromMaybe <$> fmap (<> "/atspkg.dhall") getCurrentDirectory <*> pure dir'
     b <- not <$> doesFileExist ".atspkg/config"
     if b
-        then cacheConfiguration (pack d)
+        then input auto (pack d)
         else fmap (decode . BSL.fromStrict) . BS.readFile $ ".atspkg/config"
 
 manTarget :: Text -> FilePath
@@ -190,7 +188,6 @@ mkPkg rba lint tim setup rs tgt v = do
             , mkClean
             , pkgToAction setup rs tgt cfg
             ]
-    stopGlobalPool
 
 mkConfig :: Rules ()
 mkConfig =
@@ -265,7 +262,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf as dl
         specialDeps %> \out -> do
             (_, cfgBin') <- cfgBin
             need [ cfgBin', ".atspkg/config" ]
-            -- TODO use an oracle here
+            -- TODO use an oracle for c compiler version
             liftIO $ fetchDeps (ccFromString cc') setup (unpack . fst <$> ds) (unpack . fst <$> cdps) (unpack . fst <$> bdeps) cfgBin' atslibSetup False >> writeFile out ""
 
         let bins = unpack . target <$> bs

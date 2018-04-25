@@ -1,8 +1,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-{-# LANGUAGE DeriveAnyClass     #-}
-{-# LANGUAGE DeriveGeneric      #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE TemplateHaskell    #-}
+{-# LANGUAGE DeriveAnyClass  #-}
+{-# LANGUAGE DeriveGeneric   #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Development.Shake.ATS.Type ( ForeignCabal (..)
                                   , Version (..)
@@ -71,9 +70,6 @@ import           GHC.Generics        (Generic)
 -- * Ideally something with C dependencies included.
 --
 -- * Also binary caches are good.
-
-deriving instance Generic CCompiler
-deriving instance Binary CCompiler
 
 data ArtifactType = StaticLibrary
                   | Executable

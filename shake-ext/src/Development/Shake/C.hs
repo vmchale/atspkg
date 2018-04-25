@@ -1,4 +1,9 @@
-{-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE DeriveAnyClass             #-}
+{-# LANGUAGE DeriveGeneric              #-}
+{-# LANGUAGE DerivingStrategies         #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE PatternSynonyms            #-}
+{-# LANGUAGE TypeFamilies               #-}
 
 -- | This module provides functions for easy C builds of binaries, static
 -- libraries, and dynamic libraries.
@@ -18,6 +23,11 @@ module Development.Shake.C ( -- * Types
                            , staticLibA
                            , sharedLibA
                            , stripA
+                           -- * Oracle helpers
+                           , queryCC
+                           , queryCfg
+                           , examineCC
+                           , examineCfg
                            -- * Reëxports from "Language.C.Dependency"
                            , getCDepends
                            -- * Helper functions
@@ -30,7 +40,9 @@ module Development.Shake.C ( -- * Types
 import           Control.Monad
 import           Data.List                  (isPrefixOf, isSuffixOf)
 import           Development.Shake
+import           Development.Shake.Classes
 import           Development.Shake.FilePath
+import           GHC.Generics               (Generic)
 import           Language.C.Dependency
 import           System.Info
 
@@ -106,7 +118,7 @@ data CCompiler = GCC { _prefix :: Maybe String -- ^ Usually the target triple
                | CompCert
                | ICC
                | Other String
-               deriving (Eq)
+               deriving (Show, Eq, Generic, Typeable, Hashable, Binary, NFData)
 
 mapFlags :: String -> ([String] -> [String])
 mapFlags s = fmap (s <>)
@@ -117,6 +129,32 @@ data CConfig = CConfig { includes   :: [String] -- ^ Directories to be included.
                        , extras     :: [String] -- ^ Extra flags to be passed to the compiler
                        , staticLink :: Bool -- ^ Whether to link against static versions of libraries
                        }
+             deriving (Show, Eq, Generic, Typeable, Hashable, Binary, NFData)
+
+newtype CC = CC ()
+    deriving (Show, Eq)
+    deriving newtype (Typeable, Hashable, Binary, NFData)
+
+newtype Cfg = Cfg ()
+    deriving (Show, Eq)
+    deriving newtype (Typeable, Hashable, Binary, NFData)
+
+type instance RuleResult CC = CCompiler
+type instance RuleResult Cfg = CConfig
+
+-- | Set a 'CCompiler' that can be depended on later.
+examineCC :: CCompiler -> Rules ()
+examineCC cc = void $ addOracle $ \(CC _) -> pure cc
+
+examineCfg :: CConfig -> Rules ()
+examineCfg cfg = void $ addOracle $ \(Cfg _) -> pure cfg
+
+-- | Depend on the C compiler being used.
+queryCC :: Action ()
+queryCC = void $ askOracle (CC ())
+
+queryCfg :: Action ()
+queryCfg =void $ askOracle (Cfg ())
 
 -- | Rules for making a static library from C source files. Unlike 'staticLibR',
 -- this also creates rules for creating object files.

@@ -4,19 +4,20 @@ module Main ( main
             ) where
 
 import           Control.Composition
-import           Control.Lens               hiding (List, argument)
+import           Control.Concurrent.ParallelIO.Global
+import           Control.Lens                         hiding (List, argument)
 import           Control.Monad
-import           Data.Bool                  (bool)
-import           Data.Maybe                 (fromMaybe)
-import           Data.Semigroup             (Semigroup (..))
-import qualified Data.Text.Lazy             as TL
-import           Data.Version               hiding (Version (..))
+import           Data.Bool                            (bool)
+import           Data.Maybe                           (fromMaybe)
+import           Data.Semigroup                       (Semigroup (..))
+import qualified Data.Text.Lazy                       as TL
+import           Data.Version                         hiding (Version (..))
 import           Development.Shake.ATS
 import           Development.Shake.FilePath
 import           Language.ATS.Package
 import           Options.Applicative
 import           System.Directory
-import           System.IO.Temp             (withSystemTempDirectory)
+import           System.IO.Temp                       (withSystemTempDirectory)
 
 -- TODO command to list available packages.
 wrapper :: ParserInfo Command
@@ -192,6 +193,7 @@ fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
     ps <- getSubdirs p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
     let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg False False False mempty ["install"] Nothing 0)
+    stopGlobalPool
     bool (buildAll Nothing (Just pkgDir) >> a) a =<< check (Just pkgDir)
 
 main :: IO ()
@@ -199,7 +201,7 @@ main = execParser wrapper >>= run
 
 runHelper :: Bool -> Bool -> Bool -> [String] -> Maybe String -> Int -> IO ()
 runHelper rba lint tim rs tgt v = g . bool x y =<< check Nothing
-    where g xs = mkPkg rba lint tim xs rs tgt v
+    where g xs = mkPkg rba lint tim xs rs tgt v >> stopGlobalPool
           y = mempty
           x = [buildAll tgt Nothing]
 

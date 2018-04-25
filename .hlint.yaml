@@ -15,6 +15,7 @@
 - error: {lhs: "over _1 f x", rhs: "first f x", name: "Use arrows"}
 - error: {lhs: "over _2 f x", rhs: "second f x", name: "Use arrows"}
 - error: {lhs: "bool x x p", rhs: "x", name: "Avoid bool"}
+- error: {lhs: "const", rhs: "pure", name: "Use pure"}
 
 - ignore: {name: Use <$>, within: [Language.ATS.PrettyPrint]}
 - ignore: {name: Unused LANGUAGE pragma, within: [Language.ATS.PrettyPrint]}

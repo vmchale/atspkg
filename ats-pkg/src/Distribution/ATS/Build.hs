@@ -4,6 +4,7 @@ module Distribution.ATS.Build ( cabalHooks
                               ) where
 
 -- TODO use confHook to set extra-libraries and extra-lib-dirs ourselves?
+import           Control.Concurrent.ParallelIO.Global
 import           Distribution.PackageDescription
 import           Distribution.Simple
 import           Distribution.Simple.LocalBuildInfo
@@ -12,7 +13,9 @@ import           Quaalude
 
 -- | Use this in place of 'defaultMain' for a simple build.
 atsPolyglotBuild :: IO ()
-atsPolyglotBuild = defaultMainWithHooks cabalHooks
+atsPolyglotBuild =
+    defaultMainWithHooks cabalHooks >>
+    stopGlobalPool
 
 configureCabal :: IO LocalBuildInfo -> IO LocalBuildInfo
 configureCabal = (<*>) $ do
