@@ -31,6 +31,7 @@ module Language.ATS.Package ( buildAll
                             -- * Generic Packaging
                             , Package (..)
                             , InstallDirs (..)
+                            , CacheValid
                             -- * Typeclasses
                             , GenericPackage (..)
                             -- * Lenses
