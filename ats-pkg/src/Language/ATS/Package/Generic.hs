@@ -6,6 +6,7 @@
 module Language.ATS.Package.Generic ( GenericPackage (..)
                                     , InstallDirs (..)
                                     , Package (..)
+                                    , CacheValid
                                     -- * Functions
                                     , atsInstallDirs
                                     ) where
@@ -14,10 +15,13 @@ import           Control.Monad.Reader (ReaderT)
 import           Data.Hashable        (Hashable (..))
 import           Quaalude
 
+-- | Compares cached value to new value, returning 'True' if valid.
+type CacheValid a = a -> a -> Bool
+
 -- | Functions containing installation information about a particular type.
 data InstallDirs a = InstallDirs { binDir      :: a -> FilePath
                                  , libDir      :: a -> String -> FilePath
-                                 , includeDir  :: a -> FilePath
+                                 , includeDir  :: a -> String -> FilePath
                                  , includeDeps :: a -> [FilePath]
                                  , libDeps     :: a -> [FilePath]
                                  }
@@ -30,7 +34,7 @@ atsInstallDirs = do
         includeDir' = h ++ "/.atspkg/include"
         libDeps' = ["/.atspkg/lib"]
         includeDeps' = ["/.atspkg/include"]
-    pure $ InstallDirs (pure binDir') (\pkg n -> "/.atspkg/lib/" ++ n ++ "/" ++ hex (hash pkg)) (pure includeDir') (pure includeDeps') (pure libDeps')
+    pure $ InstallDirs (pure binDir') (\pkg n -> "/.atspkg/lib/" ++ n ++ "/" ++ hex (hash pkg)) (\_ _ -> includeDir') (pure includeDeps') (pure libDeps')
 
 -- | The package monad provides information about the package to be installed,
 -- in particular, the directory for installation and the directories for
@@ -38,8 +42,6 @@ atsInstallDirs = do
 newtype Package a b = Package { unPack :: ReaderT (InstallDirs a) IO b }
     deriving (Functor)
     deriving newtype (Applicative, Monad)
-
--- TODO statically require various things about a build.
 
 -- | Any type implementing 'GenericPackage' can be depended on by other
 -- packages.

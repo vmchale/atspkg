@@ -198,6 +198,7 @@ data Pattern a = Wildcard a
              | Free (Pattern a)
              | Proof a [Pattern a] [Pattern a]
              | TuplePattern [Pattern a]
+             | BoxTuplePattern a [Pattern a]
              | AtPattern a (Pattern a)
              | UniversalPattern a String [Universal a] (Pattern a)
              | ExistentialPattern (Existential a) (Pattern a)

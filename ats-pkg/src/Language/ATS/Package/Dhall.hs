@@ -16,10 +16,8 @@ checkDhall :: Interpret a
       => FilePath
       -> Bool
       -> IO a
-checkDhall path d = do
-    x <- input auto (pack ('.' : '/' : path))
-    let f = bool id detailed d
-    f (pure x)
+checkDhall path d =
+    bool id detailed d $ input auto (pack ('.' : '/' : path))
 
 checkPkgSet :: FilePath -- ^ Path to @.dhall@ file defining a package set.
             -> Bool -- ^ Whether to print detailed error messages.

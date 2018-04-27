@@ -66,7 +66,9 @@ mkClean = "clean" ~> do
     removeFilesAfter ".atspkg" ["//*"]
     removeFilesAfter "ats-deps" ["//*"]
 
-mkInstall :: Maybe String -> Rules ()
+-- TODO take more arguments, in particular, include + library dirs
+mkInstall :: Maybe String -- ^ Optional target triple
+          -> Rules ()
 mkInstall tgt =
     "install" ~> do
         config <- getConfig Nothing
@@ -240,8 +242,9 @@ home' compV libV = do
     pure $ h ++ "lib/ats2-postiats-" ++ show libV
 
 -- | This is the @$PATSHOMELOCS@ variable to be passed to the shell.
-patsHomeLocsAtsPkg :: Int -> String
-patsHomeLocsAtsPkg n = intercalate ":" $ (<> ".atspkg/contrib") . ("./" <>) <$> g
+patsHomeLocsAtsPkg :: Int -- ^ Depth to recurse
+                   -> String
+patsHomeLocsAtsPkg n = intercalate ":" ((<> ".atspkg/contrib") . ("./" <>) <$> g)
     where g = [ join $ replicate i "../" | i <- [0..n] ]
 
 pkgToAction :: [IO ()] -- ^ Setup actions to be performed
@@ -262,7 +265,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf as dl
         specialDeps %> \out -> do
             (_, cfgBin') <- cfgBin
             need [ cfgBin', ".atspkg/config" ]
-            -- TODO use an oracle for c compiler version
+            -- TODO use an oracle for c compiler/flags
             liftIO $ fetchDeps (ccFromString cc') setup (unpack . fst <$> ds) (unpack . fst <$> cdps) (unpack . fst <$> bdeps) cfgBin' atslibSetup False >> writeFile out ""
 
         let bins = unpack . target <$> bs

@@ -188,13 +188,13 @@ fetch = Fetch <$>
 
 fetchPkg :: String -> IO ()
 fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
-    let (lib, dirName, url') = (mempty, p, pkg) & each %~ TL.pack
-    buildHelper True (ATSDependency lib dirName url' undefined undefined mempty mempty mempty mempty)
+    let (dirName, url') = (p, pkg) & each %~ TL.pack
+    buildHelper True (ATSDependency mempty dirName url' undefined undefined mempty mempty mempty mempty)
     ps <- getSubdirs p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
-    let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg False False False mempty ["install"] Nothing 0)
+    let setup = [buildAll Nothing (Just pkgDir)]
+    withCurrentDirectory (takeDirectory pkgDir) (mkPkg False False False setup ["install"] Nothing 0)
     stopGlobalPool
-    bool (buildAll Nothing (Just pkgDir) >> a) a =<< check (Just pkgDir)
 
 main :: IO ()
 main = execParser wrapper >>= run

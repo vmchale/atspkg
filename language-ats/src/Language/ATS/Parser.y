@@ -332,6 +332,7 @@ Pattern : Name { PName $1 [] }
         | identifier Pattern { PSum (to_string $1) $2 }
         | identifierSpace Pattern { PSum (to_string $1) $2 }
         | openParen PatternIn vbar PatternIn closeParen { Proof $1 $2 $4 }
+        | boxTuple PatternIn closeParen { BoxTuplePattern $1 $2 }
         | parens(PatternIn) { TuplePattern $1 }
         | Literal { PLiteral $1 }
         | Pattern when Expression { Guarded $2 $3 $1 }

@@ -209,6 +209,7 @@ instance Eq a => Pretty (Pattern a) where
         a (GuardedF _ e p)             = p <+> "when" <+> pretty e
         a (ProofF _ p p')              = parens (patternHelper p <+> "|" <+> patternHelper p')
         a (TuplePatternF ps)           = parens (patternHelper ps)
+        a (BoxTuplePatternF _ ps)      = "'(" <> patternHelper ps <> ")"
         a (AtPatternF _ p)             = "@" <> p
         a (UniversalPatternF _ n us p) = text n <> prettyArgsU "" "" us <> p
         a (ExistentialPatternF e p)    = pretty e <> p
