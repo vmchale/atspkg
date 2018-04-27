@@ -3,7 +3,7 @@ let prelude = https://raw.githubusercontent.com/vmchale/atspkg/master/ats-pkg/dh
 in
 
 {- Packages -}
-let makeGnuPkg = 
+let makeGnuPkg =
   λ(rec : { version : List Integer, name: Text}) →
     prelude.dep ⫽
       { libName = rec.name
@@ -13,7 +13,7 @@ let makeGnuPkg =
       }
 in
 
-let atsIncludes = 
+let atsIncludes =
   λ(x : List Integer) →
     prelude.dep ⫽
       { libName = "ats-includes"
@@ -46,7 +46,7 @@ let ssl =
     }
 in
 
-let ssh2 = 
+let ssh2 =
   λ(x : List Integer) →
     prelude.dep ⫽
       { libName = "ssh2"
@@ -56,7 +56,7 @@ let ssh2 =
       }
 in
 
-let curl = 
+let curl =
   λ(x : List Integer) →
     prelude.dep ⫽
       { libName = "curl"
@@ -163,7 +163,7 @@ let pkgset =
   , curl [7,59,0]
   , atsIncludes [0,3,10]
   , cairo [1,15,12]
-  , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall [0,2,3]
+  , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall [0,2,5]
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,8]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,1]
   , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall [0,1,6]
