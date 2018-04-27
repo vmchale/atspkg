@@ -2,8 +2,8 @@
 
 [![Build Status](https://travis-ci.org/vmchale/ats-format.svg?branch=master)](https://travis-ci.org/vmchale/ats-format)
 
-<img alt="Screenshot of sample results" src=https://github.com/vmchale/ats-format/raw/master/atsfmt.png>
-<img alt="Screenshot of sample results" src=https://github.com/vmchale/ats-format/raw/master/atsfmt2.png>
+<img alt="Screenshot of sample results" src=https://github.com/vmchale/atspkg/raw/master/ats-format/atsfmt.png>
+<img alt="Screenshot of sample results" src=https://github.com/vmchale/atspkg/raw/master/ats-format/atsfmt2.png>
 
 This is a code formatter for [ATS](http://www.ats-lang.org/). It is
 a work-in-progress.
@@ -39,7 +39,7 @@ To install, first install [GHC](https://www.haskell.org/ghc/download.html), then
 
 ```bash
  $ cabal update
- $ cabal new-install ats-format --happy-options='-gcsa' --alex-options='-g' -O2
+ $ cabal new-install ats-format --happy-options='-gcsa' -O2
 ```
 
 ## License

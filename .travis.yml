@@ -22,7 +22,7 @@ matrix:
           sources:
             - hvr-ghc
           packages:
-            - ghc-8.4.1
+            - ghc-8.4.2
             - cabal-install-head
       language: python
 
@@ -61,7 +61,7 @@ script:
   - |
     if [ `uname` = "Darwin" ]
     then
-      export BINPATH="$(find . -name atspkg -perm 755 | tail -n1)"
+      export BINPATH="$(find .stack-work/ -name atspkg -perm 755)"
     else
       export BINPATH="$(find -name atspkg -executable | tail -n4 | head -n1)"
     fi

@@ -87,7 +87,7 @@ data Fixity a = RightFix { pos :: a, ifix :: Fix }
               | Infix { pos :: a, ifix :: Fix }
               deriving (Show, Eq, Generic, NFData)
 
--- | Newtype wrapper containing a list of declarations
+-- | An ATS file, containing a list of declarations
 newtype ATS a = ATS { unATS :: [Declaration a] }
     deriving (Show, Eq, Generic)
     deriving newtype (NFData, Semigroup, Monoid)
@@ -97,7 +97,7 @@ data Leaf a = Leaf { _constructorUniversals :: [Universal a], name :: String, co
 
 type SortArgs a = Maybe [SortArg a]
 
--- | Declare something in a scope (a function, value, action, etc.)
+-- | Declarations for functions, values, actions, etc.
 data Declaration a = Func { pos :: a, _fun :: Function a }
                    | Impl { implArgs :: [Arg a], _impl :: Implementation a } -- TODO do something better for implicit universals
                    | ProofImpl { implArgs :: [Arg a], _impl :: Implementation a }
@@ -177,9 +177,10 @@ data Type a = Tuple a [Type a]
 
 -- | A type for @=>@, @=\<cloref1>@, etc.
 data LambdaType a = Plain a
+                  | Spear a -- | @=>>@
+                  | ProofArrow a -- | @=/=>@
                   | Full a String
-                  | Spear a -- @=>>@
-                  | ProofArrow a -- @=/=>@
+                  -- TODO figure out wtf ProofArrow does
                   deriving (Show, Eq, Generic, NFData)
 
 data Name a = Unqualified String
@@ -238,9 +239,9 @@ data Universal a = Universal { bound :: [String], typeU :: Maybe (Sort a), prop 
 data Existential a = Existential { boundE :: [String], isOpen :: Bool, typeE :: Maybe (Sort a), propE :: Maybe (StaticExpression a) }
     deriving (Show, Eq, Generic, NFData)
 
--- | @~@ is used to negate numbers in ATS
-data UnOp a = Negate
-            | Deref
+-- | Unary operators
+data UnOp a = Negate -- | @~@
+            | Deref -- | @!@
             | SpecialOp a String
     deriving (Show, Eq, Generic, NFData)
 
@@ -265,10 +266,8 @@ data BinOp a = Add
              | SpecialInfix a String
              deriving (Show, Eq, Generic, NFData)
 
-
 pattern Con :: a -> BinOp a
 pattern Con l = SpecialInfix l "::"
-
 
 data StaticExpression a = StaticVal (Name a)
                         | StaticBinary (BinOp a) (StaticExpression a) (StaticExpression a)
@@ -297,7 +296,7 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                        , whenTrue :: Expression a -- ^ Expression to be returned when true
                        , elseExpr :: Maybe (Expression a) -- ^ Expression to be returned when false
                        }
-                  | UintLit Word -- ^ @1000u@
+                  | UintLit Word -- ^ E.g. @1000u@
                   | FloatLit Float
                   | IntLit Int
                   | UnderscoreLit a
@@ -312,12 +311,12 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                   | Binary (BinOp a) (Expression a) (Expression a)
                   | Unary (UnOp a) (Expression a)
                   | IfCase { posE   :: a
-                           , ifArms :: [(Expression a, LambdaType a, Expression a)]
+                           , ifArms :: [(Expression a, LambdaType a, Expression a)] -- TODO I'm not sure @ifcase@ needs 'LambdaType'?
                            }
                   | Case { posE  :: a
                          , kind  :: Addendum
                          , val   :: Expression a
-                         , _arms :: [(Pattern a, LambdaType a, Expression a)] -- ^ Each @((Pattern a), (Expression a))@ pair corresponds to a branch of the 'case' statement
+                         , _arms :: [(Pattern a, LambdaType a, Expression a)] -- ^ Each (('Pattern' a), ('Expression' a)) pair corresponds to a branch of the 'case' statement
                          }
                   | RecordValue a [(String, Expression a)] (Maybe (Type a))
                   | Precede (Expression a) (Expression a)
@@ -343,7 +342,7 @@ data Implementation a = Implement { pos            :: a
                                   , preUniversalsI :: [Universal a]
                                   , implicits      :: [[Type a]] -- ^ Implicit arguments
                                   , universalsI    :: [Universal a] -- ^ Universal quantifiers
-                                  , nameI          :: Name a -- ^ (Name a) of the template being implemented
+                                  , nameI          :: Name a -- ^ ('Name' a) of the template being implemented
                                   , iArgs          :: [Arg a] -- ^ Arguments
                                   , _iExpression   :: Either (StaticExpression a) (Expression a) -- ^ Expression (or static expression) holding the function body.
                                   }
@@ -425,6 +424,7 @@ infix_ = Infix undefined . Left
 
 type FixityState a = M.Map String (Fixity a)
 
+-- | Fixities for operators in the ATS prelude.
 defaultFixityState :: FixityState a
 defaultFixityState = M.fromList
     [ ("::", rightFix 40) ]

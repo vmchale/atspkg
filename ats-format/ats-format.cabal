@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: ats-format
-version: 0.2.0.25
+version: 0.2.0.26
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2017-2018 Vanessa McHale
