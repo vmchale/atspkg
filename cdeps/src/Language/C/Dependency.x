@@ -121,7 +121,7 @@ getCDepends incls src = liftIO $ do
     envPath <- fromMaybe mempty <$> lookupEnv "C_INCLUDE_PATH"
     let incl = includes' contents
         dir = takeDirectory src
-        allDirs = dir : incls <> split envPath
-    filterM doesFileExist ((<>) <$> allDirs <*> incl)
+        allDirs = dir : incls ++ split envPath
+    filterM doesFileExist ((++) <$> allDirs <*> incl)
 
 }

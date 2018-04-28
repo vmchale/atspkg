@@ -23,6 +23,7 @@ module Quaalude ( hex
                 , (***)
                 , (&&&)
                 , (<=<)
+                , (<>)
                 , first
                 , second
                 , getEnv
@@ -126,6 +127,7 @@ import           Data.ByteString.Lazy         (ByteString)
 import           Data.Foldable
 import           Data.List
 import           Data.Maybe                   (fromMaybe)
+import           Data.Semigroup
 import           Data.Text.Lazy               (pack, unpack)
 import           Data.Version                 (showVersion)
 import           Development.Shake            hiding (getEnv)
@@ -150,8 +152,9 @@ hex = flip showHex mempty
 instance Semigroup a => Semigroup (Action a) where
     (<>) a b = (<>) <$> a <*> b
 
-instance Monoid a => Monoid (Action a) where
+instance (Semigroup a, Monoid a) => Monoid (Action a) where
     mempty = pure mempty
+    mappend = (<>)
 
 -- | Same as "Text.PrettyPrint.ANSI.Leijen"'s @<$>@, but doesn't clash with the
 -- prelude.

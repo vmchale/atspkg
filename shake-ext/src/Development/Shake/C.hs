@@ -1,6 +1,5 @@
 {-# LANGUAGE DeriveAnyClass             #-}
 {-# LANGUAGE DeriveGeneric              #-}
-{-# LANGUAGE DerivingStrategies         #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE PatternSynonyms            #-}
 {-# LANGUAGE TypeFamilies               #-}
@@ -23,11 +22,6 @@ module Development.Shake.C ( -- * Types
                            , staticLibA
                            , sharedLibA
                            , stripA
-                           -- * Oracle helpers
-                           , queryCC
-                           , queryCfg
-                           , examineCC
-                           , examineCfg
                            -- * Reëxports from "Language.C.Dependency"
                            , getCDepends
                            -- * Helper functions
@@ -51,7 +45,7 @@ pkgConfig :: String -> Action [String]
 pkgConfig pkg = do
     (Stdout o) <- command [] "pkg-config" ["--cflags", pkg]
     (Stdout o') <- command [] "pkg-config" ["--libs", pkg]
-    pure (words o <> words o')
+    pure (words o ++ words o')
 
 mkQualified :: Monoid a => Maybe a -> Maybe a -> a -> a
 mkQualified pre suff = h [f suff, g pre]
@@ -121,7 +115,7 @@ data CCompiler = GCC { _prefix :: Maybe String -- ^ Usually the target triple
                deriving (Show, Eq, Generic, Typeable, Hashable, Binary, NFData)
 
 mapFlags :: String -> ([String] -> [String])
-mapFlags s = fmap (s <>)
+mapFlags s = fmap (s ++)
 
 data CConfig = CConfig { includes   :: [String] -- ^ Directories to be included.
                        , libraries  :: [String] -- ^ Libraries against which to link.
@@ -129,32 +123,8 @@ data CConfig = CConfig { includes   :: [String] -- ^ Directories to be included.
                        , extras     :: [String] -- ^ Extra flags to be passed to the compiler
                        , staticLink :: Bool -- ^ Whether to link against static versions of libraries
                        }
-             deriving (Show, Eq, Generic, Typeable, Hashable, Binary, NFData)
+             deriving (Show, Eq, Generic, Binary, NFData)
 
-newtype CC = CC ()
-    deriving (Show, Eq)
-    deriving newtype (Typeable, Hashable, Binary, NFData)
-
-newtype Cfg = Cfg ()
-    deriving (Show, Eq)
-    deriving newtype (Typeable, Hashable, Binary, NFData)
-
-type instance RuleResult CC = CCompiler
-type instance RuleResult Cfg = CConfig
-
--- | Set a 'CCompiler' that can be depended on later.
-examineCC :: CCompiler -> Rules ()
-examineCC cc = void $ addOracle $ \(CC _) -> pure cc
-
-examineCfg :: CConfig -> Rules ()
-examineCfg cfg = void $ addOracle $ \(Cfg _) -> pure cfg
-
--- | Depend on the C compiler being used.
-queryCC :: Action ()
-queryCC = void $ askOracle (CC ())
-
-queryCfg :: Action ()
-queryCfg =void $ askOracle (Cfg ())
 
 -- | Rules for making a static library from C source files. Unlike 'staticLibR',
 -- this also creates rules for creating object files.
@@ -194,14 +164,14 @@ binaryA :: CmdResult r
         -> Action r
 binaryA cc sources out cfg =
     need sources >>
-    (command [EchoStderr False] (ccToString cc) . (("-o" : out : sources) <>) . cconfigToArgs) cfg
+    (command [EchoStderr False] (ccToString cc) . (("-o" : out : sources) ++) . cconfigToArgs) cfg
 
 -- | Generate compiler flags for a given configuration.
 cconfigToArgs :: CConfig -> [String]
 cconfigToArgs (CConfig is ls ds es sl) = join [ mapFlags "-I" is, mapFlags "-l" (g sl <$> ls), mapFlags "-L" ds, es ]
     where g :: Bool -> (String -> String)
           g False = id
-          g True  = (":lib" <>) . (<> ".a")
+          g True  = (":lib" ++) . (++ ".a")
 
 -- | These rules build a dynamic library (@.so@ on Linux).
 dynLibR :: CCompiler
@@ -212,7 +182,7 @@ dynLibR :: CCompiler
 dynLibR cc objFiles shLib cfg =
     shLib %> \out ->
         need objFiles >>
-        command [EchoStderr False] (ccToString cc) ("-shared" : "-o" : out : objFiles <> cconfigToArgs cfg)
+        command [EchoStderr False] (ccToString cc) ("-shared" : "-o" : out : objFiles ++ cconfigToArgs cfg)
 
 -- | These rules build an object file from a C source file.
 objectFileR :: CCompiler

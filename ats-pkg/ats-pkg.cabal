@@ -78,7 +78,7 @@ library
     ghc-options: -Wall -Wincomplete-uni-patterns
                  -Wincomplete-record-updates
     build-depends:
-        base >=4.11 && <5,
+        base >=4.9 && <5,
         http-client -any,
         bytestring -any,
         file-embed -any,
@@ -97,7 +97,7 @@ library
         parallel-io -any,
         unix -any,
         mtl -any,
-        dhall >=1.11.0 && <=1.12.0,
+        dhall >=1.11.0 && <=1.13.0,
         ansi-wl-pprint -any,
         shake-ats >=1.8.0.0,
         shake-ext >=2.6.0.0,
@@ -109,7 +109,7 @@ library
         dependency -any,
         filemanip -any
     
-    if flag(development)
+    if flag(development) && impl(ghc <8.4)
         ghc-options: -Werror
 
 executable atspkg

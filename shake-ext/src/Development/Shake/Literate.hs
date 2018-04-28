@@ -35,8 +35,8 @@ unlitA inF outF = liftIO (g =<< readFile inF)
 literateRules :: String -- ^ File extension
               -> Rules ()
 literateRules ext = pat %> g
-    where pat = "//*." <> ('l' : ext)
-          g out = let new = fst (splitExtension out) <> ('.' : ext)
+    where pat = "//*." ++ ('l' : ext)
+          g out = let new = fst (splitExtension out) ++ ('.' : ext)
             in unlitA out new
 
 -- | Rules for building @.lhs@ files.

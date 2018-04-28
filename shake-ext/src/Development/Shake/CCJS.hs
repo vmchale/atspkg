@@ -11,6 +11,6 @@ ccjs :: [FilePath] -- ^ JavaScript source files
 ccjs sources fp =
     fp %> \out -> do
         need sources
-        (Stdout sout) <- command mempty "ccjs" (sources <> ["--externs=node"])
+        (Stdout sout) <- command mempty "ccjs" (sources ++ ["--externs=node"])
         liftIO $ createDirectoryIfMissing True (takeDirectory out)
         liftIO $ writeFile out sout

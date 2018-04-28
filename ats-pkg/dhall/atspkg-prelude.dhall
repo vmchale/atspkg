@@ -64,11 +64,11 @@ let Debian =
   , target : Text
   , manpage : Optional Text
   , binaries : List Text
-  , libraries : List Text 
+  , libraries : List Text
   }
 in
 
-let script = 
+let script =
   λ(x : {dir : Text, target : Optional Text}) →
     { configure = [ "./configure --prefix=${x.dir}" ] : Optional Text, build = "make -j4", install = "make install" } : Script
 in
@@ -236,17 +236,17 @@ in
 let cabalDir = "dist-newstyle/lib"
 in
 
+let emptySrc =
+  [] : List Src
+in
+
+let emptyBin =
+  [] : List Bin
+in
+
 {- We collect everything in a single record for convenience -}
-{ Debian = Debian
-, Src = Src
-, Bin = Bin
-, ATSConstraint = ATSConstraint
-, Lib = Lib
-, LibDep = LibDep
-, LinkType = LinkType
-, ForeignCabal = ForeignCabal
-, TargetPair = TargetPair
-, Script = Script
+{ emptySrc = emptySrc
+, emptyBin = emptyBin
 , showVersion = showVersion
 , makePkg = makePkg
 , bin = bin

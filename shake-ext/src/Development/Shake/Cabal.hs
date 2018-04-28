@@ -36,9 +36,9 @@ data HsCompiler = GHC { _suff :: Maybe String -- ^ Compiler version
 
 hsCompiler :: HsCompiler -> String
 hsCompiler (GHC Nothing)    = "ghc"
-hsCompiler (GHC (Just v))   = "ghc-" <> v
+hsCompiler (GHC (Just v))   = "ghc-" ++ v
 hsCompiler (GHCJS Nothing)  = "ghcjs"
-hsCompiler (GHCJS (Just v)) = "ghcjs-" <> v
+hsCompiler (GHCJS (Just v)) = "ghcjs-" ++ v
 
 -- | E.g. @x86_64-linux@
 platform :: String
@@ -47,7 +47,7 @@ platform = arch ++ "-" ++ os
 libraryToFiles :: Library -> [FilePath]
 libraryToFiles lib = mconcat [cs, is, hs]
     where (cs, is) = (cSources &&& includes) $ libBuildInfo lib
-          hs = (<> ".hs") . toFilePath <$> explicitLibModules lib
+          hs = (++ ".hs") . toFilePath <$> explicitLibModules lib
 
 extract :: CondTree a b Library -> [Library]
 extract (CondNode d _ []) = [d]
@@ -82,8 +82,8 @@ getCabalDepsV v p = do
         vers = pkgVersion (package descr)
         libs = toList (condLibrary pkg)
         normalSrc = (libraryToFiles <=< extract) =<< libs
-        dir = (fmap (<> "/") . hsSourceDirs . libBuildInfo <=< extract) =<< libs
-        dirge = ((<>) <$> dir <*>)
+        dir = (fmap (++ "/") . hsSourceDirs . libBuildInfo <=< extract) =<< libs
+        dirge = ((++) <$> dir <*>)
         h = filterM doesFileExist
     norms <- h (dirge normalSrc)
-    pure (vers, extraSrc <> norms)
+    pure (vers, extraSrc ++ norms)

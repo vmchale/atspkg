@@ -10,5 +10,5 @@ elmMake :: [FilePath] -- ^ Elm source files
         -> Rules ()
 elmMake sources extras fp =
     fp %> \out -> do
-        need (sources <> extras)
+        need (sources ++ extras)
         command mempty "elm-make" ("--yes" : "--output" : out : "--warn" : sources)
