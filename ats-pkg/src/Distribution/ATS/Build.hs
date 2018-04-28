@@ -19,7 +19,7 @@ atsPolyglotBuild =
 
 configureCabal :: IO LocalBuildInfo -> IO LocalBuildInfo
 configureCabal = (<*>) $ do
-    build mempty
+    build 1 mempty
     libDir <- (<> "/") <$> getCurrentDirectory
     pure (modifyConf libDir)
 

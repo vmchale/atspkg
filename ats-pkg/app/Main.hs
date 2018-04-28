@@ -41,6 +41,7 @@ data Command = Install { _archTarget :: Maybe String }
              | Pack { _target :: String }
              | Test { _targets    :: [String]
                     , _rebuildAll :: Bool
+                    , _verbosity  :: Int
                     , _lint       :: Bool
                     , _prof       :: Bool
                     }
@@ -125,6 +126,7 @@ test' :: Parser Command
 test' = Test
     <$> targets "test"
     <*> rebuild
+    <*> verbosity
     <*> noLint
     <*> profile
 
@@ -192,7 +194,7 @@ fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
     buildHelper True (ATSDependency mempty dirName url' undefined undefined mempty mempty mempty mempty)
     ps <- getSubdirs p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
-    let setup = [buildAll Nothing (Just pkgDir)]
+    let setup = [buildAll 0 Nothing (Just pkgDir)]
     withCurrentDirectory (takeDirectory pkgDir) (mkPkg False False False setup ["install"] Nothing 0)
     stopGlobalPool
 
@@ -203,7 +205,7 @@ runHelper :: Bool -> Bool -> Bool -> [String] -> Maybe String -> Int -> IO ()
 runHelper rba lint tim rs tgt v = g . bool x y =<< check Nothing
     where g xs = mkPkg rba lint tim xs rs tgt v >> stopGlobalPool
           y = mempty
-          x = [buildAll tgt Nothing]
+          x = [buildAll v tgt Nothing]
 
 run :: Command -> IO ()
 run List                          = displayList "https://raw.githubusercontent.com/vmchale/atspkg/master/ats-pkg/pkgs/pkg-set.dhall"
@@ -214,7 +216,7 @@ run Nuke                          = cleanAll
 run (Fetch u)                     = fetchPkg u
 run Clean                         = mkPkg False True False mempty ["clean"] Nothing 0
 run (Build rs tgt rba v lint tim) = runHelper rba lint tim rs tgt v
-run (Test ts rba lint tim)        = runHelper rba lint tim ("test" : ts) Nothing 0
+run (Test ts rba v lint tim)      = runHelper rba lint tim ("test" : ts) Nothing v
 run (Run ts rba v lint tim)       = runHelper rba lint tim ("run" : ts) Nothing v
 run (Install tgt)                 = runHelper False True False ["install"] tgt 0
 run (Valgrind ts)                 = runHelper False True False ("valgrind" : ts) Nothing 0

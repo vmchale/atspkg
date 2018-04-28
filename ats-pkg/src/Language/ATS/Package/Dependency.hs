@@ -29,7 +29,8 @@ getTgt (GCC x)   = x
 getTgt (GHC x _) = x
 getTgt _         = Nothing
 
-fetchDeps :: CCompiler -- ^ C compiler to use
+fetchDeps :: Verbosity -- ^ Shake verbosity
+          -> CCompiler -- ^ C compiler to use
           -> [IO ()] -- ^ Setup steps that can be performed concurrently
           -> [String] -- ^ ATS dependencies
           -> [String] -- ^ C Dependencies
@@ -38,7 +39,7 @@ fetchDeps :: CCompiler -- ^ C compiler to use
           -> SetupScript -- ^ How to install an ATS library
           -> Bool -- ^ Whether to perform setup anyhow.
           -> IO ()
-fetchDeps cc' setup' deps cdeps atsBld cfgPath als b' =
+fetchDeps v cc' setup' deps cdeps atsBld cfgPath als b' =
 
     unless (null deps && null cdeps && null atsBld && b') $ do
 
@@ -56,7 +57,7 @@ fetchDeps cc' setup' deps cdeps atsBld cfgPath als b' =
             unpacked = fmap (over dirLens (pack d <>)) <$> cdeps'
             clibs = fmap (buildHelper False) (join unpacked)
             atsLibs = fmap (buildHelper False) (join atsDeps')
-            cBuild = mapM_ (setup cc') <$> (transpose . fmap reverse) unpacked
+            cBuild = mapM_ (setup v cc') <$> (transpose . fmap reverse) unpacked
             atsBuild = mapM_ (atsPkgSetup als tgt') <$> (transpose . fmap reverse) atsDeps'
 
         -- Fetch all packages & build compiler
@@ -83,14 +84,15 @@ atsPkgSetup als tgt' (ATSDependency lib' dirName' _ _ _ _ _ _ _) = do
         als tgt' (unpack lib') (unpack dirName')
         writeFile lib'' ""
 
-setup :: CCompiler -- ^ C compiler to use
+setup :: Verbosity
+      -> CCompiler -- ^ C compiler to use
       -> ATSDependency -- ^ ATSDependency itself
       -> IO ()
-setup cc' (ATSDependency lib' dirName' _ _ _ _ _ _ _) = do
+setup v' cc' (ATSDependency lib' dirName' _ _ _ _ _ _ _) = do
     lib'' <- (<> unpack lib') <$> cpkgHome cc'
     b <- doesFileExist lib''
     unless b $ do
-        clibSetup cc' (unpack lib') (unpack dirName')
+        clibSetup v' cc' (unpack lib') (unpack dirName')
         writeFile lib'' ""
 
 getCompressor :: Text -> IO (ByteString -> ByteString)

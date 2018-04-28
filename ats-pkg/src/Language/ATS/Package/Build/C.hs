@@ -25,11 +25,12 @@ ccForConfig = g . ccToString
     where g "icc" = "cc"
           g x     = x
 
-clibSetup :: CCompiler -- ^ C compiler
+clibSetup :: Verbosity -- ^ Shake verbosity level
+          -> CCompiler -- ^ C compiler
           -> String -- ^ Library name
           -> FilePath -- ^ Filepath to unpack to
           -> IO ()
-clibSetup cc' lib' p = do
+clibSetup v cc' lib' p = do
 
     -- Find configure script and make it executable
     subdirs <- allSubdirs p
@@ -41,18 +42,18 @@ clibSetup cc' lib' p = do
     h <- cpkgHome cc'
     let procEnv = Just [("CC", ccForConfig cc'), ("CFLAGS" :: String, "-I" <> h <> "include"), ("PATH", "/usr/bin:/bin")]
 
-    biaxe [fold (configure h <$> configurePath <*> pure procEnv), cmake h cmakeLists, make, install] lib' p
+    biaxe [fold (configure v h <$> configurePath <*> pure procEnv), cmake v h cmakeLists, make v, install v] lib' p
 
-cmake :: FilePath -> Maybe FilePath -> String -> FilePath -> IO ()
-cmake _ Nothing _ _ = mempty
-cmake prefixPath (Just cfgLists) _ _ = do
+cmake :: Verbosity -> FilePath -> Maybe FilePath -> String -> FilePath -> IO ()
+cmake _ _ Nothing _ _ = mempty
+cmake v prefixPath (Just cfgLists) _ _ = do
     let p = takeDirectory cfgLists
-    silentCreateProcess ((proc "cmake" ["-DCMAKE_INSTALL_PREFIX:PATH=" ++ prefixPath, p]) { cwd = Just p })
+    silentCreateProcess v ((proc "cmake" ["-DCMAKE_INSTALL_PREFIX:PATH=" ++ prefixPath, p]) { cwd = Just p })
 
-configure :: FilePath -> FilePath -> Maybe [(String, String)] -> String -> FilePath -> IO ()
-configure prefixPath configurePath procEnv lib' p =
+configure :: Verbosity -> FilePath -> FilePath -> Maybe [(String, String)] -> String -> FilePath -> IO ()
+configure v prefixPath configurePath procEnv lib' p =
     putStrLn ("configuring " ++ lib' ++ "...") >>
-    silentCreateProcess ((proc configurePath ["--prefix", prefixPath, "--host", host]) { cwd = Just p, env = procEnv })
+    silentCreateProcess v ((proc configurePath ["--prefix", prefixPath, "--host", host]) { cwd = Just p, env = procEnv })
 
 findMakefile :: FilePath -> IO FilePath
 findMakefile p = do
@@ -61,14 +62,14 @@ findMakefile p = do
     mp <- findFile (p:subdirs) "Makefile"
     pure $ maybe p takeDirectory mp -- (maybe p takeDirectory mp) takeDirectory mc
 
-make :: String -> FilePath -> IO ()
-make lib' p = do
+make :: Verbosity -> String -> FilePath -> IO ()
+make v lib' p = do
     putStrLn ("building " ++ lib' ++ "...")
     p' <- findMakefile p
-    silentCreateProcess ((proc "make" ["-j4"]) { cwd = Just p' })
+    silentCreateProcess v ((proc "make" ["-j4"]) { cwd = Just p' })
 
-install :: String -> FilePath -> IO ()
-install lib' p = do
+install :: Verbosity -> String -> FilePath -> IO ()
+install v lib' p = do
     putStrLn ("installing " ++ lib' ++ "...")
     p' <- findMakefile p
-    silentCreateProcess ((proc "make" ["install"]) { cwd = Just p' })
+    silentCreateProcess v ((proc "make" ["install"]) { cwd = Just p' })

@@ -13,6 +13,7 @@ module Language.ATS.Package.Build ( mkPkg
 import qualified Data.ByteString                 as BS
 import qualified Data.ByteString.Lazy            as BSL
 import           Data.List                       (intercalate)
+import           Development.Shake               (getVerbosity)
 import           Development.Shake.ATS
 import           Development.Shake.C             (ccFromString)
 import           Development.Shake.Check
@@ -37,12 +38,13 @@ wants :: Maybe FilePath -> IO Version
 wants p = compiler <$> getConfig p
 
 -- | Build in current directory or indicated directory
-buildAll :: Maybe String
+buildAll :: Int
+         -> Maybe String
          -> Maybe FilePath
          -> IO ()
-buildAll tgt' p = on (>>) (=<< wants p) fetchDef setupDef
+buildAll v tgt' p = on (>>) (=<< wants p) fetchDef setupDef
     where fetchDef = fetchCompiler
-          setupDef = setupCompiler atslibSetup tgt'
+          setupDef = setupCompiler (toVerbosity v) atslibSetup tgt'
 
 build' :: FilePath -- ^ Directory
        -> Maybe String -- ^ Target triple
@@ -52,9 +54,10 @@ build' dir tgt' rs = withCurrentDirectory dir (mkPkgEmpty mempty)
     where mkPkgEmpty ts = mkPkg False True False ts rs tgt' 1
 
 -- | Build a set of targets
-build :: [String] -- ^ Targets
+build :: Int
+      -> [String] -- ^ Targets
       -> IO ()
-build rs = bool (mkPkgEmpty [buildAll Nothing Nothing]) (mkPkgEmpty mempty) =<< check Nothing
+build v rs = bool (mkPkgEmpty [buildAll v Nothing Nothing]) (mkPkgEmpty mempty) =<< check Nothing
     where mkPkgEmpty ts = mkPkg False True False ts rs Nothing 1
 
 -- TODO clean generated ATS
@@ -265,8 +268,8 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf as dl
         specialDeps %> \out -> do
             (_, cfgBin') <- cfgBin
             need [ cfgBin', ".atspkg/config" ]
-            -- TODO use an oracle for c compiler/flags
-            liftIO $ fetchDeps (ccFromString cc') setup (unpack . fst <$> ds) (unpack . fst <$> cdps) (unpack . fst <$> bdeps) cfgBin' atslibSetup False >> writeFile out ""
+            v'' <- getVerbosity
+            liftIO $ fetchDeps v'' (ccFromString cc') setup (unpack . fst <$> ds) (unpack . fst <$> cdps) (unpack . fst <$> bdeps) cfgBin' atslibSetup False >> writeFile out ""
 
         let bins = unpack . target <$> bs
         setTargets rs bins mt

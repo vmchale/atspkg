@@ -62,10 +62,10 @@ fetchCompiler v = do
         withCompiler "Unpacking" v
         Tar.unpack cd . Tar.read . decompress $ response
 
-make :: Version -> FilePath -> IO ()
-make v cd =
+make :: Verbosity -> Version -> FilePath -> IO ()
+make v' v cd =
     withCompiler "Building" v >>
-    silentCreateProcess ((proc "make" []) { cwd = Just cd })
+    silentCreateProcess v' ((proc "make" []) { cwd = Just cd })
 
 type SetupScript = Maybe String -- ^ Optional target triple
                  -> String -- ^ Library name
@@ -80,35 +80,36 @@ libInstall atslibSetup cd triple =
         , atslibSetup (Just triple) "atslib" cd
         ]
 
-install :: Maybe String
+install :: Verbosity
+        -> Maybe String
         -> SetupScript
         -> Version
         -> FilePath
         -> IO ()
-install tgt' als v cd =
+install v' tgt' als v cd =
     withCompiler "Installing" v >>
-    silentCreateProcess ((proc "make" ["install"]) { cwd = Just cd }) >>
+    silentCreateProcess v' ((proc "make" ["install"]) { cwd = Just cd }) >>
     writeFile (cd ++ "/done") "" >>
     maybe mempty (libInstall als cd) tgt'
 
-configure :: FilePath -> Version -> FilePath -> IO ()
-configure configurePath v cd = do
+configure :: Verbosity -> FilePath -> Version -> FilePath -> IO ()
+configure v' configurePath v cd = do
 
     withCompiler "Configuring" v
 
     setFileMode configurePath ownerModes
     setFileMode (cd ++ "/autogen.sh") ownerModes
 
-    silentCreateProcess ((proc (cd ++ "/autogen.sh") []) { cwd = Just cd })
+    silentCreateProcess v' ((proc (cd ++ "/autogen.sh") []) { cwd = Just cd })
 
-    silentCreateProcess ((proc configurePath ["--prefix", cd]) { cwd = Just cd })
+    silentCreateProcess v' ((proc configurePath ["--prefix", cd]) { cwd = Just cd })
 
-setupCompiler :: SetupScript -> Maybe FilePath -> Version -> IO ()
-setupCompiler als tgt' v = do
+setupCompiler :: Verbosity -> SetupScript -> Maybe FilePath -> Version -> IO ()
+setupCompiler v' als tgt' v = do
 
     cd <- compilerDir v
 
-    biaxe [configure (cd ++ "/configure"), make, install tgt' als] v cd
+    biaxe [configure v' (cd ++ "/configure"), make v', install v' tgt' als] v cd
 
 cleanAll :: IO ()
 cleanAll = do
