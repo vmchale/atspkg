@@ -244,9 +244,14 @@ let emptyBin =
   [] : List Bin
 in
 
+let emptyLib =
+  [] : List Lib
+in
+
 {- We collect everything in a single record for convenience -}
 { emptySrc = emptySrc
 , emptyBin = emptyBin
+, emptyLib = emptyLib
 , showVersion = showVersion
 , makePkg = makePkg
 , bin = bin
