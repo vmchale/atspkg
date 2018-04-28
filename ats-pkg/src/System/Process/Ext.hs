@@ -14,7 +14,6 @@ handleExit :: ExitCode -> IO ()
 handleExit ExitSuccess = mempty
 handleExit x           = exitWith x
 
--- TODO use readCreateProcess instead?
 silentCreateProcess :: Verbosity -> CreateProcess -> IO ()
 silentCreateProcess v proc' | v >= Chatty = do
     (_, _, _, r) <- createProcess (proc' { std_err = verbosityErr v, std_out = Inherit })
