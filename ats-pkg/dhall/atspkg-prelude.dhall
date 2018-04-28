@@ -236,6 +236,7 @@ in
 let cabalDir = "dist-newstyle/lib"
 in
 
+{- Various empty directories because Dhall no longer allows type exports -}
 let emptySrc =
   [] : List Src
 in
@@ -249,7 +250,17 @@ let emptyLib =
 in
 
 {- We collect everything in a single record for convenience -}
-{ emptySrc = emptySrc
+{ Debian = Debian
+, Src = Src
+, Bin = Bin
+, ATSConstraint = ATSConstraint
+, Lib = Lib
+, LibDep = LibDep
+, LinkType = LinkType
+, ForeignCabal = ForeignCabal
+, TargetPair = TargetPair
+, Script = Script
+, emptySrc = emptySrc
 , emptyBin = emptyBin
 , emptyLib = emptyLib
 , showVersion = showVersion
