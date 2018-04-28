@@ -31,9 +31,6 @@ matrix:
       os: osx
       language: default
 
-  allow_failures:
-    - env: TARGET=x86_64-apple-darwin
-
 before_install:
   - rm -rf ~/.cabal
   - rm -rf ~/.stack
