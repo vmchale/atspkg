@@ -249,17 +249,13 @@ let emptyLib =
   [] : List Lib
 in
 
+let mkDeb =
+  λ(deb : Debian) →
+    [ deb ] : Optional Debian
+in
+
 {- We collect everything in a single record for convenience -}
-{ Debian = Debian
-, Src = Src
-, Bin = Bin
-, ATSConstraint = ATSConstraint
-, Lib = Lib
-, LibDep = LibDep
-, LinkType = LinkType
-, ForeignCabal = ForeignCabal
-, TargetPair = TargetPair
-, Script = Script
+{ mkDeb = mkDeb
 , emptySrc = emptySrc
 , emptyBin = emptyBin
 , emptyLib = emptyLib
