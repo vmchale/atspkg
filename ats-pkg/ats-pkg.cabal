@@ -76,6 +76,10 @@ library
         System.Process.Ext
         Quaalude
     default-language: Haskell2010
+    other-extensions: OverloadedStrings GADTs
+                      GeneralizedNewtypeDeriving DeriveAnyClass DeriveGeneric
+                      TemplateHaskell RecordWildCards TupleSections StandaloneDeriving
+                      DerivingStrategies
     ghc-options: -Wall -Wincomplete-uni-patterns
                  -Wincomplete-record-updates
     build-depends:
@@ -98,7 +102,7 @@ library
         parallel-io -any,
         unix -any,
         mtl -any,
-        dhall >=1.11.0 && <=1.13.0,
+        dhall >=1.13.0,
         ansi-wl-pprint -any,
         shake-ats >=1.8.0.0,
         shake-ext >=2.6.0.0,

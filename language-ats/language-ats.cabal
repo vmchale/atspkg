@@ -39,6 +39,12 @@ library
         Language.ATS.PrettyPrint
         Language.ATS.Types
     default-language: Haskell2010
+    other-extensions: OverloadedStrings DeriveGeneric DeriveAnyClass
+                      FlexibleContexts FlexibleInstances PatternSynonyms
+                      StandaloneDeriving LambdaCase GeneralizedNewtypeDeriving
+                      DeriveTraversable DerivingStrategies DuplicateRecordFields
+                      DeriveFoldable DeriveDataTypeable DeriveFunctor TypeFamilies
+                      TemplateHaskell
     ghc-options: -Wall
     build-depends:
         base >=4.9 && <5,

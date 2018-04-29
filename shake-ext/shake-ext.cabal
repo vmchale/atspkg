@@ -42,7 +42,8 @@ library
         Development.Shake.TH
     default-language: Haskell2010
     other-extensions: GeneralizedNewtypeDeriving PatternSynonyms
-                      TypeFamilies DeriveAnyClass DeriveGeneric
+                      TypeFamilies DeriveAnyClass DeriveGeneric DerivingStrategies
+                      TemplateHaskell RankNTypes
     ghc-options: -Wall
     build-depends:
         base >=4.9 && <5,

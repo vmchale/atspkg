@@ -1,4 +1,3 @@
-{-# LANGUAGE DerivingStrategies         #-}
 {-# LANGUAGE GADTs                      #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
@@ -40,8 +39,7 @@ atsInstallDirs = do
 -- in particular, the directory for installation and the directories for
 -- dependencies.
 newtype Package a b = Package { unPack :: ReaderT (InstallDirs a) IO b }
-    deriving (Functor)
-    deriving newtype (Applicative, Monad)
+    deriving (Functor, Applicative, Monad)
 
 -- | Any type implementing 'GenericPackage' can be depended on by other
 -- packages.
