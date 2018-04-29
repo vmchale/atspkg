@@ -89,12 +89,13 @@ let gmp =
 in
 
 let atomicOps =
-  prelude.dep ⫽
-    { libName = "atomic-ops"
-    , dir = "atomic-ops-7.6.2"
-    , url = "https://github.com/ivmai/libatomic_ops/releases/download/v7.6.2/libatomic_ops-7.6.2.tar.gz"
-    , libVersion = [7,6,2]
-    }
+  λ(v : List Integer) →
+    prelude.dep ⫽
+      { libName = "atomic-ops"
+      , dir = "atomic-ops-${prelude.showVersion v}"
+      , url = "https://github.com/ivmai/libatomic_ops/releases/download/v${prelude.showVersion v}/libatomic_ops-${prelude.showVersion v}tar.gz"
+      , libVersion = v
+      }
 in
 
 let git =
@@ -109,13 +110,14 @@ let git =
 in
 
 let gc =
-  prelude.dep ⫽
-    { libName = "gc"
-    , dir = "gc-7.6.4"
-    , url = "https://github.com/ivmai/bdwgc/releases/download/v7.6.4/gc-7.6.4.tar.gz"
-    , libVersion = [7,6,4]
-    , libDeps = prelude.mapPlainDeps [ "atomic-ops" ]
-    }
+  λ(v : List Integer) →
+    prelude.dep ⫽
+      { libName = "gc"
+      , dir = "gc-${prelude.showVersion v}"
+      , url = "https://github.com/ivmai/bdwgc/releases/download/v${prelude.showVersion v}/gc-${prelude.showVersion v}tar.gz"
+      , libVersion = v
+      , libDeps = prelude.mapPlainDeps [ "atomic-ops" ]
+      }
 in
 
 let divideConquer =
@@ -154,8 +156,8 @@ let pkgset =
   , intinf [1,0,8]
   , threadkit [1,0,3]
   , gmp [1,0,1]
-  , atomicOps
-  , gc
+  , atomicOps [7,6,4]
+  , gc [7,6,6]
   , fastArithmetic [0,6,0,1]
   , unistring
   , xzUtils [5,2,3]
