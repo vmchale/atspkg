@@ -93,7 +93,7 @@ let atomicOps =
     prelude.dep ⫽
       { libName = "atomic-ops"
       , dir = "atomic-ops-${prelude.showVersion v}"
-      , url = "https://github.com/ivmai/libatomic_ops/releases/download/v${prelude.showVersion v}/libatomic_ops-${prelude.showVersion v}tar.gz"
+      , url = "https://github.com/ivmai/libatomic_ops/releases/download/v${prelude.showVersion v}/libatomic_ops-${prelude.showVersion v}.tar.gz"
       , libVersion = v
       }
 in
@@ -114,7 +114,7 @@ let gc =
     prelude.dep ⫽
       { libName = "gc"
       , dir = "gc-${prelude.showVersion v}"
-      , url = "https://github.com/ivmai/bdwgc/releases/download/v${prelude.showVersion v}/gc-${prelude.showVersion v}tar.gz"
+      , url = "https://github.com/ivmai/bdwgc/releases/download/v${prelude.showVersion v}/gc-${prelude.showVersion v}.tar.gz"
       , libVersion = v
       , libDeps = prelude.mapPlainDeps [ "atomic-ops" ]
       }
