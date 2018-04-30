@@ -27,6 +27,9 @@ manpages:
 debian:
     PATH=/usr/bin:$PATH cabal-debian --maintainer "Vanessa McHale <vamchale@gmail.com>"
 
+lines:
+    perl -0777 -i.original -pe 's/```.*```/```\n'"$(just poly | ac -s)"'\n```/igs' README.md
+
 poly:
     @poly -e data
 
