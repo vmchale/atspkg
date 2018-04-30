@@ -3,8 +3,6 @@
 module Data.Dependency
     ( -- * Functions
       resolveDependencies
-    , buildSequence
-    , check
     -- * Types
     , Dependency (..)
     , PackageSet (..)
@@ -52,8 +50,6 @@ lookupSet x ds s = case S.lookupMax s of
           g (Just x') = Left (Conflicts (_libName <$> ds') (_libName x'))
             where ds' = filter (\d -> not (check x' [d])) ds
 
--- This does check for compatibility with past packages, but doesn't do the
--- fancy tardis shenanigans it's supposed to when package resolution fails.
 latest :: PackageSet Dependency -> [Dependency] -> Dependency -> DepM (String, Dependency)
 latest (PackageSet ps) ds d@(Dependency ln _ _) =
     (ln,) <$> (lookupSet (Just d) ds =<< lookupMap ln ps)
@@ -95,9 +91,11 @@ saturateDeps' (PackageSet ps) dep = S.fromList <$> list
 -- 6. Present a solution whenever one exists.
 --
 -- This doesn't do any package resolution beyond versioning.
-resolveDependencies :: PackageSet Dependency -> [Dependency] -> DepM [[Dependency]]
+resolveDependencies :: PackageSet Dependency -- ^ Package set
+                    -> [Dependency] -- ^ Dependencies requested
+                    -> DepM [[Dependency]] -- ^ Phased build
 resolveDependencies ps = select . getLatest <=< fmap prepare . saturate
     where select = fmap (fmap (fmap snd))
           saturate = fmap S.unions . traverse (saturateDeps ps)
           prepare = (buildSequence &&& id) . toList
-          getLatest (p, q) = traverse (traverse (latest ps q)) p
+          getLatest (stepped, allDeps) = traverse (traverse (latest ps allDeps)) stepped
