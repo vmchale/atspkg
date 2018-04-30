@@ -38,7 +38,6 @@ instance Show Version where
     show (Version is) = intercalate "." (show <$> is)
 
 instance Ord Version where
-    (Version []) <= (Version []) = True
     (Version []) <= _ = True
     _ <= (Version []) = False
     (Version (x:xs)) <= (Version (y:ys))
