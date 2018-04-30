@@ -1,32 +1,23 @@
-{-# LANGUAGE DeriveAnyClass             #-}
-{-# LANGUAGE DeriveFoldable             #-}
-{-# LANGUAGE DeriveFunctor              #-}
-{-# LANGUAGE DeriveGeneric              #-}
-{-# LANGUAGE DeriveTraversable          #-}
-{-# LANGUAGE DerivingStrategies         #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE OverloadedStrings          #-}
-{-# LANGUAGE PatternSynonyms            #-}
-{-# LANGUAGE TemplateHaskell            #-}
-{-# LANGUAGE TypeFamilies               #-}
+{-# LANGUAGE DeriveAnyClass    #-}
+{-# LANGUAGE DeriveFoldable    #-}
+{-# LANGUAGE DeriveFunctor     #-}
+{-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms   #-}
+{-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE TypeFamilies      #-}
 
 module Data.Dependency.Type ( Dependency (..)
                             , Version (..)
                             , Constraint (..)
                             , PackageSet (..)
-                            , ResMap
-                            , ResolveStateM (..)
-                            , ResolveState
                             -- * Helper functions
                             , check
                             ) where
 
 import           Control.DeepSeq              (NFData)
-import           Control.Monad.Fix
-import           Control.Monad.Tardis
-import           Control.Monad.Trans.Class
 import           Data.Binary
-import           Data.Dependency.Error
 import           Data.Functor.Foldable
 import           Data.Functor.Foldable.TH
 import           Data.List                    (intercalate)
@@ -36,41 +27,21 @@ import qualified Data.Set                     as S
 import           GHC.Generics                 (Generic)
 import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>))
 
-type Mod = ResMap -> ResMap
-type ResMap = M.Map String Dependency
-type ResolveState = ResolveStateM (Either ResolveError)
-
--- | We use a tardis monad here to give ourselves greater flexibility during
--- dependency solving.
-newtype ResolveStateM m a = ResolveStateM { unResolve :: TardisT Mod ResMap m a }
-    deriving (Functor)
-    deriving newtype (Applicative, Monad, MonadFix, MonadTardis Mod ResMap)
-
-instance MonadTrans ResolveStateM where
-    lift = ResolveStateM . lift
-
 -- | A package set is simply a map between package names and a set of packages.
 newtype PackageSet a = PackageSet { _packageSet :: M.Map String (S.Set a) }
-    deriving (Eq, Ord, Foldable, Generic)
-    deriving newtype Binary
+    deriving (Eq, Ord, Foldable, Generic, Binary)
 
 newtype Version = Version [Integer]
-    deriving (Eq, Generic)
-    deriving newtype (NFData, Binary)
-
-{-# COMPLETE V #-}
-
-pattern V :: [Integer] -> Version
-pattern V is = Version is
+    deriving (Eq, Generic, NFData, Binary)
 
 instance Show Version where
     show (Version is) = intercalate "." (show <$> is)
 
 instance Ord Version where
-    (V []) <= (V []) = True
-    (V []) <= _ = True
-    _ <= (V []) = False
-    (V (x:xs)) <= (V (y:ys))
+    (Version []) <= (Version []) = True
+    (Version []) <= _ = True
+    _ <= (Version []) = False
+    (Version (x:xs)) <= (Version (y:ys))
         | x == y = Version xs <= Version ys
         | otherwise = x <= y
 

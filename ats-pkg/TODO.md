@@ -4,6 +4,7 @@
 - [ ] shell completions should list targets (?)
 - [ ] custom build scripts in ATS (`setup.dats`)
 - [ ] Set number of threads manually
+- [ ] Initialize projects
 # Libraries
 - [ ] `shake-ats` should allow builds with `patscc` some other way
 - [ ] Set target triple in `shake-ext`?

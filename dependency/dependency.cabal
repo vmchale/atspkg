@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: dependency
-version: 0.1.0.11
+version: 1.0.0.0
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -35,19 +35,21 @@ library
     default-language: Haskell2010
     other-extensions: DeriveAnyClass DeriveGeneric OverloadedStrings
                       DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable
-                      DerivingStrategies GeneralizedNewtypeDeriving OverloadedStrings
-                      PatternSynonyms TemplateHaskell TypeFamilies
+                      OverloadedStrings TemplateHaskell TypeFamilies
     ghc-options: -Wall
     build-depends:
-        base >=4.10 && <5,
+        base >=4.8 && <5,
         ansi-wl-pprint -any,
-        containers -any,
+        containers >=0.5.9,
         recursion-schemes -any,
         lens -any,
         transformers -any,
         binary -any,
-        deepseq -any,
-        tardis -any
+        deepseq -any
+    
+    if impl(ghc <8.0)
+        build-depends:
+            semigroups -any
     
     if (flag(development) && impl(ghc <8.4))
         ghc-options: -Werror

@@ -10,21 +10,17 @@ module Data.Dependency
     , DepM
     , ResolveError (..)
     , Constraint (..)
-    , ResolveStateM (..)
-    , ResolveState
-    , ResMap
     ) where
 
+import           Control.Arrow
 import           Control.Monad
-import           Control.Monad.Tardis
-import           Control.Monad.Trans.Class
 import           Data.Dependency.Error
 import           Data.Dependency.Sort
 import           Data.Dependency.Type
-import           Data.Foldable             (toList)
-import           Data.List                 (groupBy)
-import qualified Data.Map                  as M
-import qualified Data.Set                  as S
+import           Data.Foldable         (toList)
+import           Data.List             (groupBy)
+import qualified Data.Map              as M
+import qualified Data.Set              as S
 
 lookupMap :: String -> M.Map String a -> DepM a
 lookupMap k ps = case M.lookup k ps of
@@ -56,21 +52,20 @@ lookupSet x ds s = case S.lookupMax s of
 
 -- This does check for compatibility with past packages, but doesn't do the
 -- fancy tardis shenanigans it's supposed to when package resolution fails.
-latest :: PackageSet Dependency -> Dependency -> ResolveState (String, Dependency)
-latest (PackageSet ps) d@(Dependency ln _ _) = do
-    st <- getPast
-    s <- lift $ lookupMap ln ps
-    finish ln (lookupSet (Just d) (toList st) s)
+latest :: PackageSet Dependency -> [Dependency] -> Dependency -> DepM (String, Dependency)
+latest (PackageSet ps) ds d@(Dependency ln _ _) = do
+    s <- lookupMap ln ps
+    finish ln (lookupSet (Just d) ds s)
 
-finish :: String -> DepM Dependency -> ResolveState (String, Dependency)
+finish :: String -> DepM Dependency -> DepM (String, Dependency)
 finish ln dep' =
     case dep' of
 
         Right dep ->
-            modifyForwards (M.insert ln dep) >>
             pure (ln, dep)
 
-        Left err -> lift (Left err)
+        Left err ->
+            Left err
 
 -- | This splits dependencies into phases
 buildSequence :: [Dependency] -> [[Dependency]]
@@ -90,11 +85,9 @@ saturateDeps ps = resolve <=< saturateDeps' ps
 
 saturateDeps' :: PackageSet Dependency -> Dependency -> DepM (S.Set Dependency)
 saturateDeps' (PackageSet ps) dep = S.fromList <$> list
-    where list = (:) dep <$> (traverse (lookupSet Nothing mempty) =<< deps)
+    where list = (:) dep <$> (traverse (lookupSet Nothing (crunch ps)) =<< deps)
           deps = sequence [ lookupMap lib ps | lib <- fst <$> _libDependencies dep ]
-
-run :: ResolveState a -> DepM a
-run = flip evalTardisT (id, mempty) . unResolve
+          crunch = mconcat . fmap toList . toList
 
 -- | Dependency resolution is guided by the following:
 --
@@ -112,7 +105,7 @@ run = flip evalTardisT (id, mempty) . unResolve
 --
 -- This doesn't do any package resolution beyond versioning.
 resolveDependencies :: PackageSet Dependency -> [Dependency] -> DepM [[Dependency]]
-resolveDependencies ps = select . getLatest <=< fmap (buildSequence . toList) . saturate
+resolveDependencies ps = select . getLatest <=< fmap ((buildSequence &&& id) . toList) . saturate
     where select = fmap (fmap (fmap snd))
           saturate = fmap S.unions . traverse (saturateDeps ps)
-          getLatest = run . traverse (traverse (latest ps))
+          getLatest (p, q) = traverse (traverse (latest ps q)) p
