@@ -13,6 +13,16 @@ let makeGnuPkg =
       }
 in
 
+let glibc =
+  λ(x : List Integer) →
+    prelude.dep ⫽
+      { libName = "glibc"
+      , dir = "glibc-${prelude.showVersion x}"
+      , url = "https://mirrors.peers.community/mirrors/gnu/glibc/glibc-${prelude.showVersion x}.tar.xz"
+      , libVersion = x
+      }
+in
+
 let atsIncludes =
   λ(x : List Integer) →
     prelude.dep ⫽
@@ -165,6 +175,7 @@ let pkgset =
   , curl [7,59,0]
   , atsIncludes [0,3,10]
   , cairo [1,15,12]
+  , glibc [2,27]
   , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall [0,2,3]
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,8]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,1]
