@@ -70,16 +70,9 @@ data Dependency = Dependency { _libName         :: String
                              }
                              deriving (Show, Eq, Ord, Generic, NFData)
 
-check' :: Dependency -> [Dependency] -> Bool
-check' (Dependency _ lds _) ds =
-    and [ compatible (Eq v') c | (Dependency ln _ v') <- ds, (str, c) <- lds, ln == str ]
-
 -- | Check a given dependency is compatible with in-scope dependencies.
 check :: Dependency -> [Dependency] -> Bool
-check d = (&&) <$> check' d <*> check'' d
-
-check'' :: Dependency -> [Dependency] -> Bool
-check'' (Dependency ln _ v) ds = and [ g ds' | (Dependency _ ds' _) <- ds ]
+check (Dependency ln _ v) ds = and [ g ds' | (Dependency _ ds' _) <- ds ]
     where g = all ((`satisfies` v) . snd) . filter ((== ln) . fst)
 
 satisfies :: (Ord a) => Constraint a -> a -> Bool
@@ -88,16 +81,6 @@ satisfies (GreaterThanEq x) y = x <= y
 satisfies (Eq x) y            = x == y
 satisfies (Bounded x y) z     = satisfies x z && satisfies y z
 satisfies None _              = True
-
-compatible :: (Ord a) => Constraint a -> Constraint a -> Bool
-compatible LessThanEq{} LessThanEq{}        = True
-compatible (LessThanEq x) (GreaterThanEq y) = y <= x
-compatible (Eq x) (Eq y)                    = x == y
-compatible (Bounded x y) z                  = compatible x z && compatible y z
-compatible GreaterThanEq{} GreaterThanEq{}  = True
-compatible (LessThanEq x) (Eq y)            = y <= x
-compatible None _                           = True
-compatible x y                              = compatible y x
 
 makeBaseFunctor ''Constraint
 

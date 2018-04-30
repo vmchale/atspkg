@@ -43,7 +43,6 @@ library
         containers >=0.5.9,
         recursion-schemes -any,
         lens -any,
-        transformers -any,
         binary -any,
         deepseq -any
     

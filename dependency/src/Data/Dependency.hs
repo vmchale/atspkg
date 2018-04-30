@@ -1,3 +1,5 @@
+{-# LANGUAGE TupleSections #-}
+
 module Data.Dependency
     ( -- * Functions
       resolveDependencies
@@ -53,19 +55,8 @@ lookupSet x ds s = case S.lookupMax s of
 -- This does check for compatibility with past packages, but doesn't do the
 -- fancy tardis shenanigans it's supposed to when package resolution fails.
 latest :: PackageSet Dependency -> [Dependency] -> Dependency -> DepM (String, Dependency)
-latest (PackageSet ps) ds d@(Dependency ln _ _) = do
-    s <- lookupMap ln ps
-    finish ln (lookupSet (Just d) ds s)
-
-finish :: String -> DepM Dependency -> DepM (String, Dependency)
-finish ln dep' =
-    case dep' of
-
-        Right dep ->
-            pure (ln, dep)
-
-        Left err ->
-            Left err
+latest (PackageSet ps) ds d@(Dependency ln _ _) =
+    (ln,) <$> (lookupSet (Just d) ds =<< lookupMap ln ps)
 
 -- | This splits dependencies into phases
 buildSequence :: [Dependency] -> [[Dependency]]
@@ -105,7 +96,8 @@ saturateDeps' (PackageSet ps) dep = S.fromList <$> list
 --
 -- This doesn't do any package resolution beyond versioning.
 resolveDependencies :: PackageSet Dependency -> [Dependency] -> DepM [[Dependency]]
-resolveDependencies ps = select . getLatest <=< fmap ((buildSequence &&& id) . toList) . saturate
+resolveDependencies ps = select . getLatest <=< fmap prepare . saturate
     where select = fmap (fmap (fmap snd))
           saturate = fmap S.unions . traverse (saturateDeps ps)
+          prepare = (buildSequence &&& id) . toList
           getLatest (p, q) = traverse (traverse (latest ps q)) p
