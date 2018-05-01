@@ -116,6 +116,7 @@ data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , buildDeps    :: [LibDep] -- ^ List of ATS library dependencies
                , ccompiler    :: Text -- ^ The C compiler we should use
                , cflags       :: [Text] -- ^ List of flags to pass to the C compiler
+               , atsFlags     :: [Text] -- ^ List of flags to pass to @patsopt@.
                , atsSource    :: [Src] -- ^ ATS source to be compile to C.
                , dynLink      :: Bool -- ^ Don't link statically, instead, use libraries installed by @atspkg@.
                , extSolve     :: Solver -- ^ Solver to use.

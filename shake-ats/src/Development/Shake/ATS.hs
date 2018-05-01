@@ -49,6 +49,7 @@ module Development.Shake.ATS ( -- * Shake Rules
                              , strip
                              , solver
                              , linkATSLib
+                             , patsFlags
                              ) where
 
 import           Control.Arrow
@@ -85,7 +86,7 @@ atsCommand tc sourceFile out = do
                 Ignore -> ("--constraint-ignore":)
                 _      -> id
 
-    command env patsc (f ["--output", out, "-dd", sourceFile, "-cc"])
+    command env patsc (f ["--output", out, "-dd", sourceFile, "-cc"] ++ _patsFlags tc)
 
 -- | Filter any generated errors with @pats-filter@.
 withPF :: Action (Exit, Stderr String, Stdout String) -- ^ Result of a 'cmd' or 'command'
@@ -104,10 +105,10 @@ gcFlag True  = "-DATS_MEMALLOC_GCBDW"
 -- Copy source files to the appropriate place. This is necessary because
 -- @#include@s in ATS are weird.
 copySources :: ATSToolConfig -> [FilePath] -> Action ()
-copySources (ATSToolConfig home' _ _ _ _ _ _) sources =
+copySources ATSToolConfig{..} sources =
     forM_ sources $ \dep -> do
-        liftIO $ createDirectoryIfMissing True (home' ++ "/" ++ takeDirectory dep)
-        liftIO $ copyFile dep (home' ++ "/" ++ dep)
+        liftIO $ createDirectoryIfMissing True (_patsHome ++ "/" ++ takeDirectory dep)
+        liftIO $ copyFile dep (_patsHome ++ "/" ++ dep)
 
 makeCFlags :: [String] -- ^ Inputs
            -> [ForeignCabal] -- ^ Haskell libraries

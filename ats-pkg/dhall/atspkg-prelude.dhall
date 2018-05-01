@@ -173,6 +173,8 @@ let default
       : List LibDep
     , ccompiler = "gcc"
     , cflags = [ "-O2" ]
+    , atsFlags = []
+      : List Text
     , atsSource = []
       : List Src
     , dynLink = True
