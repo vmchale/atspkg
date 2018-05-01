@@ -1,6 +1,7 @@
 module Main (main) where
 
 import           Control.Monad
+import           Data.Semigroup
 import           Data.Version          (showVersion)
 import           Language.C.Dependency
 import           Options.Applicative

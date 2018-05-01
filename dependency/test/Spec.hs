@@ -33,9 +33,9 @@ set = PackageSet $
         mapSingles [("ghc-mod", ghcMod), ("comonad", comonad), ("free", free)])
 
 main :: IO ()
-main = hspec $ parallel $ do
+main = hspec $ parallel $
     describe "resolveDependencies" $ do
-        it "correctly resolves dependencies in a package set" $
-            resolveDependencies set [newLens] `shouldBe` Right [[free, comonad], [newLens]]
-        it "correctly resolves dependencies in a package set" $
-            resolveDependencies set [ghcMod] `shouldBe` Right [[free, comonad], [lens], [ghcMod]]
+    it "correctly resolves dependencies in a package set" $
+        resolveDependencies set [newLens] `shouldBe` Right [[free, comonad], [newLens]]
+    it "correctly resolves dependencies in a package set" $
+        resolveDependencies set [ghcMod] `shouldBe` Right [[free, comonad], [lens], [ghcMod]]

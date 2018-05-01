@@ -43,10 +43,13 @@ clibSetup v cc' lib' p = do
     cmakeLists <- findFile (p:subdirs) "CMakeLists.txt"
     fold (setFileMode <$> configurePath <*> pure ownerModes)
     makeExecutable "install-sh" (p:subdirs)
+    makeExecutable "mkinstalldirs" (p:subdirs)
+    makeExecutable "rellns-sh" (p:subdirs)
 
+    -- CC="gcc" CFLAGS="-shared-libgcc -O2" ./glibc-2.27/configure --prefix="$HOME/.atspkg"
     -- Set environment variables for configure script
     h <- cpkgHome cc'
-    let procEnv = Just [("CC", ccForConfig cc'), ("CFLAGS" :: String, "-I" <> h <> "include"), ("PATH", "/usr/bin:/bin")]
+    let procEnv = Just [("CC", ccForConfig cc'), ("CFLAGS" :: String, "-I" <> h <> "include -Wno-error -O2"), ("PATH", "/usr/bin:/bin")]
 
     biaxe [fold (configure v h <$> configurePath <*> pure procEnv), cmake v h cmakeLists, make v, install v] lib' p
 
