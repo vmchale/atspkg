@@ -20,7 +20,8 @@ let glibc =
       , dir = "glibc-${prelude.showVersion x}"
       , url = "https://mirrors.peers.community/mirrors/gnu/glibc/glibc-${prelude.showVersion x}.tar.xz"
       , libVersion = x
-      , description = [ "GNU libc; included to enable pinning to a specific version" ] : Optional Text
+      , description = [ "GNU libc; included to enable pinning to a specific version" ]
+        : Optional Text
       }
 in
 
