@@ -31,7 +31,7 @@ instance Pretty ATSDependency where
               g Nothing  = id
 
 instance Pretty ATSPackageSet where
-    pretty (ATSPackageSet ds) = mconcat (punctuate hardline (pretty <$> ds))
+    pretty (ATSPackageSet ds) = fold (punctuate hardline (pretty <$> ds))
 
 displayList :: String -> IO ()
 displayList = putDoc . pretty <=< listDeps True

@@ -20,7 +20,7 @@ constraints:
   lens -test-doctests,
   comonad -test-doctests
 
-allow-boot-library-installs: True
+-- allow-boot-library-installs: True
 optimization: 2
 tests: True
 benchmarks: True

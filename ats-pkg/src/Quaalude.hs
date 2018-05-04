@@ -124,7 +124,7 @@ import           Control.Monad.IO.Class
 import           Data.Binary
 import           Data.Bool                    (bool)
 import           Data.ByteString.Lazy         (ByteString)
-import           Data.Foldable
+import           Data.Foldable                (fold)
 import           Data.List
 import           Data.Maybe                   (fromMaybe)
 import           Data.Semigroup
