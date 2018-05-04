@@ -25,6 +25,17 @@ let glibc =
       }
 in
 
+-- http://download.savannah.gnu.org/releases/tinycc/tcc-0.9.27.tar.bz2
+let vim =
+  λ(x : List Integer) →
+    prelude.dep ⫽
+      { libName = "ats-includes"
+      , dir = "vim-${prelude.showVersion x}"
+      , url = "https://github.com/vim/vim/archive/v${prelude.showVersion x}.tar.gz"
+      , libVersion = x
+      }
+in
+
 let atsIncludes =
   λ(x : List Integer) →
     prelude.dep ⫽
@@ -178,6 +189,7 @@ let pkgset =
   , atsIncludes [0,3,10]
   , cairo [1,15,12]
   , glibc [2,27]
+  , vim [8,0,1789]
   , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall [0,2,3]
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,8]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,1]
