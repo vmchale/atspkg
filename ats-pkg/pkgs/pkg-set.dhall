@@ -29,7 +29,7 @@ in
 let vim =
   λ(x : List Integer) →
     prelude.dep ⫽
-      { libName = "ats-includes"
+      { libName = "vim"
       , dir = "vim-${prelude.showVersion x}"
       , url = "https://github.com/vim/vim/archive/v${prelude.showVersion x}.tar.gz"
       , libVersion = x
