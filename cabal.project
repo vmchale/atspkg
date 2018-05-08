@@ -18,7 +18,8 @@ constraints:
   hs2ats +development +no-executable,
   cdeps +development +no-executable,
   lens -test-doctests,
-  comonad -test-doctests
+  comonad -test-doctests,
+  semigroupoids -doctests
 
 -- allow-boot-library-installs: True
 optimization: 2

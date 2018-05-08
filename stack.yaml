@@ -22,4 +22,10 @@ flags:
     no-executable: false
   cdeps:
     no-executable: false
+  lens:
+    test-doctests: false
+  comonad:
+    test-doctests: false
+  semigroupoids:
+    doctests: false
 extra-package-dbs: []
