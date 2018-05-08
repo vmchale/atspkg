@@ -58,6 +58,7 @@ import           Control.Monad
 import           Control.Monad.IO.Class
 import           Data.Bool                         (bool)
 import           Data.Either                       (fromRight)
+import           Data.Foldable                     (fold)
 import           Data.Maybe                        (fromMaybe)
 import           Data.Semigroup                    (Semigroup (..))
 import qualified Data.Text.Lazy                    as TL
@@ -245,10 +246,10 @@ maybeError p (Left y) = warnErr p y
 
 transitiveDeps :: (MonadIO m) => [FilePath] -> [FilePath] -> m [FilePath]
 transitiveDeps _ [] = pure []
-transitiveDeps gen ps = fmap join $ forM ps $ \p -> if p `elem` gen then pure mempty else do
+transitiveDeps gen ps = fmap fold $ forM ps $ \p -> if p `elem` gen then pure mempty else do
     contents <- liftIO $ readFile p
-    let (ats, err) = (fromRight mempty &&& maybeError p) . parseM $ contents
-    err
+    let (ats, err) = (fromRight mempty &&& id) . parseM $ contents
+    maybeError p err
     let dir = takeDirectory p
     deps <- filterM (\f -> ((f `elem` gen) ||) <$> (liftIO . doesFileExist) f) $ fixDir dir . trim <$> getDependencies ats
     deps' <- transitiveDeps gen deps

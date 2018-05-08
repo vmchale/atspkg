@@ -1,9 +1,11 @@
 {
 module Language.C.Dependency ( getIncludes
                              , getCDepends
+                             , getAll
                              ) where
 
-import Data.List (groupBy)
+import Data.Foldable (fold)
+import Data.List (groupBy, group, sort)
 import Data.Maybe (fromMaybe)
 import Control.Monad.IO.Class
 import System.Directory (doesFileExist)
@@ -123,5 +125,17 @@ getCDepends incls src = liftIO $ do
         dir = takeDirectory src
         allDirs = dir : incls ++ split envPath
     filterM doesFileExist ((++) <$> allDirs <*> incl)
+
+-- | Get transitive dependencies of a C source file.
+getAll :: MonadIO m
+       => [FilePath] -- ^ Directories for included header/source files
+       -> FilePath -- ^ File name
+       -> m [FilePath]
+getAll incls src = do
+    deps <- getCDepends incls src
+    level <- traverse (getAll incls) deps
+    let rmdups = fmap head . group . sort
+        next = rmdups (fold (deps : level))
+    pure $ bool next deps (null level)
 
 }

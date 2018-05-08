@@ -45,7 +45,7 @@ let atslib =
     { libraries =
       [
         prelude.staticLib ⫽
-        { libTarget = "lib/ats2-postiats-${prelude.showVersion libVersion}/ccomp/atslib/lib/libatslib.a"
+        { libTarget = "target/libatslib.a"
         , name = "atslib"
         , src =
           concat Text
@@ -56,7 +56,7 @@ let atslib =
         , includes = ([] : List Text)
         }
       , prelude.staticLib ⫽
-        { libTarget = "lib/ats2-postiats-${prelude.showVersion libVersion}/ccomp/atslib/lib/libatsopt.a"
+        { libTarget = "target/libatsopt.a"
         , name = "atsopt"
         , src = mapUtil [ "main", "print", "util" ]
         }

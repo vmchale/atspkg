@@ -44,7 +44,7 @@ library
                       StandaloneDeriving LambdaCase GeneralizedNewtypeDeriving
                       DeriveTraversable DerivingStrategies DuplicateRecordFields
                       DeriveFoldable DeriveDataTypeable DeriveFunctor TypeFamilies
-                      TemplateHaskell
+                      TemplateHaskell CPP MagicHash
     ghc-options: -Wall
     build-depends:
         base >=4.9 && <5,
