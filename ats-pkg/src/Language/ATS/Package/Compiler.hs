@@ -89,7 +89,6 @@ install :: Verbosity
 install v' tgt' als v cd =
     withCompiler "Installing" v >>
     silentCreateProcess v' ((proc "make" ["install"]) { cwd = Just cd }) >>
-    writeFile (cd ++ "/done") "" >>
     maybe mempty (libInstall als cd) tgt'
 
 configure :: Verbosity -> FilePath -> Version -> FilePath -> IO ()

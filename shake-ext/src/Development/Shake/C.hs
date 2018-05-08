@@ -35,6 +35,7 @@ module Development.Shake.C ( -- * Types
                            , ccToString
                            , ccFromString
                            , host
+                           , isCross
                            ) where
 
 import           Control.Monad
@@ -91,6 +92,11 @@ arToString :: CCompiler -> String
 arToString (GCC pre)   = mkQualified pre Nothing "ar"
 arToString (GHC pre _) = mkQualified pre Nothing "ar"
 arToString _           = "ar"
+
+isCross :: CCompiler -> Bool
+isCross (GCC Just{})   = True
+isCross (GHC Just{} _) = True
+isCross _              = False
 
 -- | Attempt to parse a string as a 'CCompiler', defaulting to @cc@ if parsing
 -- fails.

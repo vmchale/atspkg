@@ -41,7 +41,7 @@ fetchDeps :: Verbosity -- ^ Shake verbosity
           -> IO ()
 fetchDeps v cc' setup' deps cdeps atsBld cfgPath als b' =
 
-    unless (null deps && null cdeps && null atsBld && b') $ do
+    unless (null deps && null cdeps && null atsBld && b' && False) $ do
 
         putStrLn "Resolving dependencies..."
 

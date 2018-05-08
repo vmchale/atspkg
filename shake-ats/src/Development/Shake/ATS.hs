@@ -143,7 +143,6 @@ cconfig tc libs' gc' extras = do
         cc' = _cc tc
         f = bool id ("atslib":) (_linkATSLib tc)
     h' <- pkgHome cc'
-    -- FIXME only bother with atslib if it's unnecessary?
     let libs'' = f $ bool libs' ("gc" : libs') gc'
     pure $ CConfig [h ++ "/ccomp/runtime/", h, h' ++ "include", ".atspkg/contrib"] libs'' [h' ++ "lib", _patsHome tc ++ "/ccomp/atslib/lib"] extras (_linkStatic tc)
 

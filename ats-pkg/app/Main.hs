@@ -8,7 +8,7 @@ import           Control.Concurrent.ParallelIO.Global
 import           Control.Lens                         hiding (List, argument)
 import           Control.Monad
 import           Data.Bool                            (bool)
-import           Data.Maybe                           (fromMaybe)
+import           Data.Maybe                           (fromMaybe, isNothing)
 import           Data.Semigroup                       (Semigroup (..))
 import qualified Data.Text.Lazy                       as TL
 import           Data.Version                         hiding (Version (..))
@@ -202,7 +202,7 @@ main :: IO ()
 main = execParser wrapper >>= run
 
 runHelper :: Bool -> Bool -> Bool -> [String] -> Maybe String -> Int -> IO ()
-runHelper rba lint tim rs tgt v = g . bool x y =<< check Nothing
+runHelper rba lint tim rs tgt v = g . bool x y . (&& isNothing tgt) =<< check Nothing
     where g xs = mkPkg rba lint tim xs rs tgt v >> stopGlobalPool
           y = mempty
           x = [buildAll v tgt Nothing]
