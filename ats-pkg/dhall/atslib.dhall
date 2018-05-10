@@ -1,7 +1,7 @@
 {- Dhall prelude imports -}
-let map = https://ipfs.io/ipfs/QmQ8w5PLcsNz56dMvRtq54vbuPe9cNnCCUXAQp6xLc6Ccx/Prelude/List/map
+let map = https://raw.githubusercontent.com/dhall-lang/dhall-haskell/master/Prelude/List/map
 in
-let concat = https://ipfs.io/ipfs/QmQ8w5PLcsNz56dMvRtq54vbuPe9cNnCCUXAQp6xLc6Ccx/Prelude/List/concat
+let concat = https://raw.githubusercontent.com/dhall-lang/dhall-haskell/master/Prelude/List/concat
 in
 
 {- ATSPackage parts -}
