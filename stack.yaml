@@ -1,5 +1,5 @@
 ---
-resolver: nightly-2018-05-13
+resolver: lts-11.9
 packages:
   - 'ats-pkg'
   - 'language-ats'
@@ -18,15 +18,11 @@ extra-deps:
   - dirstream-1.0.3
   - htoml-megaparsec-1.1.0.4
   - micro-recursion-schemes-5.0.2.2
+  - dhall-1.13.1
+  - Cabal-2.2.0.1
 flags:
   hs2ats:
     no-executable: false
   cdeps:
     no-executable: false
-  lens:
-    test-doctests: false
-  comonad:
-    test-doctests: false
-  semigroupoids:
-    doctests: false
 extra-package-dbs: []
