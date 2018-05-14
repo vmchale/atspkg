@@ -5,7 +5,6 @@ module Main ( main
 
 import           Control.Composition
 import           Control.Concurrent.ParallelIO.Global
-import           Control.Lens                         hiding (List, argument)
 import           Control.Monad
 import           Data.Bool                            (bool)
 import           Data.Maybe                           (fromMaybe, isNothing)
@@ -15,6 +14,7 @@ import           Data.Version                         hiding (Version (..))
 import           Development.Shake.ATS
 import           Development.Shake.FilePath
 import           Language.ATS.Package
+import           Lens.Micro
 import           Options.Applicative
 import           System.Directory
 import           System.IO.Temp                       (withSystemTempDirectory)

@@ -60,7 +60,6 @@ module Language.ATS ( -- * Functions for working with syntax
                     , typeCallArgs
                     ) where
 
-import           Control.Lens
 import           Control.Monad
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.State
@@ -69,6 +68,7 @@ import           Language.ATS.Lexer
 import           Language.ATS.Parser
 import           Language.ATS.PrettyPrint
 import           Language.ATS.Types
+import           Lens.Micro
 import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
 
 rewriteATS' :: Eq a => (ATS a, FixityState a) -> ATS a

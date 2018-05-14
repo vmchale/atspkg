@@ -1,8 +1,8 @@
 module Development.Shake.ATS.Generate ( generateLinks
                                       ) where
 
-import           Control.Lens
 import           Language.ATS
+import           Lens.Micro
 
 generateLinks :: String -> Either ATSError String
 generateLinks = fmap (printATS . generateLinks') . parseM

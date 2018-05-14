@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: language-ats
-version: 1.2.0.9
+version: 1.2.0.10
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -49,8 +49,9 @@ library
     build-depends:
         base >=4.9 && <5,
         array -any,
-        recursion-schemes >=5.0.1,
-        lens -any,
+        micro-recursion-schemes >=5.0.1,
+        microlens -any,
+        microlens-th -any,
         deepseq -any,
         ansi-wl-pprint >=0.6.8,
         composition-prelude -any,

@@ -41,8 +41,8 @@ library
         base >=4.8 && <5,
         ansi-wl-pprint -any,
         containers >=0.5.9,
-        recursion-schemes -any,
-        lens -any,
+        micro-recursion-schemes -any,
+        microlens -any,
         binary -any,
         deepseq -any
     

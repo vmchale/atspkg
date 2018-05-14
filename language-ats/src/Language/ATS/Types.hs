@@ -67,7 +67,6 @@ module Language.ATS.Types
 
 import           Control.Composition
 import           Control.DeepSeq          (NFData)
-import           Control.Lens
 import           Control.Monad
 import           Data.Function            (on)
 import           Data.Functor.Foldable    (ListF (Cons), ana, cata, embed, project)
@@ -77,6 +76,8 @@ import           Data.Maybe               (isJust)
 import           Data.Semigroup           (Semigroup)
 import           GHC.Generics             (Generic)
 import           Language.ATS.Lexer       (Addendum (..))
+import           Lens.Micro
+import           Lens.Micro.TH
 
 type Fix = Either Int String
 
@@ -299,6 +300,7 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                   | UintLit Word -- ^ E.g. @1000u@
                   | FloatLit Float
                   | IntLit Int
+                  | HexLit String
                   | UnderscoreLit a
                   | Lambda a (LambdaType a) (Pattern a) (Expression a)
                   | LinearLambda a (LambdaType a) (Pattern a) (Expression a)

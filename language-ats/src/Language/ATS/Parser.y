@@ -23,7 +23,7 @@ import Language.ATS.Lexer ( Token (..)
 
 import Control.Composition
 import Control.DeepSeq (NFData)
-import Control.Lens (over, _head)
+import Lens.Micro (over, _head)
 import qualified Data.Map as M
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
@@ -139,6 +139,7 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     datasort { Keyword $$ KwDatasort }
     uintLit { UintTok _ $$ }
     intLit { IntTok _ $$ }
+    hexLit { HexIntTok _ $$ }
     floatLit { FloatTok _ $$ }
     specialIdentifier { $$@SpecialIdentifier{} }
     foldAt { Identifier $$ "fold@" }
@@ -314,6 +315,7 @@ Arg : TypeArg { $1 }
 -- | Parse a literal
 Literal : uintLit { UintLit $1 }
         | intLit { IntLit $1 }
+        | hexLit { HexLit $1 }
         | floatLit { FloatLit $1 }
         | string { StringLit $1 }
         | charLit { CharLit $1 }

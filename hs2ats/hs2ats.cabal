@@ -45,7 +45,7 @@ library
         haskell-src-exts -any,
         language-ats >=1.0.0.0,
         casing -any,
-        lens -any,
+        microlens -any,
         ansi-wl-pprint -any,
         composition-prelude -any,
         deepseq -any,

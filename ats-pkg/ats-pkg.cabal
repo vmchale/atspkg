@@ -110,7 +110,8 @@ library
         zip-archive -any,
         ansi-wl-pprint -any,
         binary -any,
-        lens -any,
+        microlens -any,
+        microlens-th,
         dependency -any,
         filemanip -any
     
@@ -139,7 +140,7 @@ executable atspkg
             ats-pkg -any,
             optparse-applicative -any,
             shake-ats -any,
-            lens -any,
+            microlens -any,
             temporary -any,
             directory -any,
             composition-prelude -any,

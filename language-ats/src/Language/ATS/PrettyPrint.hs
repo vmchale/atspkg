@@ -14,9 +14,9 @@ module Language.ATS.PrettyPrint ( printATS
                                 ) where
 
 import           Control.Composition          hiding ((&))
-import           Control.Lens                 hiding (op, pre)
 import           Data.Functor.Foldable        (cata)
 import           Language.ATS.Types
+import           Lens.Micro
 import           Prelude                      hiding ((<$>))
 import           Text.PrettyPrint.ANSI.Leijen hiding (bool)
 
@@ -124,6 +124,7 @@ instance Eq a => Pretty (Expression a) where
             ("let" <+> pretty e <$> endLet e')
         a (UintLitF u)                  = pretty u <> "u"
         a (IntLitF i)                   = pretty i
+        a (HexLitF hi)                  = "0x" <> text hi
         a (LambdaF _ lt p e)            = let pre = "lam" <+> pretty p <+> pretty lt in flatAlt (lengthAlt pre e) (pre <+> e)
         a (LinearLambdaF _ lt p e)      = let pre = "llam" <+> pretty p <+> pretty lt in flatAlt (lengthAlt pre e) (pre <+> e)
         a (FloatLitF f)                 = pretty f
@@ -167,6 +168,7 @@ instance Eq a => Pretty (Expression a) where
         a (TupleExF _ es)              = parens (mconcat $ punctuate ", " (reverse es))
         a (BoxTupleExF _ es)           = "'(" <> mconcat (punctuate ", " (reverse es)) <> ")"
         a (WhileF _ e e')              = "while" <> parens e <> e'
+        a (ActionsF (ATS [d]))         = "{" <+> pretty d <+> "}"
         a (ActionsF as)                = "{" <$> indent 2 (pretty as) <$> "}"
         a UnderscoreLitF{}             = "_"
         a (BeginF _ e)

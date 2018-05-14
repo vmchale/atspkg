@@ -37,13 +37,13 @@ module Development.Shake.ATS.Type ( ForeignCabal (..)
                                   , patsFlags
                                   ) where
 
-import           Control.Lens
 import           Data.Binary         (Binary (..))
 import           Data.Dependency     (Version (..))
 import           Data.Hashable       (Hashable)
 import qualified Data.Text.Lazy      as TL
 import           Development.Shake.C
 import           GHC.Generics        (Generic)
+import           Lens.Micro.TH
 
 -- We should have four build types:
 --
@@ -90,7 +90,7 @@ data ATSToolConfig = ATSToolConfig { _patsHome     :: String -- ^ Value to be us
                                    , _linkStatic   :: Bool -- ^ Force static linking
                                    , _solver       :: Solver
                                    , _linkATSLib   :: Bool -- ^ Whether to link against atslib
-                                   , _patsFlags :: [String] -- ^ Additional flags to pass to @patsopt@.
+                                   , _patsFlags    :: [String] -- ^ Additional flags to pass to @patsopt@.
                                    } deriving (Generic, Binary)
 
 data HATSGen = HATSGen { satsFile :: FilePath -- ^ @.sats@ file containing type definitions
