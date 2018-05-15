@@ -18,7 +18,7 @@ extra-deps:
   - dirstream-1.0.3
   - htoml-megaparsec-1.1.0.4
   - micro-recursion-schemes-5.0.2.2
-  - dhall-1.13.1
+  - dhall-1.12.0
   - Cabal-2.2.0.1
 flags:
   hs2ats:
