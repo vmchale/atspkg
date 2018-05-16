@@ -18,7 +18,6 @@ constraints:
   hs2ats +development +no-executable,
   cdeps +development +no-executable
 
--- allow-boot-library-installs: True
 optimization: 2
 tests: True
 benchmarks: True

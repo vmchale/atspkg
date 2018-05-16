@@ -54,6 +54,7 @@ install:
   - |
     if [ `uname` = "Darwin" ]
     then
+      stack install happy
       stack --no-terminal --install-ghc build --only-dependencies
     else
       cabal new-build all --dependencies-only
