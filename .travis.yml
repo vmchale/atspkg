@@ -51,7 +51,13 @@ before_install:
     fi
 
 install:
-  - stack --no-terminal --install-ghc build --only-dependencies
+  - |
+    if [ `uname` = "Darwin" ]
+    then
+      stack --no-terminal --install-ghc build --only-dependencies
+    else
+      cabal new-build all --dependencies-only
+    fi
 
 script:
   - curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s .
