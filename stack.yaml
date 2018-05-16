@@ -1,5 +1,5 @@
 ---
-resolver: lts-11.9
+resolver: nightly-2018-05-15
 packages:
   - 'ats-pkg'
   - 'language-ats'
@@ -10,13 +10,13 @@ packages:
   - 'hs2ats'
   - 'cdeps'
 extra-deps:
-  - composition-prelude-1.4.0.3
+  - composition-prelude-1.4.0.5
   - bzlib-0.5.0.5
   - casing-0.1.4.0
   - cli-setup-0.2.0.4
   - hspec-dirstream-1.0.0.0
   - dirstream-1.0.3
-  - htoml-megaparsec-1.1.0.4
+  - htoml-megaparsec-1.2.0.2
   - micro-recursion-schemes-5.0.2.2
   - dhall-1.12.0
   - Cabal-2.2.0.1
