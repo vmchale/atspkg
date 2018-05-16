@@ -240,6 +240,7 @@ tokens :-
     <0> "addr@"                  { tok (\p _ -> alex $ Keyword p KwAddrAt) }
     <0> "view@"                  { tok (\p _ -> alex $ Keyword p KwViewAt) }
     <0> sta                      { tok (\p _ -> alex $ Keyword p KwSta) }
+    <0> as                       { tok (\p _ -> alex $ Keyword p KwAs) }
     <0> symintr                  { tok (\p _ -> alex $ Keyword p KwSymintr) }
     <0> absview                  { tok (\p _ -> alex $ Keyword p KwAbsview) }
     <0> exception                { tok (\p _ -> alex $ Keyword p KwException) }
@@ -393,6 +394,7 @@ data Keyword = KwFun
              | KwAddrAt
              | KwAddr
              | KwSta
+             | KwAs
              | KwViewAt
              | KwViewdef
              | KwSymintr
@@ -511,6 +513,7 @@ instance Pretty Keyword where
     pretty KwAddrAt = "addr@"
     pretty KwAddr = "addr"
     pretty KwSta = "sta"
+    pretty KwAs = "as"
     pretty KwStacst = "stacst"
     pretty KwViewAt = "view@"
     pretty KwViewdef = "viewdef"

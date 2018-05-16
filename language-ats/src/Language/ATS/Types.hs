@@ -204,6 +204,7 @@ data Pattern a = Wildcard a
              | AtPattern a (Pattern a)
              | UniversalPattern a String [Universal a] (Pattern a)
              | ExistentialPattern (Existential a) (Pattern a)
+             | As a (Pattern a) (Pattern a)
              deriving (Show, Eq, Generic, NFData)
 
 data Paired a b = Both a b

@@ -128,6 +128,7 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     viewPlusMinus { Keyword _ (KwView $$) }
     raise { Keyword $$ KwRaise }
     tkindef { Keyword $$ KwTKind }
+    as { Keyword $$ KwAs }
     assume { Keyword $$ KwAssume }
     addrAt { Keyword $$ KwAddrAt }
     viewAt { Keyword $$ KwViewAt }
@@ -341,6 +342,7 @@ Pattern : Name { PName $1 [] }
         | at Pattern { AtPattern $1 $2 }
         | identifier Universals Pattern { UniversalPattern (token_posn $1) (to_string $1) $2 $3 }
         | identifierSpace Universals Pattern { UniversalPattern (token_posn $1) (to_string $1) $2 $3 }
+        | Pattern as Pattern { As $2 $1 $3 }
         | Existential Pattern { ExistentialPattern $1 $2 }
         | minus {% left $ Expected $1 "Pattern" "-" }
         | plus {% left $ Expected $1 "Pattern" "+" }

@@ -6,6 +6,7 @@
     using a state monad (?)
 - [ ] Preserve `and` val declarations
 - [ ] Macros with `#else`
+- [ ] `as` syntax
 - [ ] Boxed records
 - [ ] Handle `stadef mytkind = $extkind"atslib_linmap_avltree"`
 - [ ] Sort annotations for viewtypes etc.
