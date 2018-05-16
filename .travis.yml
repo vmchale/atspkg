@@ -17,13 +17,13 @@ matrix:
 
     # Linux
     - env: TARGET=x86_64-unknown-linux
-      # addons:
-      #  apt:
-      #    sources:
-      #      - hvr-ghc
-      #    packages:
-      #      - ghc-8.4.2
-      #      - cabal-install-head
+      addons:
+        apt:
+          sources:
+            - hvr-ghc
+          packages:
+            - ghc-8.4.2
+            - cabal-install-head
       # language: python
       language: c
 
@@ -45,7 +45,7 @@ before_install:
       brew install bzip2
       curl --insecure -L https://www.stackage.org/stack/osx-x86_64 | tar xz --strip-components=1 --include '*/stack' -C ~/.local/bin
     else
-      curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+      cabal update
     fi
   - chmod a+x ~/.local/bin/stack
 
@@ -53,15 +53,16 @@ install:
   - stack --no-terminal --install-ghc build --only-dependencies
 
 script:
-  - stack --no-terminal build --haddock --no-haddock-deps --test --bench --no-run-tests --no-run-benchmarks
   - curl -sL https://raw.github.com/ndmitchell/weeder/master/misc/travis.sh | sh -s .
   - curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s .
   - |
     if [ `uname` = "Darwin" ]
     then
+      stack --no-terminal build --haddock --no-haddock-deps --test --bench --no-run-tests --no-run-benchmarks
       export BINPATH="$(find .stack-work/ -name atspkg -perm 755)"
     else
-      export BINPATH="$(find -name atspkg -executable | tail -n4 | head -n1)"
+      cabal new-build all
+      export BINPATH="$(find dist-newstyle/ -name atspkg | tail -n1)"
     fi
   - echo $BINPATH
   - |
