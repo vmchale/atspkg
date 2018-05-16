@@ -44,11 +44,11 @@ before_install:
       brew install xz
       brew install bzip2
       curl --insecure -L https://www.stackage.org/stack/osx-x86_64 | tar xz --strip-components=1 --include '*/stack' -C ~/.local/bin
+      chmod a+x ~/.local/bin/stack
     else
       export PATH=/opt/ghc/bin:$PATH
       cabal update
     fi
-  - chmod a+x ~/.local/bin/stack
 
 install:
   - stack --no-terminal --install-ghc build --only-dependencies
