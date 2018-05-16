@@ -100,7 +100,6 @@ library
         hashable -any,
         containers -any,
         parallel-io -any,
-        unix -any,
         mtl -any,
         dhall >=1.12.0 && <1.13.0,
         ansi-wl-pprint -any,
@@ -111,9 +110,13 @@ library
         ansi-wl-pprint -any,
         binary -any,
         microlens -any,
-        microlens-th,
+        microlens-th -any,
         dependency -any,
         filemanip -any
+    
+    if !os(windows)
+        build-depends:
+            unix -any
     
     if (flag(development) && impl(ghc <8.4))
         ghc-options: -Werror
