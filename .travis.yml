@@ -70,7 +70,7 @@ script:
       export BINPATH="$(find .stack-work/ -name atspkg -perm 755)"
     else
       cabal new-build all
-      export BINPATH="$(find dist-newstyle/ -name atspkg | tail -n1)"
+      export BINPATH="$(find -name atspkg -executable | tail -n1)"
     fi
   - echo $BINPATH
   - |
