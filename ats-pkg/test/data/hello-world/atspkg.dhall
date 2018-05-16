@@ -7,4 +7,5 @@ in prelude.default ⫽
       , target = "target/hello-world"
       }
     ]
+  , atsLib = False
   }

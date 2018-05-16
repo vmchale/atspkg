@@ -78,7 +78,7 @@ script:
     then
       mv $BINPATH atspkg-$TARGET
     else
-      mv $BINPATH/atspkg atspkg-$TARGET
+      mv $BINPATH atspkg-$TARGET
     fi
   - |
     if [ `uname` = "Darwin" ]
