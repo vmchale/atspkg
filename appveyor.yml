@@ -16,8 +16,8 @@ test_script:
   - stack setup > nul
   - set path=%PATH%;C:\Users\appveyor\AppData\Roaming\local\bin
   - echo "" | stack --no-terminal install happy
+  - echo "" | stack --no-terminal install alex
   - echo "" | stack --no-terminal install
-  - type C:\stack\.stack-work\logs\alex-3.2.4.log
   - ps: Get-ChildItem . -name -recurse madlang.exe
   - ps: Copy-Item c:\\stack\\.stack-work\\install\\81831b05\\bin\\atspkg.exe atspkg-x86_64-pc-windows.exe
   - ps: Push-AppveyorArtifact atspkg-x86_64-pc-windows.exe
