@@ -53,12 +53,12 @@ install:
   - stack --no-terminal --install-ghc build --only-dependencies
 
 script:
-  - curl -sL https://raw.github.com/ndmitchell/weeder/master/misc/travis.sh | sh -s .
   - curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s .
   - |
     if [ `uname` = "Darwin" ]
     then
       stack --no-terminal build --haddock --no-haddock-deps --test --bench --no-run-tests --no-run-benchmarks
+      curl -sL https://raw.github.com/ndmitchell/weeder/master/misc/travis.sh | sh -s .
       export BINPATH="$(find .stack-work/ -name atspkg -perm 755)"
     else
       cabal new-build all
