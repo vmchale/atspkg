@@ -34,7 +34,6 @@ matrix:
       language: c
 
 before_install:
-  - rm -rf ~/.cabal
   - rm -rf ~/.stack
   - mkdir -p ~/.local/bin
   - export PATH=$HOME/.local/bin:$PATH
@@ -46,6 +45,7 @@ before_install:
       brew install bzip2
       curl --insecure -L https://www.stackage.org/stack/osx-x86_64 | tar xz --strip-components=1 --include '*/stack' -C ~/.local/bin
     else
+      export PATH=/opt/ghc/bin:$PATH
       cabal update
     fi
   - chmod a+x ~/.local/bin/stack
