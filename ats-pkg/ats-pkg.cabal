@@ -117,9 +117,6 @@ library
     if !os(windows)
         build-depends:
             unix -any
-
-    if os(windows):
-        build-depends: lzma-clib -any
     
     if (flag(development) && impl(ghc <8.4))
         ghc-options: -Werror

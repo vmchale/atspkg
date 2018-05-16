@@ -20,6 +20,7 @@ extra-deps:
   - micro-recursion-schemes-5.0.2.2
   - dhall-1.12.0
   - Cabal-2.2.0.1
+  - lzma-clib-5.2.2
 flags:
   hs2ats:
     no-executable: false
