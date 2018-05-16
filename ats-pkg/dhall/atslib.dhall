@@ -40,30 +40,30 @@ in
 
 let atslib =
   λ(compilerVersion : List Integer) →
-  λ(libVersion : List Integer) →
-  prelude.default ⫽
-    { libraries =
-      [
-        prelude.staticLib ⫽
-        { libTarget = "target/libatslib.a"
-        , name = "atslib"
-        , src =
-          concat Text
-            [ mapPre [ "bool", "integer", "basics", "pointer", "integer_long", "integer_short", "integer_size", "char", "float", "string", "strptr", "integer_ptr", "integer_fixed", "filebas" ]
-            , mapC [ "math", "float", "errno", "fcntl", "dirent", "stdio", "stdlib", "string", "strings", "time", "unistd" ]
-            , mapML [ "list0", "option0", "array0", "matrix0", "string", "strarr", "gvalue", "dynarray", "hashtblref", "filebas", "filebas_dirent" ]
-            ]
-        , includes = ([] : List Text)
+    λ(libVersion : List Integer) →
+      prelude.default ⫽
+        { libraries =
+          [
+            prelude.staticLib ⫽
+            { libTarget = "target/libatslib.a"
+            , name = "atslib"
+            , src =
+              concat Text
+                [ mapPre [ "bool", "integer", "basics", "pointer", "integer_long", "integer_short", "integer_size", "char", "float", "string", "strptr", "integer_ptr", "integer_fixed", "filebas" ]
+                , mapC [ "math", "float", "errno", "fcntl", "dirent", "stdio", "stdlib", "string", "strings", "time", "unistd" ]
+                , mapML [ "list0", "option0", "array0", "matrix0", "string", "strarr", "gvalue", "dynarray", "hashtblref", "filebas", "filebas_dirent" ]
+                ]
+            , includes = ([] : List Text)
+            }
+          , prelude.staticLib ⫽
+            { libTarget = "target/libatsopt.a"
+            , name = "atsopt"
+            , src = mapUtil [ "main", "print", "util" ]
+            }
+          ]
+        , cflags = [ "-fPIC" ]
+        , compiler = compilerVersion
         }
-      , prelude.staticLib ⫽
-        { libTarget = "target/libatsopt.a"
-        , name = "atsopt"
-        , src = mapUtil [ "main", "print", "util" ]
-        }
-      ]
-    , cflags = [ "-fPIC" ]
-    , compiler = compilerVersion
-    }
 in
 
 atslib [0,3,10] [0,3,9]
