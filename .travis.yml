@@ -19,6 +19,7 @@ matrix:
     - env: TARGET=x86_64-unknown-linux
       addons:
         apt:
+          update: true
           sources:
             - hvr-ghc
           packages:
