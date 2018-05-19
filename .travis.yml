@@ -59,19 +59,13 @@ install:
 script:
   - curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s .
   - cabal new-build all
-  - export BINPATH="$(find -name atspkg -executable | tail -n1)"
+  - export BINPATH="$(find dist-newstyle/ -name atspkg -executable | tail -n1)"
   - echo $BINPATH
+  - mv $BINPATH atspkg-$TARGET
   - |
     if [ `uname` = "Darwin" ]
     then
-      mv $BINPATH atspkg-$TARGET
-    else
-      mv $BINPATH atspkg-$TARGET
-    fi
-  - |
-    if [ `uname` = "Darwin" ]
-    then
-      export BINPATH="$(find -name atsfmt -perm 755 | tail -n1)"
+      export BINPATH="$(find dist-newstyle/ -name atsfmt -perm 755 | tail -n1)"
     else
       export BINPATH="$(find -name atsfmt -executable | tail -n1)"
     fi
