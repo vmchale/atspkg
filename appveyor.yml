@@ -5,6 +5,7 @@ build: off
 before_test:
   - choco install ghc
   - choco install cabal
+  - choco install 7zip
   - set PATH=C:\Program Files\Git\mingw64\bin;%PATH%
 
 clone_folder: "c:\\stack"
