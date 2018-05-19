@@ -89,10 +89,7 @@ let xzUtils =
       }
 in
 
-let fastArithmetic =
-  λ(x : List Integer) →
-    prelude.makeHsPkg { x = x, name = "fast-arithmetic" }
-      ⫽ { libDeps = prelude.mapPlainDeps [ "atscntrb-hx-intinf" ], description = [ "Number theory & combinatorics library written in ATS" ] : Optional Text }
+let fastArithmetic = https://hackage.haskell.org/package/fast-arithmetic-0.6.0.6/src/pkg.dhall
 in
 
 let gmp =
@@ -170,7 +167,7 @@ let pkgset =
   , gmp [1,0,1]
   , atomicOps [7,6,4]
   , gc [7,6,6]
-  , fastArithmetic [0,6,0,1]
+  , fastArithmetic [0,6,0,6]
   , unistring
   , xzUtils [5,2,3]
   , git [0,27,0]
