@@ -141,7 +141,9 @@ import           Numeric                      (showHex)
 import           System.Directory             as X
 import           System.Environment           (getEnv)
 import           System.Exit                  (ExitCode (ExitSuccess), exitWith)
+#ifndef mingw32_HOST_OS
 import           System.Posix.Files
+#endif
 import           System.Process               as X
 import           System.Process.Ext
 import           Text.PrettyPrint.ANSI.Leijen hiding (bool, (<$>), (<>))
