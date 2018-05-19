@@ -151,6 +151,7 @@ import           Text.PrettyPrint.ANSI.Leijen hiding (bool, (<$>), (<>))
 infixr 5 <#>
 
 #ifdef mingw32_HOST_OS
+setFileMode :: a -> b -> IO ()
 setFileMode _ _ = mempty
 ownerModes = undefined
 #endif
