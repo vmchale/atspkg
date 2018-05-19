@@ -91,6 +91,8 @@ script:
   - strip atspkg-$TARGET
   - du -h atspkg-$TARGET
   - strip atsfmt-$TARGET
+  - cd ats-pkg/test/data/hello-world
+  - ../../../../atspkg-$TARGET run
 
 deploy:
   api_key:
