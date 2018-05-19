@@ -34,7 +34,6 @@ matrix:
       language: c
 
 before_install:
-  - rm -rf ~/.stack
   - mkdir -p ~/.local/bin
   - export PATH=$HOME/.local/bin:$PATH
   - |
