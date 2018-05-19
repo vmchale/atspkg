@@ -71,7 +71,7 @@ script:
   - |
     if [ `uname` = "Darwin" ]
     then
-      export BINPATH="$(find .stack-work -name atsfmt -perm 755 | tail -n1)"
+      export BINPATH="$(find -name atsfmt -perm 755 | tail -n1)"
     else
       export BINPATH="$(find -name atsfmt -executable | tail -n1)"
     fi
