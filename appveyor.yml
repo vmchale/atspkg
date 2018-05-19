@@ -14,6 +14,7 @@ environment:
 
 test_script:
   - refreshenv
+  - cabal update
   - cabal new-build all
   - type C:\stack\.stack-work\logs\alex-3.2.4.log
   - ps: Get-ChildItem . -name -recurse madlang.exe
