@@ -42,7 +42,7 @@ before_install:
       brew install lzlib
       brew install xz
       brew install bzip2
-      brew install CabalInstall
+      brew install cabal-install
       cabal update
       # curl --insecure https://www.haskell.org/cabal/release/cabal-install-2.2.0.0/cabal-install-2.2.0.0-x86_64-apple-darwin-sierra.tar.gz -O cabal-install-2.2.0.0-x86_64-apple-darwin-sierra.tar.gz
       # curl --insecure https://downloads.haskell.org/~ghc/8.4.2/ghc-8.4.2-x86_64-apple-darwin.tar.xz -O ghc-8.4.2-x86_64-apple-darwin.tar.xz
