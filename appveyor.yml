@@ -16,8 +16,7 @@ test_script:
   - refreshenv
   - cabal update
   - cabal new-build all
-  - type C:\stack\.stack-work\logs\alex-3.2.4.log
-  - ps: Get-ChildItem . -name -recurse madlang.exe
+  - ps: Get-ChildItem . -name -recurse atspkg.exe
   - ps: Copy-Item c:\\stack\\.stack-work\\install\\81831b05\\bin\\atspkg.exe atspkg-x86_64-pc-windows.exe
   - ps: Push-AppveyorArtifact atspkg-x86_64-pc-windows.exe
 
