@@ -73,6 +73,7 @@ script:
     then
       export BINPATH="$(find dist-newstyle/ -name atsfmt -perm 755 | tail -n1)"
     else
+      find dist-newstyle/ -name atsfmt -executable
       export BINPATH="$(find dist-newstyle/ -name atsfmt -executable | tail -n1)"
     fi
   - echo $BINPATH

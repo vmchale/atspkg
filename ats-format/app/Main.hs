@@ -67,7 +67,7 @@ wrapper :: ParserInfo Program
 wrapper = info (helper <*> versionInfo <*> file)
     (fullDesc
     <> progDesc "ATS source code formater. For more detailed help, see 'man atsfmt'"
-    <> header "ats-format - a source code formatter written using happy/alex")
+    <> header "ats-format - a source code formatter written in Haskell")
 
 main :: IO ()
 main = execParser wrapper >>= pick
