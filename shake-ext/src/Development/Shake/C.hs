@@ -30,6 +30,7 @@ module Development.Shake.C ( -- * Types
                            , examineCfg
                            -- * Reëxports from "Language.C.Dependency"
                            , getCDepends
+                           , getAll
                            -- * Helper functions
                            , cconfigToArgs
                            , ccToString
