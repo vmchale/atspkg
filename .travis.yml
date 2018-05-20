@@ -4,6 +4,7 @@ cache:
   directories:
     - $HOME/.cabal
     - $HOME/.ghc
+    - dist-newstyle
 addons:
   apt:
     packages:
