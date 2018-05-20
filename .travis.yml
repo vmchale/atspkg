@@ -2,7 +2,6 @@
 sudo: false
 cache:
   directories:
-    - $HOME/.stack
     - $HOME/.cabal
     - $HOME/.ghc
 addons:
@@ -81,7 +80,7 @@ script:
   - du -h atspkg-$TARGET
   - strip atsfmt-$TARGET
   - cd ats-pkg/test/data/hello-world
-  - ../../../../atspkg-$TARGET run
+  - ../../../../atspkg-$TARGET run -vv
 
 deploy:
   api_key:
