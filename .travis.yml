@@ -57,7 +57,7 @@ install:
   - cabal new-build all --dependencies-only
 
 script:
-  - curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s .
+  - curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s ats-format ats-pkg cdeps dependency hs2ats language-ats shake-ats shake-ext
   - cabal new-build all
   - |
     if [ `uname` = "Darwin" ]
