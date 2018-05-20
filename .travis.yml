@@ -33,6 +33,9 @@ matrix:
       os: osx
       language: c
 
+  allow_failures:
+    - env: TARGET=x86_64-apple-darwin
+
 before_install:
   - mkdir -p ~/.local/bin
   - export PATH=$HOME/.local/bin:$PATH
