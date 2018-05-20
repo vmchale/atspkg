@@ -46,7 +46,7 @@ let cairo =
 in
 
 let unistring =
-  makeGnuPkg { version = [+0,+9,+9], name = "unistring" }
+  makeGnuPkg { version = [0,9,9], name = "unistring" }
 in
 
 let ssl =
@@ -54,7 +54,7 @@ let ssl =
     { libName = "openssl"
     , dir = "openssl-1.1.0h"
     , url = "https://www.openssl.org/source/openssl-1.1.0h.tar.gz"
-    , libVersion = [+1,+1,+0]
+    , libVersion = [1,1,0]
     }
 in
 
