@@ -63,6 +63,7 @@ script:
     if [ `uname` = "Darwin" ]
     then
       export BINPATH="$(find dist-newstyle/ -name atspkg -perm 755 | tail -n1)"
+      find dist-newstyle/ -name atspkg -perm 755
     else
       export BINPATH="$(find dist-newstyle/ -name atspkg -executable | tail -n1)"
     fi
