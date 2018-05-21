@@ -25,13 +25,14 @@ import qualified Data.Map                     as M
 import           Data.Semigroup
 import qualified Data.Set                     as S
 import           GHC.Generics                 (Generic)
+import           GHC.Natural                  (Natural)
 import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>))
 
 -- | A package set is simply a map between package names and a set of packages.
 newtype PackageSet a = PackageSet { _packageSet :: M.Map String (S.Set a) }
     deriving (Eq, Ord, Foldable, Generic, Binary)
 
-newtype Version = Version [Integer]
+newtype Version = Version [Natural]
     deriving (Eq, Generic, NFData, Binary)
 
 instance Show Version where

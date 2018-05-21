@@ -39,8 +39,8 @@ let mapML =
 in
 
 let atslib =
-  λ(compilerVersion : List Integer) →
-    λ(libVersion : List Integer) →
+  λ(compilerVersion : List Natural) →
+    λ(libVersion : List Natural) →
       prelude.default ⫽
         { libraries =
           [

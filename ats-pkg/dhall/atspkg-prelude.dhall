@@ -5,7 +5,7 @@ let map = http://hackage.haskell.org/package/dhall-1.14.0/src/Prelude/List/map
 in
 
 {- Types for export and supporting functions -}
-let ATSConstraint = { lower : Optional (List Integer), upper : Optional (List Integer) }
+let ATSConstraint = { lower : Optional (List Natural), upper : Optional (List Natural) }
 in
 
 let LibDep = { _1 : Text, _2 : ATSConstraint }
@@ -58,7 +58,7 @@ in
 
 let Debian =
   { package : Text
-  , version : List Integer
+  , version : List Natural
   , maintainer : Text
   , description : Text
   , target : Text
@@ -93,10 +93,10 @@ let patsHome =
 in
 
 let showVersion =
-  λ(x : List Integer) → concatMapSep "." Integer Integer/show x
+  λ(x : List Natural) → concatMapSep "." Natural Natural/show x
 in
 
-let none = [] : Optional (List Integer)
+let none = [] : Optional (List Natural)
 in
 let plainDeps = λ(x : Text) → { _1 = x, _2 = { lower = none, upper = none } }
 in
@@ -200,7 +200,7 @@ in
 
 {- Package functions -}
 let makePkg =
-  λ(rec : { x : List Integer, name : Text, githubUsername : Text}) →
+  λ(rec : { x : List Natural, name : Text, githubUsername : Text}) →
     dep ⫽
       { libName = rec.name
       , dir = "${patsHome}"
@@ -210,7 +210,7 @@ let makePkg =
 in
 
 let makeNpmPkg =
-  λ(rec : { x : List Integer, name : Text, unpackDir : Text }) →
+  λ(rec : { x : List Natural, name : Text, unpackDir : Text }) →
     dep ⫽
       { libName = rec.name
       , dir = "${patsHome}/${rec.unpackDir}"
@@ -220,7 +220,7 @@ let makeNpmPkg =
 in
 
 let makeHsPkg =
-  λ(rec : { x : List Integer, name : Text }) →
+  λ(rec : { x : List Natural, name : Text }) →
     dep ⫽
       { libName = rec.name
       , dir = "${patsHome}"
@@ -230,7 +230,7 @@ let makeHsPkg =
 in
 
 let makePkgDescr =
-  λ(x : { x : List Integer, name : Text, githubUsername : Text, description : Text }) →
+  λ(x : { x : List Natural, name : Text, githubUsername : Text, description : Text }) →
     makePkg { x = x.x, name = x.name, githubUsername = x.githubUsername }
       ⫽ { description = [ x.description ] : Optional Text }
 in
