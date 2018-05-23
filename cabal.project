@@ -9,7 +9,7 @@ packages: language-ats
 
 constraints:
   ats-format +development +static,
-  ats-pkg +development +static -eventlog -profile,
+  ats-pkg +development -static -eventlog -profile,
   shake-ext +development, 
   language-ats +development,
   shake-ats +development,
