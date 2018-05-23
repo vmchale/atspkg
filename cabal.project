@@ -8,8 +8,8 @@ packages: language-ats
         , cdeps
 
 constraints:
-  ats-format +development,
-  ats-pkg +development -eventlog -profile,
+  ats-format +development +static,
+  ats-pkg +development +static -eventlog -profile,
   shake-ext +development, 
   language-ats +development,
   shake-ats +development,
@@ -21,7 +21,7 @@ constraints:
 optimization: 2
 tests: True
 benchmarks: True
-documentation: True
+-- documentation: True
 
 program-options
   happy-options: -gcsa

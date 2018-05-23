@@ -45,10 +45,6 @@ before_install:
       brew install bzip2
       brew install cabal-install
       cabal update
-      # curl --insecure https://www.haskell.org/cabal/release/cabal-install-2.2.0.0/cabal-install-2.2.0.0-x86_64-apple-darwin-sierra.tar.gz -O cabal-install-2.2.0.0-x86_64-apple-darwin-sierra.tar.gz
-      # curl --insecure https://downloads.haskell.org/~ghc/8.4.2/ghc-8.4.2-x86_64-apple-darwin.tar.xz -O ghc-8.4.2-x86_64-apple-darwin.tar.xz
-      # curl --insecure -L https://www.stackage.org/stack/osx-x86_64 | tar xz --strip-components=1 --include '*/stack' -C ~/.local/bin
-      # chmod a+x ~/.local/bin/stack
     else
       export PATH=/opt/ghc/bin:$PATH
       cabal update
@@ -58,6 +54,7 @@ install:
   - cabal new-build all --dependencies-only
 
 script:
+  - rm -rf dist-newstyle
   - curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s ats-format ats-pkg cdeps dependency hs2ats language-ats shake-ats shake-ext
   - cabal new-build all
   - |
@@ -73,6 +70,7 @@ script:
   - du -h atspkg-$TARGET
   - cd ats-pkg/test/data/hello-world
   - ../../../../atspkg-$TARGET run -vv
+  - cd -
 
 deploy:
   api_key:

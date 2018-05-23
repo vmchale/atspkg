@@ -30,6 +30,11 @@ custom-setup
                    Cabal >=2.2,
                    cli-setup >=0.2.0.1
 
+flag static
+    description:
+        Make static binaries
+    default: False
+
 flag profile
     description:
         Enable profiling
@@ -103,7 +108,7 @@ library
         containers -any,
         parallel-io -any,
         mtl -any,
-        dhall >=1.14.0,
+        dhall <=1.14.0,
         ansi-wl-pprint -any,
         shake-ats >=1.8.0.0,
         shake-ext >=2.6.0.0,
@@ -158,3 +163,6 @@ executable atspkg
     
     if flag(development)
         ghc-options: -Werror
+    
+    if flag(static)
+        ghc-options: -static -optc-static -optl-static

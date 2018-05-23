@@ -32,3 +32,4 @@
 - [ ] Benchmark/test suite
 - [ ] Make a `Dhall` subdirectory for "library" functions
 - [ ] Instead of calling `atspkg install`, use the function.
+- [ ] Generate a `hpc` report

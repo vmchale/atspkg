@@ -1,5 +1,5 @@
 ---
-resolver: nightly-2018-05-15
+resolver: lts-11.10
 packages:
   - 'ats-pkg'
   - 'language-ats'
@@ -18,7 +18,7 @@ extra-deps:
   - dirstream-1.0.3
   - htoml-megaparsec-1.2.0.2
   - micro-recursion-schemes-5.0.2.2
-  - dhall-1.12.0
+  - dhall-1.14.0
   - Cabal-2.2.0.1
   - lzma-clib-5.2.2
 flags:

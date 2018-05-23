@@ -25,6 +25,11 @@ custom-setup
                    Cabal -any,
                    cli-setup >=0.1.0.2
 
+flag static
+    description:
+        Make static binaries
+    default: False
+
 flag development
     description:
         Enable `-Werror`
@@ -55,3 +60,6 @@ executable atsfmt
     
     if impl(ghc >=8.0)
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
+    
+    if flag(static)
+        ghc-options: -static -optc-static -optl-static
