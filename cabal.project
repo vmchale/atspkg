@@ -8,7 +8,7 @@ packages: language-ats
         , cdeps
 
 constraints:
-  ats-format +development +static,
+  ats-format +development -static,
   ats-pkg +development -static -eventlog -profile,
   shake-ext +development, 
   language-ats +development,
