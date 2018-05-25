@@ -89,7 +89,7 @@ let xzUtils =
       }
 in
 
-let fastArithmetic = https://hackage.haskell.org/package/fast-arithmetic-0.6.0.6/src/pkg.dhall
+let fastArithmetic = https://raw.githubusercontent.com/vmchale/hs-ats/master/fast-arithmetic/pkg.dhall -- https://hackage.haskell.org/package/fast-arithmetic-0.6.0.6/src/pkg.dhall
 in
 
 let gmp =
