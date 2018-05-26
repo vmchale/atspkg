@@ -45,6 +45,7 @@ clibSetup v cc' lib' p = do
     makeExecutable "install-sh" (p:subdirs)
     makeExecutable "mkinstalldirs" (p:subdirs)
     makeExecutable "rellns-sh" (p:subdirs)
+    makeExecutable "shtool" (p:subdirs)
 
     -- CC="gcc" CFLAGS="-shared-libgcc -O2" ./glibc-2.27/configure --prefix="$HOME/.atspkg"
     -- Set environment variables for configure script
