@@ -585,8 +585,7 @@ instance Eq a => Pretty (Declaration a) where
     pretty (ViewTypeDef _ s as t)           = "vtypedef" <+> text s <> prettySortArgs as <+> "=" <#> pretty t
     pretty (TypeDef _ s as t ms)            = "typedef" <+> text s <> prettySortArgs as <+> "=" <+> pretty t <> maybeT ms
     pretty (AbsProp _ n as)                 = "absprop" <+> text n <+> prettyArgs as
-    pretty (Assume n NoA e)                 = "assume" </> pretty n <+> "=" </> pretty e
-    pretty (Assume n as e)                  = "assume" </> pretty n <> prettyArgs as <+> "=" </> pretty e
+    pretty (Assume n as e)                  = "assume" </> pretty n <> prettySortArgs as <+> "=" </> pretty e
     pretty (SymIntr _ ns)                   = "symintr" <+> hsep (fmap pretty ns)
     pretty (Stacst _ n t Nothing)           = "stacst" </> pretty n <+> ":" </> pretty t
     pretty (Stacst _ n t (Just e))          = "stacst" </> pretty n <+> ":" </> pretty t <+> "=" </> pretty e

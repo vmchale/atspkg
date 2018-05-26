@@ -909,10 +909,8 @@ Declaration : include string { Include $2 }
             | overload tilde with identifierSpace of intLit { OverloadIdent $1 "~" (Unqualified $ to_string $4) (Just $6) }
             | overload lsqbracket rsqbracket with identifierSpace of intLit { OverloadIdent $1 "[]" (Unqualified $ to_string $5) (Just $7) }
             | overload dot identifierSpace with Name { OverloadIdent $1 ('.' : (to_string $3)) $5 Nothing }
-            | assume identifierSpace eq Type { Assume (Unqualified (to_string $2)) [NoArgs] $4 }
-            | assume Name eq Type { Assume $2 [NoArgs] $4 }
-            | assume Name doubleParens eq Type { Assume $2 [] $5 }
-            | assume Name openParen Args closeParen eq Type { Assume $2 $4 $7 }
+            | assume identifierSpace eq Type { Assume (Unqualified (to_string $2)) Nothing $4 }
+            | assume Name SortArgs eq Type { Assume $2 $3 $5 }
             | tkindef IdentifierOr eq string { TKind $1 (Unqualified $2) $4 }
             | TypeDecl { $1 }
             | symintr Names { SymIntr $1 $2 }

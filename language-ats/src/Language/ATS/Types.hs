@@ -132,7 +132,7 @@ data Declaration a = Func { pos :: a, _fun :: Function a }
                    | AndD (Declaration a) (Declaration a)
                    | Local a (ATS a) (ATS a)
                    | AbsProp a String [Arg a]
-                   | Assume (Name a) [Arg a] (Type a)
+                   | Assume (Name a) (SortArgs a) (Type a)
                    | TKind a (Name a) String
                    | SymIntr a [Name a]
                    | Stacst a (Name a) (Type a) (Maybe (Expression a))

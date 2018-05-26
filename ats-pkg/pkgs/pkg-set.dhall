@@ -13,6 +13,16 @@ let makeGnuPkg =
       }
 in
 
+let pth =
+  λ(x : List Natural) →
+    prelude.dep ⫽
+      { libName = "pth"
+      , dir = "pth-${prelude.showVersion x}"
+      , url = "https://ftp.wayne.edu/gnu/pth/pth-${prelude.showVersion x}.tar.gz"
+      , libVersion = x
+      }
+in
+
 let glibc =
   λ(x : List Natural) →
     prelude.dep ⫽
@@ -175,6 +185,7 @@ let pkgset =
   , atsIncludes [0,3,10]
   , cairo [1,15,12]
   , glibc [2,27]
+  , pth [2,0,7]
   , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall [0,2,3]
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,8]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,1]
