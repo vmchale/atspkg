@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: ats-format
-version: 0.2.0.27
+version: 0.2.0.28
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2017-2018 Vanessa McHale
@@ -47,7 +47,7 @@ executable atsfmt
         base >=4.9 && <5,
         language-ats >=0.1.1.10,
         optparse-applicative -any,
-        htoml-megaparsec >=1.1.0.0,
+        htoml-megaparsec >=2.0.0.0,
         text -any,
         ansi-wl-pprint -any,
         directory -any,

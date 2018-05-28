@@ -13,6 +13,16 @@ let makeGnuPkg =
       }
 in
 
+let sdl2 =
+  λ(x : List Natural) →
+    prelude.dep ⫽
+      { libName = "sdl2"
+      , dir = "sdl-${prelude.showVersion x}"
+      , url = "https://libsdl.org/release/SDL2-${prelude.showVersion x}.tar.gz"
+      , libVersion = x
+      }
+in
+
 let pth =
   λ(x : List Natural) →
     prelude.dep ⫽
@@ -186,6 +196,7 @@ let pkgset =
   , cairo [1,15,12]
   , glibc [2,27]
   , pth [2,0,7]
+  , sdl2 [2,0,8]
   , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall [0,2,3]
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,8]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,1]
