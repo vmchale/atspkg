@@ -5,6 +5,7 @@
 - [ ] custom build scripts in ATS (`setup.dats`)
 - [ ] Set number of threads manually
 - [ ] Initialize projects
+- [ ] Post-process Haskell documentation to link to ATS source?
 # Libraries
 - [ ] `shake-ats` should allow builds with `patscc` some other way
 - [ ] Set target triple in `shake-ext`?
