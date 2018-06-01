@@ -16,7 +16,7 @@ extra-deps:
   - cli-setup-0.2.0.4
   - hspec-dirstream-1.0.0.0
   - dirstream-1.0.3
-  - htoml-megaparsec-1.2.0.2
+  - htoml-megaparsec-2.0.0.0
   - micro-recursion-schemes-5.0.2.2
   - dhall-1.14.0
   - Cabal-2.2.0.1

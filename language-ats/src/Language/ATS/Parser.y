@@ -515,6 +515,7 @@ Sort : t0pPlain { T0p None }
      | vtype { VType (token_posn $1) (get_addendum $1) }
      | openParen Sort comma Sort closeParen { TupleSort $1 $2 $4 }
      | doubleParens { NamedSort "()" }
+     | Sort mutateArrow Sort { ArrowSort $2 $1 $3 }
      | IdentifierOr { NamedSort $1 }
      | IdentifierOr plus { NamedSort ($1 <> "+") }
 
@@ -909,7 +910,7 @@ Declaration : include string { Include $2 }
             | overload tilde with identifierSpace of intLit { OverloadIdent $1 "~" (Unqualified $ to_string $4) (Just $6) }
             | overload lsqbracket rsqbracket with identifierSpace of intLit { OverloadIdent $1 "[]" (Unqualified $ to_string $5) (Just $7) }
             | overload dot identifierSpace with Name { OverloadIdent $1 ('.' : (to_string $3)) $5 Nothing }
-            | assume identifierSpace eq Type { Assume (Unqualified (to_string $2)) Nothing $4 }
+            | assume identifierSpace SortArgs eq Type { Assume (Unqualified (to_string $2)) $3 $5 }
             | assume Name SortArgs eq Type { Assume $2 $3 $5 }
             | tkindef IdentifierOr eq string { TKind $1 (Unqualified $2) $4 }
             | TypeDecl { $1 }

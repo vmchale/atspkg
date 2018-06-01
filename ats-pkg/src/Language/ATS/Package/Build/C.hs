@@ -56,7 +56,7 @@ clibSetup v cc' lib' p = do
     h <- cpkgHome cc'
     let procEnv = Just [("CC", ccForConfig cc'), ("CFLAGS" :: String, "-I" <> h <> "include -Wno-error -O2"), ("PATH", "/usr/bin:/bin")]
 
-    biaxe [fold (autogen v <$> configurePath), fold (configure v h <$> configurePath <*> pure procEnv), cmake v h cmakeLists, make v, install v] lib' p
+    biaxe [fold (autogen v <$> autogenPath), fold (configure v h <$> configurePath <*> pure procEnv), cmake v h cmakeLists, make v, install v] lib' p
 
 cmake :: Verbosity -> FilePath -> Maybe FilePath -> String -> FilePath -> IO ()
 cmake _ _ Nothing _ _ = mempty
@@ -65,9 +65,9 @@ cmake v prefixPath (Just cfgLists) _ _ = do
     silentCreateProcess v ((proc "cmake" ["-DCMAKE_INSTALL_PREFIX:PATH=" ++ prefixPath, p]) { cwd = Just p })
 
 autogen :: Verbosity -> FilePath -> String -> FilePath -> IO ()
-autogen v autogenPath lib' p =
-    putStrLn ("generating" ++ lib' ++ "...") >>
-    silentCreateProcess v ((proc autogenPath mempty) { cwd = Just p })
+autogen v autogenPath lib' _ =
+    putStrLn ("generating " ++ lib' ++ "...") >>
+    silentCreateProcess v ((proc autogenPath mempty) { cwd = Just (takeDirectory autogenPath) })
 
 configure :: Verbosity -> FilePath -> FilePath -> Maybe [(String, String)] -> String -> FilePath -> IO ()
 configure v prefixPath configurePath procEnv lib' p =

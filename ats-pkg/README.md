@@ -102,6 +102,7 @@ You can find several examples with explanation
 
 ## Global Configuration
 
+
 `atspkg` is configured via a file in `~/.config/atspkg/config.dhall`. You can
 set a custom package set as follows:
 

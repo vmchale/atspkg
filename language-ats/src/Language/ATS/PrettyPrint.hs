@@ -258,13 +258,15 @@ instance Eq a => Pretty (StaticExpression a) where
         a (SCaseF ad e sls) = "case" <> pretty ad <+> e <+> "of" <$> indent 2 (prettyCases sls)
 
 instance Eq a => Pretty (Sort a) where
-    pretty (T0p ad)           = "t@ype" <> pretty ad
-    pretty (Vt0p ad)          = "vt@ype" <> pretty ad
-    pretty (NamedSort s)      = text s
-    pretty Addr               = "addr"
-    pretty (View _ t)         = "view" <> pretty t
-    pretty (VType _ a)        = "vtype" <> pretty a
-    pretty (TupleSort _ s s') = parens (pretty s <> "," <+> pretty s')
+    pretty = cata a where
+        a (T0pF ad)           = "t@ype" <> pretty ad
+        a (Vt0pF ad)          = "vt@ype" <> pretty ad
+        a (NamedSortF s)      = text s
+        a AddrF               = "addr"
+        a (ViewF _ t)         = "view" <> pretty t
+        a (VTypeF _ a')       = "vtype" <> pretty a'
+        a (TupleSortF _ s s') = parens (s <> "," <+> s')
+        a (ArrowSortF _ s s') = s <+> "->" <+> s'
 
 instance Eq a => Pretty (Type a) where
     pretty = cata a where

@@ -45,6 +45,7 @@ module Language.ATS.Types
     , Fixity (..)
     , StackFunction (..)
     , Sort (..)
+    , SortF (..)
     , SortArg (..)
     , SortArgs
     , DataSortLeaf (..)
@@ -230,6 +231,7 @@ data Sort a = NamedSort { _sortName :: String }
             | VType a Addendum -- ^ @viewtype@ or @vtype@
             | View a Addendum -- ^ @view@
             | TupleSort a (Sort a) (Sort a)
+            | ArrowSort a (Sort a) (Sort a)
             deriving (Show, Eq, Generic, NFData)
 
 -- FIXME a type for sorts?
@@ -384,7 +386,7 @@ data PreFunction a = PreF { fname         :: Name a -- ^ Function name
                           }
                           deriving (Show, Eq, Generic, NFData)
 
-join <$> traverse makeBaseFunctor [''Pattern, ''Expression, ''StaticExpression, ''Type]
+join <$> traverse makeBaseFunctor [''Pattern, ''Expression, ''StaticExpression, ''Type, ''Sort]
 join <$> traverse makeLenses [''Leaf, ''Declaration, ''PreFunction, ''Implementation, ''DataPropLeaf, ''Function, ''Type]
 
 exprLens :: Eq a => FixityState a -> ASetter s t (Expression a) (Expression a) -> s -> t
