@@ -42,10 +42,10 @@ clibSetup v cc' lib' p = do
     -- Find configure script and make it executable
     subdirs <- allSubdirs p
     configurePath <- findFile (p:subdirs) "configure"
-    autogenPath <- findFile (p:subdirs) "autogen.sh"
+    -- autogenPath <- findFile (p:subdirs) "autogen.sh"
     cmakeLists <- findFile (p:subdirs) "CMakeLists.txt"
     fold (setFileMode <$> configurePath <*> pure ownerModes)
-    fold (setFileMode <$> autogenPath <*> pure ownerModes)
+    -- fold (setFileMode <$> autogenPath <*> pure ownerModes)
     makeExecutable "install-sh" (p:subdirs)
     makeExecutable "mkinstalldirs" (p:subdirs)
     makeExecutable "rellns-sh" (p:subdirs)
@@ -56,7 +56,7 @@ clibSetup v cc' lib' p = do
     h <- cpkgHome cc'
     let procEnv = Just [("CC", ccForConfig cc'), ("CFLAGS" :: String, "-I" <> h <> "include -Wno-error -O2"), ("PATH", "/usr/bin:/bin")]
 
-    biaxe [fold (autogen v <$> autogenPath), fold (configure v h <$> configurePath <*> pure procEnv), cmake v h cmakeLists, make v, install v] lib' p
+    biaxe [fold (configure v h <$> configurePath <*> pure procEnv), cmake v h cmakeLists, make v, install v] lib' p
 
 cmake :: Verbosity -> FilePath -> Maybe FilePath -> String -> FilePath -> IO ()
 cmake _ _ Nothing _ _ = mempty

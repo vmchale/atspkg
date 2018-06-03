@@ -14,6 +14,7 @@ module Language.ATS.PrettyPrint ( printATS
                                 ) where
 
 import           Control.Composition          hiding ((&))
+import           Data.Bool                    (bool)
 import           Data.Functor.Foldable        (cata)
 import           Language.ATS.Types
 import           Lens.Micro

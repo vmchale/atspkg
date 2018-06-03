@@ -199,7 +199,7 @@ let pkgset =
   , sdl2 [2,0,8]
   , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall [0,2,3]
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,8]
-  , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,1]
+  , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,2]
   , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall [0,1,7]
   , https://raw.githubusercontent.com/vmchale/either/master/pkg.dhall [0,2,2]
   , https://raw.githubusercontent.com/vmchale/ats-linecount/master/pkg.dhall [0,2,5]
