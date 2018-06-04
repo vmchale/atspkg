@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 set -e
 set pipefail
 
-function getTarget {
+getTarget() {
     if [ "$(uname)" = "Darwin" ]
     then
         echo "atspkg-$(uname -m)-apple-darwin"
@@ -27,10 +27,10 @@ main() {
     man_dest=$HOME/.local/share/man/man1/atspkg.1
     dest=$HOME/.local/bin/atspkg
 
-    if which duma > /dev/null ; then
+    if command -v duma > /dev/null ; then
         duma "$url" -O "$dest"
         duma "$man_url" -O "$man_dest"
-    elif which wget > /dev/null ; then
+    elif command -v wget > /dev/null ; then
         wget "$url" -O "$dest"
         wget "$man_url" -O "$man_dest"
     else
@@ -39,6 +39,12 @@ main() {
     fi
 
     chmod +x "$dest"
+
+
+    case :$PATH: in 
+        *:$HOME/.local/bin:*) ;;
+        *) echo "$HOME/.local/bin not in $PATH" >&2;;
+    esac
 
 }
 
