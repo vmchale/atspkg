@@ -15,8 +15,8 @@ constraints:
   shake-ats +development,
   ats-setup +development,
   dependency +development,
-  hs2ats +development +no-executable,
-  cdeps +development +no-executable
+  hs2ats +development -no-executable,
+  cdeps +development -no-executable
 
 optimization: 2
 tests: True

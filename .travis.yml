@@ -60,12 +60,20 @@ script:
   - |
     if [ `uname` = "Darwin" ]
     then
-      export BINPATH="$(find dist-newstyle/ -name atspkg -perm 755 | tail -n1)"
+      export BINPATH1="$(find dist-newstyle/ -name atspkg -perm 755 | tail -n1)"
+      export BINPATH2="$(find dist-newstyle/ -name atsfmt -perm 755 | tail -n1)"
+      export BINPATH3="$(find dist-newstyle/ -name hs2ats -perm 755 | tail -n1)"
     else
-      export BINPATH="$(find dist-newstyle/ -name atspkg -executable | tail -n1)"
+      export BINPATH1="$(find dist-newstyle/ -name atspkg -executable | tail -n1)"
+      export BINPATH2="$(find dist-newstyle/ -name atsfmt -executable | tail -n1)"
+      export BINPATH3="$(find dist-newstyle/ -name hs2ats -executable | tail -n1)"
     fi
-  - echo $BINPATH
-  - mv $BINPATH atspkg-$TARGET
+  - echo $BINPATH1
+  - echo $BINPATH2
+  - echo $BINPATH3
+  - mv $BINPATH1 atspkg-$TARGET
+  - mv $BINPATH2 atsfmt-$TARGET
+  - mv $BINPATH3 hs2ats-$TARGET
   - strip atspkg-$TARGET
   - du -h atspkg-$TARGET
   - cd ats-pkg/test/data/hello-world
