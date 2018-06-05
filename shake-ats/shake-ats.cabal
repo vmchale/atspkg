@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: shake-ats
-version: 1.8.0.5
+version: 1.8.0.6
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -50,7 +50,7 @@ library
         dependency -any,
         shake >=0.14,
         binary -any,
-        shake-cabal
+        shake-cabal -any
     
     if flag(development)
         ghc-options: -Werror
