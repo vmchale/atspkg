@@ -5,8 +5,12 @@ module Development.Shake.Clean ( cleanElm
 
 import           Development.Shake
 
+-- | Clean @elm-stuff@ directory and file extensions typically associated w/ Elm
+-- builds.
 cleanElm :: Action ()
-cleanElm = removeFilesAfter "elm-stuff" ["//*"]
+cleanElm =
+    removeFilesAfter "elm-stuff" ["//*"] >>
+    removeFilesAfter "." ["//*.elmi"]
 
 -- | Clean generic products (@.o@, @.so@, @.a@).
 cleanProducts :: Action ()
@@ -19,4 +23,4 @@ cleanHaskell =
     mapM_ (\p -> removeFilesAfter p ["//*"])
         [ "dist", "dist-newstyle", ".stack-work", ".cabal-sandbox" ] >>
     removeFilesAfter "."
-        ["//*.o", "//*.ghc.*", "//*_stub.h", "//*.hi", "//*.dyn_o", "//*.p_o", "//*.dyn_hi", "//*.p_hi", "//*.hc", "cabal.sandbox.config"]
+        ["//*.o", "//*.ghc.*", "//*_stub.h", "//*.hi", "//*.dyn_o", "//*.p_o", "//*.dyn_hi", "//*.p_hi", "//*.hc", "//*.haddock", "cabal.sandbox.config"]

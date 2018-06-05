@@ -18,7 +18,7 @@ import           Language.ATS.Package.Type
 import           Quaalude
 
 newtype ATSPackageSet = ATSPackageSet { _atsPkgSet :: [ ATSDependency ] }
-    deriving (Interpret, Show)
+    deriving (Interpret)
 
 makeLenses ''ATSPackageSet
 
@@ -26,12 +26,12 @@ instance Pretty Version where
     pretty v = text (show v)
 
 instance Pretty ATSDependency where
-    pretty (ATSDependency ln _ url md v _ _ _) = dullyellow (text (unpack ln)) <#> indent 4 (g md "url:" <+> text (unpack url) <#> "version:" <+> pretty v) <> hardline
+    pretty (ATSDependency ln _ url md v _ _ _ _) = dullyellow (text (unpack ln)) <#> indent 4 (g md "url:" <+> text (unpack url) <#> "version:" <+> pretty v) <> hardline
         where g (Just d) = ("description:" <+> text (unpack d) <#>)
               g Nothing  = id
 
 instance Pretty ATSPackageSet where
-    pretty (ATSPackageSet ds) = mconcat (punctuate hardline (pretty <$> ds))
+    pretty (ATSPackageSet ds) = fold (punctuate hardline (pretty <$> ds))
 
 displayList :: String -> IO ()
 displayList = putDoc . pretty <=< listDeps True

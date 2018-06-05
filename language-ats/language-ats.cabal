@@ -1,11 +1,12 @@
 cabal-version: 1.18
 name: language-ats
-version: 1.2.0.1
+version: 1.2.0.11
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
 maintainer: vamchale@gmail.com
 author: Vanessa McHale
+stability: experimental
 synopsis: Parser and pretty-printer for ATS.
 description:
     Parser and pretty-printer for [ATS](http://www.ats-lang.org/), written with Happy and Alex.
@@ -30,7 +31,7 @@ flag development
 library
     exposed-modules:
         Language.ATS
-    build-tools: happy -any, alex -any
+    build-tools: happy >=1.17.1, alex -any, cpphs -any
     hs-source-dirs: src
     other-modules:
         Language.ATS.Lexer
@@ -38,14 +39,21 @@ library
         Language.ATS.PrettyPrint
         Language.ATS.Types
     default-language: Haskell2010
+    other-extensions: OverloadedStrings DeriveGeneric DeriveAnyClass
+                      FlexibleContexts FlexibleInstances PatternSynonyms
+                      StandaloneDeriving LambdaCase GeneralizedNewtypeDeriving
+                      DeriveTraversable DerivingStrategies DuplicateRecordFields
+                      DeriveFoldable DeriveDataTypeable DeriveFunctor TypeFamilies
+                      TemplateHaskell CPP MagicHash
     ghc-options: -Wall
     build-depends:
-        base >=4.10 && <5,
+        base >=4.9 && <5,
         array -any,
-        lens -any,
+        micro-recursion-schemes >=5.0.1,
+        microlens -any,
+        microlens-th -any,
         deepseq -any,
         ansi-wl-pprint >=0.6.8,
-        recursion-schemes >=5.0.1,
         composition-prelude -any,
         containers -any,
         transformers -any
@@ -75,7 +83,6 @@ test-suite language-ats-test
     
     if impl(ghc >=8.0)
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
-                     -Wcompat
 
 benchmark language-ats-bench
     type: exitcode-stdio-1.0
@@ -93,4 +100,3 @@ benchmark language-ats-bench
     
     if impl(ghc >=8.0)
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
-                     -Wcompat

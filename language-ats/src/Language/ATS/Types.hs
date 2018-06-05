@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-duplicate-exports #-}
 {-# LANGUAGE DeriveAnyClass             #-}
 {-# LANGUAGE DeriveDataTypeable         #-}
 {-# LANGUAGE DeriveFoldable             #-}
@@ -29,6 +30,7 @@ module Language.ATS.Types
     , ExpressionF (..)
     , Implementation (..)
     , BinOp (..)
+    , BinOp (Con)
     , UnOp (..)
     , TypeF (..)
     , Existential (..)
@@ -43,10 +45,12 @@ module Language.ATS.Types
     , Fixity (..)
     , StackFunction (..)
     , Sort (..)
+    , SortF (..)
     , SortArg (..)
     , SortArgs
     , DataSortLeaf (..)
     , FixityState
+    , Fix
     -- * Rewrites
     , rewriteDecl
     -- * Helper functions
@@ -64,7 +68,7 @@ module Language.ATS.Types
 
 import           Control.Composition
 import           Control.DeepSeq          (NFData)
-import           Control.Lens
+import           Control.Monad
 import           Data.Function            (on)
 import           Data.Functor.Foldable    (ListF (Cons), ana, cata, embed, project)
 import           Data.Functor.Foldable.TH (makeBaseFunctor)
@@ -73,6 +77,8 @@ import           Data.Maybe               (isJust)
 import           Data.Semigroup           (Semigroup)
 import           GHC.Generics             (Generic)
 import           Language.ATS.Lexer       (Addendum (..))
+import           Lens.Micro
+import           Lens.Micro.TH
 
 type Fix = Either Int String
 
@@ -83,7 +89,7 @@ data Fixity a = RightFix { pos :: a, ifix :: Fix }
               | Infix { pos :: a, ifix :: Fix }
               deriving (Show, Eq, Generic, NFData)
 
--- | Newtype wrapper containing a list of declarations
+-- | An ATS file, containing a list of declarations
 newtype ATS a = ATS { unATS :: [Declaration a] }
     deriving (Show, Eq, Generic)
     deriving newtype (NFData, Semigroup, Monoid)
@@ -93,7 +99,7 @@ data Leaf a = Leaf { _constructorUniversals :: [Universal a], name :: String, co
 
 type SortArgs a = Maybe [SortArg a]
 
--- | Declare something in a scope (a function, value, action, etc.)
+-- | Declarations for functions, values, actions, etc.
 data Declaration a = Func { pos :: a, _fun :: Function a }
                    | Impl { implArgs :: [Arg a], _impl :: Implementation a } -- TODO do something better for implicit universals
                    | ProofImpl { implArgs :: [Arg a], _impl :: Implementation a }
@@ -104,9 +110,9 @@ data Declaration a = Func { pos :: a, _fun :: Function a }
                    | AndDecl { andT :: Maybe (Type a), andPat :: Pattern a, _andExpr :: Expression a }
                    | Include String
                    | Load { static :: Bool, withOctothorpe :: Bool, qualName :: Maybe String, fileName :: String }
-                   | Stadef String (SortArgs a) (Either (StaticExpression a) (Type a)) -- TODO (StaticExpression a, Maybe (Type a))
+                   | Stadef String (SortArgs a) (Either (StaticExpression a, Maybe (Sort a)) (Type a))
                    | CBlock String
-                   | TypeDef a String (SortArgs a) (Type a)
+                   | TypeDef a String (SortArgs a) (Type a) (Maybe (Sort a))
                    | ViewTypeDef a String (SortArgs a) (Type a)
                    | SumType { typeName :: String, typeArgs :: SortArgs a, _leaves :: [Leaf a] }
                    | SumViewType { typeName :: String, typeArgs :: SortArgs a, _leaves :: [Leaf a] }
@@ -127,7 +133,7 @@ data Declaration a = Func { pos :: a, _fun :: Function a }
                    | AndD (Declaration a) (Declaration a)
                    | Local a (ATS a) (ATS a)
                    | AbsProp a String [Arg a]
-                   | Assume (Name a) [Arg a] (Type a)
+                   | Assume (Name a) (SortArgs a) (Type a)
                    | TKind a (Name a) String
                    | SymIntr a [Name a]
                    | Stacst a (Name a) (Type a) (Maybe (Expression a))
@@ -147,6 +153,7 @@ data DataPropLeaf a = DataPropLeaf { propU :: [Universal a], _propExpr1 :: Expre
 
 -- | A type for parsed ATS types
 data Type a = Tuple a [Type a]
+            | BoxTuple a [Type a]
             | Named (Name a)
             | Ex (Existential a) (Maybe (Type a))
             | ForA (Universal a) (Type a)
@@ -172,8 +179,10 @@ data Type a = Tuple a [Type a]
 
 -- | A type for @=>@, @=\<cloref1>@, etc.
 data LambdaType a = Plain a
+                  | Spear a -- | @=>>@
+                  | ProofArrow a -- | @=/=>@
                   | Full a String
-                  | Spear a
+                  -- TODO figure out wtf ProofArrow does
                   deriving (Show, Eq, Generic, NFData)
 
 data Name a = Unqualified String
@@ -192,9 +201,11 @@ data Pattern a = Wildcard a
              | Free (Pattern a)
              | Proof a [Pattern a] [Pattern a]
              | TuplePattern [Pattern a]
+             | BoxTuplePattern a [Pattern a]
              | AtPattern a (Pattern a)
              | UniversalPattern a String [Universal a] (Pattern a)
              | ExistentialPattern (Existential a) (Pattern a)
+             | As a (Pattern a) (Pattern a)
              deriving (Show, Eq, Generic, NFData)
 
 data Paired a b = Both a b
@@ -220,6 +231,7 @@ data Sort a = NamedSort { _sortName :: String }
             | VType a Addendum -- ^ @viewtype@ or @vtype@
             | View a Addendum -- ^ @view@
             | TupleSort a (Sort a) (Sort a)
+            | ArrowSort a (Sort a) (Sort a)
             deriving (Show, Eq, Generic, NFData)
 
 -- FIXME a type for sorts?
@@ -231,9 +243,9 @@ data Universal a = Universal { bound :: [String], typeU :: Maybe (Sort a), prop 
 data Existential a = Existential { boundE :: [String], isOpen :: Bool, typeE :: Maybe (Sort a), propE :: Maybe (StaticExpression a) }
     deriving (Show, Eq, Generic, NFData)
 
--- | @~@ is used to negate numbers in ATS
-data UnOp a = Negate
-            | Deref
+-- | Unary operators
+data UnOp a = Negate -- | @~@
+            | Deref -- | @!@
             | SpecialOp a String
     deriving (Show, Eq, Generic, NFData)
 
@@ -258,6 +270,9 @@ data BinOp a = Add
              | SpecialInfix a String
              deriving (Show, Eq, Generic, NFData)
 
+pattern Con :: a -> BinOp a
+pattern Con l = SpecialInfix l "::"
+
 data StaticExpression a = StaticVal (Name a)
                         | StaticBinary (BinOp a) (StaticExpression a) (StaticExpression a)
                         | StaticInt Int
@@ -267,6 +282,7 @@ data StaticExpression a = StaticVal (Name a)
                         | SCall (Name a) [StaticExpression a]
                         | SUnary (UnOp a) (StaticExpression a)
                         | SLet a [Declaration a] (Maybe (StaticExpression a))
+                        | SCase Addendum (StaticExpression a) [(Pattern a, LambdaType a, StaticExpression a)]
                         deriving (Show, Eq, Generic, NFData)
 
 -- | A (possibly effectful) expression.
@@ -284,9 +300,10 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                        , whenTrue :: Expression a -- ^ Expression to be returned when true
                        , elseExpr :: Maybe (Expression a) -- ^ Expression to be returned when false
                        }
-                  | UintLit Word -- ^ @1000u@
+                  | UintLit Word -- ^ E.g. @1000u@
                   | FloatLit Float
                   | IntLit Int
+                  | HexLit String
                   | UnderscoreLit a
                   | Lambda a (LambdaType a) (Pattern a) (Expression a)
                   | LinearLambda a (LambdaType a) (Pattern a) (Expression a)
@@ -299,19 +316,20 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                   | Binary (BinOp a) (Expression a) (Expression a)
                   | Unary (UnOp a) (Expression a)
                   | IfCase { posE   :: a
-                           , ifArms :: [(Expression a, LambdaType a, Expression a)]
+                           , ifArms :: [(Expression a, LambdaType a, Expression a)] -- TODO I'm not sure @ifcase@ needs 'LambdaType'?
                            }
                   | Case { posE  :: a
                          , kind  :: Addendum
                          , val   :: Expression a
-                         , _arms :: [(Pattern a, LambdaType a, Expression a)] -- ^ Each @((Pattern a), (Expression a))@ pair corresponds to a branch of the 'case' statement
+                         , _arms :: [(Pattern a, LambdaType a, Expression a)] -- ^ Each (('Pattern' a), ('Expression' a)) pair corresponds to a branch of the 'case' statement
                          }
                   | RecordValue a [(String, Expression a)] (Maybe (Type a))
                   | Precede (Expression a) (Expression a)
                   | ProofExpr a (Expression a) (Expression a)
                   | TypeSignature (Expression a) (Type a)
                   | WhereExp (Expression a) (ATS a)
-                  | TupleEx a [Expression a] -- TODO support boxed tuples
+                  | TupleEx a [Expression a]
+                  | BoxTupleEx a [Expression a]
                   | While a (Expression a) (Expression a)
                   | Actions (ATS a)
                   | Begin a (Expression a)
@@ -329,7 +347,7 @@ data Implementation a = Implement { pos            :: a
                                   , preUniversalsI :: [Universal a]
                                   , implicits      :: [[Type a]] -- ^ Implicit arguments
                                   , universalsI    :: [Universal a] -- ^ Universal quantifiers
-                                  , nameI          :: Name a -- ^ (Name a) of the template being implemented
+                                  , nameI          :: Name a -- ^ ('Name' a) of the template being implemented
                                   , iArgs          :: [Arg a] -- ^ Arguments
                                   , _iExpression   :: Either (StaticExpression a) (Expression a) -- ^ Expression (or static expression) holding the function body.
                                   }
@@ -368,17 +386,8 @@ data PreFunction a = PreF { fname         :: Name a -- ^ Function name
                           }
                           deriving (Show, Eq, Generic, NFData)
 
-makeBaseFunctor ''Pattern
-makeBaseFunctor ''Expression
-makeBaseFunctor ''StaticExpression
-makeBaseFunctor ''Type
-makeLenses ''Leaf
-makeLenses ''Declaration
-makeLenses ''PreFunction
-makeLenses ''Implementation
-makeLenses ''DataPropLeaf
-makeLenses ''Function
-makeLenses ''Type
+join <$> traverse makeBaseFunctor [''Pattern, ''Expression, ''StaticExpression, ''Type, ''Sort]
+join <$> traverse makeLenses [''Leaf, ''Declaration, ''PreFunction, ''Implementation, ''DataPropLeaf, ''Function, ''Type]
 
 exprLens :: Eq a => FixityState a -> ASetter s t (Expression a) (Expression a) -> s -> t
 exprLens st = flip over (rewriteATS st)
@@ -420,6 +429,7 @@ infix_ = Infix undefined . Left
 
 type FixityState a = M.Map String (Fixity a)
 
+-- | Fixities for operators in the ATS prelude.
 defaultFixityState :: FixityState a
 defaultFixityState = M.fromList
     [ ("::", rightFix 40) ]
@@ -467,6 +477,8 @@ rewriteATS st = cata a where
         | compareFixity st op' op'' = Binary op'' e (Binary op' e' e'')
     a (BinaryF Add e (BinList Add es))               = BinList Add (e : es)
     a (BinaryF Add e e')                             = BinList Add [e, e']
+    a (BinaryF Con{} e (BinList Add es))             = BinList (SpecialInfix undefined "::") (e : es)
+    a (BinaryF Con{} e e')                           = BinList (SpecialInfix undefined "::") [e, e']
     a (ParenExprF _ e@Precede{})                     = e
     a (ParenExprF _ e@PrecedeList{})                 = e
     a (WhereExpF e (ATS ds))                         = WhereExp e (ATS (rewriteDecl st <$> ds))

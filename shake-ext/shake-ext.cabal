@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: shake-ext
-version: 2.7.0.3
+version: 2.11.0.4
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -36,18 +36,23 @@ library
         Development.Shake.C
         Development.Shake.CCJS
         Development.Shake.Elm
+        Development.Shake.Literate
     hs-source-dirs: src
     other-modules:
         Development.Shake.TH
     default-language: Haskell2010
+    other-extensions: GeneralizedNewtypeDeriving PatternSynonyms
+                      TypeFamilies DeriveAnyClass DeriveGeneric DerivingStrategies
+                      TemplateHaskell RankNTypes
     ghc-options: -Wall
-    build-tools: cpphs
     build-depends:
-        base >=4.10 && <5,
-        shake -any,
-        composition-prelude,
+        base >=4.9 && <5,
+        Cabal >=2.2,
+        cdeps -any,
+        composition-prelude -any,
+        cpphs -any,
         directory -any,
-        Cabal >=2.0,
+        shake -any,
         template-haskell -any
     
     if flag(development)
@@ -55,4 +60,3 @@ library
     
     if impl(ghc >=8.0)
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
-                     -Wcompat

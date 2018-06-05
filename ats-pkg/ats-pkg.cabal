@@ -1,12 +1,13 @@
 cabal-version: 1.18
 name: ats-pkg
-version: 2.7.1.0
+version: 2.10.2.2
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
 maintainer: vamchale@gmail.com
 author: Vanessa McHale
 homepage: https://github.com/vmchale/atspkg#readme
+bug-reports: https://github.com/vmchale/atspkg/issues
 synopsis: A build tool for ATS
 description:
     A collection of scripts to simplify building ATS projects.
@@ -16,6 +17,7 @@ extra-source-files:
     man/atspkg.1
     dhall/config.dhall
     dhall/atslib.dhall
+    dhall/atspkg-prelude.dhall
 extra-doc-files: README.md
                  docs/manual.tex
 
@@ -25,8 +27,25 @@ source-repository head
 
 custom-setup
     setup-depends: base -any,
-                   Cabal >=2.0,
+                   Cabal >=2.2,
                    cli-setup >=0.2.0.1
+
+flag static
+    description:
+        Make static binaries
+    default: False
+
+flag profile
+    description:
+        Enable profiling
+    default: False
+    manual: True
+
+flag eventlog
+    description:
+        Enable event logging
+    default: False
+    manual: True
 
 flag development
     description:
@@ -43,6 +62,7 @@ library
     exposed-modules:
         Language.ATS.Package
         Distribution.ATS
+    build-tools: cpphs -any
     hs-source-dirs: src
     other-modules:
         Paths_ats_pkg
@@ -58,20 +78,25 @@ library
         Language.ATS.Package.PackageSet
         Language.ATS.Package.Type
         Language.ATS.Package.Upgrade
+        Language.ATS.Package.Debian
         Distribution.ATS.Version
         System.Process.Ext
         Quaalude
     default-language: Haskell2010
+    other-extensions: OverloadedStrings GADTs
+                      GeneralizedNewtypeDeriving DeriveAnyClass DeriveGeneric
+                      TemplateHaskell RecordWildCards TupleSections StandaloneDeriving
+                      DerivingStrategies
     ghc-options: -Wall -Wincomplete-uni-patterns
-                 -Wincomplete-record-updates -Wcompat
+                 -Wincomplete-record-updates
     build-depends:
-        base >=4.7 && <5,
+        base >=4.9 && <5,
         http-client -any,
         bytestring -any,
         file-embed -any,
         shake -any,
         bzlib -any,
-        Cabal >=2.0.0.0,
+        Cabal >=2.2.0.0,
         lzma -any,
         tar -any,
         zlib -any,
@@ -79,24 +104,28 @@ library
         text -any,
         directory -any,
         process -any,
-        hashable,
+        hashable -any,
         containers -any,
         parallel-io -any,
-        unix -any,
-        lens -any,
-        mtl,
-        dhall >=1.10.0,
+        mtl -any,
+        dhall >=1.14.0,
         ansi-wl-pprint -any,
-        shake-ats >=1.3.0.0,
+        shake-ats >=1.8.0.0,
         shake-ext >=2.6.0.0,
         composition-prelude >=1.3.0.0,
         zip-archive -any,
         ansi-wl-pprint -any,
         binary -any,
+        microlens -any,
+        microlens-th -any,
         dependency -any,
         filemanip -any
     
-    if flag(development)
+    if !os(windows)
+        build-depends:
+            unix -any
+    
+    if (flag(development) && impl(ghc <8.4))
         ghc-options: -Werror
 
 executable atspkg
@@ -106,19 +135,27 @@ executable atspkg
         Paths_ats_pkg
     default-language: Haskell2010
     ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall
-                 -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat
+                 -with-rtsopts=-I0 -Wincomplete-uni-patterns
+                 -Wincomplete-record-updates
+    
+    if flag(eventlog)
+        ghc-options: -eventlog -with-rtsopts=-l
+    
+    if flag(profile)
+        ghc-options: -with-rtsopts=-h
     
     if !flag(no-executable)
         build-depends:
             base -any,
             ats-pkg -any,
             optparse-applicative -any,
-            lens -any,
             shake-ats -any,
+            microlens -any,
             temporary -any,
             directory -any,
             composition-prelude -any,
             text -any,
+            parallel-io -any,
             shake -any
     
     if flag(no-executable)
@@ -126,3 +163,6 @@ executable atspkg
     
     if flag(development)
         ghc-options: -Werror
+    
+    if flag(static)
+        ghc-options: -static -optc-static -optl-static

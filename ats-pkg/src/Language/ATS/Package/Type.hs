@@ -6,7 +6,6 @@
 {-# LANGUAGE DuplicateRecordFields      #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings          #-}
-{-# LANGUAGE ScopedTypeVariables        #-}
 {-# LANGUAGE StandaloneDeriving         #-}
 {-# LANGUAGE TemplateHaskell            #-}
 
@@ -28,8 +27,9 @@ module Language.ATS.Package.Type ( -- * Types
                                  ) where
 
 import           Data.Dependency
-import           Data.Hashable         (Hashable)
+import           Data.Hashable               (Hashable)
 import           Development.Shake.ATS
+import           Language.ATS.Package.Debian
 import           Quaalude
 
 data ATSConstraint = ATSConstraint { lower :: Maybe Version
@@ -37,14 +37,16 @@ data ATSConstraint = ATSConstraint { lower :: Maybe Version
                                    }
                 deriving (Eq, Show, Generic, Binary, Interpret, Hashable)
 
-deriving newtype instance Interpret Version
-deriving newtype instance Hashable Version
+deriving newtype instance Inject Version
 
 type LibDep = (Text, ATSConstraint)
 
 -- | You likely want 'libDeps' or 'libBldDeps'
 type DepSelector = ATSDependency -> [LibDep]
 
+data PkgConfig = PkgConfig { dir :: Text, target :: Maybe Text }
+
+-- TODO add a field for configure stage??
 -- | Type for a dependency
 data ATSDependency = ATSDependency { libName     :: Text -- ^ Library name, e.g.
                                    , dir         :: Text -- ^ Directory we should unpack to
@@ -54,8 +56,9 @@ data ATSDependency = ATSDependency { libName     :: Text -- ^ Library name, e.g.
                                    , libDeps     :: [LibDep] -- ^ Dependencies to be unpacked
                                    , libBldDeps  :: [LibDep] -- ^ Dependencies to be built
                                    , libCDeps    :: [LibDep] -- ^ C dependencies to be built
+                                   , script      :: [Text] -- ^ Optional build script for C library
                                    }
-                   deriving (Eq, Show, Generic, Interpret, Binary, Hashable)
+                   deriving (Generic, Interpret, Binary, Hashable)
 
 makeLensesFor [("dir", "dirLens")] ''ATSDependency
 
@@ -63,16 +66,19 @@ makeLensesFor [("dir", "dirLens")] ''ATSDependency
 data TargetPair = TargetPair { hs    :: Text
                              , ats   :: Text
                              , cpphs :: Bool
-                             } deriving (Eq, Show, Generic, Interpret, Binary, Hashable)
+                             } deriving (Generic, Interpret, Binary, Hashable)
 
 deriving instance Interpret ForeignCabal
+
+deriving instance Hashable Solver
+deriving instance Interpret Solver
 
 data Src = Src { atsSrc  :: Text
                , cTarget :: Text
                , atsGen  :: [TargetPair]
                , extras  :: [Text]
                }
-         deriving (Show, Eq, Generic, Interpret, Binary, Hashable)
+         deriving (Generic, Interpret, Binary, Hashable)
 
 data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
                , target :: Text -- ^ Binary to be built
@@ -82,7 +88,7 @@ data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
                , gcBin  :: Bool -- ^ Whether to use the garbage collector
                , extras :: [Text] -- ^ Extra source files the build depends on
                }
-         deriving (Show, Eq, Generic, Interpret, Binary, Hashable)
+         deriving (Generic, Interpret, Binary, Hashable)
 
 data Lib = Lib { name      :: Text -- ^ Name of library being provided
                , src       :: [Text] -- ^ Source files (should end with @.dats@) to be compiled to object files
@@ -95,7 +101,7 @@ data Lib = Lib { name      :: Text -- ^ Name of library being provided
                , extras    :: [Text] -- ^ Other source files the build depends on
                , static    :: Bool -- ^ Whether to make a static library
                }
-         deriving (Show, Eq, Generic, Interpret, Binary, Hashable)
+         deriving (Generic, Interpret, Binary, Hashable)
 
 -- | Data type associated with @atspkg.dhall@ file.
 data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
@@ -110,6 +116,11 @@ data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , buildDeps    :: [LibDep] -- ^ List of ATS library dependencies
                , ccompiler    :: Text -- ^ The C compiler we should use
                , cflags       :: [Text] -- ^ List of flags to pass to the C compiler
+               , atsFlags     :: [Text] -- ^ List of flags to pass to @patsopt@.
                , atsSource    :: [Src] -- ^ ATS source to be compile to C.
+               , dynLink      :: Bool -- ^ Don't link statically, instead, use libraries installed by @atspkg@.
+               , extSolve     :: Solver -- ^ Solver to use.
+               , debPkg       :: Maybe Debian -- ^ Optional specificiation as a debian package.
+               , atsLib       :: Bool -- ^ Whether to link/build @atslib@.
                }
-         deriving (Show, Eq, Generic, Interpret, Binary, Hashable)
+         deriving (Generic, Interpret, Binary, Hashable)

@@ -1,9 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Distribution.ATS ( cleanATSCabal
-                        , fetchDependencies
-                        -- * Types
-                        , Version (..)
+module Distribution.ATS ( -- * Types
+                          Version (..)
                         , ATSDependency (..)
                         -- * Libraries
                         , libgmp
@@ -43,14 +41,15 @@ maybeCleanBuild :: LocalBuildInfo -> IO ()
 maybeCleanBuild li =
     let cf = configConfigurationsFlags (configFlags li) in
 
-    unless ((mkFlagName "development", True) `elem` cf) $
+    unless ((mkFlagName "development", True) `elem` unFlagAssignment cf) $
         putStrLn "Cleaning up ATS dependencies..." >>
         cleanATSCabal
 
 -- | This generates user hooks for a Cabal distribution that has some ATS
 -- library dependencies. This will *not* do anything with the ATS source files,
 -- but it *will* download any files necessary for the bundled C to compile.
-atsUserHooks :: [ATSDependency] -> UserHooks
+atsUserHooks :: [ATSDependency] -- ^ List of ATS dependencies
+             -> UserHooks
 atsUserHooks deps = simpleUserHooks { preConf = \_ flags -> fetchDependencies flags deps >> pure emptyHookedBuildInfo
                                     , postBuild = \_ _ _ -> maybeCleanBuild
                                     }
@@ -83,7 +82,7 @@ fetchDependencies cfs =
     bool act nothing cond
     where act = (>> stopGlobalPool) . parallel_ . fmap fetchDependency
           nothing = pure mempty
-          cond = (mkFlagName "with-atsdeps", False) `elem` configConfigurationsFlags cfs
+          cond = (mkFlagName "with-atsdeps", False) `elem` unFlagAssignment (configConfigurationsFlags cfs)
 
 fetchDependency :: ATSDependency -> IO ()
 fetchDependency (ATSDependency libNameATS dirName url) = do

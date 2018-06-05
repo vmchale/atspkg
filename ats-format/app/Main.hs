@@ -20,7 +20,7 @@ import           System.IO                    (hPutStr, stderr)
 import           System.Process               (readCreateProcess, shell)
 import           Text.PrettyPrint.ANSI.Leijen (pretty)
 import           Text.Toml
-import           Text.Toml.Types              hiding (Parser)
+-- import           Text.Toml.Types              hiding (Parser)
 
 data Program = Program { _path :: Maybe FilePath, _inplace :: Bool, _noConfig :: Bool, _defaultConfig :: Bool }
 
@@ -67,7 +67,7 @@ wrapper :: ParserInfo Program
 wrapper = info (helper <*> versionInfo <*> file)
     (fullDesc
     <> progDesc "ATS source code formater. For more detailed help, see 'man atsfmt'"
-    <> header "ats-format - a source code formatter written using happy/alex")
+    <> header "ats-format - a source code formatter written in Haskell")
 
 main :: IO ()
 main = execParser wrapper >>= pick

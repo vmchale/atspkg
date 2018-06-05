@@ -40,9 +40,9 @@ fun {a:vt0p} queue_make (cap : intGt(0)) : queue(a)
 extern
 fun {a:t@ype} queue_free (que : queue(a)) : void
 
-assume queue_vtype(a : vt0p, id : int) = deqarray(a)
-assume ISNIL(id : int, b : bool) = unit_p
-assume ISFULL(id : int, b : bool) = unit_p
+assume queue_vtype(a: vt0p, id: int) = deqarray(a)
+assume ISNIL(id: int, b: bool) = unit_p
+assume ISFULL(id: int, b: bool) = unit_p
 
 absvtype channel_vtype(a: vt@ype+) = ptr
 
@@ -84,7 +84,7 @@ fun {a:vt0p} channel_unref (ch : channel(a)) : Option_vt(queue(a))
 extern
 fun channel_refcount {a:vt0p} (ch : !channel(a)) : intGt(0)
 
-assume channel_vtype(a : vt0p) = channel_
+assume channel_vtype(a: vt0p) = channel_
 
 implement {a} queue_is_nil (xs) =
   (unit_p() | deqarray_is_nil(xs))

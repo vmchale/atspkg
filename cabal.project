@@ -5,32 +5,23 @@ packages: language-ats
         , shake-ats
         , dependency
         , hs2ats
+        , cdeps
 
 constraints:
-  ats-format +development,
-  ats-pkg +development,
+  ats-format +development -static,
+  ats-pkg +development -static -eventlog -profile,
   shake-ext +development, 
   language-ats +development,
   shake-ats +development,
   ats-setup +development,
   dependency +development,
-  hs2ats +development +no-executable
+  hs2ats +development -no-executable,
+  cdeps +development -no-executable
 
-allow-newer:
-  hashable:base
-  integer-logarithms:base
-  lzma:base
-  insert-ordered-containers:base
-  recursion-schemes:template-haskell
-  cabal-doctest:base
-  Cabal
-
-allow-boot-library-installs: True
 optimization: 2
-with-compiler: ghc-8.2.2
 tests: True
 benchmarks: True
-documentation: True
+-- documentation: True
 
 program-options
   happy-options: -gcsa

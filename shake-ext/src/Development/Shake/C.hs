@@ -1,11 +1,15 @@
-{-# LANGUAGE CPP             #-}
-{-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE DeriveAnyClass             #-}
+{-# LANGUAGE DeriveGeneric              #-}
+{-# LANGUAGE DerivingStrategies         #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE PatternSynonyms            #-}
+{-# LANGUAGE TypeFamilies               #-}
 
 -- | This module provides functions for easy C builds of binaries, static
 -- libraries, and dynamic libraries.
 module Development.Shake.C ( -- * Types
                              CConfig (..)
-                           , CCompiler (GCC, Clang, GHC, Other, GCCStd, GHCStd, CompCert)
+                           , CCompiler (ICC, GCC, Clang, GHC, Other, GCCStd, GHCStd, CompCert)
                            -- * Rules
                            , staticLibR
                            , sharedLibR
@@ -14,24 +18,42 @@ module Development.Shake.C ( -- * Types
                            , cBin
                            , cToLib
                            -- * Actions
+                           , pkgConfig
                            , binaryA
                            , staticLibA
                            , sharedLibA
+                           , stripA
+                           -- * Oracle helpers
+                           , queryCC
+                           , queryCfg
+                           , examineCC
+                           , examineCfg
+                           -- * Reëxports from "Language.C.Dependency"
+                           , getCDepends
+                           , getAll
                            -- * Helper functions
                            , cconfigToArgs
                            , ccToString
                            , ccFromString
                            , host
+                           , isCross
                            ) where
 
 import           Control.Monad
 import           Data.List                  (isPrefixOf, isSuffixOf)
-#if __GLASGOW_HASKELL__ < 804
-import           Data.Semigroup
-#endif
 import           Development.Shake
+import           Development.Shake.Classes
 import           Development.Shake.FilePath
+import           GHC.Generics               (Generic)
+import           Language.C.Dependency
 import           System.Info
+
+-- | Given a package name or path to a @.pc@ file, output flags for C compiler.
+pkgConfig :: String -> Action [String]
+pkgConfig pkg = do
+    (Stdout o) <- command [] "pkg-config" ["--cflags", pkg]
+    (Stdout o') <- command [] "pkg-config" ["--libs", pkg]
+    pure (words o ++ words o')
 
 mkQualified :: Monoid a => Maybe a -> Maybe a -> a -> a
 mkQualified pre suff = h [f suff, g pre]
@@ -53,23 +75,36 @@ pattern GCCStd = GCC Nothing
 pattern GHCStd :: CCompiler
 pattern GHCStd = GHC Nothing Nothing
 
--- | Get the executable name associated with a 'CCompiler'
+-- | Get the executable name for a 'CCompiler'
 ccToString :: CCompiler -> String
+ccToString ICC            = "icc"
 ccToString Clang          = "clang"
 ccToString (Other s)      = s
 ccToString (GCC pre)      = mkQualified pre Nothing "gcc"
 ccToString (GHC pre suff) = mkQualified pre suff "ghc"
 ccToString CompCert       = "ccomp"
 
+stripToString :: CCompiler -> String
+stripToString (GCC pre)   = mkQualified pre Nothing "strip"
+stripToString (GHC pre _) = mkQualified pre Nothing "strip"
+stripToString _           = "strip"
+
 arToString :: CCompiler -> String
 arToString (GCC pre)   = mkQualified pre Nothing "ar"
 arToString (GHC pre _) = mkQualified pre Nothing "ar"
 arToString _           = "ar"
 
+isCross :: CCompiler -> Bool
+isCross (GCC Just{})   = True
+isCross (GHC Just{} _) = True
+isCross _              = False
+
 -- | Attempt to parse a string as a 'CCompiler', defaulting to @cc@ if parsing
 -- fails.
 ccFromString :: String -> CCompiler
+ccFromString "icc" = ICC
 ccFromString "gcc" = GCC Nothing
+ccFromString "ccomp" = CompCert
 ccFromString "clang" = Clang
 ccFromString "ghc" = GHC Nothing Nothing
 ccFromString s
@@ -78,6 +113,8 @@ ccFromString s
     | "ghc" `isPrefixOf` s = GHC Nothing (Just (drop 3 s))
 ccFromString _ = Other "cc"
 
+-- ALSO consider using Haskell -> C -> ICC ??
+-- TODO ICC??
 -- | A data type representing the C compiler to be used.
 data CCompiler = GCC { _prefix :: Maybe String -- ^ Usually the target triple
                      }
@@ -86,11 +123,12 @@ data CCompiler = GCC { _prefix :: Maybe String -- ^ Usually the target triple
                      , _postfix :: Maybe String -- ^ The compiler version
                      }
                | CompCert
+               | ICC
                | Other String
-               deriving (Eq)
+               deriving (Show, Eq, Generic, Typeable, Hashable, Binary, NFData)
 
 mapFlags :: String -> ([String] -> [String])
-mapFlags s = fmap (s <>)
+mapFlags s = fmap (s ++)
 
 data CConfig = CConfig { includes   :: [String] -- ^ Directories to be included.
                        , libraries  :: [String] -- ^ Libraries against which to link.
@@ -98,6 +136,32 @@ data CConfig = CConfig { includes   :: [String] -- ^ Directories to be included.
                        , extras     :: [String] -- ^ Extra flags to be passed to the compiler
                        , staticLink :: Bool -- ^ Whether to link against static versions of libraries
                        }
+             deriving (Show, Eq, Generic, Typeable, Hashable, Binary, NFData)
+
+newtype CC = CC ()
+    deriving (Show, Eq)
+    deriving newtype (Typeable, Hashable, Binary, NFData)
+
+newtype Cfg = Cfg ()
+    deriving (Show, Eq)
+    deriving newtype (Typeable, Hashable, Binary, NFData)
+
+type instance RuleResult CC = CCompiler
+type instance RuleResult Cfg = CConfig
+
+-- | Set a 'CCompiler' that can be depended on later.
+examineCC :: CCompiler -> Rules ()
+examineCC cc = void $ addOracle $ \(CC _) -> pure cc
+
+examineCfg :: CConfig -> Rules ()
+examineCfg cfg = void $ addOracle $ \(Cfg _) -> pure cfg
+
+-- | Depend on the C compiler being used.
+queryCC :: Action ()
+queryCC = void $ askOracle (CC ())
+
+queryCfg :: Action ()
+queryCfg =void $ askOracle (Cfg ())
 
 -- | Rules for making a static library from C source files. Unlike 'staticLibR',
 -- this also creates rules for creating object files.
@@ -113,8 +177,8 @@ cToLib cc sources lib cfg =
     where objRules = objectFileR cc cfg <$> g sources <*> pure lib
           g = fmap (-<.> "o")
 
--- | Rules for generating a binary from C source files. At most one can have the
--- @main@ function.
+-- | Rules for generating a binary from C source files. Can have at most have
+-- one @main@ function.
 cBin :: CCompiler
      -> [FilePath] -- ^ C source files
      -> FilePattern -- ^ Binary file output
@@ -122,22 +186,29 @@ cBin :: CCompiler
      -> Rules ()
 cBin cc sources bin cfg = bin %> \out -> binaryA cc sources out cfg
 
--- | This action builds a binary.
+stripA :: CmdResult r
+       => FilePath -- ^ Build product to be stripped
+       -> CCompiler -- ^ C compiler
+       -> Action r
+stripA out cc = command mempty (stripToString cc) [out]
+
+-- | This action builds an executable.
 binaryA :: CmdResult r
-         => CCompiler
-         -> [FilePath] -- ^ Source files
-         -> FilePath -- ^ Binary file output
-         -> CConfig
-         -> Action r
+        => CCompiler
+        -> [FilePath] -- ^ Source files
+        -> FilePath -- ^ Executable output
+        -> CConfig
+        -> Action r
 binaryA cc sources out cfg =
     need sources >>
-    (command [EchoStderr False] (ccToString cc) . (("-o" : out : sources) <>) . cconfigToArgs) cfg
+    (command [EchoStderr False] (ccToString cc) . (("-o" : out : sources) ++) . cconfigToArgs) cfg
 
+-- | Generate compiler flags for a given configuration.
 cconfigToArgs :: CConfig -> [String]
 cconfigToArgs (CConfig is ls ds es sl) = join [ mapFlags "-I" is, mapFlags "-l" (g sl <$> ls), mapFlags "-L" ds, es ]
     where g :: Bool -> (String -> String)
           g False = id
-          g True  = (":lib" <>) . (<> ".a")
+          g True  = (":lib" ++) . (++ ".a")
 
 -- | These rules build a dynamic library (@.so@ on Linux).
 dynLibR :: CCompiler
@@ -148,7 +219,7 @@ dynLibR :: CCompiler
 dynLibR cc objFiles shLib cfg =
     shLib %> \out ->
         need objFiles >>
-        command [EchoStderr False] (ccToString cc) ("-shared" : "-o" : out : objFiles <> cconfigToArgs cfg)
+        command [EchoStderr False] (ccToString cc) ("-shared" : "-o" : out : objFiles ++ cconfigToArgs cfg)
 
 -- | These rules build an object file from a C source file.
 objectFileR :: CCompiler

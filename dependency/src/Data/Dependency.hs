@@ -1,8 +1,8 @@
+{-# LANGUAGE TupleSections #-}
+
 module Data.Dependency
     ( -- * Functions
       resolveDependencies
-    , buildSequence
-    , check
     -- * Types
     , Dependency (..)
     , PackageSet (..)
@@ -10,21 +10,17 @@ module Data.Dependency
     , DepM
     , ResolveError (..)
     , Constraint (..)
-    , ResolveStateM (..)
-    , ResolveState
-    , ResMap
     ) where
 
+import           Control.Arrow
 import           Control.Monad
-import           Control.Monad.Tardis
-import           Control.Monad.Trans.Class
 import           Data.Dependency.Error
 import           Data.Dependency.Sort
 import           Data.Dependency.Type
-import           Data.Foldable             (toList)
-import           Data.List                 (groupBy)
-import qualified Data.Map                  as M
-import qualified Data.Set                  as S
+import           Data.Foldable         (toList)
+import           Data.List             (groupBy)
+import qualified Data.Map              as M
+import qualified Data.Set              as S
 
 lookupMap :: String -> M.Map String a -> DepM a
 lookupMap k ps = case M.lookup k ps of
@@ -54,27 +50,15 @@ lookupSet x ds s = case S.lookupMax s of
           g (Just x') = Left (Conflicts (_libName <$> ds') (_libName x'))
             where ds' = filter (\d -> not (check x' [d])) ds
 
--- This does check for compatibility with past packages, but doesn't do the
--- fancy tardis shenanigans it's supposed to when package resolution fails.
-latest :: PackageSet Dependency -> Dependency -> ResolveState (String, Dependency)
-latest (PackageSet ps) d@(Dependency ln _ _) = do
-    st <- getPast
-    s <- lift $ lookupMap ln ps
-    finish ln (lookupSet (Just d) (toList st) s)
+latest :: PackageSet Dependency -> [Dependency] -> Dependency -> DepM (String, Dependency)
+latest (PackageSet ps) ds d@(Dependency ln _ _) =
+    (ln,) <$> (lookupSet (Just d) ds =<< lookupMap ln ps)
 
-finish :: String -> DepM Dependency -> ResolveState (String, Dependency)
-finish ln dep' =
-    case dep' of
-
-        Right dep ->
-            modifyForwards (M.insert ln dep) >>
-            pure (ln, dep)
-
-        Left err -> lift (Left err)
-
+-- | This splits dependencies into phases
 buildSequence :: [Dependency] -> [[Dependency]]
 buildSequence = reverse . groupBy independent . sortDeps
-    where independent (Dependency ln ls _) (Dependency ln' ls' _) = ln' `notElem` (fst <$> ls) && ln `notElem` (fst <$> ls')
+    where independent (Dependency ln ls _) (Dependency ln' ls' _) =
+            ln' `notElem` (fst <$> ls) && ln `notElem` (fst <$> ls')
 
 iterateM :: (Monad m) => Int -> (a -> m a) -> a -> m [a]
 iterateM 0 _ _ = pure []
@@ -87,15 +71,12 @@ saturateDeps ps = resolve <=< saturateDeps' ps
           n = length (toList ps)
 
 saturateDeps' :: PackageSet Dependency -> Dependency -> DepM (S.Set Dependency)
-saturateDeps' (PackageSet ps) dep = do
-    deps <- sequence [ lookupMap lib ps | lib <- fst <$> _libDependencies dep ]
-    list <- (:) dep <$> traverse (lookupSet Nothing mempty) deps
-    pure $ S.fromList list
+saturateDeps' (PackageSet ps) dep = S.fromList <$> list
+    where list = (:) dep <$> (traverse (lookupSet Nothing (crunch ps)) =<< deps)
+          deps = sequence [ lookupMap lib ps | lib <- fst <$> _libDependencies dep ]
+          crunch = mconcat . fmap toList . toList
 
-run :: ResolveState a -> DepM a
-run = flip evalTardisT (id, mempty) . unResolve
-
--- | Heuristics:
+-- | Dependency resolution is guided by the following:
 --
 -- 1. Always use a newer version when possible
 --
@@ -107,9 +88,14 @@ run = flip evalTardisT (id, mempty) . unResolve
 --
 -- 5. Specify an error if a package is not present
 --
+-- 6. Present a solution whenever one exists.
+--
 -- This doesn't do any package resolution beyond versioning.
-resolveDependencies :: PackageSet Dependency -> [Dependency] -> DepM [[Dependency]]
-resolveDependencies ps = select . getLatest <=< fmap (buildSequence . toList) . saturated
+resolveDependencies :: PackageSet Dependency -- ^ Package set
+                    -> [Dependency] -- ^ Dependencies requested
+                    -> DepM [[Dependency]] -- ^ Phased build
+resolveDependencies ps = select . getLatest <=< fmap prepare . saturate
     where select = fmap (fmap (fmap snd))
-          saturated dep = S.unions <$> traverse (saturateDeps ps) dep
-          getLatest = run . traverse (traverse (latest ps))
+          saturate = fmap S.unions . traverse (saturateDeps ps)
+          prepare = (buildSequence &&& id) . toList
+          getLatest (stepped, allDeps) = traverse (traverse (latest ps allDeps)) stepped

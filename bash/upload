@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+version="$(grep -P -o '\d+\.\d+\.\d+\.\d+' "ats-pkg/ats-pkg.cabal" | head -n1)"
+token=$(cat "$HOME"/.git-token)
+
+github-release release -s "$token" -u vmchale -r atspkg -t "$version"
+github-release upload -s "$token" -u vmchale -r atspkg -n atspkg.1 -f ats-pkg/man/atspkg.1 -t "$version"
+github-release upload -s "$token" -u vmchale -r atspkg -n atsfmt.1 -f ats-format/man/atsfmt.1 -t "$version"

@@ -6,7 +6,6 @@ module Development.Shake.TH ( checkExecutable
                             , mkExecChecks
                             , commonVersion
                             , MBool
-                            , AVersion
                             ) where
 
 import           Control.Monad.IO.Class
@@ -17,15 +16,15 @@ import           System.Directory       (findExecutable)
 
 type MBool = forall m. MonadIO m => m Bool
 
-type AVersion = Action String
-
-commonVersion :: String -> Action String
+-- | Attempt to get version information from a given exectuable.
+commonVersion :: String -- ^ Executable name
+              -> Action String
 commonVersion prog = do
     ~(Stdout out) <- command mempty prog ["--version"]
     pure . last . words . head . lines $ out
 
 mkSigVersion :: String -> Dec
-mkSigVersion s = SigD (mkName $ s ++ "Version") (ConT ''AVersion)
+mkSigVersion s = SigD (mkName $ s ++ "Version") (ConT ''Action `AppT` ConT ''String)
 
 mkVersion :: String -> Dec
 mkVersion s = FunD (mkName $ s ++ "Version") [Clause mempty (NormalB expr) mempty]

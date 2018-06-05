@@ -14,10 +14,10 @@ module Development.Shake.Check ( checkExecutable
                                , MBool
                                ) where
 
-import           Control.Monad.IO.Class
 import           Development.Shake.TH
 
 $(mkExecChecks ["compleat", "pandoc", "autoconf", "cabal", "ghc", "madlang"])
 
-patsFilter :: (MonadIO m) => m Bool
+-- | Check for presence of @pats-filter@.
+patsFilter :: MBool
 patsFilter = checkExecutable "pats-filter"

@@ -19,6 +19,7 @@
                               , get_staload
                               ) where
 
+import Data.Char (chr)
 import Data.Bool (bool)
 import Control.DeepSeq (NFData)
 import GHC.Generics (Generic)
@@ -31,9 +32,10 @@ import Text.PrettyPrint.ANSI.Leijen hiding (line, bool, column, (<$>))
 -- Digits
 $digit = 0-9
 $octal = 0-7
+$hex = [0-9 a-f A-F]
 
 -- Characters
-$special = [\+\-\&\|\[\]\{\}\(\)\_\=\!\%\^\$\@\;\~\,\.\\\#\<\>\:\?]
+$special = [\+\-\*\&\|\[\]\{\}\(\)\_\=\!\%\^\$\@\;\~\,\.\\\#\<\>\:\?]
 $alpha = [a-zA-Z]
 $terminal = $printable # $white
 $esc_char = \27
@@ -113,6 +115,8 @@ $in_r = $in_operator # [\>]
 tokens :-
 
     <0> $white+                  ;
+
+    -- (sort of) handle nested comments
     <one,two,three,one_c> "(*)"  ;
     <0> @block_comment_start     { tok (\p _ -> alex $ CommentBegin p) `andBegin` one }
     <0> @c_comment_start         { tok (\p _ -> alex $ CommentBegin p) `andBegin` one_c }
@@ -131,16 +135,21 @@ tokens :-
     <three> [^\*\/]+             { tok (\p s -> alex $ CommentContents p s) }
     <three> @comment_in+ / [^\/] { tok (\p s -> alex $ CommentContents p s) }
     <three> @comment_general     { tok (\p s -> alex $ CommentContents p s) }
-    <one_c> @c_comment_end   { tok (\p _ -> alex $ CommentEnd p) `andBegin` 0 }
-    <one_c> @c_comment_start { tok (\p _ -> alexError ("at " <> show (pretty p) <> ": Nested C comments of depth > 1 are not supported.")) }
+
+    -- C-style nested comments
+    <one_c> @c_comment_end       { tok (\p _ -> alex $ CommentEnd p) `andBegin` 0 }
+    <one_c> @c_comment_start     { tok (\p _ -> alexError ("at " <> show (pretty p) <> ": Nested C comments of depth > 1 are not supported.")) }
     <one_c> [^\*\/]+             { tok (\p s -> alex $ CommentContents p s) }
     <one_c> @comment_in+ / [^\/] { tok (\p s -> alex $ CommentContents p s) }
     <one_c> @comment_general     { tok (\p s -> alex $ CommentContents p s) }
-    <0> "//".*                   { tok (\p s -> alex $ CommentLex p s) }
+
+    -- comments and macros
     <0> "//".*                   { tok (\p s -> alex $ CommentLex p s) }
     <0> @c_block                 { tok (\p s -> alex $ CBlockLex p s) }
     <0> "#define".*              { tok (\p s -> alex $ MacroBlock p s) }
     <0> @if_block                { tok (\p s -> alex $ MacroBlock p s) }      
+
+    -- keywords
     <0> fun                      { tok (\p _ -> alex $ Keyword p KwFun) }
     <0> fn                       { tok (\p _ -> alex $ Keyword p KwFn) }
     <0> fnx                      { tok (\p _ -> alex $ Keyword p KwFnx) }
@@ -231,23 +240,22 @@ tokens :-
     <0> "addr@"                  { tok (\p _ -> alex $ Keyword p KwAddrAt) }
     <0> "view@"                  { tok (\p _ -> alex $ Keyword p KwViewAt) }
     <0> sta                      { tok (\p _ -> alex $ Keyword p KwSta) }
+    <0> as                       { tok (\p _ -> alex $ Keyword p KwAs) }
     <0> symintr                  { tok (\p _ -> alex $ Keyword p KwSymintr) }
     <0> absview                  { tok (\p _ -> alex $ Keyword p KwAbsview) }
     <0> exception                { tok (\p _ -> alex $ Keyword p KwException) }
     <0> "$list_vt"               { tok (\p _ -> alex $ Keyword p (KwListLit "_vt")) }
     <0> "$list"                  { tok (\p _ -> alex $ Keyword p (KwListLit mempty)) }
-    <0> "fold@"                  { tok (\p s -> alex $ IdentifierSpace p s) }
+    <0> "fold@"                  { tok (\p s -> alex $ Identifier p s) }
     <0> "free@"                  { tok (\p s -> alex $ Identifier p s) }
     <0> @fixity_decl             { tok (\p s -> alex $ FixityTok p s) }
+
+    -- special symbols, literals
     <0> @double_parens           { tok (\p s -> alex $ DoubleParenTok p) }
     <0> @double_braces           { tok (\p s -> alex $ DoubleBracesTok p) }
     <0> @double_brackets         { tok (\p s -> alex $ DoubleBracketTok p) }
     <0> @lambda                  { tok (\p s -> alex $ Arrow p s) }
     <0> @func_type               { tok (\p s -> alex $ FuncType p s) }
-    <0> @unsigned_lit            { tok (\p s -> alex $ UintTok p (read $ init s)) }
-    <0> @integer                 { tok (\p s -> alex $ IntTok p (read s)) } -- FIXME shouldn't fail silenty on overflow
-    <0> @float                   { tok (\p s -> alex $ FloatTok p (read s)) }
-    <0> @char_lit                { tok (\p s -> alex $ CharTok p (toChar s)) }
     <0> @at_brace                { tok (\p s -> alex $ Special p "@{") }
     <0> @at_tuple                { tok (\p s -> alex $ Special p "@(") }
     <0> @box_tuple               { tok (\p s -> alex $ Special p "'(") }
@@ -257,11 +265,48 @@ tokens :-
     <0> @operator                { tok (\p s -> alex $ Operator p s) }
     <0> @builtin                 { tok (\p s -> alex $ SpecialIdentifier p (tail s)) }
     <0> $special                 { tok (\p s -> alex $ Special p s) }
-    <0> @identifier / " "        { tok (\p s -> alex $ IdentifierSpace p s) } -- FIXME get rid of this for performance reasons
-    <0> @identifier              { tok (\p s -> alex $ Identifier p s) }
+
+    -- literals
+    <0> @unsigned_lit            { tok (\p s -> alex $ UintTok p (read $ init s)) }
+    <0> @integer                 { tok (\p s -> alex $ IntTok p (read s)) } -- FIXME shouldn't fail silenty on overflow
+    <0> "0x" $hex+               { tok (\p s -> alex $ HexIntTok p (drop 2 s)) }
+    <0> @float                   { tok (\p s -> alex $ FloatTok p (read s)) }
+    <0> @char_lit                { tok (\p s -> alex $ CharTok p (toChar s)) }
     <0> @string                  { tok (\p s -> alex $ StringTok p s) }
 
+    -- identifiers
+    <0> @identifier / " "        { tok (\p s -> alex $ IdentifierSpace p s) } -- FIXME get rid of this for performance reasons
+    <0> @identifier              { tok (\p s -> alex $ Identifier p s) }
+
 {
+
+nested_comment :: AlexInput -> Int -> Alex Token
+nested_comment _ _ = do
+
+    input <- alexGetInput
+    go 1 input
+
+    where go :: Int -> AlexInput -> Alex Token
+          go 0 input = alexSetInput input >> alexMonadScan
+          go n input = do
+            case alexGetByte input of
+                Nothing -> err input
+                Just (c, input) -> do
+                    case chr (fromIntegral c) of
+                        '*' -> do
+                            case alexGetByte input of
+                                Nothing -> err input
+                                Just (41,input) -> go (n-1) input
+                                Just (_,input) -> go n input
+                        '(' -> do
+                            case alexGetByte input of
+                                Nothing -> err input
+                                Just (c,input) -> go (bool id (+1) (c==42) $ n) input
+                        _ -> go n input
+
+          err (pos,_,_,_) =
+            let (AlexPn _ line col) = pos
+            in alexError ("Error in nested comment at line " ++ show line ++ ", column " ++ show col)
 
 alex :: a -> Alex a
 alex = pure
@@ -349,6 +394,7 @@ data Keyword = KwFun
              | KwAddrAt
              | KwAddr
              | KwSta
+             | KwAs
              | KwViewAt
              | KwViewdef
              | KwSymintr
@@ -368,6 +414,7 @@ data Token = Identifier AlexPosn String
            | SpecialIdentifier AlexPosn String
            | Keyword AlexPosn Keyword
            | IntTok AlexPosn Int
+           | HexIntTok AlexPosn String
            | FloatTok AlexPosn Float
            | CharTok AlexPosn Char
            | StringTok AlexPosn String
@@ -466,6 +513,7 @@ instance Pretty Keyword where
     pretty KwAddrAt = "addr@"
     pretty KwAddr = "addr"
     pretty KwSta = "sta"
+    pretty KwAs = "as"
     pretty KwStacst = "stacst"
     pretty KwViewAt = "view@"
     pretty KwViewdef = "viewdef"
@@ -490,6 +538,7 @@ instance Pretty Token where
     pretty (IdentifierSpace _ s) = text s
     pretty (Keyword _ kw) = pretty kw
     pretty (IntTok _ i) = pretty i
+    pretty (HexIntTok _ hi) = "0x" <> text hi
     pretty (FloatTok _ x) = pretty x
     pretty (CharTok _ c) = squotes (pretty c)
     pretty (StringTok _ s) = text s
@@ -545,6 +594,7 @@ token_posn (FixityTok p _) = p
 token_posn (CommentContents p _) = p
 token_posn (CommentBegin p) = p
 token_posn (CommentEnd p) = p
+token_posn (HexIntTok p _) = p
 token_posn End = undefined
 
 toChar :: String -> Char
@@ -559,7 +609,7 @@ alexEOF = pure End
 
 -- | This function turns a string into a stream of tokens for the parser.
 lexATS :: String -> Either String [Token]
-lexATS str = runAlex str $ loop
+lexATS str = runAlex str loop
 
 loop :: Alex [Token]
 loop = do

@@ -9,3 +9,11 @@
         - identifier:
           - constructorUniversals
           - leaves
+- package:
+  - name: dependency
+  - section:
+    - name: library
+    - message:
+      - name: Redundant build-depends entry
+      - depends: recursion-schemes
+

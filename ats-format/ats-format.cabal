@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: ats-format
-version: 0.2.0.25
+version: 0.2.0.28
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2017-2018 Vanessa McHale
@@ -12,7 +12,6 @@ description:
 category: Parser, Language, ATS, Development
 build-type: Custom
 extra-source-files:
-    stack.yaml
     .atsfmt.toml
     man/atsfmt.1
 extra-doc-files: README.md
@@ -25,6 +24,11 @@ custom-setup
     setup-depends: base -any,
                    Cabal -any,
                    cli-setup >=0.1.0.2
+
+flag static
+    description:
+        Make static binaries
+    default: False
 
 flag development
     description:
@@ -40,10 +44,10 @@ executable atsfmt
     default-language: Haskell2010
     ghc-options: -Wall
     build-depends:
-        base >=4.10 && <5,
+        base >=4.9 && <5,
         language-ats >=0.1.1.10,
         optparse-applicative -any,
-        htoml-megaparsec >=1.1.0.0,
+        htoml-megaparsec >=2.0.0.0,
         text -any,
         ansi-wl-pprint -any,
         directory -any,
@@ -56,4 +60,6 @@ executable atsfmt
     
     if impl(ghc >=8.0)
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
-                     -Wcompat
+    
+    if flag(static)
+        ghc-options: -static -optc-static -optl-static

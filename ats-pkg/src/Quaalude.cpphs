@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Quaalude ( hex
                 , bool
@@ -9,6 +9,7 @@ module Quaalude ( hex
                 , unless
                 , when
                 , join
+                , fold
                 , zipWithM_
                 , zipWithM
                 , filterM
@@ -19,10 +20,10 @@ module Quaalude ( hex
                 , isSuffixOf
                 , on
                 , both
-                , (<>)
                 , (***)
                 , (&&&)
                 , (<=<)
+                , (<>)
                 , first
                 , second
                 , getEnv
@@ -43,6 +44,7 @@ module Quaalude ( hex
                 , thread
                 -- * Dhall reëxports
                 , Interpret
+                , Inject
                 , Generic
                 , Binary
                 , input
@@ -92,6 +94,7 @@ module Quaalude ( hex
                 , text
                 , punctuate
                 , dullred
+                , linebreak
                 , dullyellow
                 , hardline
                 , hang
@@ -113,39 +116,55 @@ module Quaalude ( hex
                 , (%~)
                 ) where
 
-#if __GLASGOW_HASKELL__ < 804
-import           Data.Semigroup
-#endif
 import           Control.Arrow                hiding ((<+>))
 import           Control.Composition
-import           Control.Lens                 hiding (both)
 import           Control.Monad
 import           Control.Monad.IO.Class
 import           Data.Binary
 import           Data.Bool                    (bool)
 import           Data.ByteString.Lazy         (ByteString)
+import           Data.Foldable                (fold)
 import           Data.List
 import           Data.Maybe                   (fromMaybe)
+import           Data.Semigroup
 import           Data.Text.Lazy               (pack, unpack)
 import           Data.Version                 (showVersion)
 import           Development.Shake            hiding (getEnv)
 import           Development.Shake.FilePath
 import           Dhall                        hiding (bool)
+import           Lens.Micro                   hiding (both)
+import           Lens.Micro.Extras
+import           Lens.Micro.TH
 import           Network.HTTP.Client
 import           Network.HTTP.Client.TLS      (tlsManagerSettings)
 import           Numeric                      (showHex)
 import           System.Directory             as X
 import           System.Environment           (getEnv)
 import           System.Exit                  (ExitCode (ExitSuccess), exitWith)
+#ifndef mingw32_HOST_OS
 import           System.Posix.Files
+#endif
 import           System.Process               as X
 import           System.Process.Ext
-import           Text.PrettyPrint.ANSI.Leijen hiding (bool, (<>))
+import           Text.PrettyPrint.ANSI.Leijen hiding (bool, (<$>), (<>))
 
 infixr 5 <#>
 
+#ifdef mingw32_HOST_OS
+setFileMode :: a -> b -> IO ()
+setFileMode _ _ = mempty
+ownerModes = undefined
+#endif
+
 hex :: Int -> String
 hex = flip showHex mempty
+
+instance Semigroup a => Semigroup (Action a) where
+    (<>) a b = (<>) <$> a <*> b
+
+instance (Semigroup a, Monoid a) => Monoid (Action a) where
+    mempty = pure mempty
+    mappend = (<>)
 
 -- | Same as "Text.PrettyPrint.ANSI.Leijen"'s @<$>@, but doesn't clash with the
 -- prelude.

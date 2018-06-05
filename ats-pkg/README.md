@@ -1,9 +1,13 @@
 # ATSPackage
 
 [![Build Status](https://travis-ci.org/vmchale/atspkg.svg?branch=master)](https://travis-ci.org/vmchale/atspkg)
+[![Hackage](https://img.shields.io/hackage/v/ats-pkg.svg)](http://hackage.haskell.org/package/ats-pkg)
+[![Dependencies of latest version on Hackage](https://img.shields.io/hackage-deps/v/ats-pkg.svg)](https://hackage.haskell.org/package/ats-pkg)
 
 This is a build system for ATS written in Haskell and configured with Dhall. It
 is not fully working, but the configuration format is now stable.
+
+`atspkg` works quite well as a build system, and acceptably well as a package manager.
 
 ## Features & Non-Features
 
@@ -19,14 +23,14 @@ Things that `atspkg` will do for you:
   * Install `patscc` and other ATS tooling
   * Install manual pages and shell completions
   * Install ATS libraries
+  * Dependency resolution
 
 Things that `atspkg` will not do for you:
 
-  * Dependency resolution (this is planned)
   * Give you the full flexibility of the C/ATS ecosystem
   * Integrate with other ecosystems
   * Provide a centralized package repository
-  * Cache builds locally (like `nix` or `cabal`)
+  * Cache builds (like `nix` or `cabal new-build`)
 
 ### Example
 
@@ -97,6 +101,7 @@ You can find several examples with explanation
 [here](https://github.com/vmchale/atspkg/blob/master/ats-pkg/EXAMPLES.md).
 
 ## Global Configuration
+
 
 `atspkg` is configured via a file in `~/.config/atspkg/config.dhall`. You can
 set a custom package set as follows:

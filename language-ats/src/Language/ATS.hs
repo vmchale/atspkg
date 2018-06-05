@@ -41,6 +41,7 @@ module Language.ATS ( -- * Functions for working with syntax
                     , SortArg (..)
                     , Sort (..)
                     , SortArgs
+                    , Fix
                     -- * Parser State
                     , FixityState
                     -- * Lexical types
@@ -59,7 +60,6 @@ module Language.ATS ( -- * Functions for working with syntax
                     , typeCallArgs
                     ) where
 
-import           Control.Lens
 import           Control.Monad
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.State
@@ -68,6 +68,7 @@ import           Language.ATS.Lexer
 import           Language.ATS.Parser
 import           Language.ATS.PrettyPrint
 import           Language.ATS.Types
+import           Lens.Micro
 import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
 
 rewriteATS' :: Eq a => (ATS a, FixityState a) -> ATS a
@@ -89,6 +90,9 @@ parseM = parseWithCtx defaultFixityState stripComments
 parse :: String -> Either ATSError (ATS AlexPosn)
 parse = parseWithCtx defaultFixityState id
 
+lexErr :: Either String a -> Either ATSError a
+lexErr = over _Left LexError
+
 stripComments :: [Token] -> [Token]
 stripComments = filter nc
     where nc CommentLex{}      = False
@@ -99,9 +103,9 @@ stripComments = filter nc
 
 -- | Parse with some fixity declarations already in scope.
 parseWithCtx :: FixityState AlexPosn -> ([Token] -> [Token]) -> String -> Either ATSError (ATS AlexPosn)
-parseWithCtx st p = stateParse <=< lexErr
+parseWithCtx st p = stateParse <=< lex'
     where withSt = flip runStateT st
-          lexErr = over _Left LexError . fmap p . lexATS
+          lex' = lexErr . fmap p . lexATS
           stateParse = fmap rewriteATS' . withSt . parseATS
 
 -- | Extract a list of files that some code depends on.

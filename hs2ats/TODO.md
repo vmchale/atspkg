@@ -1,3 +1,3 @@
 # Deficiencies
-- [ ] Error reporting is crap
-- [ ] Generate storable instances? (elsewhere, ideally)
+- [ ] Error reporting is poor.
+- [ ] Support Happy/Alex?

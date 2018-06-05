@@ -6,10 +6,8 @@ darcs:
     darcs optimize pristine
     darcs optimize cache
 
-fmt-install:
-    @cabal new-build ats-format
-    @cp ats-format/man/atsfmt.1 ~/.local/share/man/man1
-    @cp $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) ~/.local/bin
+build:
+    @cabal new-build all
 
 approve FILE:
     @atsfmt language-ats/test/data/{{ FILE }} -o > language-ats/test/data/$(echo {{ FILE }} | sed 's/\(dats\|hats\|sats\)/out/')
@@ -29,27 +27,39 @@ manpages:
 debian:
     PATH=/usr/bin:$PATH cabal-debian --maintainer "Vanessa McHale <vamchale@gmail.com>"
 
+lines:
+    perl -0777 -i -pe 's/```.*```/```\n'"$(just poly | ac -s)"'\n```/igs' README.md
+
 poly:
     @poly -e data
 
+dhall-check:
+    atspkg check-set ats-pkg/pkgs/pkg-set.dhall
+    cat ats-pkg/dhall/atslib.dhall | dhall
+    cat ats-pkg/dhall/config.dhall | dhall
+    cat ats-pkg/dhall/atspkg-prelude.dhall | dhall
+
 ci: install
     @cabal new-test all
+    shellcheck bash/install.sh
     yamllint .stylish-haskell.yaml
     yamllint .hlint.yaml
     yamllint .yamllint
     yamllint stack.yaml
     tomlcheck --file ats-format/.atsfmt.toml
-    shellcheck bash/install.sh
-    hlint ats-pkg language-ats shake-ext ats-format
+    hlint ats-pkg language-ats shake-ext ats-format cdeps
     stack build --test --no-run-tests --bench --no-run-benchmarks && weeder .
+
+remote:
     atspkg nuke
     atspkg remote https://github.com/vmchale/polyglot/archive/master.zip
 
-pkg-install:
-    @cabal new-build all
-    @cp -f $(fd 'atspkg$' -IH dist-newstyle | tail -n1) ~/.local/bin
-
-install: fmt-install pkg-install
+# atspkg remote https://hackage.haskell.org/package/fast-arithmetic-0.3.3.5/fast-arithmetic-0.3.3.5.tar.gz
+install: build
+    @cp ats-format/man/atsfmt.1 ~/.local/share/man/man1
+    @strip $(fd 'atsfmt$' -IH dist-newstyle | tail -n1)
+    @cp $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) ~/.local/bin
+    @cp -f $(fd 'atspkg$' -t x -IH dist-newstyle | tail -n1) ~/.local/bin
 
 size:
     @sn d $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) $(fd 'atspkg$' -IH dist-newstyle | tail -n1)

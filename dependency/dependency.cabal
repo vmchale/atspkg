@@ -1,76 +1,104 @@
-name:                dependency
-version:             0.1.0.10
-synopsis:            Dependency resolution for package management
-description:         A library for resolving dependencies; uses a topological sort to construct a build plan and then allows choice between all compatible plans.
-license:             BSD3
-license-file:        LICENSE
-author:              Vanessa McHale
-maintainer:          vamchale@gmail.com
-copyright:           Copyright: (c) 2018 Vanessa McHale
-category:            Development, Build
-build-type:          Simple
-extra-doc-files:     README.md
-cabal-version:       1.18
-
-Flag development {
-  Description: Enable `-Werror`
-  manual: True
-  default: False
-}
-
-library
-  hs-source-dirs:      src
-  build-tools:         cpphs
-  exposed-modules:     Data.Dependency
-  other-modules:       Data.Dependency.Type
-                     , Data.Dependency.Error
-                     , Data.Dependency.Sort
-  build-depends:       base >= 4.10 && < 5
-                     , ansi-wl-pprint
-                     , containers
-                     , recursion-schemes
-                     , lens
-                     , transformers
-                     , binary
-                     , deepseq
-                     , tardis
-  default-language:    Haskell2010
-  if flag(development)
-    ghc-options:       -Werror
-  if impl(ghc >= 8.0)
-    ghc-options:       -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat
-  ghc-options:         -Wall
-
-test-suite dependency-test
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      test
-  main-is:             Spec.hs
-  build-depends:       base
-                     , dependency
-                     , hspec
-                     , containers
-  if flag(development)
-    ghc-options:       -Werror
-  if impl(ghc >= 8.0)
-    ghc-options:       -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
-  default-language:    Haskell2010
-
-benchmark dependency-bench
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      bench
-  main-is:             Bench.hs
-  build-depends:       base
-                     , dependency
-                     , containers
-                     , criterion
-  if flag(development)
-    ghc-options:       -Werror
-  if impl(ghc >= 8.0)
-    ghc-options:       -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat
-  ghc-options:         -Wall
-  default-language:    Haskell2010
+cabal-version: 1.18
+name: dependency
+version: 1.1.0.0
+license: BSD3
+license-file: LICENSE
+copyright: Copyright: (c) 2018 Vanessa McHale
+maintainer: vamchale@gmail.com
+author: Vanessa McHale
+synopsis: Dependency resolution for package management
+description:
+    A library for resolving dependencies; uses a topological sort to construct a build plan and then allows choice between all compatible plans.
+category: Development, Build
+build-type: Simple
+extra-doc-files: README.md
 
 source-repository head
-  type:     darcs
-  location: https://hub.darcs.net/vmchale/ats
+    type: darcs
+    location: https://hub.darcs.net/vmchale/ats
+
+flag development
+    description:
+        Enable `-Werror`
+    default: False
+    manual: True
+
+library
+    exposed-modules:
+        Data.Dependency
+    build-tools: cpphs -any
+    hs-source-dirs: src
+    other-modules:
+        Data.Dependency.Type
+        Data.Dependency.Error
+        Data.Dependency.Sort
+    default-language: Haskell2010
+    other-extensions: DeriveAnyClass DeriveGeneric OverloadedStrings
+                      DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable
+                      OverloadedStrings TemplateHaskell TypeFamilies TupleSections
+    ghc-options: -Wall
+    build-depends:
+        base >=4.8 && <5,
+        ansi-wl-pprint -any,
+        containers >=0.5.9,
+        microlens -any,
+        binary -any,
+        deepseq -any
+    
+    if impl(ghc >=8.2)
+        build-depends:
+            micro-recursion-schemes -any
+    else
+        build-depends:
+            recursion-schemes >=5.1
+
+    if impl(ghc <8.0)
+        build-depends:
+            semigroups -any
+    
+    if (flag(development) && impl(ghc <8.4))
+        ghc-options: -Werror
+    
+    if impl(ghc >=8.0)
+        ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
+                     -Wcompat
+
+test-suite dependency-test
+    type: exitcode-stdio-1.0
+    main-is: Spec.hs
+    hs-source-dirs: test
+    default-language: Haskell2010
+    other-extensions: TupleSections
+    ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall
+    build-depends:
+        base -any,
+        dependency -any,
+        hspec -any,
+        containers -any
+    
+    if flag(development)
+        ghc-options: -Werror
+    
+    if impl(ghc >=8.0)
+        ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
+                     -Wcompat
+
+benchmark dependency-bench
+    type: exitcode-stdio-1.0
+    main-is: Bench.hs
+    hs-source-dirs: bench
+    default-language: Haskell2010
+    other-extensions: TupleSections
+    ghc-options: -Wall
+    build-depends:
+        base -any,
+        dependency -any,
+        containers -any,
+        criterion -any
+    
+    if flag(development)
+        ghc-options: -Werror
+    
+    if impl(ghc >=8.0)
+        ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
+                     -Wcompat

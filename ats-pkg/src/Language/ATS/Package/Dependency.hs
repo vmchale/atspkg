@@ -29,7 +29,8 @@ getTgt (GCC x)   = x
 getTgt (GHC x _) = x
 getTgt _         = Nothing
 
-fetchDeps :: CCompiler -- ^ C compiler to use
+fetchDeps :: Verbosity -- ^ Shake verbosity
+          -> CCompiler -- ^ C compiler to use
           -> [IO ()] -- ^ Setup steps that can be performed concurrently
           -> [String] -- ^ ATS dependencies
           -> [String] -- ^ C Dependencies
@@ -38,9 +39,9 @@ fetchDeps :: CCompiler -- ^ C compiler to use
           -> SetupScript -- ^ How to install an ATS library
           -> Bool -- ^ Whether to perform setup anyhow.
           -> IO ()
-fetchDeps cc' setup' deps cdeps atsBld cfgPath als b' =
+fetchDeps v cc' setup' deps cdeps atsBld cfgPath als b' =
 
-    unless (null deps && null cdeps && null atsBld && b') $ do
+    unless (null deps && null cdeps && null atsBld && b' && False) $ do
 
         putStrLn "Resolving dependencies..."
 
@@ -50,14 +51,14 @@ fetchDeps cc' setup' deps cdeps atsBld cfgPath als b' =
         cdeps' <- setBuildPlan "c" libDeps pkgSet cdeps
 
         -- Set up actions
-        d <- (<> "lib/") <$> pkgHome cc'
+        d <- (<> "lib/") <$> cpkgHome cc'
         let tgt' = getTgt cc'
             libs' = fmap (buildHelper False) (join deps')
             unpacked = fmap (over dirLens (pack d <>)) <$> cdeps'
             clibs = fmap (buildHelper False) (join unpacked)
             atsLibs = fmap (buildHelper False) (join atsDeps')
-            cBuild = mapM_ (setup cc') <$> transpose unpacked
-            atsBuild = mapM_ (atsPkgSetup als tgt') <$> transpose atsDeps'
+            cBuild = mapM_ (setup v cc') <$> (transpose . fmap reverse) unpacked
+            atsBuild = mapM_ (atsPkgSetup als tgt') <$> (transpose . fmap reverse) atsDeps'
 
         -- Fetch all packages & build compiler
         parallel' $ join [ setup', libs', clibs, atsLibs ]
@@ -65,7 +66,7 @@ fetchDeps cc' setup' deps cdeps atsBld cfgPath als b' =
         let tagBuild str bld =
                 unless (null bld) $
                     putStrLn (mconcat ["Building ", str, " dependencies..."]) >>
-                    parallel' bld
+                    sequence_ bld -- FIXME parallel'
 
         zipWithM_ tagBuild [ "C", "ATS" ] [ cBuild, atsBuild ]
 
@@ -76,21 +77,22 @@ atsPkgSetup :: SetupScript
             -> Maybe String
             -> ATSDependency
             -> IO ()
-atsPkgSetup als tgt' (ATSDependency lib' dirName' _ _ _ _ _ _) = do
-    lib'' <- (<> unpack lib') <$> pkgHome GCCStd
+atsPkgSetup als tgt' (ATSDependency lib' dirName' _ _ _ _ _ _ _) = do
+    lib'' <- (<> unpack lib') <$> cpkgHome GCCStd
     b <- doesFileExist lib''
     unless b $ do
         als tgt' (unpack lib') (unpack dirName')
         writeFile lib'' ""
 
-setup :: CCompiler -- ^ C compiler to use
+setup :: Verbosity
+      -> CCompiler -- ^ C compiler to use
       -> ATSDependency -- ^ ATSDependency itself
       -> IO ()
-setup cc' (ATSDependency lib' dirName' _ _ _ _ _ _) = do
-    lib'' <- (<> unpack lib') <$> pkgHome cc'
+setup v' cc' (ATSDependency lib' dirName' _ _ _ _ _ _ _) = do
+    lib'' <- (<> unpack lib') <$> cpkgHome cc'
     b <- doesFileExist lib''
     unless b $ do
-        clibSetup cc' (unpack lib') (unpack dirName')
+        clibSetup v' cc' (unpack lib') (unpack dirName')
         writeFile lib'' ""
 
 getCompressor :: Text -> IO (ByteString -> ByteString)
@@ -113,7 +115,7 @@ zipResponse dirName response = do
     extractFilesFromArchive [options] (toArchive response)
 
 buildHelper :: Bool -> ATSDependency -> IO ()
-buildHelper b (ATSDependency lib' dirName' url'' _ _ _ _ _) = do
+buildHelper b (ATSDependency lib' dirName' url'' _ _ _ _ _ _) = do
 
     let (lib, dirName, url') = (lib', dirName', url'') & each %~ unpack
         isLib = bool "" "library " b

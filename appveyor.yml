@@ -1,0 +1,35 @@
+---
+
+build: off
+
+before_test:
+  - choco install ghc
+  - choco install cabal
+  - choco install 7zip
+  - set PATH=C:\Program Files\Git\mingw64\bin;%PATH%
+
+clone_folder: "c:\\stack"
+environment:
+  global:
+    STACK_ROOT: "c:\\sr"
+
+test_script:
+  - refreshenv
+  - cabal update
+  - cabal new-build all
+  - ps: Get-ChildItem . -name -recurse atspkg.exe
+  - ps: Copy-Item c:\\stack\\.stack-work\\install\\81831b05\\bin\\atspkg.exe atspkg-x86_64-pc-windows.exe
+  - ps: Push-AppveyorArtifact atspkg-x86_64-pc-windows.exe
+
+deploy:
+  artifacts: atspkg-x86_64-pc-windows.exe
+  provider: GitHub
+  on:
+    appveyor_repo_tag: true
+  auth_token:
+    secure: cNzi4ZEE4PIrKxBJXEDPHkqrHI4fdSJtIQZ8n7qbYJwBtsx8TkBxduK8eIr6fzdY
+
+branches:
+  only:
+    - master
+    - /\d+\.\d+\.\d+\.\d+.*$/

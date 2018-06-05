@@ -5,17 +5,17 @@
 -- | This module holds various functions for turning a package into a set of rules
 -- or an 'IO ()'.
 module Language.ATS.Package.Build ( mkPkg
-                                  , pkgToAction
                                   , build
                                   , buildAll
                                   , check
                                   ) where
 
-import           Control.Concurrent.ParallelIO.Global
-import qualified Data.ByteString                      as BS
-import qualified Data.ByteString.Lazy                 as BSL
+import qualified Data.ByteString                 as BS
+import qualified Data.ByteString.Lazy            as BSL
+import           Data.List                       (intercalate)
+import           Development.Shake               (getVerbosity)
 import           Development.Shake.ATS
-import           Development.Shake.C                  (ccFromString)
+import           Development.Shake.C             (ccFromString)
 import           Development.Shake.Check
 import           Development.Shake.Clean
 import           Development.Shake.Man
@@ -23,6 +23,7 @@ import           Distribution.ATS.Version
 import           Language.ATS.Package.Build.C
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Config
+import           Language.ATS.Package.Debian     hiding (libraries, target)
 import           Language.ATS.Package.Dependency
 import           Language.ATS.Package.Type
 import           Quaalude
@@ -37,17 +38,26 @@ wants :: Maybe FilePath -> IO Version
 wants p = compiler <$> getConfig p
 
 -- | Build in current directory or indicated directory
-buildAll :: Maybe String
+buildAll :: Int
+         -> Maybe String
          -> Maybe FilePath
          -> IO ()
-buildAll tgt' p = on (>>) (=<< wants p) fetchDef setupDef
+buildAll v tgt' p = on (>>) (=<< wants p) fetchDef setupDef
     where fetchDef = fetchCompiler
-          setupDef = setupCompiler atslibSetup tgt'
+          setupDef = setupCompiler (toVerbosity v) atslibSetup tgt'
+
+build' :: FilePath -- ^ Directory
+       -> Maybe String -- ^ Target triple
+       -> [String] -- ^ Targets
+       -> IO ()
+build' dir tgt' rs = withCurrentDirectory dir (mkPkgEmpty mempty)
+    where mkPkgEmpty ts = mkPkg False True False ts rs tgt' 1
 
 -- | Build a set of targets
-build :: [String] -- ^ Targets
+build :: Int
+      -> [String] -- ^ Targets
       -> IO ()
-build rs = bool (mkPkgEmpty [buildAll Nothing Nothing]) (mkPkgEmpty mempty) =<< check Nothing
+build v rs = bool (mkPkgEmpty [buildAll v Nothing Nothing]) (mkPkgEmpty mempty) =<< check Nothing
     where mkPkgEmpty ts = mkPkg False True False ts rs Nothing 1
 
 -- TODO clean generated ATS
@@ -59,7 +69,9 @@ mkClean = "clean" ~> do
     removeFilesAfter ".atspkg" ["//*"]
     removeFilesAfter "ats-deps" ["//*"]
 
-mkInstall :: Maybe String -> Rules ()
+-- TODO take more arguments, in particular, include + library dirs
+mkInstall :: Maybe String -- ^ Optional target triple
+          -> Rules ()
 mkInstall tgt =
     "install" ~> do
         config <- getConfig Nothing
@@ -87,7 +99,7 @@ mkInstall tgt =
             Just com -> if not co then pure () else do
                 let com' = unpack com
                     comDest = home <> "/.compleat/" <> takeFileName com'
-                need [com']
+                need [com'] -- FIXME do this all in one step
                 copyFile' com' comDest
             Nothing -> pure ()
 
@@ -99,15 +111,14 @@ mkManpage = do
         Just _ -> bool (pure ()) manpages b
         _      -> pure ()
 
-cacheConfiguration :: Text -> IO Pkg
-cacheConfiguration = input auto
-
+-- FIXME this doesn't rebuild when it should; it should rebuild when
+-- @atspkg.dhall@ changes.
 getConfig :: MonadIO m => Maybe FilePath -> m Pkg
 getConfig dir' = liftIO $ do
     d <- fromMaybe <$> fmap (<> "/atspkg.dhall") getCurrentDirectory <*> pure dir'
     b <- not <$> doesFileExist ".atspkg/config"
     if b
-        then cacheConfiguration (pack d)
+        then input auto (pack d)
         else fmap (decode . BSL.fromStrict) . BS.readFile $ ".atspkg/config"
 
 manTarget :: Text -> FilePath
@@ -135,7 +146,7 @@ toVerbosity 0 = Normal
 toVerbosity 1 = Loud
 toVerbosity 2 = Chatty
 toVerbosity 3 = Diagnostic
-toVerbosity _ = Diagnostic -- really should be a warning
+toVerbosity _ = Diagnostic -- should be a warning
 
 options :: Bool -- ^ Whether to rebuild all targets
         -> Bool -- ^ Whether to run the linter
@@ -158,7 +169,7 @@ rebuildTargets :: Bool -- ^ Force rebuild of all targets
                -> [(Rebuild, String)]
 rebuildTargets rba rs = foldMap g [ (rba, (RebuildNow ,) <$> patterns rs) ]
     where g (b, ts) = bool mempty ts b
-          patterns = thread (mkPattern <$> ["c", "o", "so", "a"])
+          patterns = thread (mkPattern <$> ["c", "o", "so", "a", "deb"])
           mkPattern ext = ("//*." <> ext :)
 
 cleanConfig :: (MonadIO m) => [String] -> m Pkg
@@ -182,10 +193,6 @@ mkPkg rba lint tim setup rs tgt v = do
             , mkClean
             , pkgToAction setup rs tgt cfg
             ]
-    stopGlobalPool
-
-asTuple :: TargetPair -> (Text, Text, Bool)
-asTuple (TargetPair s t b) = (s, t, b)
 
 mkConfig :: Rules ()
 mkConfig =
@@ -217,17 +224,38 @@ atslibSetup :: Maybe String -- ^ Optional target triple
             -> IO ()
 atslibSetup tgt' lib' p = do
     putStrLn $ "installing " ++ lib' ++ "..."
-    subdirs <- allSubdirs p
+    subdirs <- (p:) <$> allSubdirs p
     pkgPath <- fromMaybe p <$> findFile subdirs "atspkg.dhall"
     let installDir = takeDirectory pkgPath
-    buildAll tgt' (Just installDir)
+    build' installDir tgt' ["install"]
+
+-- | The directory @~/.atspkg@
+pkgHome :: MonadIO m => CCompiler -> m String
+pkgHome cc' = liftIO $ (++ ("/.atspkg/" ++ ccToDir cc')) <$> getEnv "HOME"
+
+-- | The directory that will be @PATSHOME@.
+patsHomeAtsPkg :: MonadIO m => Version -> m String
+patsHomeAtsPkg v = fmap (++ (show v ++ "/")) (pkgHome (GCC Nothing))
+
+home' :: MonadIO m => Version -- ^ Compiler version
+                   -> Version -- ^ Library version
+                   -> m String
+home' compV libV = do
+    h <- patsHomeAtsPkg compV
+    pure $ h ++ "lib/ats2-postiats-" ++ show libV
+
+-- | This is the @$PATSHOMELOCS@ variable to be passed to the shell.
+patsHomeLocsAtsPkg :: Int -- ^ Depth to recurse
+                   -> String
+patsHomeLocsAtsPkg n = intercalate ":" ((<> ".atspkg/contrib") . ("./" <>) <$> g)
+    where g = [ join $ replicate i "../" | i <- [0..n] ]
 
 pkgToAction :: [IO ()] -- ^ Setup actions to be performed
             -> [String] -- ^ Targets
             -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
             -> Pkg -- ^ Package data type
             -> Rules ()
-pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf as) =
+pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf af as dl slv deb al) =
 
     unless (rs == ["clean"]) $ do
 
@@ -235,40 +263,50 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf as) =
 
         mkUserConfig
 
+        want (unpack . cTarget <$> as)
+
         specialDeps %> \out -> do
             (_, cfgBin') <- cfgBin
             need [ cfgBin', ".atspkg/config" ]
-            liftIO $ fetchDeps (ccFromString cc') setup (unpack . fst <$> ds) (unpack . fst <$> cdps) (unpack . fst <$> bdeps) cfgBin' atslibSetup False >> writeFile out ""
+            v'' <- getVerbosity
+            liftIO $ fetchDeps v'' (ccFromString cc') setup (unpack . fst <$> ds) (unpack . fst <$> cdps) (unpack . fst <$> bdeps) cfgBin' atslibSetup False >> writeFile out ""
 
         let bins = unpack . target <$> bs
         setTargets rs bins mt
 
-        cDepsRules >> bits tgt rs
+        ph <- home' v' v
 
-        mapM_ h lbs
+        cDepsRules ph >> bits tgt rs
 
-        mapM_ g (bs ++ ts)
+        mapM_ (h ph) lbs
 
-    where g (Bin s t ls hs' atg gc' extra) =
-            atsBin (ATSTarget (unpack <$> cf) atsToolConfig gc' (unpack <$> ls) [unpack s] hs' (unpackBoth . asTuple <$> atg) mempty (unpack t) (deps extra) Executable)
+        mapM_ (g ph) (bs ++ ts)
 
-          h (Lib _ s t ls _ hs' lnk atg extra sta) =
-            atsBin (ATSTarget (unpack <$> cf) atsToolConfig False (unpack <$> ls) (unpack <$> s) hs' (unpackBoth . asTuple <$> atg) (both unpack <$> lnk) (unpack t) (deps extra) (k sta))
+        fold (debRules <$> deb)
+
+    where g ph (Bin s t ls hs' atg gc' extra) =
+            atsBin (ATSTarget (unpack <$> cf) (atsToolConfig ph) gc' (unpack <$> ls) [unpack s] hs' (unpackTgt <$> atg) mempty (unpack t) (deps extra) Executable True)
+
+          h ph (Lib _ s t ls _ hs' lnk atg extra sta) =
+            atsBin (ATSTarget (unpack <$> cf) (atsToolConfig ph) False (unpack <$> ls) (unpack <$> s) hs' (unpackTgt <$> atg) (unpackLinks <$> lnk) (unpack t) (deps extra) (k sta) False)
 
           k False = SharedLibrary
           k True  = StaticLibrary
 
-          atsToolConfig = ATSToolConfig v v' False (ccFromString cc') False
+          atsToolConfig ph = ATSToolConfig ph (patsHomeLocsAtsPkg 5) False (ccFromString cc') (not dl) slv al (unpack <$> af)
 
-          cDepsRules = unless (null as) $ do
+          cDepsRules ph = unless (null as) $ do
               let targets = fmap (unpack . cTarget) as
                   sources = fmap (unpack . atsSrc) as
-              zipWithM_ (cgen atsToolConfig [specialDeps, ".atspkg/config"] (fmap (unpack . ats) . atsGen =<< as)) sources targets
+              zipWithM_ (cgen (atsToolConfig ph) [specialDeps, ".atspkg/config"] (fmap (unpack . ats) . atsGen =<< as)) sources targets
 
           cc' = maybe (unpack ccLocal) (<> "-gcc") tgt
           deps = (specialDeps:) . (".atspkg/config":) . fmap unpack
 
-          unpackBoth :: (Text, Text, Bool) -> ATSGen
-          unpackBoth (t, t', b)= ATSGen (unpack t) (unpack t') b
+          unpackLinks :: (Text, Text) -> HATSGen
+          unpackLinks (t, t') = HATSGen (unpack t) (unpack t')
+
+          unpackTgt :: TargetPair -> ATSGen
+          unpackTgt (TargetPair t t' b) = ATSGen (unpack t) (unpack t') b
 
           specialDeps = ".atspkg/deps" ++ maybe mempty ("-" <>) tgt

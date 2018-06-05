@@ -24,22 +24,18 @@ defV = Version [0,1,0]
 ghcMod :: Dependency
 ghcMod = Dependency "ghc-mod" [("lens", LessThanEq defV)] defV
 
-deps :: [Dependency]
-deps = [free, lens, comonad]
-
 mapSingles :: [(d, b)] -> [(d, S.Set b)]
 mapSingles = fmap (second S.singleton)
 
 set :: PackageSet Dependency
-set = PackageSet $ M.fromList (("lens", S.fromList [lens, newLens]) : mapSingles [("ghc-mod", ghcMod), ("comonad", comonad), ("free", free)])
+set = PackageSet $
+    M.fromList (("lens", S.fromList [lens, newLens]) :
+        mapSingles [("ghc-mod", ghcMod), ("comonad", comonad), ("free", free)])
 
 main :: IO ()
-main = hspec $ parallel $ do
-    describe "buildSequence" $
-        it "correctly orders dependencies" $
-            buildSequence deps `shouldBe` [[free, comonad], [lens]]
+main = hspec $ parallel $
     describe "resolveDependencies" $ do
-        it "correctly resolves dependencies in a package set" $
-            resolveDependencies set [newLens] `shouldBe` Right [[free, comonad], [newLens]]
-        it "correctly resolves dependencies in a package set" $
-            pendingWith "not working yet" -- resolveDependencies set [ghcMod] `shouldBe` Right [[free, comonad], [lens], [ghcMod]]
+    it "correctly resolves dependencies in a package set" $
+        resolveDependencies set [newLens] `shouldBe` Right [[free, comonad], [newLens]]
+    it "correctly resolves dependencies in a package set" $
+        resolveDependencies set [ghcMod] `shouldBe` Right [[free, comonad], [lens], [ghcMod]]

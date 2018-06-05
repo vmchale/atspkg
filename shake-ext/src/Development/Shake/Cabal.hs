@@ -1,5 +1,3 @@
-{-# LANGUAGE CPP #-}
-
 module Development.Shake.Cabal ( getCabalDeps
                                , getCabalDepsV
                                , getCabalDepsA
@@ -10,28 +8,26 @@ module Development.Shake.Cabal ( getCabalDeps
                                , platform
                                , hsCompiler
                                -- * Reëxports from "Distribution.Version"
-                               , showVersion
+                               , prettyShow
                                ) where
 
 import           Control.Arrow
 import           Control.Composition
 import           Control.Monad
-import           Data.Foldable                         (toList)
-import           Data.Maybe                            (catMaybes)
-#if __GLASGOW_HASKELL__ < 804
-import           Data.Semigroup
-#endif
-import           Development.Shake                     hiding (doesFileExist)
-import qualified Development.Shake                     as Shake
+import           Data.Foldable                          (toList)
+import           Data.Maybe                             (catMaybes)
+import           Development.Shake                      hiding (doesFileExist)
+import qualified Development.Shake                      as Shake
 import           Distribution.ModuleName
 import           Distribution.PackageDescription
-import           Distribution.PackageDescription.Parse
+import           Distribution.PackageDescription.Parsec
+import           Distribution.Pretty
 import           Distribution.Types.CondTree
 import           Distribution.Types.PackageId
-import           Distribution.Verbosity                as Distribution
+import           Distribution.Verbosity                 as Distribution
 import           Distribution.Version
-import           System.Directory                      (doesFileExist)
-import           System.Info                           (arch, os)
+import           System.Directory                       (doesFileExist)
+import           System.Info                            (arch, os)
 
 data HsCompiler = GHC { _suff :: Maybe String -- ^ Compiler version
                       }
@@ -40,9 +36,9 @@ data HsCompiler = GHC { _suff :: Maybe String -- ^ Compiler version
 
 hsCompiler :: HsCompiler -> String
 hsCompiler (GHC Nothing)    = "ghc"
-hsCompiler (GHC (Just v))   = "ghc-" <> v
+hsCompiler (GHC (Just v))   = "ghc-" ++ v
 hsCompiler (GHCJS Nothing)  = "ghcjs"
-hsCompiler (GHCJS (Just v)) = "ghcjs-" <> v
+hsCompiler (GHCJS (Just v)) = "ghcjs-" ++ v
 
 -- | E.g. @x86_64-linux@
 platform :: String
@@ -51,7 +47,7 @@ platform = arch ++ "-" ++ os
 libraryToFiles :: Library -> [FilePath]
 libraryToFiles lib = mconcat [cs, is, hs]
     where (cs, is) = (cSources &&& includes) $ libBuildInfo lib
-          hs = (<> ".hs") . toFilePath <$> explicitLibModules lib
+          hs = (++ ".hs") . toFilePath <$> explicitLibModules lib
 
 extract :: CondTree a b Library -> [Library]
 extract (CondNode d _ []) = [d]
@@ -86,8 +82,8 @@ getCabalDepsV v p = do
         vers = pkgVersion (package descr)
         libs = toList (condLibrary pkg)
         normalSrc = (libraryToFiles <=< extract) =<< libs
-        dir = (fmap (<> "/") . hsSourceDirs . libBuildInfo <=< extract) =<< libs
-        dirge = ((<>) <$> dir <*>)
+        dir = (fmap (++ "/") . hsSourceDirs . libBuildInfo <=< extract) =<< libs
+        dirge = ((++) <$> dir <*>)
         h = filterM doesFileExist
     norms <- h (dirge normalSrc)
-    pure (vers, extraSrc <> norms)
+    pure (vers, extraSrc ++ norms)

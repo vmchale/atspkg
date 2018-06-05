@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 set -e
 set pipefail
 
-function getTarget {
+getTarget() {
     if [ "$(uname)" = "Darwin" ]
     then
         echo "atspkg-$(uname -m)-apple-darwin"
@@ -14,19 +14,37 @@ function getTarget {
 
 main() {
 
+
+    mkdir -p "$HOME/.local/bin"
+    mkdir -p "$HOME/.local/share/man/man1/"
+
     latest="$(curl -s https://github.com/vmchale/atspkg/releases/latest/ | cut -d'"' -f2 | rev | cut -d'/' -f1 | rev)"
     binname=$(getTarget)
+
     url="https://github.com/vmchale/atspkg/releases/download/$latest/$binname"
-    mkdir -p "$HOME/.local/bin"
-    local dest=$HOME/.local/bin/atspkg
-    if which duma > /dev/null ; then
+    man_url="https://github.com/vmchale/atspkg/releases/download/$latest/atspkg.1"
+
+    man_dest=$HOME/.local/share/man/man1/atspkg.1
+    dest=$HOME/.local/bin/atspkg
+
+    if command -v duma > /dev/null ; then
         duma "$url" -O "$dest"
-    elif which wget > /dev/null ; then
+        duma "$man_url" -O "$man_dest"
+    elif command -v wget > /dev/null ; then
         wget "$url" -O "$dest"
+        wget "$man_url" -O "$man_dest"
     else
         curl "$url" -o "$dest"
+        curl "$man_url" -o "$man_dest"
     fi
+
     chmod +x "$dest"
+
+
+    case :$PATH: in 
+        *:$HOME/.local/bin:*) ;;
+        *) echo "$HOME/.local/bin not in $PATH" >&2;;
+    esac
 
 }
 

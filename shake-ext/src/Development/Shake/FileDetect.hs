@@ -1,3 +1,5 @@
+-- | The functions in this module get all files in the current directory with
+-- some extension.
 module Development.Shake.FileDetect
     ( getAts
     , getSats
@@ -18,6 +20,7 @@ import           Control.Monad
 import           Data.Semigroup    ((<>))
 import           Development.Shake
 
+-- | Get all files ending with @.mad@.
 getMadlang :: Action [FilePath]
 getMadlang = getAll ["mad"]
 
@@ -33,6 +36,7 @@ getYml = getAll ["yaml", "yml", "yamllint"]
 getToml :: Action [FilePath]
 getToml = getAll ["toml"]
 
+-- | Get all haskell source files, including module signatures.
 getHs :: [FilePath] -> Action [FilePath]
 getHs files = join <$> mapM (`getAllDir` ["hs", "hs-boot", "hsig", "lhs"]) files
 

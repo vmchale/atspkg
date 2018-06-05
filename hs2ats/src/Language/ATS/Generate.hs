@@ -1,19 +1,15 @@
-{-# LANGUAGE DataKinds         #-}
-{-# LANGUAGE DeriveAnyClass    #-}
-{-# LANGUAGE DeriveGeneric     #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE PatternSynonyms   #-}
-{-# LANGUAGE TypeOperators     #-}
+{-# LANGUAGE PatternSynonyms #-}
 
 module Language.ATS.Generate
-    ( exec
-    , generateATS
+    ( -- * Functions
+      generateATS
     , genATSTypes
+    -- * Types
     , ErrM
+    , GenerateError (..)
     ) where
 
 import           Control.Arrow
-import           Control.Lens                 (over, _head)
 import           Data.Bool                    (bool)
 import           Data.Char                    (toUpper)
 import           Data.Either                  (lefts, rights)
@@ -23,13 +19,8 @@ import           Language.ATS.Generate.Error
 import           Language.Haskell.Exts
 import           Language.Haskell.Exts.Syntax as HS
 import           Language.Preprocessor.Cpphs  (defaultCpphsOptions, runCpphs)
-import           Options.Generic
+import           Lens.Micro                   (over, _head)
 import           Text.Casing                  (quietSnake)
-
-data Program = Program { src    :: FilePath <?> "Haskell source file"
-                       , target :: FilePath <?> "ATS target"
-                       , cpphs  :: Bool <?> "Use cpphs as a preprocessor"
-                       } deriving (Generic, ParseRecord)
 
 convertConventions :: String -> String
 convertConventions = filterKeys . quietSnake
@@ -172,7 +163,9 @@ extends =
 
 -- | Given a string containing Haskell, return a string containing ATS and
 -- a list of warnings.
-generateATS :: FilePath -> String -> ErrM (String, [GenerateError])
+generateATS :: FilePath -- ^ Name of source file
+            -> String -- ^ Source file contents
+            -> ErrM (String, [GenerateError])
 generateATS file hsSrc = modulePrint <$> case parseModuleWithMode extends hsSrc of
     ParseOk x            -> Right x
     ParseFailed loc' msg -> syntaxError (loc' { srcFilename = file }) msg
@@ -180,14 +173,12 @@ generateATS file hsSrc = modulePrint <$> case parseModuleWithMode extends hsSrc 
 process :: FilePath -> String -> IO String
 process p = fmap (unlines . drop 1 . lines) . runCpphs defaultCpphsOptions p
 
-genATSTypes :: FilePath -> FilePath -> Bool -> IO ()
+genATSTypes :: FilePath -- ^ Haskell source file
+            -> FilePath -- ^ @.sats@ file to be generated
+            -> Bool -- ^ Whether to use pre-process the Haskell source (use this if you use @{#- LANGUAGE CPP #-}@ anywhere)
+            -> IO ()
 genATSTypes p p' withCPP = do
     let proc = bool pure (process p) withCPP
     contents <- proc =<< readFile p
     let warnDo (x, es) = mapM_ displayErr es >> writeFile p' x
     either displayErr warnDo (generateATS p contents)
-
-exec :: IO ()
-exec = do
-    x <- getRecord "Generate ATS types for Haskell source code" :: IO Program
-    genATSTypes (unHelpful . src $ x) (unHelpful . target $ x) (unHelpful . cpphs $ x)

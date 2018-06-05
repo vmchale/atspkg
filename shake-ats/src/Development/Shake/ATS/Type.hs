@@ -1,8 +1,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-{-# LANGUAGE DeriveAnyClass     #-}
-{-# LANGUAGE DeriveGeneric      #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE TemplateHaskell    #-}
+{-# LANGUAGE DeriveAnyClass  #-}
+{-# LANGUAGE DeriveGeneric   #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Development.Shake.ATS.Type ( ForeignCabal (..)
                                   , Version (..)
@@ -10,6 +9,8 @@ module Development.Shake.ATS.Type ( ForeignCabal (..)
                                   , ArtifactType (..)
                                   , ATSToolConfig (..)
                                   , ATSGen (..)
+                                  , HATSGen (..)
+                                  , Solver (..)
                                   -- * Lenses
                                   , atsTarget
                                   , hasPretty
@@ -24,19 +25,25 @@ module Development.Shake.ATS.Type ( ForeignCabal (..)
                                   , genTargets
                                   , hsLibs
                                   , libs
+                                  , patsHome
+                                  , patsHomeLocs
                                   , tgtType
-                                  , compilerVer
-                                  , libVersion
                                   , linkTargets
+                                  , cpphs
+                                  , hsFile
+                                  , strip
+                                  , solver
+                                  , linkATSLib
+                                  , patsFlags
                                   ) where
 
-import           Control.Lens
 import           Data.Binary         (Binary (..))
 import           Data.Dependency     (Version (..))
 import           Data.Hashable       (Hashable)
 import qualified Data.Text.Lazy      as TL
 import           Development.Shake.C
 import           GHC.Generics        (Generic)
+import           Lens.Micro.TH
 
 -- We should have four build types:
 --
@@ -65,26 +72,37 @@ import           GHC.Generics        (Generic)
 --
 -- * Also binary caches are good.
 
-deriving instance Generic CCompiler
-deriving instance Binary CCompiler
-
 data ArtifactType = StaticLibrary
                   | Executable
                   | SharedLibrary
                   deriving (Generic, Binary)
 
+data Solver = PatsSolve
+            | Z3
+            | Ignore
+            deriving (Generic, Binary)
+
 -- | Information about where to find @patscc@ and @patsopt@.
-data ATSToolConfig = ATSToolConfig { _libVersion  :: Version -- ^ Standard library version to be used.
-                                   , _compilerVer :: Version -- ^ Version of @patscc@ to be used.
-                                   , _hasPretty   :: Bool -- ^ Whether to display errors via @pats-filter@
-                                   , _cc          :: CCompiler -- ^ C compiler to be used
-                                   , _linkStatic  :: Bool -- ^ Force static linking
+data ATSToolConfig = ATSToolConfig { _patsHome     :: String -- ^ Value to be used for @PATSHOME@.
+                                   , _patsHomeLocs :: String -- ^ Value to be used for @PATSHOMELOCS@.
+                                   , _hasPretty    :: Bool -- ^ Whether to display errors via @pats-filter@
+                                   , _cc           :: CCompiler -- ^ C compiler to be used
+                                   , _linkStatic   :: Bool -- ^ Force static linking
+                                   , _solver       :: Solver
+                                   , _linkATSLib   :: Bool -- ^ Whether to link against atslib
+                                   , _patsFlags    :: [String] -- ^ Additional flags to pass to @patsopt@.
                                    } deriving (Generic, Binary)
 
-data ATSGen = ATSGen { hsFile     :: FilePath -- ^ Haskell file containing types
+data HATSGen = HATSGen { satsFile :: FilePath -- ^ @.sats@ file containing type definitions
+                       , hatsFile :: FilePath -- ^ @.hats@ file to be generated for library distribution
+                       } deriving (Generic, Binary)
+
+data ATSGen = ATSGen { _hsFile    :: FilePath -- ^ Haskell file containing types
                      , _atsTarget :: FilePath -- ^ ATS file to be generated
-                     , cpphs      :: Bool -- ^ Whether to use the C preprocessor on the Haskell code
+                     , _cpphs     :: Bool -- ^ Whether to use the C preprocessor on the Haskell code
                      } deriving (Generic, Binary)
+
+-- TODO split off haskell-related types and leave it more general??
 
 -- | Type for binary and library builds with ATS.
 data ATSTarget = ATSTarget { _cFlags      :: [String] -- ^ Flags to be passed to the C compiler
@@ -94,10 +112,11 @@ data ATSTarget = ATSTarget { _cFlags      :: [String] -- ^ Flags to be passed to
                            , _src         :: [FilePath] -- ^ ATS source files. If building an executable, at most one may contain @main0@.
                            , _hsLibs      :: [ForeignCabal] -- ^ Cabal-based Haskell libraries.
                            , _genTargets  :: [ATSGen] -- ^ Files to be run through @hs2ats@.
-                           , _linkTargets :: [(FilePath, FilePath)] -- ^ Targets for @_link.hats@ generation.
+                           , _linkTargets :: [HATSGen] -- ^ Targets for @_link.hats@ generation.
                            , _binTarget   :: FilePath -- ^ Target
                            , _otherDeps   :: [FilePath] -- ^ Other files to track.
                            , _tgtType     :: ArtifactType -- ^ Build type
+                           , _strip       :: Bool -- ^ Whether to strip generated artifacts
                            } deriving (Generic, Binary)
 
 -- | Data type containing information about Haskell components of a build. Any
@@ -107,6 +126,4 @@ data ForeignCabal = ForeignCabal { projectFile :: Maybe TL.Text -- ^ @cabal.proj
                                  , objectFile  :: TL.Text -- ^ Object file to be generated
                                  } deriving (Eq, Show, Generic, Binary, Hashable)
 
-makeLenses ''ATSGen
-makeLenses ''ATSTarget
-makeLenses ''ATSToolConfig
+mconcat <$> traverse makeLenses [''ATSGen, ''ATSTarget, ''ATSToolConfig]

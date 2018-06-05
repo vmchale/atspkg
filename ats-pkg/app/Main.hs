@@ -4,18 +4,20 @@ module Main ( main
             ) where
 
 import           Control.Composition
-import           Control.Lens               hiding (List, argument)
-import           Data.Bool                  (bool)
-import           Data.Maybe                 (fromMaybe)
-import           Data.Semigroup             (Semigroup (..))
-import qualified Data.Text.Lazy             as TL
-import           Data.Version               hiding (Version (..))
+import           Control.Concurrent.ParallelIO.Global
+import           Control.Monad
+import           Data.Bool                            (bool)
+import           Data.Maybe                           (fromMaybe, isNothing)
+import           Data.Semigroup                       (Semigroup (..))
+import qualified Data.Text.Lazy                       as TL
+import           Data.Version                         hiding (Version (..))
 import           Development.Shake.ATS
 import           Development.Shake.FilePath
 import           Language.ATS.Package
+import           Lens.Micro
 import           Options.Applicative
 import           System.Directory
-import           System.IO.Temp             (withSystemTempDirectory)
+import           System.IO.Temp                       (withSystemTempDirectory)
 
 -- TODO command to list available packages.
 wrapper :: ParserInfo Command
@@ -39,7 +41,9 @@ data Command = Install { _archTarget :: Maybe String }
              | Pack { _target :: String }
              | Test { _targets    :: [String]
                     , _rebuildAll :: Bool
+                    , _verbosity  :: Int
                     , _lint       :: Bool
+                    , _prof       :: Bool
                     }
              | Fetch { _url :: String }
              | Nuke
@@ -49,12 +53,14 @@ data Command = Install { _archTarget :: Maybe String }
                    , _rebuildAll :: Bool
                    , _verbosity  :: Int
                    , _lint       :: Bool
+                   , _prof       :: Bool
                    }
              | Check { _filePath :: String, _details :: Bool }
+             | CheckSet { _filePath :: String, _details :: Bool }
              | List
 
-command' :: Parser Command
-command' = hsubparser
+userCmd :: Parser Command
+userCmd = hsubparser
     (command "install" (info install (progDesc "Install all binaries to $HOME/.local/bin"))
     <> command "clean" (info (pure Clean) (progDesc "Clean current project directory"))
     <> command "remote" (info fetch (progDesc "Fetch and install a binary package"))
@@ -64,8 +70,17 @@ command' = hsubparser
     <> command "upgrade" (info (pure Upgrade) (progDesc "Upgrade to the latest version of atspkg"))
     <> command "valgrind" (info valgrind (progDesc "Run generated binaries through valgrind"))
     <> command "run" (info run' (progDesc "Run generated binaries"))
-    <> command "check" (info check' (progDesc "Audit a package set to ensure it is well-typed."))
+    <> command "check" (info check' (progDesc "Check that a pkg.dhall file is well-typed."))
+    <> command "check-set" (info checkSet (progDesc "Audit a package set to ensure it is well-typed."))
     <> command "list" (info (pure List) (progDesc "List available packages"))
+    )
+
+command' :: Parser Command
+command' = userCmd <|> internalCmd
+
+internalCmd :: Parser Command
+internalCmd = subparser
+    (internal
     <> command "pack" (info pack (progDesc "Make a tarball for distributing the compiler"))
     )
 
@@ -77,10 +92,18 @@ install :: Parser Command
 install = Install
     <$> triple
 
+checkSet :: Parser Command
+checkSet = CheckSet
+    <$> targetP dhallCompletions id "check"
+    <*> details
+
 check' :: Parser Command
 check' = Check
-    <$> targetP dhallCompletions id "check"
-    <*> switch
+    <$> targetP dhallCompletions id "check-set"
+    <*> details
+
+details :: Parser Bool
+details = switch
     (long "detailed"
     <> short 'd'
     <> help "Enable detailed error messages")
@@ -97,12 +120,15 @@ run' = Run
     <*> rebuild
     <*> verbosity
     <*> noLint
+    <*> profile
 
 test' :: Parser Command
 test' = Test
     <$> targets "test"
     <*> rebuild
+    <*> verbosity
     <*> noLint
+    <*> profile
 
 valgrind :: Parser Command
 valgrind = Valgrind <$> targets "run with valgrind"
@@ -164,32 +190,34 @@ fetch = Fetch <$>
 
 fetchPkg :: String -> IO ()
 fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
-    let (lib, dirName, url') = (mempty, p, pkg) & each %~ TL.pack
-    buildHelper True (ATSDependency lib dirName url' undefined undefined mempty mempty mempty)
+    let (dirName, url') = (p, pkg) & each %~ TL.pack
+    buildHelper True (ATSDependency mempty dirName url' undefined undefined mempty mempty mempty mempty)
     ps <- getSubdirs p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
-    let a = withCurrentDirectory (takeDirectory pkgDir) (mkPkg False False False mempty ["install"] Nothing 0)
-    bool (buildAll Nothing (Just pkgDir) >> a) a =<< check (Just pkgDir)
+    let setup = [buildAll 0 Nothing (Just pkgDir)]
+    withCurrentDirectory (takeDirectory pkgDir) (mkPkg False False False setup ["install"] Nothing 0)
+    stopGlobalPool
 
 main :: IO ()
 main = execParser wrapper >>= run
 
 runHelper :: Bool -> Bool -> Bool -> [String] -> Maybe String -> Int -> IO ()
-runHelper rba lint tim rs tgt v = g . bool x y =<< check Nothing
-    where g xs = mkPkg rba lint tim xs rs tgt v
+runHelper rba lint tim rs tgt v = g . bool x y . (&& isNothing tgt) =<< check Nothing
+    where g xs = mkPkg rba lint tim xs rs tgt v >> stopGlobalPool
           y = mempty
-          x = [buildAll tgt Nothing]
+          x = [buildAll v tgt Nothing]
 
 run :: Command -> IO ()
 run List                          = displayList "https://raw.githubusercontent.com/vmchale/atspkg/master/ats-pkg/pkgs/pkg-set.dhall"
-run (Check p b)                   = print =<< checkPkg p b
+run (Check p b)                   = void $ ($ Version [0,1,0]) <$> checkPkg p b
+run (CheckSet p b)                = void $ checkPkgSet p b
 run Upgrade                       = upgradeBin "vmchale" "atspkg"
 run Nuke                          = cleanAll
 run (Fetch u)                     = fetchPkg u
 run Clean                         = mkPkg False True False mempty ["clean"] Nothing 0
 run (Build rs tgt rba v lint tim) = runHelper rba lint tim rs tgt v
-run (Test ts rba lint)            = runHelper rba lint False ("test" : ts) Nothing 0
-run (Run ts rba v lint)           = runHelper rba lint False ("run" : ts) Nothing v
+run (Test ts rba v lint tim)      = runHelper rba lint tim ("test" : ts) Nothing v
+run (Run ts rba v lint tim)       = runHelper rba lint tim ("run" : ts) Nothing v
 run (Install tgt)                 = runHelper False True False ["install"] tgt 0
 run (Valgrind ts)                 = runHelper False True False ("valgrind" : ts) Nothing 0
 run (Pack dir')                   = packageCompiler dir'

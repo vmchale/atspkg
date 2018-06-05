@@ -1,5 +1,5 @@
 ---
-resolver: lts-10.7
+resolver: lts-11.11
 packages:
   - 'ats-pkg'
   - 'language-ats'
@@ -8,17 +8,22 @@ packages:
   - 'shake-ats'
   - 'dependency'
   - 'hs2ats'
+  - 'cdeps'
 extra-deps:
-  - dhall-1.10.0
-  - composition-prelude-1.3.0.4
-  - cli-setup-0.2.0.1
-  - hspec-dirstream-0.4.0.0
+  - composition-prelude-1.4.0.5
+  - bzlib-0.5.0.5
+  - casing-0.1.4.0
+  - cli-setup-0.2.0.4
+  - hspec-dirstream-1.0.0.0
   - dirstream-1.0.3
-  - prettyprinter-1.2.0.1
-  - htoml-megaparsec-1.1.0.1
+  - htoml-megaparsec-2.0.0.0
+  - micro-recursion-schemes-5.0.2.2
+  - dhall-1.14.0
+  - Cabal-2.2.0.1
+  - lzma-clib-5.2.2
 flags:
-  ats-pkg:
-    development: false
   hs2ats:
+    no-executable: false
+  cdeps:
     no-executable: false
 extra-package-dbs: []

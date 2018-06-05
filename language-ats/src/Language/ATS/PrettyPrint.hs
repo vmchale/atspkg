@@ -1,13 +1,12 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-{-# LANGUAGE DeriveAnyClass       #-}
-{-# LANGUAGE DeriveGeneric        #-}
-{-# LANGUAGE FlexibleContexts     #-}
-{-# LANGUAGE FlexibleInstances    #-}
-{-# LANGUAGE OverloadedStrings    #-}
-{-# LANGUAGE PatternSynonyms      #-}
-{-# LANGUAGE StandaloneDeriving   #-}
-{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE DeriveAnyClass     #-}
+{-# LANGUAGE DeriveGeneric      #-}
+{-# LANGUAGE FlexibleContexts   #-}
+{-# LANGUAGE FlexibleInstances  #-}
+{-# LANGUAGE OverloadedStrings  #-}
+{-# LANGUAGE PatternSynonyms    #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 module Language.ATS.PrettyPrint ( printATS
                                 , printATSCustom
@@ -15,9 +14,10 @@ module Language.ATS.PrettyPrint ( printATS
                                 ) where
 
 import           Control.Composition          hiding ((&))
-import           Control.Lens                 hiding (op, pre)
+import           Data.Bool                    (bool)
 import           Data.Functor.Foldable        (cata)
 import           Language.ATS.Types
+import           Lens.Micro
 import           Prelude                      hiding ((<$>))
 import           Text.PrettyPrint.ANSI.Leijen hiding (bool)
 
@@ -50,9 +50,10 @@ instance Pretty (Name a) where
     pretty (FieldName _ n n') = text n <> "." <> text n'
 
 instance Pretty (LambdaType a) where
-    pretty Plain{}    = "=>"
-    pretty Spear{}    = "=>>"
-    pretty (Full _ v) = "=<" <> text v <> ">"
+    pretty Plain{}      = "=>"
+    pretty Spear{}      = "=>>"
+    pretty ProofArrow{} = "=/=>"
+    pretty (Full _ v)   = "=<" <> text v <> ">"
 
 instance Pretty (BinOp a) where
     pretty Mult               = "*"
@@ -124,6 +125,7 @@ instance Eq a => Pretty (Expression a) where
             ("let" <+> pretty e <$> endLet e')
         a (UintLitF u)                  = pretty u <> "u"
         a (IntLitF i)                   = pretty i
+        a (HexLitF hi)                  = "0x" <> text hi
         a (LambdaF _ lt p e)            = let pre = "lam" <+> pretty p <+> pretty lt in flatAlt (lengthAlt pre e) (pre <+> e)
         a (LinearLambdaF _ lt p e)      = let pre = "llam" <+> pretty p <+> pretty lt in flatAlt (lengthAlt pre e) (pre <+> e)
         a (FloatLitF f)                 = pretty f
@@ -131,6 +133,7 @@ instance Eq a => Pretty (Expression a) where
         a (ParenExprF _ e)              = parens e
         a (UnaryF op e) = pretty op <> pretty e
         a (BinListF op@Add es)          = prettyBinary (pretty op) es
+        a (BinListF op@Con{} es)        = prettyBinary (pretty op) es
         a (BinaryF op e e')
             | splits op = e </> pretty op <+> e'
             | otherwise = e <+> pretty op <+> e'
@@ -164,7 +167,9 @@ instance Eq a => Pretty (Expression a) where
         a (TypeSignatureF e t)         = e <+> ":" <+> pretty t
         a (WhereExpF e d)              = e <+> "where" <$> braces (" " <> nest 2 (pretty d) <> " ")
         a (TupleExF _ es)              = parens (mconcat $ punctuate ", " (reverse es))
+        a (BoxTupleExF _ es)           = "'(" <> mconcat (punctuate ", " (reverse es)) <> ")"
         a (WhileF _ e e')              = "while" <> parens e <> e'
+        a (ActionsF (ATS [d]))         = "{" <+> pretty d <+> "}"
         a (ActionsF as)                = "{" <$> indent 2 (pretty as) <$> "}"
         a UnderscoreLitF{}             = "_"
         a (BeginF _ e)
@@ -182,9 +187,11 @@ instance Eq a => Pretty (Expression a) where
         prettyIfCase []              = mempty
         prettyIfCase [(s, l, t)]     = "|" <+> s <+> pretty l <+> t
         prettyIfCase ((s, l, t): xs) = prettyIfCase xs $$ "|" <+> s <+> pretty l <+> t
-        prettyCases []              = mempty
-        prettyCases [(s, l, t)]     = "|" <+> pretty s <+> pretty l <+> t
-        prettyCases ((s, l, t): xs) = prettyCases xs $$ "|" <+> pretty s <+> pretty l <+> t -- FIXME can leave space with e.g. => \n begin ...
+
+prettyCases :: (Pretty a, Pretty b) => [(a, b, Doc)] -> Doc
+prettyCases []              = mempty
+prettyCases [(s, l, t)]     = "|" <+> pretty s <+> pretty l <+> t
+prettyCases ((s, l, t): xs) = prettyCases xs $$ "|" <+> pretty s <+> pretty l <+> t -- FIXME can leave space with e.g. => \n begin ...
 
 noParens :: Doc -> Bool
 noParens = all (`notElem` ("()" :: String)) . show
@@ -204,9 +211,11 @@ instance Eq a => Pretty (Pattern a) where
         a (GuardedF _ e p)             = p <+> "when" <+> pretty e
         a (ProofF _ p p')              = parens (patternHelper p <+> "|" <+> patternHelper p')
         a (TuplePatternF ps)           = parens (patternHelper ps)
+        a (BoxTuplePatternF _ ps)      = "'(" <> patternHelper ps <> ")"
         a (AtPatternF _ p)             = "@" <> p
         a (UniversalPatternF _ n us p) = text n <> prettyArgsU "" "" us <> p
         a (ExistentialPatternF e p)    = pretty e <> p
+        a (AsF _ p p')                 = p <+> "as" <+> p'
 
 argHelper :: Eq a => (Doc -> Doc -> Doc) -> Arg a -> Doc
 argHelper _ (Arg (First s))   = pretty s
@@ -247,22 +256,25 @@ instance Eq a => Pretty (StaticExpression a) where
         a (SLetF _ e e') = flatAlt
             ("let" <$> indent 2 (pretty e) <$> endLet e')
             ("let" <+> pretty e <$> endLet e')
+        a (SCaseF ad e sls) = "case" <> pretty ad <+> e <+> "of" <$> indent 2 (prettyCases sls)
 
 instance Eq a => Pretty (Sort a) where
-    pretty (T0p ad)           = "t@ype" <> pretty ad
-    pretty (Vt0p ad)          = "vt@ype" <> pretty ad
-    pretty (NamedSort s)      = text s
-    pretty Addr               = "addr"
-    pretty (View _ t)         = "view" <> pretty t
-    pretty (VType _ a)        = "vtype" <> pretty a
-    pretty (TupleSort _ s s') = parens (pretty s <> "," <+> pretty s')
+    pretty = cata a where
+        a (T0pF ad)           = "t@ype" <> pretty ad
+        a (Vt0pF ad)          = "vt@ype" <> pretty ad
+        a (NamedSortF s)      = text s
+        a AddrF               = "addr"
+        a (ViewF _ t)         = "view" <> pretty t
+        a (VTypeF _ a')       = "vtype" <> pretty a'
+        a (TupleSortF _ s s') = parens (s <> "," <+> s')
+        a (ArrowSortF _ s s') = s <+> "->" <+> s'
 
 instance Eq a => Pretty (Type a) where
     pretty = cata a where
         a (NamedF n)                       = pretty n
         a (ViewTypeF _ t)                  = "view@" <> parens t
         a (ExF e (Just t))
-            | head (show t) == '['         = pretty e <> t -- FIXME this is a hack
+            | head (show t) == '['         = pretty e <> t -- FIXME this is kinda dumb
             | otherwise                    = pretty e <+> t
         a (ExF e Nothing)                  = pretty e
         a (DependentF n@SpecialName{} [t]) = pretty n <+> pretty t
@@ -275,9 +287,12 @@ instance Eq a => Pretty (Type a) where
         a (MaybeValF t)                    = t <> "?"
         a (AtExprF _ t t')                 = t <+> "@" <+> pretty t'
         a (AtTypeF _ t)                    = "@" <> t
-        a (ProofTypeF _ t t')              = parens (prettyArgsG "" "" t <+> "|" <+> t')
+        a (ProofTypeF _ t t')              = parens (pre' `op` "|" <+> t')
+            where pre' = prettyArgsG mempty mempty t
+                  op = bool (<+>) (<>) ('\n' `elem` showFast pre')
         a (ConcreteTypeF e)                = pretty e
         a (TupleF _ ts)                    = parens (mconcat (punctuate ", " (fmap pretty (reverse ts))))
+        a (BoxTupleF _ ts)                 = "'(" <> mconcat (punctuate ", " (fmap pretty (reverse ts))) <> ")"
         a (RefTypeF t)                     = "&" <> t
         a (FunctionTypeF s t t')           = t <+> string s <+> t'
         a (ViewLiteralF c)                 = "view" <> pretty c
@@ -351,8 +366,6 @@ glue Comment{} _                   = True
 glue (Func _ Fnx{}) (Func _ And{}) = True
 glue Assume{} Assume{}             = True
 glue _ _                           = False
-
-{-# INLINE glue #-}
 
 concatSame :: Eq a => [Declaration a] -> Doc
 concatSame []  = mempty
@@ -524,6 +537,10 @@ prettySortArgs :: (Pretty a) => Maybe [a] -> Doc
 prettySortArgs Nothing   = mempty
 prettySortArgs (Just as) = prettyArgs' ", " "(" ")" as
 
+maybeT :: Pretty a => Maybe a -> Doc
+maybeT (Just x) = ":" <+> pretty x
+maybeT Nothing  = mempty
+
 instance Eq a => Pretty (Declaration a) where
     pretty (Exception s t)                  = "exception" <+> text s <+> "of" <+> pretty t
     pretty (AbsType _ s as t)               = "abstype" <+> text s <> prettySortArgs as <> prettyMaybeType t
@@ -569,10 +586,9 @@ instance Eq a => Pretty (Declaration a) where
     pretty (Extern _ d)                     = "extern" <$> pretty d
     pretty (DataProp _ s as ls)             = "dataprop" <+> text s <> prettySortArgs as <+> "=" <$> prettyDL ls
     pretty (ViewTypeDef _ s as t)           = "vtypedef" <+> text s <> prettySortArgs as <+> "=" <#> pretty t
-    pretty (TypeDef _ s as t)               = "typedef" <+> text s <> prettySortArgs as <+> "=" <+> pretty t
+    pretty (TypeDef _ s as t ms)            = "typedef" <+> text s <> prettySortArgs as <+> "=" <+> pretty t <> maybeT ms
     pretty (AbsProp _ n as)                 = "absprop" <+> text n <+> prettyArgs as
-    pretty (Assume n NoA e)                 = "assume" </> pretty n <+> "=" </> pretty e
-    pretty (Assume n as e)                  = "assume" </> pretty n <> prettyArgs as <+> "=" </> pretty e
+    pretty (Assume n as e)                  = "assume" </> pretty n <> prettySortArgs as <+> "=" </> pretty e
     pretty (SymIntr _ ns)                   = "symintr" <+> hsep (fmap pretty ns)
     pretty (Stacst _ n t Nothing)           = "stacst" </> pretty n <+> ":" </> pretty t
     pretty (Stacst _ n t (Just e))          = "stacst" </> pretty n <+> ":" </> pretty t <+> "=" </> pretty e
@@ -582,9 +598,9 @@ instance Eq a => Pretty (Declaration a) where
     pretty (FixityDecl f ss)                = pretty f <+> hsep (fmap text ss)
     pretty (StaVal us i t)                  = "val" </> mconcat (fmap pretty us) <+> text i <+> ":" <+> pretty t
     pretty (Stadef i as (Right t))          = "stadef" <+> text i <+> prettySortArgs as <+> "=" <+> pretty t
-    pretty (Stadef i as (Left se))          = "stadef" <+> text i <+> prettySortArgs as <+> "=" <+> pretty se
+    pretty (Stadef i as (Left (se, mt)))    = "stadef" <+> text i <+> prettySortArgs as <+> "=" <+> pretty se <> maybeT mt
     pretty (AndD d (Stadef i as (Right t))) = pretty d <+> "and" <+> text i <+> prettySortArgs as <+> "=" <+> pretty t
-    pretty (AndD d (Stadef i as (Left se))) = pretty d <+> "and" <+> text i <+> prettySortArgs as <+> "=" <+> pretty se
+    pretty (AndD d (Stadef i as (Left (se, mt)))) = pretty d <+> "and" <+> text i <+> prettySortArgs as <+> "=" <+> pretty se <> maybeT mt
     pretty (AbsView _ i as t)               = "absview" <+> text i <> prettySortArgs as <> prettyMaybeType t
     pretty (AbsVT0p _ i as t)               = "absvt@ype" <+> text i <> prettySortArgs as <> prettyMaybeType t
     pretty (AbsT0p _ i Nothing t)           = "abst@ype" <+> text i <+> "=" <+> pretty t
