@@ -31,7 +31,7 @@ library
     ghc-options: -Wall
     build-depends:
         base >=4.3 && <5,
-        shake -any,
+        shake >=0.14,
         Cabal >=2.2,
         directory -any,
         composition-prelude -any

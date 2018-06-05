@@ -12,6 +12,12 @@ getTarget() {
     fi
 }
 
+addBin() {
+
+    printf 'export PATH=$HOME/.local/bin:$PATH' >> "$HOME"/.bashrc
+    export PATH=$HOME/.local/bin:$PATH
+}
+
 main() {
 
 
@@ -43,7 +49,7 @@ main() {
 
     case :$PATH: in 
         *:$HOME/.local/bin:*) ;;
-        *) echo "$HOME/.local/bin not in $PATH" >&2;;
+        *) addBin ;;
     esac
 
 }

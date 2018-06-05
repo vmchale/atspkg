@@ -41,7 +41,7 @@ dhall-check:
 
 ci: install
     @cabal new-test all
-    shellcheck bash/install.sh
+    shellcheck -e SC2016 bash/install.sh
     yamllint .stylish-haskell.yaml
     yamllint .hlint.yaml
     yamllint .yamllint

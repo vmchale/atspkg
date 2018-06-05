@@ -48,7 +48,7 @@ library
         microlens-th -any,
         text -any,
         dependency -any,
-        shake -any,
+        shake >=0.14,
         binary -any,
         shake-cabal
     

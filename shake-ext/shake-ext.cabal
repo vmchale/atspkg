@@ -33,9 +33,6 @@ library
         Development.Shake.Clean
         Development.Shake.Version
         Development.Shake.C
-        Development.Shake.CCJS
-        Development.Shake.Elm
-        Development.Shake.Literate
     hs-source-dirs: src
     other-modules:
         Development.Shake.TH
@@ -47,10 +44,8 @@ library
     build-depends:
         base >=4.9 && <5,
         cdeps -any,
-        composition-prelude -any,
-        cpphs -any,
         directory -any,
-        shake -any,
+        shake >=0.14,
         template-haskell -any
     
     if flag(development)

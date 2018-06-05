@@ -6,7 +6,7 @@ license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
 maintainer: vamchale@gmail.com
 author: Vanessa McHale
-homepage: https://github.com/vmchale/atspkg#readme
+homepage: https://github.com/vmchale/atspkg/tree/master/ats-pkg#readme
 bug-reports: https://github.com/vmchale/atspkg/issues
 synopsis: A build tool for ATS
 description:
