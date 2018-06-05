@@ -49,7 +49,8 @@ library
         text -any,
         dependency -any,
         shake -any,
-        binary -any
+        binary -any,
+        shake-cabal
     
     if flag(development)
         ghc-options: -Werror

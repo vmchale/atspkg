@@ -6,6 +6,7 @@ packages: language-ats
         , dependency
         , hs2ats
         , cdeps
+        , shake-cabal
 
 constraints:
   ats-format +development -static,
@@ -16,7 +17,8 @@ constraints:
   ats-setup +development,
   dependency +development,
   hs2ats +development -no-executable,
-  cdeps +development -no-executable
+  cdeps +development -no-executable,
+  shake-cabal +development
 
 optimization: 2
 tests: True

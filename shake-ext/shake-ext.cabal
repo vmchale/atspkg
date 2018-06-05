@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: shake-ext
-version: 2.11.0.4
+version: 2.12.0.0
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -31,7 +31,6 @@ library
         Development.Shake.Man
         Development.Shake.Check
         Development.Shake.Clean
-        Development.Shake.Cabal
         Development.Shake.Version
         Development.Shake.C
         Development.Shake.CCJS
@@ -47,7 +46,6 @@ library
     ghc-options: -Wall
     build-depends:
         base >=4.9 && <5,
-        Cabal >=2.2,
         cdeps -any,
         composition-prelude -any,
         cpphs -any,
