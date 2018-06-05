@@ -118,7 +118,7 @@ library
         binary -any,
         microlens -any,
         microlens-th -any,
-        dependency -any,
+        dependency >=1.2.0.0,
         filemanip -any
     
     if !os(windows)
