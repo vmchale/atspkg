@@ -44,6 +44,7 @@ hsCompiler (GHCJS (Just v)) = "ghcjs-" ++ v
 platform :: String
 platform = arch ++ "-" ++ os
 
+-- FIXME: should also work with .x, .cpphs, .y files
 libraryToFiles :: Library -> [FilePath]
 libraryToFiles lib = mconcat [cs, is, hs]
     where (cs, is) = (cSources &&& includes) $ libBuildInfo lib
