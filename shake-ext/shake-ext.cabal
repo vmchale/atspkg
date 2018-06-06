@@ -39,8 +39,7 @@ library
     other-extensions: TemplateHaskell RankNTypes
     ghc-options: -Wall
     build-depends:
-        base >=4.3 && <5,
-        cdeps -any,
+        base >=4.9 && <5,
         directory -any,
         shake >=0.14,
         template-haskell -any
