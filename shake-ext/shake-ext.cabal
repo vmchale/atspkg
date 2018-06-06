@@ -32,14 +32,11 @@ library
         Development.Shake.Check
         Development.Shake.Clean
         Development.Shake.Version
-        Development.Shake.C
     hs-source-dirs: src
     other-modules:
         Development.Shake.TH
     default-language: Haskell2010
-    other-extensions: GeneralizedNewtypeDeriving PatternSynonyms
-                      TypeFamilies DeriveAnyClass DeriveGeneric DerivingStrategies
-                      TemplateHaskell RankNTypes
+    other-extensions: TemplateHaskell RankNTypes
     ghc-options: -Wall
     build-depends:
         base >=4.9 && <5,

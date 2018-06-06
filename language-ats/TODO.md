@@ -12,6 +12,7 @@
 - [ ] Sort annotations for viewtypes etc.
 - [ ] `$tup(x, y)` syntax?
 - [ ] `stadef x: bool = z`
+- [ ] whatever the fuck this is: https://github.com/githwxi/ATS-Xanadu/blob/master/srcgen/xats/SATS/lexing.sats#L94
 # Deficiencies
 - [ ] Error messages
   - [ ] Add test suite for messages

@@ -64,10 +64,10 @@ cmake v prefixPath (Just cfgLists) _ _ = do
     let p = takeDirectory cfgLists
     silentCreateProcess v ((proc "cmake" ["-DCMAKE_INSTALL_PREFIX:PATH=" ++ prefixPath, p]) { cwd = Just p })
 
-autogen :: Verbosity -> FilePath -> String -> FilePath -> IO ()
+{-autogen :: Verbosity -> FilePath -> String -> FilePath -> IO ()
 autogen v autogenPath lib' _ =
     putStrLn ("generating " ++ lib' ++ "...") >>
-    silentCreateProcess v ((proc autogenPath mempty) { cwd = Just (takeDirectory autogenPath) })
+    silentCreateProcess v ((proc autogenPath mempty) { cwd = Just (takeDirectory autogenPath) })-}
 
 configure :: Verbosity -> FilePath -> FilePath -> Maybe [(String, String)] -> String -> FilePath -> IO ()
 configure v prefixPath configurePath procEnv lib' p =

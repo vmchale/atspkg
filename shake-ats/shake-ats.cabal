@@ -50,7 +50,8 @@ library
         dependency -any,
         shake >=0.14,
         binary -any,
-        shake-cabal -any
+        shake-cabal -any,
+        shake-c -any
     
     if flag(development)
         ghc-options: -Werror

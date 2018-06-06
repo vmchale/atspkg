@@ -16,6 +16,7 @@ addBin() {
 
     printf 'export PATH=$HOME/.local/bin:$PATH' >> "$HOME"/.bashrc
     export PATH=$HOME/.local/bin:$PATH
+
 }
 
 main() {

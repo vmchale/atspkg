@@ -1,17 +1,21 @@
 cabal-version: 1.18
-name: shake-cabal
+name: shake-c
 version: 0.1.0.0
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
 maintainer: vanessa.mchale@iohk.io
 author: Vanessa McHale
-synopsis: Shake library for use with cabal
+homepage: https://github.com/vmchale/shake-c#readme
 bug-reports: https://github.com/vmchale/atspkg/issues
+synopsis: Library for building C code with shake
 description:
-    A library for using [shake](http://hackage.haskell.org/package/shake) alongside [cabal](https://www.haskell.org/cabal/).
-category: Development
+    Facilities for building C libraries and binaries, and depending on C source files. Extends [shake](http://hackage.haskell.org/package/shake).
+category: Development, C
 build-type: Simple
+extra-source-files:
+    stack.yaml
+    cabal.project.local
 extra-doc-files: README.md
 
 source-repository head
@@ -26,16 +30,16 @@ flag development
 
 library
     exposed-modules:
-        Development.Shake.Cabal
+        Development.Shake.C
     hs-source-dirs: src
     default-language: Haskell2010
+    other-extensions: DeriveAnyClass DeriveGeneric DerivingStrategies
+                      GeneralizedNewtypeDeriving PatternSynonyms TypeFamilies
     ghc-options: -Wall
     build-depends:
         base >=4.3 && <5,
         shake >=0.14,
-        Cabal >=2.2,
-        directory -any,
-        composition-prelude -any
+        cdeps -any
     
     if flag(development)
         ghc-options: -Werror

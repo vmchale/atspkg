@@ -7,6 +7,7 @@ packages: language-ats
         , hs2ats
         , cdeps
         , shake-cabal
+        , shake-c
 
 constraints:
   ats-format +development -static,
@@ -18,12 +19,13 @@ constraints:
   dependency +development,
   hs2ats +development -no-executable,
   cdeps +development -no-executable,
-  shake-cabal +development
+  shake-cabal +development,
+  shake-c +development
 
 optimization: 2
 tests: True
 benchmarks: True
--- documentation: True
+documentation: True
 
 program-options
   happy-options: -gcsa
