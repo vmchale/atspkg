@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: shake-ext
-version: 2.12.0.0
+version: 3.0.0.0
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -39,7 +39,7 @@ library
     other-extensions: TemplateHaskell RankNTypes
     ghc-options: -Wall
     build-depends:
-        base >=4.9 && <5,
+        base >=4.3 && <5,
         cdeps -any,
         directory -any,
         shake >=0.14,

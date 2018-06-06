@@ -41,7 +41,7 @@ library
         base >=4.9 && <5,
         hashable -any,
         language-ats -any,
-        shake-ext >=2.9.0.0,
+        shake-ext >=3.0.0.0,
         hs2ats >=0.2.0.1,
         directory -any,
         microlens -any,
