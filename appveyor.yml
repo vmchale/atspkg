@@ -10,7 +10,7 @@ before_test:
 test_script:
   - refreshenv
   - cabal update
-  - cabal new-build exe:atsfmt exe:hs2ats
+  - cabal new-build all
   - ps: Get-ChildItem . -name -recurse atspkg.exe
   - ps: Copy-Item c:\\stack\\.stack-work\\install\\81831b05\\bin\\atspkg.exe atspkg-x86_64-pc-windows.exe
   - ps: Push-AppveyorArtifact atspkg-x86_64-pc-windows.exe

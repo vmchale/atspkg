@@ -6,8 +6,6 @@ darcs:
     darcs optimize pristine
     darcs optimize cache
 
-build:
-    @cabal new-build all
 
 approve FILE:
     @atsfmt language-ats/test/data/{{ FILE }} -o > language-ats/test/data/$(echo {{ FILE }} | sed 's/\(dats\|hats\|sats\)/out/')
@@ -26,9 +24,6 @@ manpages:
 
 debian:
     PATH=/usr/bin:$PATH cabal-debian --maintainer "Vanessa McHale <vamchale@gmail.com>"
-
-lines:
-    perl -0777 -i -pe 's/```.*```/```\n'"$(just poly | ac -s)"'\n```/igs' README.md
 
 poly:
     @poly -e data
@@ -50,12 +45,8 @@ ci: install
     hlint ats-pkg language-ats shake-ext ats-format cdeps shake-cabal shake-c
     stack build --test --no-run-tests --bench --no-run-benchmarks && weeder .
 
-remote:
-    atspkg nuke
-    atspkg remote https://github.com/vmchale/polyglot/archive/master.zip
-
-# atspkg remote https://hackage.haskell.org/package/fast-arithmetic-0.3.3.5/fast-arithmetic-0.3.3.5.tar.gz
-install: build
+install:
+    @cabal new-build all
     @cp ats-format/man/atsfmt.1 ~/.local/share/man/man1
     @strip $(fd 'atsfmt$' -IH dist-newstyle | tail -n1)
     @cp $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) ~/.local/bin
@@ -63,12 +54,3 @@ install: build
 
 size:
     @sn d $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) $(fd 'atspkg$' -IH dist-newstyle | tail -n1)
-
-test-format:
-    @git clone https://github.com/vmchale/polyglot
-    cd polyglot && atsfmt src/polyglot.dats -i
-    cd polyglot && atsfmt src/cli.dats -i
-    cd polyglot && atsfmt src/shared.dats -i
-    cd polyglot && atsfmt src/filetype.sats -i
-    cd polyglot && atspkg build
-    @rm -rf polyglot
