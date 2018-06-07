@@ -74,9 +74,7 @@ module Quaalude ( hex
                 , takeFileName
                 , takeDirectory
                 , (-<.>)
-                -- * "System.Posix" reëxports
-                , setFileMode
-                , ownerModes
+                , makeExecutable
                 -- * "Network.HTTP.Client.TLS" reëxports
                 , tlsManagerSettings
                 -- "Network.HTTP.Client" reëxports
@@ -151,9 +149,11 @@ import           Text.PrettyPrint.ANSI.Leijen hiding (bool, (<$>), (<>))
 infixr 5 <#>
 
 #ifdef mingw32_HOST_OS
-setFileMode :: a -> b -> IO ()
-setFileMode _ _ = mempty
-ownerModes = undefined
+makeExecutable :: FilePath -> IO ()
+makeExecutable = pure mempty
+#else
+makeExecutable :: FilePath -> IO ()
+makeExecutable = flip setFileMode ownerModes
 #endif
 
 hex :: Int -> String

@@ -42,4 +42,4 @@ upgradeBin user proj = do
     createDirectoryIfMissing True (takeDirectory atsPath)
     BSL.writeFile (atsPath ++ "-new") binBytes
     renameFile (atsPath ++ "-new") atsPath
-    setFileMode atsPath ownerModes
+    makeExecutable atsPath

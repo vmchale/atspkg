@@ -25,10 +25,10 @@ ccForConfig = g . ccToString
     where g "icc" = "cc"
           g x     = x
 
-makeExecutable :: FilePath -> [FilePath] -> IO ()
-makeExecutable file dirs = do
+{-makeExecutable' :: FilePath -> [FilePath] -> IO ()
+makeExecutable' file dirs = do
     p <- findFile dirs file
-    fold (setFileMode <$> p <*> pure ownerModes)
+    fold (setFileMode <$> p <*> pure ownerModes)-}
 
 clibSetup :: Verbosity -- ^ Shake verbosity level
           -> CCompiler -- ^ C compiler
@@ -42,16 +42,9 @@ clibSetup v cc' lib' p = do
     -- Find configure script and make it executable
     subdirs <- allSubdirs p
     configurePath <- findFile (p:subdirs) "configure"
-    -- autogenPath <- findFile (p:subdirs) "autogen.sh"
     cmakeLists <- findFile (p:subdirs) "CMakeLists.txt"
-    fold (setFileMode <$> configurePath <*> pure ownerModes)
-    -- fold (setFileMode <$> autogenPath <*> pure ownerModes)
-    makeExecutable "install-sh" (p:subdirs)
-    makeExecutable "mkinstalldirs" (p:subdirs)
-    makeExecutable "rellns-sh" (p:subdirs)
-    makeExecutable "shtool" (p:subdirs)
+    fold (makeExecutable <$> configurePath)
 
-    -- CC="gcc" CFLAGS="-shared-libgcc -O2" ./glibc-2.27/configure --prefix="$HOME/.atspkg"
     -- Set environment variables for configure script
     h <- cpkgHome cc'
     let procEnv = Just [("CC", ccForConfig cc'), ("CFLAGS" :: String, "-I" <> h <> "include -Wno-error -O2"), ("PATH", "/usr/bin:/bin")]
@@ -64,11 +57,6 @@ cmake v prefixPath (Just cfgLists) _ _ = do
     let p = takeDirectory cfgLists
     silentCreateProcess v ((proc "cmake" ["-DCMAKE_INSTALL_PREFIX:PATH=" ++ prefixPath, p]) { cwd = Just p })
 
-{-autogen :: Verbosity -> FilePath -> String -> FilePath -> IO ()
-autogen v autogenPath lib' _ =
-    putStrLn ("generating " ++ lib' ++ "...") >>
-    silentCreateProcess v ((proc autogenPath mempty) { cwd = Just (takeDirectory autogenPath) })-}
-
 configure :: Verbosity -> FilePath -> FilePath -> Maybe [(String, String)] -> String -> FilePath -> IO ()
 configure v prefixPath configurePath procEnv lib' p =
     putStrLn ("configuring " ++ lib' ++ "...") >>
@@ -77,9 +65,8 @@ configure v prefixPath configurePath procEnv lib' p =
 findMakefile :: FilePath -> IO FilePath
 findMakefile p = do
     subdirs <- allSubdirs p
-    -- mc <- findFile (p:subdirs) "CMakeLists.txt"
     mp <- findFile (p:subdirs) "Makefile"
-    pure $ maybe p takeDirectory mp -- (maybe p takeDirectory mp) takeDirectory mc
+    pure $ maybe p takeDirectory mp
 
 make :: Verbosity -> String -> FilePath -> IO ()
 make v lib' p = do

@@ -96,8 +96,8 @@ configure v' configurePath v cd = do
 
     withCompiler "Configuring" v
 
-    setFileMode configurePath ownerModes
-    setFileMode (cd ++ "/autogen.sh") ownerModes
+    makeExecutable configurePath
+    makeExecutable (cd ++ "/autogen.sh")
 
     silentCreateProcess v' ((proc (cd ++ "/autogen.sh") []) { cwd = Just cd })
 
