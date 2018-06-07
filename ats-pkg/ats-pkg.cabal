@@ -126,10 +126,6 @@ library
         build-depends:
             unix -any
     
-    if os(windows)
-        build-depends:
-            Win32 -any
-    
     if (flag(development) && impl(ghc <8.4))
         ghc-options: -Werror
 
