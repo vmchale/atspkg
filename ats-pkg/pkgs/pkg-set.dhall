@@ -96,7 +96,7 @@ let pkgset =
   , gc [7,6,6]
   , fastArithmetic [0,6,0,6]
   , unistring
-  , atsIncludes [0,3,10]
+  , atsIncludes [0,3,11]
   , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall [0,2,3]
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,8]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,2]
