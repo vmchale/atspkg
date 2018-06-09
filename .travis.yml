@@ -55,7 +55,7 @@ install:
 script:
   - rm -rf dist-newstyle
   - curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s ats-format ats-pkg cdeps dependency hs2ats language-ats shake-ats shake-ext
-  - cabal new-build all
+  - travis_wait 20 cabal new-build all
   - |
     if [ `uname` = "Darwin" ]
     then
