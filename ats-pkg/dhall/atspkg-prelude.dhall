@@ -163,7 +163,7 @@ let default
       : List Lib
     , man = ([] : Optional Text)
     , completions = ([] : Optional Text)
-    , version = [0,3,10]
+    , version = [0,3,11]
     , compiler = [0,3,11]
     , dependencies = []
       : List LibDep
