@@ -17,7 +17,7 @@ constraints:
   shake-ats +development,
   ats-setup +development,
   dependency +development,
-  hs2ats +development,
+  hs2ats +development -no-executable,
   cdeps +development,
   shake-cabal +development,
   shake-c +development,
