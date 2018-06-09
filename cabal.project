@@ -10,7 +10,7 @@ packages: language-ats
         , shake-c
 
 constraints:
-  ats-format +development +static,
+  ats-format +development -static,
   ats-pkg +development -eventlog -profile,
   shake-ext +development, 
   language-ats +development,
