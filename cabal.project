@@ -18,7 +18,7 @@ constraints:
   ats-setup +development,
   dependency +development,
   hs2ats +development -no-executable,
-  cdeps +development,
+  cdeps +development -no-executable,
   shake-cabal +development,
   shake-c +development,
   micro-recursion-schemes -template-haskell
