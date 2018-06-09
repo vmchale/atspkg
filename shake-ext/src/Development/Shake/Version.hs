@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 module Development.Shake.Version ( ghcVersion
                                  , cabalVersion
                                  , commonVersion
@@ -7,11 +5,21 @@ module Development.Shake.Version ( ghcVersion
                                  ) where
 
 import           Development.Shake
-import           Development.Shake.TH
+
+-- | Attempt to get version information from a given exectuable.
+commonVersion :: String -- ^ Executable name
+              -> Action String
+commonVersion prog = do
+    ~(Stdout out) <- command mempty prog ["--version"]
+    pure . last . words . head . lines $ out
 
 ghcVersion :: Action String
 ghcVersion = do
     ~(Stdout o) <- command mempty "ghc" ["--numeric-version"]
     pure (head (lines o))
 
-$(mkVersions ["pandoc", "cabal"])
+cabalVersion :: Action String
+cabalVersion = commonVersion "cabal"
+
+pandocVersion :: Action String
+pandocVersion = commonVersion "pandoc"

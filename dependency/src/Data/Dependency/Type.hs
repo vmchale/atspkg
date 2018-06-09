@@ -2,10 +2,8 @@
 {-# LANGUAGE DeriveFoldable    #-}
 {-# LANGUAGE DeriveFunctor     #-}
 {-# LANGUAGE DeriveGeneric     #-}
-{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PatternSynonyms   #-}
-{-# LANGUAGE TemplateHaskell   #-}
 {-# LANGUAGE TypeFamilies      #-}
 
 module Data.Dependency.Type ( Dependency (..)
@@ -19,7 +17,6 @@ module Data.Dependency.Type ( Dependency (..)
 import           Control.DeepSeq              (NFData)
 import           Data.Binary
 import           Data.Functor.Foldable
-import           Data.Functor.Foldable.TH
 import           Data.List                    (intercalate)
 import qualified Data.Map                     as M
 import           Data.Semigroup
@@ -82,7 +79,21 @@ satisfies (Eq x) y            = x == y
 satisfies (Bounded x y) z     = satisfies x z && satisfies y z
 satisfies None _              = True
 
-makeBaseFunctor ''Constraint
+data ConstraintF a x = LessThanEqF a
+                     | GreaterThanEqF a
+                     | EqF a
+                     | BoundedF x x
+                     | NoneF
+                     deriving (Functor)
+
+type instance Base (Constraint a) = ConstraintF a
+
+instance Recursive (Constraint a) where
+    project (LessThanEq x)    = LessThanEqF x
+    project (GreaterThanEq x) = GreaterThanEqF x
+    project (Eq x)            = EqF x
+    project (Bounded x y)     = BoundedF x y
+    project None              = NoneF
 
 instance Pretty a => Pretty (Constraint a) where
     pretty = cata a where

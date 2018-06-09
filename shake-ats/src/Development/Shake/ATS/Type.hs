@@ -1,7 +1,6 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-{-# LANGUAGE DeriveAnyClass  #-}
-{-# LANGUAGE DeriveGeneric   #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric  #-}
 
 module Development.Shake.ATS.Type ( ForeignCabal (..)
                                   , Version (..)
@@ -11,30 +10,6 @@ module Development.Shake.ATS.Type ( ForeignCabal (..)
                                   , ATSGen (..)
                                   , HATSGen (..)
                                   , Solver (..)
-                                  -- * Lenses
-                                  , atsTarget
-                                  , hasPretty
-                                  , cFlags
-                                  , otherDeps
-                                  , toolConfig
-                                  , cc
-                                  , linkStatic
-                                  , src
-                                  , gc
-                                  , binTarget
-                                  , genTargets
-                                  , hsLibs
-                                  , libs
-                                  , patsHome
-                                  , patsHomeLocs
-                                  , tgtType
-                                  , linkTargets
-                                  , cpphs
-                                  , hsFile
-                                  , strip
-                                  , solver
-                                  , linkATSLib
-                                  , patsFlags
                                   ) where
 
 import           Data.Binary         (Binary (..))
@@ -43,7 +18,6 @@ import           Data.Hashable       (Hashable)
 import qualified Data.Text.Lazy      as TL
 import           Development.Shake.C
 import           GHC.Generics        (Generic)
-import           Lens.Micro.TH
 
 -- We should have four build types:
 --
@@ -125,5 +99,3 @@ data ForeignCabal = ForeignCabal { projectFile :: Maybe TL.Text -- ^ @cabal.proj
                                  , cabalFile   :: TL.Text -- ^ @.cabal@ file associated with the library
                                  , objectFile  :: TL.Text -- ^ Object file to be generated
                                  } deriving (Eq, Show, Generic, Binary, Hashable)
-
-mconcat <$> traverse makeLenses [''ATSGen, ''ATSTarget, ''ATSToolConfig]

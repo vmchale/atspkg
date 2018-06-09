@@ -17,6 +17,7 @@
 - error: {lhs: "bool x x p", rhs: "x", name: "Avoid bool"}
 - error: {lhs: "const", rhs: "pure", name: "Use pure"}
 
+- ignore: {name: Avoid lambda, within: [Language.ATS.Types]}
 - ignore: {name: Use <$>, within: [Language.ATS.PrettyPrint]}
 - ignore: {name: Unused LANGUAGE pragma, within: [Language.ATS.PrettyPrint]}
 - ignore: {name: Functor law, within: [Language.ATS.PrettyPrint]}

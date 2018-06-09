@@ -10,17 +10,18 @@ packages: language-ats
         , shake-c
 
 constraints:
-  ats-format +development -static,
-  ats-pkg +development -static -eventlog -profile,
+  ats-format +development +static,
+  ats-pkg +development -eventlog -profile,
   shake-ext +development, 
   language-ats +development,
   shake-ats +development,
   ats-setup +development,
   dependency +development,
-  hs2ats +development -no-executable,
-  cdeps +development -no-executable,
+  hs2ats +development,
+  cdeps +development,
   shake-cabal +development,
-  shake-c +development
+  shake-c +development,
+  micro-recursion-schemes -template-haskell
 
 optimization: 2
 tests: True

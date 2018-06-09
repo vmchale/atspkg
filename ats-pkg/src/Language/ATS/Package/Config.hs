@@ -1,6 +1,5 @@
 {-# LANGUAGE DeriveAnyClass  #-}
 {-# LANGUAGE DeriveGeneric   #-}
-{-# LANGUAGE QuasiQuotes     #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Language.ATS.Package.Config ( UserConfig (..)

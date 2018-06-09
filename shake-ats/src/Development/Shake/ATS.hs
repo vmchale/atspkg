@@ -26,30 +26,6 @@ module Development.Shake.ATS ( -- * Shake Rules
                              , ATSGen (..)
                              , HATSGen (..)
                              , Solver (..)
-                             -- * Lenses
-                             , atsTarget
-                             , cFlags
-                             , binTarget
-                             , cc
-                             , gc
-                             , hasPretty
-                             , genTargets
-                             , hsLibs
-                             , patsHome
-                             , patsHomeLocs
-                             , libs
-                             , linkStatic
-                             , linkTargets
-                             , otherDeps
-                             , src
-                             , tgtType
-                             , toolConfig
-                             , cpphs
-                             , hsFile
-                             , strip
-                             , solver
-                             , linkATSLib
-                             , patsFlags
                              ) where
 
 import           Control.Arrow
@@ -69,7 +45,7 @@ import           Development.Shake.C
 import           Development.Shake.FilePath
 import           Development.Shake.Version
 import           Language.ATS
-import           Lens.Micro
+-- import           Lens.Micro
 import           System.Directory                  (copyFile, createDirectoryIfMissing, doesFileExist)
 import           System.Environment                (getEnv)
 import           System.Exit                       (ExitCode (ExitSuccess))
@@ -198,7 +174,7 @@ atsBin ATSTarget{..} = do
 
     cconfig' <- cconfig _toolConfig _libs _gc (makeCFlags _cFlags mempty (pure undefined) _gc)
 
-    let atsGen = (hatsFile <$> _linkTargets) <> ((^.atsTarget) <$> _genTargets)
+    let atsGen = (hatsFile <$> _linkTargets) <> (_atsTarget <$> _genTargets)
         atsExtras = _otherDeps <> (TL.unpack . objectFile <$> _hsLibs)
     zipWithM_ (cgen _toolConfig atsExtras atsGen) _src cTargets
 

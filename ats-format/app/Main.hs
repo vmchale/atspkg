@@ -1,11 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell   #-}
 
 module Main where
 
 import           Control.Arrow
 import           Control.Monad                (unless, (<=<))
-import           Data.FileEmbed               (embedStringFile)
 import qualified Data.HashMap.Lazy            as HM
 import           Data.Maybe                   (fromMaybe)
 import           Data.Monoid                  ((<>))
@@ -76,7 +74,8 @@ printFail :: String -> IO a
 printFail = pure exitFailure <=< hPutStr stderr
 
 defaultConfig :: FilePath -> IO ()
-defaultConfig = flip writeFile $(embedStringFile ".atsfmt.toml")
+defaultConfig = flip writeFile
+    "ribbon = 0.6 # maximum ribbon fraction\nwidth = 120 # maximum width\nclang-format = false # call clang-format on inline code\n"
 
 asFloat :: Node -> Maybe Float
 asFloat (VFloat d) = Just (realToFrac d)

@@ -1,13 +1,11 @@
-{-# OPTIONS_GHC -fno-warn-unused-top-binds -fno-warn-orphans #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 {-# LANGUAGE DeriveAnyClass             #-}
 {-# LANGUAGE DeriveGeneric              #-}
 {-# LANGUAGE DerivingStrategies         #-}
 {-# LANGUAGE DuplicateRecordFields      #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE StandaloneDeriving         #-}
-{-# LANGUAGE TemplateHaskell            #-}
 
 module Language.ATS.Package.Type ( -- * Types
                                    Pkg (..)
@@ -44,8 +42,6 @@ type LibDep = (Text, ATSConstraint)
 -- | You likely want 'libDeps' or 'libBldDeps'
 type DepSelector = ATSDependency -> [LibDep]
 
-data PkgConfig = PkgConfig { dir :: Text, target :: Maybe Text }
-
 -- TODO add a field for configure stage??
 -- | Type for a dependency
 data ATSDependency = ATSDependency { libName     :: Text -- ^ Library name, e.g.
@@ -60,7 +56,9 @@ data ATSDependency = ATSDependency { libName     :: Text -- ^ Library name, e.g.
                                    }
                    deriving (Generic, Interpret, Binary, Hashable)
 
-makeLensesFor [("dir", "dirLens")] ''ATSDependency
+dirLens :: Lens' ATSDependency Text
+dirLens f s = fmap (\x -> s { dir = x }) (f (dir s))
+{-# INLINE dirLens #-}
 
 -- | This is just a tuple, except I can figure out how to use it with Dhall.
 data TargetPair = TargetPair { hs    :: Text

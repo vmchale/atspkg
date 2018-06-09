@@ -118,7 +118,6 @@ library
         ansi-wl-pprint -any,
         binary -any,
         microlens -any,
-        microlens-th -any,
         dependency >=1.2.0.0,
         filemanip -any
     

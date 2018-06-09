@@ -2,7 +2,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE RecordWildCards            #-}
-{-# LANGUAGE TemplateHaskell            #-}
 
 module Language.ATS.Package.PackageSet ( ATSPackageSet (..)
                                        , setBuildPlan
@@ -20,7 +19,9 @@ import           Quaalude
 newtype ATSPackageSet = ATSPackageSet { _atsPkgSet :: [ ATSDependency ] }
     deriving (Interpret)
 
-makeLenses ''ATSPackageSet
+atsPkgSet :: Lens' ATSPackageSet [ATSDependency]
+atsPkgSet f s = fmap (\x -> s { _atsPkgSet = x }) (f (_atsPkgSet s))
+{-# INLINE atsPkgSet #-}
 
 instance Pretty Version where
     pretty v = text (show v)

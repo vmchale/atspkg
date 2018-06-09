@@ -1,16 +1,11 @@
 {-# OPTIONS_GHC -fno-warn-duplicate-exports #-}
 {-# LANGUAGE DeriveAnyClass             #-}
-{-# LANGUAGE DeriveDataTypeable         #-}
-{-# LANGUAGE DeriveFoldable             #-}
 {-# LANGUAGE DeriveFunctor              #-}
 {-# LANGUAGE DeriveGeneric              #-}
-{-# LANGUAGE DeriveTraversable          #-}
 {-# LANGUAGE DerivingStrategies         #-}
 {-# LANGUAGE DuplicateRecordFields      #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase                 #-}
 {-# LANGUAGE PatternSynonyms            #-}
-{-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeFamilies               #-}
 
 -- | This is a module containing types to model the ATS syntax tree. As it is
@@ -67,18 +62,15 @@ module Language.ATS.Types
     ) where
 
 import           Control.Composition
-import           Control.DeepSeq          (NFData)
-import           Control.Monad
-import           Data.Function            (on)
-import           Data.Functor.Foldable    (ListF (Cons), ana, cata, embed, project)
-import           Data.Functor.Foldable.TH (makeBaseFunctor)
-import qualified Data.Map                 as M
-import           Data.Maybe               (isJust)
-import           Data.Semigroup           (Semigroup)
-import           GHC.Generics             (Generic)
-import           Language.ATS.Lexer       (Addendum (..))
+import           Control.DeepSeq       (NFData)
+import           Data.Function         (on)
+import           Data.Functor.Foldable hiding (Fix (..))
+import qualified Data.Map              as M
+import           Data.Maybe            (isJust)
+import           Data.Semigroup        (Semigroup)
+import           GHC.Generics          (Generic)
+import           Language.ATS.Lexer    (Addendum (..))
 import           Lens.Micro
-import           Lens.Micro.TH
 
 type Fix = Either Int String
 
@@ -97,7 +89,63 @@ newtype ATS a = ATS { unATS :: [Declaration a] }
 data Leaf a = Leaf { _constructorUniversals :: [Universal a], name :: String, constructorArgs :: [StaticExpression a], maybeType :: Maybe (Type a) }
     deriving (Show, Eq, Generic, NFData)
 
+constructorUniversals :: Lens' (Leaf a) [Universal a]
+constructorUniversals f s = fmap (\x -> s { _constructorUniversals = x}) (f (_constructorUniversals s))
+{-# INLINE constructorUniversals #-}
+
 type SortArgs a = Maybe [SortArg a]
+
+fun :: Traversal' (Declaration a) (Function a)
+fun f (Func x y) = Func x <$> f y
+fun _ x          = pure x
+{-# INLINE fun #-}
+
+impl :: Traversal' (Declaration a) (Implementation a)
+impl f (Impl x y)      = Impl x <$> f y
+impl f (ProofImpl x y) = ProofImpl x <$> f y
+impl _ x               = pure x
+{-# INLINE impl #-}
+
+valExpression :: Traversal' (Declaration a) (Expression a)
+valExpression f (Val a v p e) = Val a v p <$> f e
+valExpression _ x             = pure x
+{-# INLINE valExpression #-}
+
+prValExpr :: Traversal' (Declaration a) (Maybe (Expression a))
+prValExpr f (PrVal p me t) = (\me' -> PrVal p me' t) <$> f me
+prValExpr _ x              = pure x
+{-# INLINE prValExpr #-}
+
+varExpr1 :: Traversal' (Declaration a) (Maybe (Expression a))
+varExpr1 f (Var t p e e') = (\e'' -> Var t p e'' e') <$> f e
+varExpr1 _ x              = pure x
+{-# INLINE varExpr1 #-}
+
+varExpr2 :: Traversal' (Declaration a) (Maybe (Expression a))
+varExpr2 f (Var t p e e') = (\e'' -> Var t p e e'') <$> f e'
+varExpr2 _ x              = pure x
+{-# INLINE varExpr2 #-}
+
+andExpr :: Traversal' (Declaration a) (Expression a)
+andExpr f (AndDecl t p e) = AndDecl t p <$> f e
+andExpr _ x               = pure x
+{-# INLINE andExpr #-}
+
+propLeaves :: Traversal' (Declaration a) [DataPropLeaf a]
+propLeaves f (DataProp l n as pl) = DataProp l n as <$> f pl
+propLeaves _ x                    = pure x
+{-# INLINE propLeaves #-}
+
+leaves :: Traversal' (Declaration a) [Leaf a]
+leaves f (SumType t as l)     = SumType t as <$> f l
+leaves f (SumViewType t as l) = SumViewType t as <$> f l
+leaves _ x                    = pure x
+{-# INLINE leaves #-}
+
+comment :: Traversal' (Declaration a) String
+comment f (Comment c) = Comment <$> f c
+comment _ x           = pure x
+{-# INLINE comment #-}
 
 -- | Declarations for functions, values, actions, etc.
 data Declaration a = Func { pos :: a, _fun :: Function a }
@@ -151,6 +199,14 @@ data DataSortLeaf a = DataSortLeaf [Universal a] (Sort a) (Maybe (Sort a))
 data DataPropLeaf a = DataPropLeaf { propU :: [Universal a], _propExpr1 :: Expression a, _propExpr2 :: Maybe (Expression a) }
                     deriving (Show, Eq, Generic, NFData)
 
+propExpr1 :: Lens' (DataPropLeaf a) (Expression a)
+propExpr1 f s = fmap (\x -> s { _propExpr1 = x}) (f (_propExpr1 s))
+{-# INLINE propExpr1 #-}
+
+propExpr2 :: Lens' (DataPropLeaf a) (Maybe (Expression a))
+propExpr2 f s = fmap (\x -> s { _propExpr2 = x}) (f (_propExpr2 s))
+{-# INLINE propExpr2 #-}
+
 -- | A type for parsed ATS types
 data Type a = Tuple a [Type a]
             | BoxTuple a [Type a]
@@ -177,6 +233,68 @@ data Type a = Tuple a [Type a]
             | WhereType a (Type a) String (SortArgs a) (Type a)
             deriving (Show, Eq, Generic, NFData)
 
+data TypeF a x = TupleF a [x]
+               | BoxTupleF a [x]
+               | NamedF (Name a)
+               | ExF (Existential a) (Maybe x)
+               | ForAF (Universal a) x
+               | DependentF (Name a) [x]
+               | UnconsumedF x
+               | AsProofF x (Maybe x)
+               | FromVTF x
+               | MaybeValF x
+               | AtExprF a x (StaticExpression a)
+               | AtTypeF a x
+               | ProofTypeF a [x] x
+               | ConcreteTypeF (StaticExpression a)
+               | RefTypeF x
+               | ViewTypeF a x
+               | FunctionTypeF String x x
+               | NoneTypeF a
+               | ImplicitTypeF a
+               | ViewLiteralF Addendum
+               | AnonymousRecordF a [(String, x)]
+               | ParenTypeF a x
+               | WhereTypeF a x String (SortArgs a) x
+               deriving (Functor)
+
+type instance Base (Type a) = TypeF a
+
+instance Recursive (Type a) where
+    project (Tuple x tys)              = TupleF x tys
+    project (BoxTuple x tys)           = BoxTupleF x tys
+    project (Named n)                  = NamedF n
+    project (Ex e mty)                 = ExF e mty
+    project (ForA u ty)                = ForAF u ty
+    project (Dependent n tys)          = DependentF n tys
+    project (Unconsumed ty)            = UnconsumedF ty
+    project (AsProof ty mty)           = AsProofF ty mty
+    project (FromVT ty)                = FromVTF ty
+    project (MaybeVal ty)              = MaybeValF ty
+    project (AtExpr l ty se)           = AtExprF l ty se
+    project (AtType l ty)              = AtTypeF l ty
+    project (ProofType l tys ty')      = ProofTypeF l tys ty'
+    project (ConcreteType se)          = ConcreteTypeF se
+    project (RefType ty)               = RefTypeF ty
+    project (ViewType l ty)            = ViewTypeF l ty
+    project (FunctionType s ty ty')    = FunctionTypeF s ty ty'
+    project (NoneType l)               = NoneTypeF l
+    project (ImplicitType l)           = ImplicitTypeF l
+    project (ViewLiteral a)            = ViewLiteralF a
+    project (AnonymousRecord l stys)   = AnonymousRecordF l stys
+    project (ParenType l ty)           = ParenTypeF l ty
+    project (WhereType l ty s sas ty') = WhereTypeF l ty s sas ty'
+
+typeCall :: Traversal' (Type a) (Name a)
+typeCall f (Dependent x y) = (\x' -> Dependent x' y) <$> f x
+typeCall _ x               = pure x
+{-# INLINE typeCall #-}
+
+typeCallArgs :: Traversal' (Type a) [Type a]
+typeCallArgs f (Dependent x y) = (\y' -> Dependent x y') <$> f y
+typeCallArgs _ x               = pure x
+{-# INLINE typeCallArgs #-}
+
 -- | A type for @=>@, @=\<cloref1>@, etc.
 data LambdaType a = Plain a
                   | Spear a -- | @=>>@
@@ -194,19 +312,51 @@ data Name a = Unqualified String
 
 -- | A data type for patterns.
 data Pattern a = Wildcard a
-             | PName (Name a) [Pattern a]
-             | PSum String (Pattern a)
-             | PLiteral (Expression a)
-             | Guarded a (Expression a) (Pattern a)
-             | Free (Pattern a)
-             | Proof a [Pattern a] [Pattern a]
-             | TuplePattern [Pattern a]
-             | BoxTuplePattern a [Pattern a]
-             | AtPattern a (Pattern a)
-             | UniversalPattern a String [Universal a] (Pattern a)
-             | ExistentialPattern (Existential a) (Pattern a)
-             | As a (Pattern a) (Pattern a)
-             deriving (Show, Eq, Generic, NFData)
+               | PName (Name a) [Pattern a]
+               | PSum String (Pattern a)
+               | PLiteral (Expression a)
+               | Guarded a (Expression a) (Pattern a)
+               | Free (Pattern a)
+               | Proof a [Pattern a] [Pattern a]
+               | TuplePattern [Pattern a]
+               | BoxTuplePattern a [Pattern a]
+               | AtPattern a (Pattern a)
+               | UniversalPattern a String [Universal a] (Pattern a)
+               | ExistentialPattern (Existential a) (Pattern a)
+               | As a (Pattern a) (Pattern a)
+               deriving (Show, Eq, Generic, NFData)
+
+data PatternF a x = WildcardF a
+                  | PNameF (Name a) [x]
+                  | PSumF String x
+                  | PLiteralF (Expression a)
+                  | GuardedF a (Expression a) x
+                  | FreeF x
+                  | ProofF a [x] [x]
+                  | TuplePatternF [x]
+                  | BoxTuplePatternF a [x]
+                  | AtPatternF a x
+                  | UniversalPatternF a String [Universal a] x
+                  | ExistentialPatternF (Existential a) x
+                  | AsF a x x
+                  deriving (Functor)
+
+type instance Base (Pattern a) = PatternF a
+
+instance Recursive (Pattern a) where
+    project (Wildcard a)                = WildcardF a
+    project (PName x ps)                = PNameF x ps
+    project (PSum x p)                  = PSumF x p
+    project (PLiteral e)                = PLiteralF e
+    project (Guarded x e p)             = GuardedF x e p
+    project (Free p)                    = FreeF p
+    project (Proof x ps ps')            = ProofF x ps ps'
+    project (TuplePattern ps)           = TuplePatternF ps
+    project (BoxTuplePattern x ps)      = BoxTuplePatternF x ps
+    project (AtPattern x p)             = AtPatternF x p
+    project (UniversalPattern x s us p) = UniversalPatternF x s us p
+    project (ExistentialPattern e x)    = ExistentialPatternF e x
+    project (As x p p')                 = AsF x p p'
 
 data Paired a b = Both a b
                 | First a
@@ -233,6 +383,28 @@ data Sort a = NamedSort { _sortName :: String }
             | TupleSort a (Sort a) (Sort a)
             | ArrowSort a (Sort a) (Sort a)
             deriving (Show, Eq, Generic, NFData)
+
+data SortF a x = NamedSortF String
+               | T0pF Addendum
+               | Vt0pF Addendum
+               | AddrF
+               | VTypeF a Addendum
+               | ViewF a Addendum
+               | TupleSortF a x x
+               | ArrowSortF a x x
+               deriving (Functor)
+
+type instance Base (Sort a) = SortF a
+
+instance Recursive (Sort a) where
+    project (NamedSort s)      = NamedSortF s
+    project (T0p a)            = T0pF a
+    project (Vt0p a)           = Vt0pF a
+    project Addr               = AddrF
+    project (VType x a)        = VTypeF x a
+    project (View x a)         = ViewF x a
+    project (TupleSort x s s') = TupleSortF x s s'
+    project (ArrowSort x s s') = ArrowSortF x s s'
 
 -- FIXME a type for sorts?
 -- | Wrapper for universal quantifiers (refinement types)
@@ -278,12 +450,38 @@ data StaticExpression a = StaticVal (Name a)
                         | StaticInt Int
                         | SPrecede (StaticExpression a) (StaticExpression a)
                         | StaticVoid a
-                        | Sif { scond :: StaticExpression a, wwhenTrue :: StaticExpression a, selseExpr :: StaticExpression a } -- Static if (for proofs)
+                        | Sif { scond :: StaticExpression a, whenTrue :: StaticExpression a, selseExpr :: StaticExpression a } -- Static if (for proofs)
                         | SCall (Name a) [StaticExpression a]
                         | SUnary (UnOp a) (StaticExpression a)
                         | SLet a [Declaration a] (Maybe (StaticExpression a))
                         | SCase Addendum (StaticExpression a) [(Pattern a, LambdaType a, StaticExpression a)]
                         deriving (Show, Eq, Generic, NFData)
+
+data StaticExpressionF a x = StaticValF (Name a)
+                           | StaticBinaryF (BinOp a) x x
+                           | StaticIntF Int
+                           | SPrecedeF x x
+                           | StaticVoidF a
+                           | SifF x x x
+                           | SCallF (Name a) [x]
+                           | SUnaryF (UnOp a) x
+                           | SLetF a [Declaration a] (Maybe x)
+                           | SCaseF Addendum x [(Pattern a, LambdaType a, x)]
+                           deriving (Functor)
+
+type instance Base (StaticExpression a) = StaticExpressionF a
+
+instance Recursive (StaticExpression a) where
+    project (StaticVal n)         = StaticValF n
+    project (StaticBinary b x x') = StaticBinaryF b x x'
+    project (StaticInt i)         = StaticIntF i
+    project (SPrecede x x')       = SPrecedeF x x'
+    project (StaticVoid x)        = StaticVoidF x
+    project (Sif e e' e'')        = SifF e e' e''
+    project (SCall n es)          = SCallF n es
+    project (SUnary u x)          = SUnaryF u x
+    project (SLet x ds e)         = SLetF x ds e
+    project (SCase a x ples)      = SCaseF a x ples
 
 -- | A (possibly effectful) expression.
 data Expression a = Let a (ATS a) (Maybe (Expression a))
@@ -342,6 +540,134 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                   | MacroVar a String
                   deriving (Show, Eq, Generic, NFData)
 
+data ExpressionF a x = LetF a (ATS a) (Maybe x)
+                     | VoidLiteralF a
+                     | CallF (Name a) [[Type a]] [Type a] (Maybe [x]) [x]
+                     | NamedValF (Name a)
+                     | ListLiteralF a String (Type a) [x]
+                     | IfF x x (Maybe x)
+                     | UintLitF Word
+                     | FloatLitF Float
+                     | IntLitF Int
+                     | HexLitF String
+                     | UnderscoreLitF a
+                     | LambdaF a (LambdaType a) (Pattern a) x
+                     | LinearLambdaF a (LambdaType a) (Pattern a) x
+                     | IndexF a (Name a) x
+                     | AccessF a x (Name a)
+                     | StringLitF String
+                     | CharLitF Char
+                     | AddrAtF a x
+                     | ViewAtF a x
+                     | BinaryF (BinOp a) x x
+                     | UnaryF (UnOp a) x
+                     | IfCaseF a [(x, LambdaType a, x)]
+                     | CaseF a Addendum x [(Pattern a, LambdaType a, x)]
+                     | RecordValueF a [(String, x)] (Maybe (Type a))
+                     | PrecedeF x x
+                     | ProofExprF a x x
+                     | TypeSignatureF x (Type a)
+                     | WhereExpF x (ATS a)
+                     | TupleExF a [x]
+                     | BoxTupleExF a [x]
+                     | WhileF a x x
+                     | ActionsF (ATS a)
+                     | BeginF a x
+                     | BinListF (BinOp a) [x]
+                     | PrecedeListF [x]
+                     | FixAtF a String (StackFunction a)
+                     | LambdaAtF a (StackFunction a)
+                     | ParenExprF a x
+                     | CommentExprF String x
+                     | MacroVarF a String
+                     deriving (Functor)
+
+type instance Base (Expression a) = ExpressionF a
+
+instance Recursive (Expression a) where
+    project (Let l ds me)            = LetF l ds me
+    project (VoidLiteral l)          = VoidLiteralF l
+    project (Call n is us mps as)    = CallF n is us mps as
+    project (NamedVal n)             = NamedValF n
+    project (ListLiteral l s t es)   = ListLiteralF l s t es
+    project (If e e' me)             = IfF e e' me
+    project (UintLit u)              = UintLitF u
+    project (FloatLit f)             = FloatLitF f
+    project (IntLit i)               = IntLitF i
+    project (HexLit s)               = HexLitF s
+    project (UnderscoreLit l)        = UnderscoreLitF l
+    project (Lambda l lt p e)        = LambdaF l lt p e
+    project (LinearLambda l lt p e)  = LinearLambdaF l lt p e
+    project (Index l n e)            = IndexF l n e
+    project (Access l e n)           = AccessF l e n
+    project (StringLit s)            = StringLitF s
+    project (CharLit c)              = CharLitF c
+    project (AddrAt l e)             = AddrAtF l e
+    project (ViewAt l e)             = ViewAtF l e
+    project (Binary op e e')         = BinaryF op e e'
+    project (Unary op e)             = UnaryF op e
+    project (IfCase l arms)          = IfCaseF l arms
+    project (Case l k e arms)        = CaseF l k e arms
+    project (RecordValue l recs mty) = RecordValueF l recs mty
+    project (Precede e e')           = PrecedeF e e'
+    project (ProofExpr a e e')       = ProofExprF a e e'
+    project (TypeSignature e ty)     = TypeSignatureF e ty
+    project (WhereExp e ds)          = WhereExpF e ds
+    project (TupleEx l es)           = TupleExF l es
+    project (BoxTupleEx l es)        = BoxTupleExF l es
+    project (While l e e')           = WhileF l e e'
+    project (Actions ds)             = ActionsF ds
+    project (Begin l e)              = BeginF l e
+    project (BinList op es)          = BinListF op es
+    project (PrecedeList es)         = PrecedeListF es
+    project (FixAt a s sfun)         = FixAtF a s sfun
+    project (LambdaAt a sfun)        = LambdaAtF a sfun
+    project (ParenExpr l e)          = ParenExprF l e
+    project (CommentExpr s e)        = CommentExprF s e
+    project (MacroVar l s)           = MacroVarF l s
+
+instance Corecursive (Expression a) where
+    embed (LetF l ds me)            = Let l ds me
+    embed (VoidLiteralF l)          = VoidLiteral l
+    embed (CallF n is us mps as)    = Call n is us mps as
+    embed (NamedValF n)             = NamedVal n
+    embed (ListLiteralF l s t es)   = ListLiteral l s t es
+    embed (IfF e e' me)             = If e e' me
+    embed (UintLitF u)              = UintLit u
+    embed (IntLitF i)               = IntLit i
+    embed (FloatLitF f)             = FloatLit f
+    embed (HexLitF s)               = HexLit s
+    embed (UnderscoreLitF l)        = UnderscoreLit l
+    embed (LambdaF l lt p e)        = Lambda l lt p e
+    embed (LinearLambdaF l lt p e)  = LinearLambda l lt p e
+    embed (IndexF l n e)            = Index l n e
+    embed (AccessF l n e)           = Access l n e
+    embed (StringLitF s)            = StringLit s
+    embed (CharLitF c)              = CharLit c
+    embed (AddrAtF l e)             = AddrAt l e
+    embed (ViewAtF l e)             = ViewAt l e
+    embed (BinaryF op e e')         = Binary op e e'
+    embed (UnaryF op e)             = Unary op e
+    embed (IfCaseF l arms)          = IfCase l arms
+    embed (CaseF l k e arms)        = Case l k e arms
+    embed (RecordValueF l recs mty) = RecordValue l recs mty
+    embed (PrecedeF e e')           = Precede e e'
+    embed (ProofExprF a e e')       = ProofExpr a e e'
+    embed (TypeSignatureF e ty)     = TypeSignature e ty
+    embed (WhereExpF e ds)          = WhereExp e ds
+    embed (TupleExF l es)           = TupleEx l es
+    embed (BoxTupleExF l es)        = BoxTupleEx l es
+    embed (WhileF l e e')           = While l e e'
+    embed (ActionsF ds)             = Actions ds
+    embed (BeginF l e)              = Begin l e
+    embed (BinListF op es)          = BinList op es
+    embed (PrecedeListF es)         = PrecedeList es
+    embed (FixAtF a s sfun)         = FixAt a s sfun
+    embed (LambdaAtF a sfun)        = LambdaAt a sfun
+    embed (ParenExprF l e)          = ParenExpr l e
+    embed (CommentExprF s e)        = CommentExpr s e
+    embed (MacroVarF l s)           = MacroVar l s
+
 -- | An 'implement' or 'primplmnt' declaration
 data Implementation a = Implement { pos            :: a
                                   , preUniversalsI :: [Universal a]
@@ -352,6 +678,10 @@ data Implementation a = Implement { pos            :: a
                                   , _iExpression   :: Either (StaticExpression a) (Expression a) -- ^ Expression (or static expression) holding the function body.
                                   }
     deriving (Show, Eq, Generic, NFData)
+
+iExpression :: Lens' (Implementation a) (Either (StaticExpression a) (Expression a))
+iExpression f s = fmap (\x -> s { _iExpression = x}) (f (_iExpression s))
+{-# INLINE iExpression #-}
 
 -- | A function declaration accounting for all keywords ATS uses to
 -- define them.
@@ -364,6 +694,10 @@ data Function a = Fun { _preF :: PreFunction a }
                 | Praxi { _preF :: PreFunction a }
                 | CastFn { _preF :: PreFunction a }
                 deriving (Show, Eq, Generic, NFData)
+
+preF :: Lens' (Function a) (PreFunction a)
+preF f s = fmap (\x -> s { _preF = x}) (f (_preF s))
+{-# INLINE preF #-}
 
 -- | A type for stack-allocated functions. See
 -- [here](http://ats-lang.sourceforge.net/DOCUMENT/ATS2TUTORIAL/HTML/c1267.html)
@@ -386,8 +720,10 @@ data PreFunction a = PreF { fname         :: Name a -- ^ Function name
                           }
                           deriving (Show, Eq, Generic, NFData)
 
-join <$> traverse makeBaseFunctor [''Pattern, ''Expression, ''StaticExpression, ''Type, ''Sort]
-join <$> traverse makeLenses [''Leaf, ''Declaration, ''PreFunction, ''Implementation, ''DataPropLeaf, ''Function, ''Type]
+-- TODO lens/base functor module?
+expression :: Lens' (PreFunction a) (Maybe (Expression a))
+expression f s = fmap (\x -> s { _expression = x}) (f (_expression s))
+{-# INLINE expression #-}
 
 exprLens :: Eq a => FixityState a -> ASetter s t (Expression a) (Expression a) -> s -> t
 exprLens st = flip over (rewriteATS st)

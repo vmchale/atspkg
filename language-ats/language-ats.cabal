@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: language-ats
-version: 1.2.0.11
+version: 1.2.0.12
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -41,17 +41,14 @@ library
     default-language: Haskell2010
     other-extensions: OverloadedStrings DeriveGeneric DeriveAnyClass
                       FlexibleContexts FlexibleInstances PatternSynonyms
-                      StandaloneDeriving LambdaCase GeneralizedNewtypeDeriving
-                      DeriveTraversable DerivingStrategies DuplicateRecordFields
-                      DeriveFoldable DeriveDataTypeable DeriveFunctor TypeFamilies
-                      TemplateHaskell CPP MagicHash
+                      StandaloneDeriving GeneralizedNewtypeDeriving DerivingStrategies
+                      DuplicateRecordFields DeriveFunctor TypeFamilies
     ghc-options: -Wall
     build-depends:
         base >=4.9 && <5,
         array -any,
         micro-recursion-schemes >=5.0.1,
         microlens -any,
-        microlens-th -any,
         deepseq -any,
         ansi-wl-pprint >=0.6.8,
         composition-prelude -any,

@@ -6,8 +6,8 @@ license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
 maintainer: vanessa.mchale@iohk.io
 author: Vanessa McHale
-synopsis: Shake library for use with cabal
 bug-reports: https://github.com/vmchale/atspkg/issues
+synopsis: Shake library for use with cabal
 description:
     A library for using [shake](http://hackage.haskell.org/package/shake) alongside [cabal](https://www.haskell.org/cabal/).
 category: Development
