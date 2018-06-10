@@ -41,7 +41,6 @@ ci: install
     yamllint .hlint.yaml
     yamllint .yamllint
     yamllint stack.yaml
-    tomlcheck --file ats-format/.atsfmt.toml
     hlint ats-pkg language-ats shake-ext ats-format cdeps shake-cabal shake-c
     stack build --test --no-run-tests --bench --no-run-benchmarks && weeder .
 

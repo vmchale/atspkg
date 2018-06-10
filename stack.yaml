@@ -1,5 +1,5 @@
 ---
-resolver: lts-11.11
+resolver: lts-11.13
 packages:
   - 'ats-pkg'
   - 'language-ats'

@@ -38,8 +38,7 @@ library
     build-depends:
         base >=4.9 && <5,
         directory -any,
-        shake >=0.14,
-        template-haskell -any
+        shake >=0.14
     
     if flag(development)
         ghc-options: -Werror

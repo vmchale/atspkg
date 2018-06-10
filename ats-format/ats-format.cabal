@@ -51,8 +51,7 @@ executable atsfmt
         ansi-wl-pprint -any,
         directory -any,
         unordered-containers -any,
-        process -any,
-        file-embed -any
+        process -any
     
     if flag(development)
         ghc-options: -Werror
