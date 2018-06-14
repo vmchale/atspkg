@@ -44,7 +44,7 @@ hsCompiler (GHCJS (Just v)) = "ghcjs-" ++ v
 platform :: String
 platform = arch ++ "-" ++ processOS os
     where processOS "darwin" = "osx"
-          processOs x = x
+          processOS x        = x
 
 -- FIXME: should also work with .x, .cpphs, .y files
 libraryToFiles :: Library -> [FilePath]
