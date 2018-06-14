@@ -6,10 +6,13 @@
 - [ ] Set number of threads manually
 - [ ] Initialize projects
 - [ ] Post-process Haskell documentation to link to ATS source?
+- [ ] Possibly pass `--disable-threads` to configure?
 # Libraries
 - [ ] `shake-ats` should allow builds with `patscc` some other way
 - [ ] Set target triple in `shake-ext`?
 # Deficiencies
+- [ ] Cross-compiler should not rebuild full compiler, only static library
+  - [ ] and even then only if necessary
 - [ ] Installations should be installed locally based on configuration
   - [ ] calculus of compatibility? algebra of compatibility?
 - [ ] `atspkg` should be able to build `atslib` and thus work for
