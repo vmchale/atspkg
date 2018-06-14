@@ -14,7 +14,7 @@ module Development.Shake.Cabal ( getCabalDeps
 import           Control.Arrow
 import           Control.Composition
 import           Control.Monad
-import           Data.Foldable                          (toList)
+import           Data.Foldable                          (fold, toList)
 import           Data.Maybe                             (catMaybes)
 import           Development.Shake                      hiding (doesFileExist)
 import qualified Development.Shake                      as Shake
@@ -46,7 +46,7 @@ platform = arch ++ "-" ++ os
 
 -- FIXME: should also work with .x, .cpphs, .y files
 libraryToFiles :: Library -> [FilePath]
-libraryToFiles lib = mconcat [cs, is, hs]
+libraryToFiles lib = fold [cs, is, hs]
     where (cs, is) = (cSources &&& includes) $ libBuildInfo lib
           hs = (++ ".hs") . toFilePath <$> explicitLibModules lib
 

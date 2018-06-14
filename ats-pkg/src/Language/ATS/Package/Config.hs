@@ -19,17 +19,17 @@ data UserConfig = UserConfig { defaultPkgs    :: Text
                              } deriving (Generic, Interpret, Binary)
 
 cfgFile :: String
-cfgFile = $(embedStringFile "dhall/config.dhall")
+cfgFile = $(embedStringFile ("dhall" </> "config.dhall"))
 
 defaultFileConfig :: FilePath -> IO ()
 defaultFileConfig p = do
-    let dir = p ++ "/.config/atspkg"
+    let dir = p </> ".config" </> "atspkg"
     createDirectoryIfMissing True dir
-    writeFile (dir ++ "/config.dhall") cfgFile
+    writeFile (dir </> "config.dhall") cfgFile
 
 cfgBin :: (MonadIO m) => m (FilePath, FilePath)
 cfgBin = liftIO io
-    where io = (id &&& (++ "/.atspkg/config")) <$> getEnv "HOME"
+    where io = (id &&& (</> (".atspkg" </> "config"))) <$> getEnv "HOME"
 
 mkUserConfig :: Rules ()
 mkUserConfig = do
@@ -42,7 +42,7 @@ mkUserConfig = do
 
     where g h cfgBin' = do
 
-            let cfg = h ++ "/.config/atspkg/config.dhall"
+            let cfg = h </> ".config" </> "atspkg" </> "config.dhall"
 
             want [cfgBin']
 

@@ -44,7 +44,7 @@ getSubdirs p = do
     case ds of
         [] -> pure []
         xs -> do
-            ds' <- filterM doesDirectoryExist (((p <> "/") <>) <$> xs)
+            ds' <- filterM doesDirectoryExist ((p </>) <$> xs)
             ss <- mapM getSubdirs ds'
             pure $ ds' <> join ss
 
@@ -69,17 +69,17 @@ cabalForeign (GHC _ suff) (ForeignCabal cbp' cf' obf') = do
         command_ [Cwd obfDir] "cabal" ["new-build", "all", "-w", "ghc-" ++ ghcV]
 
         -- TODO move this to the @shake-ext@ package?
-        let subdir = takeDirectory cbp ++ "/"
+        let subdir = takeDirectory cbp
             correctDir = (== "build")
             endsBuild = correctDir . last . splitPath
-            pkgDir = subdir ++ "dist-newstyle/build/" ++ platform ++ "/ghc-" ++ ghcV ++ "/" ++ libName ++ "-" ++ prettyShow v ++ "/"
+            pkgDir = subdir </> "dist-newstyle" </> "build" </> platform </> "ghc-" ++ ghcV </> libName ++ "-" ++ prettyShow v
 
         dir <- filter endsBuild <$> liftIO (getSubdirs pkgDir)
         let obj = head dir ++ "/" ++ takeFileName obf
         liftIO $ copyFile obj out
 
         let hdr = dropExtension obj ++ "_stub.h"
-        liftIO $ copyFile hdr (takeDirectory out ++ "/" ++ takeFileName hdr)
+        liftIO $ copyFile hdr (takeDirectory out </> takeFileName hdr)
 cabalForeign _ _ = mempty
 
 -- | Build a @.lats@ file using @atslex@.

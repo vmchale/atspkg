@@ -88,7 +88,7 @@ nested_comment = go 1 =<< alexGetInput
                 alexError ("Error in nested comment at line " ++ show line ++ ", column " ++ show col)
 
 extractDeps :: [Token] -> [FilePath]
-extractDeps [] = mempty
+extractDeps [] = []
 extractDeps (Include:StringTok s:xs) = toInclude s : extractDeps xs
 extractDeps (_:xs) = extractDeps xs
 
@@ -102,7 +102,7 @@ loop :: Alex [Token]
 loop = do
     tok' <- alexMonadScan
     case tok' of
-        End -> pure mempty
+        End -> pure []
         _ -> (tok' :) <$> loop
 
 includes' :: BSL.ByteString -> [FilePath]
@@ -121,7 +121,7 @@ getCDepends :: MonadIO m
             -> m [FilePath]
 getCDepends incls src = liftIO $ do
     contents <- BSL.readFile src
-    envPath <- fromMaybe mempty <$> lookupEnv "C_INCLUDE_PATH"
+    envPath <- fromMaybe "" <$> lookupEnv "C_INCLUDE_PATH"
     let incl = includes' contents
         dir = takeDirectory src
         allDirs = dir : incls ++ split envPath

@@ -83,6 +83,9 @@ module Quaalude ( hex
                 , httpLbs
                 , Response (..)
                 , Request (method, redirectCount)
+                -- * "System.FilePath" reëxports
+                , (</>)
+                , pathSeparator
                 -- * ByteString reëxports
                 , ByteString
                 -- * Helpers for pretty-printing
@@ -142,7 +145,7 @@ import           System.Posix.Files
 #endif
 import           System.Process               as X
 import           System.Process.Ext
-import           Text.PrettyPrint.ANSI.Leijen hiding (bool, (<$>), (<>))
+import           Text.PrettyPrint.ANSI.Leijen hiding (bool, (<$>), (<>), (</>))
 
 infixr 5 <#>
 

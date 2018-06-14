@@ -78,7 +78,7 @@ atsPkgSetup :: SetupScript
             -> ATSDependency
             -> IO ()
 atsPkgSetup als tgt' (ATSDependency lib' dirName' _ _ _ _ _ _ _) = do
-    lib'' <- (<> unpack lib') <$> cpkgHome GCCStd
+    lib'' <- (<> unpack lib') <$> cpkgHome (GCC Nothing)
     b <- doesFileExist lib''
     unless b $ do
         als tgt' (unpack lib') (unpack dirName')
@@ -89,7 +89,7 @@ setup :: Verbosity
       -> ATSDependency -- ^ ATSDependency itself
       -> IO ()
 setup v' cc' (ATSDependency lib' dirName' _ _ _ _ _ _ _) = do
-    lib'' <- (<> unpack lib') <$> cpkgHome cc'
+    lib'' <- (</> unpack lib') <$> cpkgHome cc'
     b <- doesFileExist lib''
     unless b $ do
         clibSetup v' cc' (unpack lib') (unpack dirName')
@@ -134,8 +134,8 @@ buildHelper b (ATSDependency lib' dirName' url'' _ _ _ _ _ _) = do
             zipResponse dirName response
                 else tarResponse url'' dirName response
 
-        needsMove <- doesDirectoryExist (dirName ++ "/package")
+        needsMove <- doesDirectoryExist (dirName </> "package")
         when needsMove $ do
-            renameDirectory (dirName ++ "/package") "tempdir"
+            renameDirectory (dirName </> "package") "tempdir"
             removeDirectoryRecursive dirName
             renameDirectory "tempdir" dirName

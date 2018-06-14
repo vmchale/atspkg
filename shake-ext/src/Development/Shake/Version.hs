@@ -10,12 +10,12 @@ import           Development.Shake
 commonVersion :: String -- ^ Executable name
               -> Action String
 commonVersion prog = do
-    ~(Stdout out) <- command mempty prog ["--version"]
+    ~(Stdout out) <- command [] prog ["--version"]
     pure . last . words . head . lines $ out
 
 ghcVersion :: Action String
 ghcVersion = do
-    ~(Stdout o) <- command mempty "ghc" ["--numeric-version"]
+    ~(Stdout o) <- command [] "ghc" ["--numeric-version"]
     pure (head (lines o))
 
 cabalVersion :: Action String

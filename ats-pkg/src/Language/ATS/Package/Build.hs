@@ -32,7 +32,7 @@ check :: Maybe FilePath -> IO Bool
 check p = do
     home <- getEnv "HOME"
     v <- wants p
-    doesFileExist (home ++ "/.atspkg/" ++ show v ++ "/bin/patscc")
+    doesFileExist (home </> ".atspkg" </> show v </> "bin" </> "patscc")
 
 wants :: Maybe FilePath -> IO Version
 wants p = compiler <$> getConfig p
@@ -78,19 +78,19 @@ mkInstall tgt =
         let libs' = fmap (unpack . libTarget) . libraries $ config
             bins = fmap (unpack . target) . bin $ config
             incs = ((fmap unpack . includes) =<<) . libraries $ config
-            libDir = maybe mempty (<> "/") tgt
+            libDir = maybe mempty (<> [pathSeparator]) tgt
         need (bins <> libs')
         home <- liftIO $ getEnv "HOME"
-        let g str = fmap (((home <> str) <>) . takeFileName)
-            binDest =  g "/.local/bin/" bins
-            libDest = ((home <> "/.atspkg/" <> libDir <> "lib/") <>) . takeFileName <$> libs'
-            inclDest = ((home <> "/.atspkg/include/") <>) . takeFileName <$> incs
+        let g str = fmap (((home </> str) </>) . takeFileName)
+            binDest =  g (".local" </> "bin") bins
+            libDest = ((home </> ".atspkg" </> libDir </> "lib") </>) . takeFileName <$> libs'
+            inclDest = ((home </> ".atspkg" </> "include") </>) . takeFileName <$> incs
         zipWithM_ copyFile' (bins ++ libs' ++ incs) (binDest ++ libDest ++ inclDest)
         pa <- pandoc
         case man config of
             Just mt -> if not pa then pure () else do
                 let mt' = manTarget mt
-                    manDest = home <> "/.local/share/man/man1/" <> takeFileName mt'
+                    manDest = home </> ".local" </> "share" </> "man" </> "man1" </> takeFileName mt'
                 need [mt']
                 copyFile' mt' manDest
             Nothing -> pure ()
@@ -98,7 +98,7 @@ mkInstall tgt =
         case completions config of
             Just com -> if not co then pure () else do
                 let com' = unpack com
-                    comDest = home <> "/.compleat/" <> takeFileName com'
+                    comDest = home </> ".compleat" </> takeFileName com'
                 need [com'] -- FIXME do this all in one step
                 copyFile' com' comDest
             Nothing -> pure ()
@@ -115,7 +115,7 @@ mkManpage = do
 -- @atspkg.dhall@ changes.
 getConfig :: MonadIO m => Maybe FilePath -> m Pkg
 getConfig dir' = liftIO $ do
-    d <- fromMaybe <$> fmap (<> "/atspkg.dhall") getCurrentDirectory <*> pure dir'
+    d <- fromMaybe <$> fmap (</> "atspkg.dhall") getCurrentDirectory <*> pure dir'
     b <- not <$> doesFileExist ".atspkg/config"
     if b
         then input auto (pack d)
@@ -186,17 +186,17 @@ mkPkg :: Bool -- ^ Force rebuild
       -> IO ()
 mkPkg rba lint tim setup rs tgt v = do
     cfg <- cleanConfig rs
-    let opt = options rba lint tim v $ pkgToTargets cfg rs
+    let opt = options rba lint tim v $ pkgToTargets cfg tgt rs
     shake opt $
         mconcat
-            [ want (pkgToTargets cfg rs)
+            [ want (pkgToTargets cfg tgt rs)
             , mkClean
             , pkgToAction setup rs tgt cfg
             ]
 
 mkConfig :: Rules ()
 mkConfig =
-    ".atspkg/config" %> \out -> do
+    (".atspkg" </> "config") %> \out -> do
         need ["atspkg.dhall"]
         x <- liftIO $ input auto "./atspkg.dhall"
         liftIO $ BSL.writeFile out (encode (x :: Pkg))
@@ -211,9 +211,9 @@ bits :: Maybe String -> [String] -> Rules ()
 bits tgt rs = mconcat $ [ mkManpage, mkInstall tgt, mkConfig ] <>
     sequence [ mkRun, mkTest, mkValgrind ] rs
 
-pkgToTargets :: Pkg -> [FilePath] -> [FilePath]
-pkgToTargets ~Pkg{..} [] = (unpack . target <$> bin) <> (unpack . libTarget <$> libraries)
-pkgToTargets _ ts        = ts
+pkgToTargets :: Pkg -> Maybe String -> [FilePath] -> [FilePath]
+pkgToTargets ~Pkg{..} tgt [] = (toTgt tgt . target <$> bin) <> (unpack . libTarget <$> libraries)
+pkgToTargets _  _ ts         = ts
 
 noConstr :: ATSConstraint
 noConstr = ATSConstraint Nothing Nothing
@@ -231,24 +231,29 @@ atslibSetup tgt' lib' p = do
 
 -- | The directory @~/.atspkg@
 pkgHome :: MonadIO m => CCompiler -> m String
-pkgHome cc' = liftIO $ (++ ("/.atspkg/" ++ ccToDir cc')) <$> getEnv "HOME"
+pkgHome cc' = liftIO $ (</> (".atspkg" </> ccToDir cc')) <$> getEnv "HOME"
 
 -- | The directory that will be @PATSHOME@.
 patsHomeAtsPkg :: MonadIO m => Version -> m String
-patsHomeAtsPkg v = fmap (++ (show v ++ "/")) (pkgHome (GCC Nothing))
+patsHomeAtsPkg v = fmap (</> show v) (pkgHome (GCC Nothing))
 
 home' :: MonadIO m => Version -- ^ Compiler version
                    -> Version -- ^ Library version
                    -> m String
 home' compV libV = do
     h <- patsHomeAtsPkg compV
-    pure $ h ++ "lib/ats2-postiats-" ++ show libV
+    pure $ h </> "lib" </> "ats2-postiats-" ++ show libV
 
 -- | This is the @$PATSHOMELOCS@ variable to be passed to the shell.
 patsHomeLocsAtsPkg :: Int -- ^ Depth to recurse
                    -> String
 patsHomeLocsAtsPkg n = intercalate ":" ((<> ".atspkg/contrib") . ("./" <>) <$> g)
     where g = [ join $ replicate i "../" | i <- [0..n] ]
+
+toTgt :: Maybe String -> Text -> String
+toTgt tgt = maybeTgt tgt . unpack
+    where maybeTgt (Just t) = (<> ('-' : t))
+          maybeTgt Nothing  = id
 
 pkgToAction :: [IO ()] -- ^ Setup actions to be performed
             -> [String] -- ^ Targets
@@ -265,13 +270,14 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf af as
 
         want (unpack . cTarget <$> as)
 
+        -- TODO depend on tgt somehow?
         specialDeps %> \out -> do
             (_, cfgBin') <- cfgBin
-            need [ cfgBin', ".atspkg/config" ]
+            need [ cfgBin', ".atspkg" </> "config" ]
             v'' <- getVerbosity
             liftIO $ fetchDeps v'' (ccFromString cc') setup (unpack . fst <$> ds) (unpack . fst <$> cdps) (unpack . fst <$> bdeps) cfgBin' atslibSetup False >> writeFile out ""
 
-        let bins = unpack . target <$> bs
+        let bins = toTgt tgt . target <$> bs
         setTargets rs bins mt
 
         ph <- home' v' v
@@ -285,7 +291,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf af as
         fold (debRules <$> deb)
 
     where g ph (Bin s t ls hs' atg gc' extra) =
-            atsBin (ATSTarget (unpack <$> cf) (atsToolConfig ph) gc' (unpack <$> ls) [unpack s] hs' (unpackTgt <$> atg) mempty (unpack t) (deps extra) Executable True)
+            atsBin (ATSTarget (unpack <$> cf) (atsToolConfig ph) gc' (unpack <$> ls) [unpack s] hs' (unpackTgt <$> atg) mempty (toTgt tgt t) (deps extra) Executable True)
 
           h ph (Lib _ s t ls _ hs' lnk atg extra sta) =
             atsBin (ATSTarget (unpack <$> cf) (atsToolConfig ph) False (unpack <$> ls) (unpack <$> s) hs' (unpackTgt <$> atg) (unpackLinks <$> lnk) (unpack t) (deps extra) (k sta) False)
@@ -298,10 +304,10 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf af as
           cDepsRules ph = unless (null as) $ do
               let targets = fmap (unpack . cTarget) as
                   sources = fmap (unpack . atsSrc) as
-              zipWithM_ (cgen (atsToolConfig ph) [specialDeps, ".atspkg/config"] (fmap (unpack . ats) . atsGen =<< as)) sources targets
+              zipWithM_ (cgen (atsToolConfig ph) [specialDeps, ".atspkg" </> "config"] (fmap (unpack . ats) . atsGen =<< as)) sources targets
 
           cc' = maybe (unpack ccLocal) (<> "-gcc") tgt
-          deps = (specialDeps:) . (".atspkg/config":) . fmap unpack
+          deps = (specialDeps:) . ((".atspkg" </> "config"):) . fmap unpack
 
           unpackLinks :: (Text, Text) -> HATSGen
           unpackLinks (t, t') = HATSGen (unpack t) (unpack t')
@@ -309,4 +315,4 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf af as
           unpackTgt :: TargetPair -> ATSGen
           unpackTgt (TargetPair t t' b) = ATSGen (unpack t) (unpack t') b
 
-          specialDeps = ".atspkg/deps" ++ maybe mempty ("-" <>) tgt
+          specialDeps = ".atspkg" </> "deps" ++ maybe "" ("-" <>) tgt

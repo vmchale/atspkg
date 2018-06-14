@@ -8,13 +8,13 @@ import           Development.Shake.C
 import           Quaalude
 
 cpkgHome :: CCompiler -> IO FilePath
-cpkgHome cc' = (++ ("/.atspkg/" ++ ccToDir cc')) <$> getEnv "HOME"
+cpkgHome cc' = (</> (".atspkg" </> ccToDir cc')) <$> getEnv "HOME"
 
 allSubdirs :: FilePath -> IO [FilePath]
 allSubdirs [] = pure mempty
 allSubdirs d = do
     d' <- listDirectory d
-    let d'' = ((d <> "/") <>) <$> d'
+    let d'' = (d </>) <$> d'
     ds <- filterM doesDirectoryExist d''
     ds' <- mapM allSubdirs ds
     pure $ join (ds : ds')
@@ -47,7 +47,7 @@ clibSetup v cc' lib' p = do
 
     -- Set environment variables for configure script
     h <- cpkgHome cc'
-    let procEnv = Just [("CC", ccForConfig cc'), ("CFLAGS" :: String, "-I" <> h <> "include -Wno-error -O2"), ("PATH", "/usr/bin:/bin")]
+    let procEnv = Just [("CC", ccForConfig cc'), ("CFLAGS" :: String, "-I" <> h </> "include -Wno-error -O2"), ("PATH", "/usr/bin:/bin")]
 
     biaxe [fold (configure v h <$> configurePath <*> pure procEnv), cmake v h cmakeLists, make v, install v] lib' p
 

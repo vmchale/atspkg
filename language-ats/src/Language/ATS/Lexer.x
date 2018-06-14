@@ -165,6 +165,7 @@ tokens :-
     <0> dataview                 { tok (\p _ -> alex $ Keyword p KwDataview) }
     <0> dataprop                 { tok (\p _ -> alex $ Keyword p KwDataprop) }
     <0> assume                   { tok (\p _ -> alex $ Keyword p KwAssume) }
+    <0> absimpl                  { tok (\p _ -> alex $ Keyword p KwAbsimpl) }
     <0> typedef                  { tok (\p _ -> alex $ Keyword p KwTypedef) }
     <0> @view typedef            { tok (\p _ -> alex $ Keyword p KwVtypedef) }
     <0> absprop                  { tok (\p _ -> alex $ Keyword p KwAbsprop) }
@@ -336,6 +337,7 @@ data Keyword = KwFun
              | KwDatatype
              | KwDatavtype
              | KwAssume
+             | KwAbsimpl
              | KwTypedef
              | KwVtypedef
              | KwVtype Addendum
@@ -454,6 +456,7 @@ instance Pretty Keyword where
     pretty KwDatavtype = "datavtype" -- FIXME this wrongly squashes dataviewtype
     pretty KwFnx = "fnx"
     pretty KwAssume = "assume"
+    pretty KwAbsimpl = "absimpl"
     pretty KwTypedef = "typedef"
     pretty KwVtypedef = "vtypedef"
     pretty (KwStaload b) = maybeSharp b "staload"

@@ -81,6 +81,7 @@ printErr = liftIO . hPutDoc stderr . (<> "\n") . pretty
 -- | Same as 'printErr', but print a yellow warning message instead.
 warnErr :: MonadIO m => FilePath -> ATSError -> m ()
 warnErr fp = liftIO . hPutDoc stderr . ((dullyellow "Warning" <+> text (fp <> ":")) <+> ) . preErr
+-- TODO: this should detect if being piped to terminal!
 
 -- | Parse a string containing ATS source, disregarding comments.
 parseM :: String -> Either ATSError (ATS AlexPosn)

@@ -27,11 +27,11 @@ import           System.FilePath.Find    (find)
 import           System.Process.Ext      (silentCreateProcess)
 
 libatsCfg :: String
-libatsCfg = $(embedStringFile "dhall/atslib.dhall")
+libatsCfg = $(embedStringFile ("dhall" </> "atslib.dhall"))
 
 compilerDir :: Version -> IO FilePath
 compilerDir v = makeAbsolute =<< dir
-    where dir = (++ ("/.atspkg/" ++ show v)) <$> getEnv "HOME"
+    where dir = (</> (".atspkg" </> show v)) <$> getEnv "HOME"
 
 -- | Make a tarball from a directory containing the compiler.
 packageCompiler :: FilePath -> IO ()
@@ -97,9 +97,9 @@ configure v' configurePath v cd = do
     withCompiler "Configuring" v
 
     makeExecutable configurePath
-    makeExecutable (cd ++ "/autogen.sh")
+    makeExecutable (cd </> "autogen.sh")
 
-    silentCreateProcess v' ((proc (cd ++ "/autogen.sh") []) { cwd = Just cd })
+    silentCreateProcess v' ((proc (cd </> "autogen.sh") []) { cwd = Just cd })
 
     silentCreateProcess v' ((proc configurePath ["--prefix", cd]) { cwd = Just cd })
 
@@ -108,11 +108,11 @@ setupCompiler v' als tgt' v = do
 
     cd <- compilerDir v
 
-    biaxe [configure v' (cd ++ "/configure"), make v', install v' tgt' als] v cd
+    biaxe [configure v' (cd </> "configure"), make v', install v' tgt' als] v cd
 
 cleanAll :: IO ()
 cleanAll = do
-    d <- (++ "/.atspkg") <$> getEnv "HOME"
+    d <- (</> ".atspkg") <$> getEnv "HOME"
     b <- doesDirectoryExist d
     when b $ do
         putStrLn "Cleaning everything..."

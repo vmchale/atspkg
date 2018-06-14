@@ -37,7 +37,7 @@ library
     other-extensions: OverloadedStrings
     ghc-options: -Wall
     build-depends:
-        base >=4.9 && <5,
+        base >=4.8 && <5,
         text -any,
         bytestring -any,
         array -any,
@@ -47,6 +47,10 @@ library
     if flag(development)
         ghc-options: -Werror
     
+    if !impl(ghc >= 8.0)
+        build-depends: transformers
+                     , semigroups
+
     if impl(ghc >=8.0)
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
     

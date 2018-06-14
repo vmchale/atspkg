@@ -84,8 +84,8 @@ gcFlag True  = "-DATS_MEMALLOC_GCBDW"
 copySources :: ATSToolConfig -> [FilePath] -> Action ()
 copySources ATSToolConfig{..} sources =
     forM_ sources $ \dep -> do
-        liftIO $ createDirectoryIfMissing True (_patsHome ++ "/" ++ takeDirectory dep)
-        liftIO $ copyFile dep (_patsHome ++ "/" ++ dep)
+        liftIO $ createDirectoryIfMissing True (_patsHome </> takeDirectory dep)
+        liftIO $ copyFile dep (_patsHome </> dep)
 
 makeCFlags :: [String] -- ^ Inputs
            -> [ForeignCabal] -- ^ Haskell libraries
@@ -94,9 +94,9 @@ makeCFlags :: [String] -- ^ Inputs
            -> [String]
 makeCFlags ss fc ghcV' b = gcFlag' : (hsExtra <> ss) where
     gcFlag' = bool ("-optc" <>) id noHs $ gcFlag b
-    hsExtra = bool (["--make", "-I.", "-odir", ".atspkg", "-no-hs-main", "-package-db", "~/.cabal/store/ghc-" ++ ghcV' ++ "/package.db/"] ++ packageDbs) mempty noHs
+    hsExtra = bool (["--make", "-I.", "-odir", ".atspkg", "-no-hs-main", "-package-db", "~/.cabal/store/ghc-" ++ ghcV' </> "package.db/"] ++ packageDbs) mempty noHs
     noHs = null fc
-    packageDbs = (\x -> ["-package-db", x ++ "/dist-newstyle/packagedb/ghc-" ++ ghcV']) =<< libToDirs fc
+    packageDbs = (\x -> ["-package-db", x </> "dist-newstyle" </> "packagedb" </> "ghc-" ++ ghcV']) =<< libToDirs fc
 
 libToDirs :: [ForeignCabal] -> [String]
 libToDirs = fmap (takeDirectory . TL.unpack . h)
@@ -120,16 +120,16 @@ cconfig tc libs' gc' extras = do
         f = bool id ("atslib":) (_linkATSLib tc)
     h' <- pkgHome cc'
     let libs'' = f $ bool libs' ("gc" : libs') gc'
-    pure $ CConfig [h ++ "/ccomp/runtime/", h, h' ++ "include", ".atspkg/contrib"] libs'' [h' ++ "lib", _patsHome tc ++ "/ccomp/atslib/lib"] extras (_linkStatic tc)
+    pure $ CConfig [h </> "ccomp" </> "runtime", h, h' </> "include", ".atspkg" </> "contrib"] libs'' [h' </> "lib", _patsHome tc </> "ccomp" </> "atslib" </> "lib"] extras (_linkStatic tc)
 
 patsEnv :: ATSToolConfig -> FilePath -> [CmdOption]
 patsEnv cfg path = EchoStderr False :
     zipWith AddEnv
         ["PATSHOME", "PATH", "PATSHOMELOCS", "LIBGMP"]
-        [_patsHome cfg, _patsHome cfg ++ "/bin:" ++ path, _patsHomeLocs cfg ]
+        [_patsHome cfg, _patsHome cfg </> "bin:" ++ path, _patsHomeLocs cfg ]
 
 atsToC :: FilePath -> FilePath
-atsToC = (-<.> "c") . (".atspkg/c/" <>)
+atsToC = (-<.> "c") . ((".atspkg" </> "c") </>)
 
 ghcV :: CCompiler -> [ForeignCabal] -> Action String
 ghcV (GHC _ suff) hsLibs' = maybe def' (fmap (drop 1)) (pure <$> suff) where

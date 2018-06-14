@@ -16,13 +16,6 @@ let mapDir =
       rec.xs
 in
 
-let mapUtil =
-  λ(xs : List Text) →
-    map Text Text
-      (λ(x : Text) → "utils/atscc/DATS/atscc_${x}.dats")
-      xs
-in
-
 let mapPre =
   λ(xs : List Text) →
     mapDir { dir = "prelude", xs = xs }
@@ -55,15 +48,10 @@ let atslib =
                 ]
             , includes = ([] : List Text)
             }
-          , prelude.staticLib ⫽
-            { libTarget = "target/libatsopt.a"
-            , name = "atsopt"
-            , src = mapUtil [ "main", "print", "util" ]
-            }
           ]
         , cflags = [ "-fPIC" ]
         , compiler = compilerVersion
         }
 in
 
-atslib [0,3,11] [0,3,10]
+atslib [0,3,11] [0,3,11]

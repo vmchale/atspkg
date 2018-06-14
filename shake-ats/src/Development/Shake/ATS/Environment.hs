@@ -13,12 +13,12 @@ import           System.Environment         (getEnv)
 -- installed artifacts. This is used to keep libraries built for different
 -- platforms separate.
 ccToDir :: CCompiler -> String
-ccToDir (GCC (Just s)) = reverse (drop 1 $ reverse s) ++ "/"
+ccToDir (GCC (Just s)) = reverse (drop 1 $ reverse s) ++ [pathSeparator]
 ccToDir _              = ""
 
 -- | The directory @~/.atspkg@
 pkgHome :: MonadIO m => CCompiler -> m String
-pkgHome cc' = liftIO $ (++ ("/.atspkg/" ++ ccToDir cc')) <$> getEnv "HOME"
+pkgHome cc' = liftIO $ (</> (".atspkg" </> ccToDir cc')) <$> getEnv "HOME"
 
 fixDir :: FilePath -> String -> String
 fixDir p =

@@ -50,7 +50,7 @@ library
             micro-recursion-schemes -any
     else
         build-depends:
-            recursion-schemes >=5.1
+            recursion-schemes >=5.0.1
     
     if impl(ghc <8.0)
         build-depends:

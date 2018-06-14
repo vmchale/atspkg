@@ -20,7 +20,7 @@ targetArch = g [arch, manufacturer, os]
 atspkgPath :: IO String
 atspkgPath = do
     home <- getEnv "HOME"
-    pure $ home <> "/.local/bin/atspkg"
+    pure $ home </> ".local" </> "bin" </> "atspkg"
 
 upgradeBin :: String -> String -> IO ()
 upgradeBin user proj = do

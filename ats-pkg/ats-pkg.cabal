@@ -119,7 +119,8 @@ library
         binary -any,
         microlens -any,
         dependency >=1.2.0.0,
-        filemanip -any
+        filemanip -any,
+        filepath
     
     if !os(windows)
         build-depends:

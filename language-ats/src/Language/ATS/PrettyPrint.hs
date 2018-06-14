@@ -361,6 +361,7 @@ glue AbsViewType{} AbsViewType{}   = True
 glue AbsType{} AbsType{}           = True
 glue AbsType{} AbsViewType{}       = True
 glue AbsViewType{} AbsType{}       = True
+glue AbsImpl{} AbsImpl{}           = True
 glue TypeDef{} TypeDef{}           = True
 glue Comment{} _                   = True
 glue (Func _ Fnx{}) (Func _ And{}) = True
@@ -611,4 +612,5 @@ instance Eq a => Pretty (Declaration a) where
     pretty (AndD d (SortDef _ i t))         = pretty d <+> "and" <+> text i <+> "=" <+> either pretty pretty t
     pretty (MacDecl _ n is e)               = "macdef" <+> text n <> "(" <> mconcat (punctuate ", " (fmap text is)) <> ") =" <+> pretty e
     pretty (ExtVar _ s e)                   = "extvar" <+> text s <+> "=" <+> pretty e
+    pretty (AbsImpl _ n as e)               = "absimpl" </> pretty n <> prettySortArgs as <+> "=" </> pretty e
     pretty AndD{}                           = undefined -- probably not valid syntax if we get to this point

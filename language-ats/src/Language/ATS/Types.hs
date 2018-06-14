@@ -191,6 +191,7 @@ data Declaration a = Func { pos :: a, _fun :: Function a }
                    | DataSort a String [DataSortLeaf a]
                    | Exception String (Type a)
                    | ExtVar a String (Expression a)
+                   | AbsImpl a (Name a) (SortArgs a) (Type a)
                    deriving (Show, Eq, Generic, NFData)
 
 data DataSortLeaf a = DataSortLeaf [Universal a] (Sort a) (Maybe (Sort a))

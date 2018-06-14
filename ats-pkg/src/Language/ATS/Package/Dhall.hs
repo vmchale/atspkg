@@ -17,7 +17,7 @@ checkDhall :: Interpret a
       -> Bool
       -> IO a
 checkDhall path d =
-    bool id detailed d $ input auto (pack ('.' : '/' : path))
+    bool id detailed d $ input auto (pack ('.' : pathSeparator : path))
 
 checkPkgSet :: FilePath -- ^ Path to @.dhall@ file defining a package set.
             -> Bool -- ^ Whether to print detailed error messages.

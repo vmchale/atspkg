@@ -130,6 +130,7 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     tkindef { Keyword $$ KwTKind }
     as { Keyword $$ KwAs }
     assume { Keyword $$ KwAssume }
+    absimpl { Keyword $$ KwAbsimpl }
     addrAt { Keyword $$ KwAddrAt }
     viewAt { Keyword $$ KwViewAt }
     symintr { Keyword $$ KwSymintr }
@@ -912,6 +913,8 @@ Declaration : include string { Include $2 }
             | overload dot identifierSpace with Name { OverloadIdent $1 ('.' : (to_string $3)) $5 Nothing }
             | assume identifierSpace SortArgs eq Type { Assume (Unqualified (to_string $2)) $3 $5 }
             | assume Name SortArgs eq Type { Assume $2 $3 $5 }
+            | absimpl identifierSpace SortArgs eq Type { AbsImpl $1 (Unqualified (to_string $2)) $3 $5 }
+            | absimpl Name SortArgs eq Type { AbsImpl $1 $2 $3 $5 }
             | tkindef IdentifierOr eq string { TKind $1 (Unqualified $2) $4 }
             | TypeDecl { $1 }
             | symintr Names { SymIntr $1 $2 }
