@@ -44,7 +44,6 @@ library
         build-depends: transformers
                      , semigroups
 
-    if impl(ghc >=8.0)
     if flag(development)
         ghc-options: -Werror
     

@@ -40,6 +40,9 @@ ci: install
     yamllint .stylish-haskell.yaml
     yamllint .hlint.yaml
     yamllint .yamllint
+    yamllint .weeder.yaml
+    yamllint .travis.yml
+    yamllint appveyor.yml
     yamllint stack.yaml
     tomlcheck --file ats-format/.atsfmt.toml
     hlint ats-pkg language-ats shake-ext ats-format cdeps shake-cabal shake-c

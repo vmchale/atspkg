@@ -1,27 +1,27 @@
 ---
 resolver: lts-11.13
 packages:
-  - 'ats-pkg'
-  - 'language-ats'
-  - 'ats-format'
-  - 'shake-ext'
-  - 'shake-ats'
-  - 'dependency'
-  - 'hs2ats'
-  - 'cdeps'
-  - 'shake-cabal'
-  - 'shake-c'
+- 'ats-pkg'
+- 'language-ats'
+- 'ats-format'
+- 'shake-ext'
+- 'shake-ats'
+- 'dependency'
+- 'hs2ats'
+- 'cdeps'
+- 'shake-cabal'
+- 'shake-c'
 extra-deps:
-  - bzlib-0.5.0.5
-  - casing-0.1.4.0
-  - cli-setup-0.2.0.4
-  - hspec-dirstream-1.0.0.0
-  - dirstream-1.0.3
-  - htoml-megaparsec-2.0.0.0
-  - micro-recursion-schemes-5.0.2.2
-  - dhall-1.14.0
-  - Cabal-2.2.0.1
-  - lzma-clib-5.2.2
+- bzlib-0.5.0.5
+- casing-0.1.4.0
+- cli-setup-0.2.0.4
+- hspec-dirstream-1.0.0.0
+- dirstream-1.0.3
+- htoml-megaparsec-2.0.0.0
+- micro-recursion-schemes-5.0.2.2
+- dhall-1.14.0
+- Cabal-2.2.0.1
+- lzma-clib-5.2.2
 flags:
   hs2ats:
     no-executable: false

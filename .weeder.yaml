@@ -1,3 +1,4 @@
+---
 - package:
   - name: ats-format
   - section:
@@ -16,4 +17,17 @@
     - message:
       - name: Redundant build-depends entry
       - depends: recursion-schemes
-
+- package:
+  - name: cdeps
+  - section:
+    - name: library
+    - message:
+      - name: Redundant build-depends entry
+      - depends: transformers
+- package:
+  - name: shake-ext
+  - section:
+    - name: library
+    - message:
+      - name: Redundant build-depends entry
+      - depends: transformers
