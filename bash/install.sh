@@ -34,10 +34,7 @@ main() {
     man_dest=$HOME/.local/share/man/man1/atspkg.1
     dest=$HOME/.local/bin/atspkg
 
-    if command -v duma > /dev/null ; then
-        duma "$url" -O "$dest"
-        duma "$man_url" -O "$man_dest"
-    elif command -v wget > /dev/null ; then
+    if command -v wget > /dev/null ; then
         wget "$url" -O "$dest"
         wget "$man_url" -O "$man_dest"
     else

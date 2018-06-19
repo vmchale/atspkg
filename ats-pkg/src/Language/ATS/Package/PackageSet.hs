@@ -21,7 +21,6 @@ newtype ATSPackageSet = ATSPackageSet { _atsPkgSet :: [ ATSDependency ] }
 
 atsPkgSet :: Lens' ATSPackageSet [ATSDependency]
 atsPkgSet f s = fmap (\x -> s { _atsPkgSet = x }) (f (_atsPkgSet s))
-{-# INLINE atsPkgSet #-}
 
 instance Pretty Version where
     pretty v = text (show v)

@@ -58,7 +58,6 @@ data ATSDependency = ATSDependency { libName     :: Text -- ^ Library name, e.g.
 
 dirLens :: Lens' ATSDependency Text
 dirLens f s = fmap (\x -> s { dir = x }) (f (dir s))
-{-# INLINE dirLens #-}
 
 -- | This is just a tuple, except I can figure out how to use it with Dhall.
 data TargetPair = TargetPair { hs    :: Text

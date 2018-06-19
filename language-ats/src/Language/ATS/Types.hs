@@ -91,61 +91,50 @@ data Leaf a = Leaf { _constructorUniversals :: [Universal a], name :: String, co
 
 constructorUniversals :: Lens' (Leaf a) [Universal a]
 constructorUniversals f s = fmap (\x -> s { _constructorUniversals = x}) (f (_constructorUniversals s))
-{-# INLINE constructorUniversals #-}
 
 type SortArgs a = Maybe [SortArg a]
 
 fun :: Traversal' (Declaration a) (Function a)
 fun f (Func x y) = Func x <$> f y
 fun _ x          = pure x
-{-# INLINE fun #-}
 
 impl :: Traversal' (Declaration a) (Implementation a)
 impl f (Impl x y)      = Impl x <$> f y
 impl f (ProofImpl x y) = ProofImpl x <$> f y
 impl _ x               = pure x
-{-# INLINE impl #-}
 
 valExpression :: Traversal' (Declaration a) (Expression a)
 valExpression f (Val a v p e) = Val a v p <$> f e
 valExpression _ x             = pure x
-{-# INLINE valExpression #-}
 
 prValExpr :: Traversal' (Declaration a) (Maybe (Expression a))
 prValExpr f (PrVal p me t) = (\me' -> PrVal p me' t) <$> f me
 prValExpr _ x              = pure x
-{-# INLINE prValExpr #-}
 
 varExpr1 :: Traversal' (Declaration a) (Maybe (Expression a))
 varExpr1 f (Var t p e e') = (\e'' -> Var t p e'' e') <$> f e
 varExpr1 _ x              = pure x
-{-# INLINE varExpr1 #-}
 
 varExpr2 :: Traversal' (Declaration a) (Maybe (Expression a))
 varExpr2 f (Var t p e e') = (\e'' -> Var t p e e'') <$> f e'
 varExpr2 _ x              = pure x
-{-# INLINE varExpr2 #-}
 
 andExpr :: Traversal' (Declaration a) (Expression a)
 andExpr f (AndDecl t p e) = AndDecl t p <$> f e
 andExpr _ x               = pure x
-{-# INLINE andExpr #-}
 
 propLeaves :: Traversal' (Declaration a) [DataPropLeaf a]
 propLeaves f (DataProp l n as pl) = DataProp l n as <$> f pl
 propLeaves _ x                    = pure x
-{-# INLINE propLeaves #-}
 
 leaves :: Traversal' (Declaration a) [Leaf a]
 leaves f (SumType t as l)     = SumType t as <$> f l
 leaves f (SumViewType t as l) = SumViewType t as <$> f l
 leaves _ x                    = pure x
-{-# INLINE leaves #-}
 
 comment :: Traversal' (Declaration a) String
 comment f (Comment c) = Comment <$> f c
 comment _ x           = pure x
-{-# INLINE comment #-}
 
 -- | Declarations for functions, values, actions, etc.
 data Declaration a = Func { pos :: a, _fun :: Function a }
@@ -202,11 +191,9 @@ data DataPropLeaf a = DataPropLeaf { propU :: [Universal a], _propExpr1 :: Expre
 
 propExpr1 :: Lens' (DataPropLeaf a) (Expression a)
 propExpr1 f s = fmap (\x -> s { _propExpr1 = x}) (f (_propExpr1 s))
-{-# INLINE propExpr1 #-}
 
 propExpr2 :: Lens' (DataPropLeaf a) (Maybe (Expression a))
 propExpr2 f s = fmap (\x -> s { _propExpr2 = x}) (f (_propExpr2 s))
-{-# INLINE propExpr2 #-}
 
 -- | A type for parsed ATS types
 data Type a = Tuple a [Type a]
@@ -289,12 +276,10 @@ instance Recursive (Type a) where
 typeCall :: Traversal' (Type a) (Name a)
 typeCall f (Dependent x y) = (\x' -> Dependent x' y) <$> f x
 typeCall _ x               = pure x
-{-# INLINE typeCall #-}
 
 typeCallArgs :: Traversal' (Type a) [Type a]
 typeCallArgs f (Dependent x y) = (\y' -> Dependent x y') <$> f y
 typeCallArgs _ x               = pure x
-{-# INLINE typeCallArgs #-}
 
 -- | A type for @=>@, @=\<cloref1>@, etc.
 data LambdaType a = Plain a
@@ -682,7 +667,6 @@ data Implementation a = Implement { pos            :: a
 
 iExpression :: Lens' (Implementation a) (Either (StaticExpression a) (Expression a))
 iExpression f s = fmap (\x -> s { _iExpression = x}) (f (_iExpression s))
-{-# INLINE iExpression #-}
 
 -- | A function declaration accounting for all keywords ATS uses to
 -- define them.
@@ -698,7 +682,6 @@ data Function a = Fun { _preF :: PreFunction a }
 
 preF :: Lens' (Function a) (PreFunction a)
 preF f s = fmap (\x -> s { _preF = x}) (f (_preF s))
-{-# INLINE preF #-}
 
 -- | A type for stack-allocated functions. See
 -- [here](http://ats-lang.sourceforge.net/DOCUMENT/ATS2TUTORIAL/HTML/c1267.html)
@@ -724,7 +707,6 @@ data PreFunction a = PreF { fname         :: Name a -- ^ Function name
 -- TODO lens/base functor module?
 expression :: Lens' (PreFunction a) (Maybe (Expression a))
 expression f s = fmap (\x -> s { _expression = x}) (f (_expression s))
-{-# INLINE expression #-}
 
 exprLens :: Eq a => FixityState a -> ASetter s t (Expression a) (Expression a) -> s -> t
 exprLens st = flip over (rewriteATS st)
