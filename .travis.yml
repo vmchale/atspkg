@@ -23,7 +23,7 @@ matrix:
         - hvr-ghc
         packages:
         - ghc-8.4.3
-        - cabal-install-head
+        - cabal-install-2.2
     language: c
 
   # OS X

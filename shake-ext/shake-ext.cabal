@@ -40,10 +40,11 @@ library
         directory -any,
         shake >=0.14
     
-    if !impl(ghc >= 8.0)
-        build-depends: transformers
-                     , semigroups
-
+    if !impl(ghc >=8.0)
+        build-depends:
+            transformers -any,
+            semigroups -any
+    
     if flag(development)
         ghc-options: -Werror
     

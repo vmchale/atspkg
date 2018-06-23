@@ -51,7 +51,7 @@ fetchDeps v cc' setup' deps cdeps atsBld cfgPath als b' =
         cdeps' <- setBuildPlan "c" libDeps pkgSet cdeps
 
         -- Set up actions
-        d <- (<> "lib/") <$> cpkgHome cc'
+        d <- (</> "lib/") <$> cpkgHome cc'
         let tgt' = getTgt cc'
             libs' = fmap (buildHelper False) (join deps')
             unpacked = fmap (over dirLens (pack d <>)) <$> cdeps'
