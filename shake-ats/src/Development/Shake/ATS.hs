@@ -175,7 +175,10 @@ atsBin ATSTarget{..} = do
     cconfig' <- cconfig _toolConfig _libs _gc (makeCFlags _cFlags mempty (pure undefined) _gc)
 
     let atsGen = (hatsFile <$> _linkTargets) <> (_atsTarget <$> _genTargets)
+        -- FIXME the generated C should not depend on the C compiler but the
+        -- build artifacts should
         atsExtras = _otherDeps <> (TL.unpack . objectFile <$> _hsLibs)
+
     zipWithM_ (cgen _toolConfig atsExtras atsGen) _src cTargets
 
     doLib _tgtType (zipWithM_ (objectFileR (_cc _toolConfig) cconfig') cTargets (h' cTargets))

@@ -25,10 +25,10 @@ ccForConfig = g . ccToString
     where g "icc" = "cc"
           g x     = x
 
-{-makeExecutable' :: FilePath -> [FilePath] -> IO ()
+makeExecutable' :: FilePath -> [FilePath] -> IO ()
 makeExecutable' file dirs = do
     p <- findFile dirs file
-    fold (setFileMode <$> p <*> pure ownerModes)-}
+    fold (setFileMode <$> p <*> pure ownerModes)
 
 clibSetup :: Verbosity -- ^ Shake verbosity level
           -> CCompiler -- ^ C compiler
@@ -44,6 +44,7 @@ clibSetup v cc' lib' p = do
     configurePath <- findFile (p:subdirs) "configure"
     cmakeLists <- findFile (p:subdirs) "CMakeLists.txt"
     fold (makeExecutable <$> configurePath)
+    makeExecutable' "install-sh" (p:subdirs)
 
     -- Set environment variables for configure script
     h <- cpkgHome cc'
