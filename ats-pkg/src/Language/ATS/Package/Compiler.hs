@@ -76,7 +76,7 @@ libInstall :: SetupScript -> FilePath -> String -> IO ()
 libInstall atslibSetup cd triple =
     unless (triple == "musl") $ mconcat
         [ putStrLn "Installing cross libraries..."
-        , writeFile (cd ++ "/atspkg.dhall") libatsCfg
+        , writeFile (cd </> "atspkg.dhall") libatsCfg
         , atslibSetup (Just triple) "atslib" cd
         ]
 

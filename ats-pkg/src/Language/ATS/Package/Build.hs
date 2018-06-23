@@ -13,7 +13,7 @@ module Language.ATS.Package.Build ( mkPkg
 import qualified Data.ByteString                 as BS
 import qualified Data.ByteString.Lazy            as BSL
 import           Data.List                       (intercalate)
-import           Development.Shake               (getVerbosity)
+import           Development.Shake               (alwaysRerun, getVerbosity)
 import           Development.Shake.ATS
 import           Development.Shake.C             (ccFromString)
 import           Development.Shake.Check
@@ -227,6 +227,7 @@ atslibSetup tgt' lib' p = do
     subdirs <- (p:) <$> allSubdirs p
     pkgPath <- fromMaybe p <$> findFile subdirs "atspkg.dhall"
     let installDir = takeDirectory pkgPath
+    -- removeDirectoryRecursive (installDir </> ".atspkg")
     build' installDir tgt' ["install"]
 
 -- | The directory @~/.atspkg@
@@ -270,10 +271,14 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf af as
 
         want (unpack . cTarget <$> as)
 
+        flags %> \out -> do
+            alwaysRerun
+            liftIO $ BSL.writeFile out (encode tgt)
+
         -- TODO depend on tgt somehow?
         specialDeps %> \out -> do
             (_, cfgBin') <- cfgBin
-            need [ cfgBin', ".atspkg" </> "config" ]
+            need [ cfgBin', flags, ".atspkg" </> "config" ]
             v'' <- getVerbosity
             liftIO $ fetchDeps v'' (ccFromString cc') setup (unpack . fst <$> ds) (unpack . fst <$> cdps) (unpack . fst <$> bdeps) cfgBin' atslibSetup False >> writeFile out ""
 
@@ -304,10 +309,10 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf af as
           cDepsRules ph = unless (null as) $ do
               let targets = fmap (unpack . cTarget) as
                   sources = fmap (unpack . atsSrc) as
-              zipWithM_ (cgen (atsToolConfig ph) [specialDeps, ".atspkg" </> "config"] (fmap (unpack . ats) . atsGen =<< as)) sources targets
+              zipWithM_ (cgen (atsToolConfig ph) [specialDeps, ".atspkg" </> "config", flags] (fmap (unpack . ats) . atsGen =<< as)) sources targets
 
           cc' = maybe (unpack ccLocal) (<> "-gcc") tgt
-          deps = (specialDeps:) . ((".atspkg" </> "config"):) . fmap unpack
+          deps = (flags:) . (specialDeps:) . ((".atspkg" </> "config"):) . fmap unpack
 
           unpackLinks :: (Text, Text) -> HATSGen
           unpackLinks (t, t') = HATSGen (unpack t) (unpack t')
@@ -316,3 +321,4 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf af as
           unpackTgt (TargetPair t t' b) = ATSGen (unpack t) (unpack t') b
 
           specialDeps = ".atspkg" </> "deps" ++ maybe "" ("-" <>) tgt
+          flags = ".atspkg" </> "flags"

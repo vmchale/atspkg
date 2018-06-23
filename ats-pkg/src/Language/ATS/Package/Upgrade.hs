@@ -25,7 +25,7 @@ atspkgPath = do
 upgradeBin :: String -> String -> IO ()
 upgradeBin user proj = do
 
-    let inner = user <> "/" <> proj
+    let inner = user </> proj
 
     putStrLn "Finding latest release..."
     manager <- newManager tlsManagerSettings
