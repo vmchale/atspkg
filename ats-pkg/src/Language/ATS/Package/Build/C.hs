@@ -28,7 +28,7 @@ ccForConfig = g . ccToString
 makeExecutable' :: FilePath -> [FilePath] -> IO ()
 makeExecutable' file dirs = do
     p <- findFile dirs file
-    fold (setFileMode <$> p <*> pure ownerModes)
+    fold (makeExecutable <$> p)
 
 clibSetup :: Verbosity -- ^ Shake verbosity level
           -> CCompiler -- ^ C compiler
