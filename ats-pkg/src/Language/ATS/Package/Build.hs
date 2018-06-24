@@ -273,18 +273,23 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf af as
 
         newFlag <- do
             exists <- liftIO (doesFileExist flags)
-            contents <- if exists then liftIO (BSL.readFile flags) else pure mempty
-            pure $ encode tgt /= contents
+            contents <- if exists
+                then liftIO (BSL.readFile flags)
+                else pure mempty
+            pure $ BSL.length contents /= 0 && encode tgt /= contents
 
         -- this is dumb but w/e
         flags %> \out -> do
-            if newFlag then alwaysRerun else mempty
-            liftIO $ BSL.writeFile out (encode tgt)
+            alwaysRerun
+            exists <- liftIO (doesFileExist out)
+            liftIO $ if not exists || newFlag
+                then BSL.writeFile out (encode tgt)
+                else mempty
 
         -- TODO depend on tgt somehow?
         specialDeps %> \out -> do
             (_, cfgBin') <- cfgBin
-            need [ cfgBin', ".atspkg" </> "config" ]
+            need [ cfgBin', flags, ".atspkg" </> "config" ]
             v'' <- getVerbosity
             liftIO $ fetchDeps v'' (ccFromString cc') setup (unpack . fst <$> ds) (unpack . fst <$> cdps) (unpack . fst <$> bdeps) cfgBin' atslibSetup False >> writeFile out ""
 
