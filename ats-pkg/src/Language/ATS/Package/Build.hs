@@ -271,14 +271,20 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf af as
 
         want (unpack . cTarget <$> as)
 
+        newFlag <- do
+            exists <- liftIO (doesFileExist flags)
+            contents <- if exists then liftIO (BSL.readFile flags) else pure mempty
+            pure $ encode tgt == contents
+
+        -- this is dumb but w/e
         flags %> \out -> do
-            alwaysRerun
+            if newFlag then alwaysRerun else mempty
             liftIO $ BSL.writeFile out (encode tgt)
 
         -- TODO depend on tgt somehow?
         specialDeps %> \out -> do
             (_, cfgBin') <- cfgBin
-            need [ cfgBin', flags, ".atspkg" </> "config" ]
+            need (gFlag newFlag [ cfgBin', ".atspkg" </> "config" ])
             v'' <- getVerbosity
             liftIO $ fetchDeps v'' (ccFromString cc') setup (unpack . fst <$> ds) (unpack . fst <$> cdps) (unpack . fst <$> bdeps) cfgBin' atslibSetup False >> writeFile out ""
 
@@ -289,17 +295,17 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf af as
 
         cDepsRules ph >> bits tgt rs
 
-        mapM_ (h ph) lbs
+        mapM_ (h newFlag ph) lbs
 
-        mapM_ (g ph) (bs ++ ts)
+        mapM_ (g newFlag ph) (bs ++ ts)
 
         fold (debRules <$> deb)
 
-    where g ph (Bin s t ls hs' atg gc' extra) =
-            atsBin (ATSTarget (unpack <$> cf) (atsToolConfig ph) gc' (unpack <$> ls) [unpack s] hs' (unpackTgt <$> atg) mempty (toTgt tgt t) (deps extra) Executable True)
+    where g newFlag ph (Bin s t ls hs' atg gc' extra) =
+            atsBin (ATSTarget (unpack <$> cf) (atsToolConfig ph) gc' (unpack <$> ls) [unpack s] hs' (unpackTgt <$> atg) mempty (toTgt tgt t) (deps newFlag extra) Executable True)
 
-          h ph (Lib _ s t ls _ hs' lnk atg extra sta) =
-            atsBin (ATSTarget (unpack <$> cf) (atsToolConfig ph) False (unpack <$> ls) (unpack <$> s) hs' (unpackTgt <$> atg) (unpackLinks <$> lnk) (unpack t) (deps extra) (k sta) False)
+          h newFlag ph (Lib _ s t ls _ hs' lnk atg extra sta) =
+            atsBin (ATSTarget (unpack <$> cf) (atsToolConfig ph) False (unpack <$> ls) (unpack <$> s) hs' (unpackTgt <$> atg) (unpackLinks <$> lnk) (unpack t) (deps newFlag extra) (k sta) False)
 
           k False = SharedLibrary
           k True  = StaticLibrary
@@ -309,10 +315,11 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf af as
           cDepsRules ph = unless (null as) $ do
               let targets = fmap (unpack . cTarget) as
                   sources = fmap (unpack . atsSrc) as
-              zipWithM_ (cgen (atsToolConfig ph) [specialDeps, ".atspkg" </> "config", flags] (fmap (unpack . ats) . atsGen =<< as)) sources targets
+              zipWithM_ (cgen (atsToolConfig ph) [specialDeps, ".atspkg" </> "config"] (fmap (unpack . ats) . atsGen =<< as)) sources targets
 
           cc' = maybe (unpack ccLocal) (<> "-gcc") tgt
-          deps = (flags:) . (specialDeps:) . ((".atspkg" </> "config"):) . fmap unpack
+          deps newFlag = gFlag newFlag . (specialDeps:) . ((".atspkg" </> "config"):) . fmap unpack
+          gFlag newFlag = if newFlag then (flags:) else id
 
           unpackLinks :: (Text, Text) -> HATSGen
           unpackLinks (t, t') = HATSGen (unpack t) (unpack t')

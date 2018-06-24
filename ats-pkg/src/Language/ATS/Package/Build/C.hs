@@ -73,10 +73,10 @@ make :: Verbosity -> String -> FilePath -> IO ()
 make v lib' p = do
     putStrLn ("building " ++ lib' ++ "...")
     p' <- findMakefile p
-    silentCreateProcess v ((proc "make" ["-j4"]) { cwd = Just p' })
+    silentCreateProcess v ((proc makeExe ["-j4"]) { cwd = Just p' })
 
 install :: Verbosity -> String -> FilePath -> IO ()
 install v lib' p = do
     putStrLn ("installing " ++ lib' ++ "...")
     p' <- findMakefile p
-    silentCreateProcess v ((proc "make" ["install"]) { cwd = Just p' })
+    silentCreateProcess v ((proc makeExe ["install"]) { cwd = Just p' })

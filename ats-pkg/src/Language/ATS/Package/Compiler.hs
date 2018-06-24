@@ -65,7 +65,7 @@ fetchCompiler v = do
 make :: Verbosity -> Version -> FilePath -> IO ()
 make v' v cd =
     withCompiler "Building" v >>
-    silentCreateProcess v' ((proc "make" []) { cwd = Just cd })
+    silentCreateProcess v' ((proc makeExe []) { cwd = Just cd })
 
 type SetupScript = Maybe String -- ^ Optional target triple
                  -> String -- ^ Library name
@@ -88,7 +88,7 @@ install :: Verbosity
         -> IO ()
 install v' tgt' als v cd =
     withCompiler "Installing" v >>
-    silentCreateProcess v' ((proc "make" ["install"]) { cwd = Just cd }) >>
+    silentCreateProcess v' ((proc makeExe ["install"]) { cwd = Just cd }) >>
     maybe mempty (libInstall als cd) tgt'
 
 configure :: Verbosity -> FilePath -> Version -> FilePath -> IO ()

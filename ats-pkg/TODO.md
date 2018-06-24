@@ -1,4 +1,3 @@
-⅋ ⊸
 # Features
 - [ ] `fetching...` should include version number.
 - [ ] shell completions should list targets (?)
@@ -34,7 +33,5 @@
 - [ ] User manual
 - [ ] Document how to pin Dhall versions
 # Code Quality
-- [ ] Benchmark/test suite
-- [ ] Make a `Dhall` subdirectory for "library" functions
-- [ ] Instead of calling `atspkg install`, use the function.
+- [ ] Test suite
 - [ ] Generate a `hpc` report

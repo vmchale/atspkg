@@ -31,6 +31,8 @@ module Quaalude ( hex
                 , showVersion
                 , ExitCode (ExitSuccess)
                 , MonadIO (..)
+                -- * Miscellaneous
+                , makeExe
                 -- * "System.Process.Ext" reëxports
                 , silentCreateProcess
                 -- * "Data.Text.Lazy" reëxports
@@ -140,6 +142,7 @@ import           Numeric                      (showHex)
 import           System.Directory             as X
 import           System.Environment           (getEnv)
 import           System.Exit                  (ExitCode (ExitSuccess), exitWith)
+import           System.Info                  (os)
 #ifndef mingw32_HOST_OS
 import           System.Posix.Files
 #endif
@@ -156,6 +159,15 @@ makeExecutable = pure mempty
 makeExecutable :: FilePath -> IO ()
 makeExecutable = flip setFileMode ownerModes
 #endif
+
+makeExe :: String
+makeExe = case os of
+    "freebsd"   -> "gmake"
+    "openbsd"   -> "gmake"
+    "netbsd"    -> "gmake"
+    "solaris"   -> "gmake"
+    "dragonfly" -> "gmake"
+    _           -> "make"
 
 hex :: Int -> String
 hex = flip showHex mempty
