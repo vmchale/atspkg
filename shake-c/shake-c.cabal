@@ -6,8 +6,7 @@ license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
 maintainer: vanessa.mchale@iohk.io
 author: Vanessa McHale
-homepage: https://github.com/vmchale/shake-c#readme
-bug-reports: https://github.com/vmchale/atspkg/issues
+bug-reports: https://hub.darcs.net/vmchale/ats/issues
 synopsis: Library for building C code with shake
 description:
     Facilities for building C libraries and binaries, and depending on C source files. Extends [shake](http://hackage.haskell.org/package/shake).
@@ -35,7 +34,8 @@ library
     build-depends:
         base >=4.3 && <5,
         shake >=0.14,
-        cdeps -any
+        cdeps -any,
+        composition-prelude
     
     if flag(development)
         ghc-options: -Werror

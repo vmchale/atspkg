@@ -3,14 +3,14 @@ module Development.Shake.Man ( manpagesA
                              , manpages
                              ) where
 
-import           Development.Shake
+import           Development.Shake          hiding ((*>))
 import           Development.Shake.FilePath
 
 manpagesA :: FilePath -- ^ Source file. Can be any format accepted by [pandoc](http://hackage.haskell.org/package/pandoc).
           -> FilePath -- ^ Output file.
           -> Action ()
 manpagesA source out =
-    need [ source ] >>
+    need [ source ] *>
     cmd ["pandoc", source, "-s", "-t", "man", "-o", out]
 
 manpagesR :: FilePath -- ^ Source file

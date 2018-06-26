@@ -1,12 +1,13 @@
 cabal-version: 1.18
 name: shake-ext
-version: 3.0.0.0
+version: 3.0.1.0
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
 maintainer: vamchale@gmail.com
 author: Vanessa McHale
 homepage: https://hub.darcs.net/vmchale/shake-ext
+bug-reports: https://hub.darcs.net/vmchale/ats/issues
 synopsis: Helper functions for linting with shake
 description:
     This package provides several linters out of the box, for use with [shake](http://shakebuild.com/).

@@ -2,6 +2,7 @@
 
 import           Data.Bool                       (bool)
 import           Data.Foldable                   (fold)
+import           Data.Functor                    (($>))
 import           Distribution.CommandLine
 import           Distribution.PackageDescription
 import           Distribution.Simple
@@ -22,4 +23,4 @@ maybeInstallActions cfs = bool nothing act cond
 
 main :: IO ()
 main = defaultMainWithHooks $
-    simpleUserHooks { preConf = \_ flags -> maybeInstallActions flags >> pure emptyHookedBuildInfo }
+    simpleUserHooks { preConf = \_ flags -> maybeInstallActions flags $> emptyHookedBuildInfo }

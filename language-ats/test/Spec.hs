@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+import           Data.Foldable
 import qualified Filesystem.Path.CurrentOS as F
 import           Language.ATS
 import           Test.Hspec
@@ -11,5 +12,5 @@ isATS x = (extension x `elem`) (pure <$> ["ats", "dats", "sats", "hats", "cats"]
 main :: IO ()
 main = hspec $
     describe "pretty-print" $ parallel $
-        mapM_ (\x -> testFiles x isATS (fmap printATS . parse))
+        traverse_ (\x -> testFiles x isATS (fmap printATS . parse))
             ["test/data", "test/data/stdlib", "test/data/stdlib/DATS"]

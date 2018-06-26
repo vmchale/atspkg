@@ -14,7 +14,7 @@ import           Quaalude
 -- | Use this in place of 'defaultMain' for a simple build.
 atsPolyglotBuild :: IO ()
 atsPolyglotBuild =
-    defaultMainWithHooks cabalHooks >>
+    defaultMainWithHooks cabalHooks *>
     stopGlobalPool
 
 configureCabal :: IO LocalBuildInfo -> IO LocalBuildInfo
@@ -45,14 +45,14 @@ modifyLibrary libDir lib = let old = libBuildInfo lib
 -- | Write a dummy file that will allow packaging to work.
 writeDummyFile :: IO ()
 writeDummyFile =
-    createDirectoryIfMissing True ("dist-newstyle" </> "lib") >>
+    createDirectoryIfMissing True ("dist-newstyle" </> "lib") *>
     writeFile ("dist-newstyle" </> "lib" </> "empty") ""
 
 -- | This uses the users hooks as is @simpleUserHooks@, modified to build the
 -- ATS library.
 cabalHooks :: UserHooks
 cabalHooks = let defConf = confHook simpleUserHooks
-    in simpleUserHooks { preConf = (writeDummyFile >>) .* preConf simpleUserHooks
+    in simpleUserHooks { preConf = (writeDummyFile *>) .* preConf simpleUserHooks
                        , confHook = configureCabal .* defConf }
                        -- FIXME registration + installation/copy hooks
                        -- ideally in a library of its own for C builds

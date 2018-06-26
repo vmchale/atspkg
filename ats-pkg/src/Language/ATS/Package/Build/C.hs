@@ -16,9 +16,8 @@ allSubdirs d = do
     d' <- listDirectory d
     let d'' = (d </>) <$> d'
     ds <- filterM doesDirectoryExist d''
-    ds' <- mapM allSubdirs ds
+    ds' <- traverse allSubdirs ds
     pure $ join (ds : ds')
-
 
 ccForConfig :: CCompiler -> String
 ccForConfig = g . ccToString
@@ -36,8 +35,6 @@ clibSetup :: Verbosity -- ^ Shake verbosity level
           -> FilePath -- ^ Filepath to unpack to
           -> IO ()
 clibSetup v cc' lib' p = do
-
-    -- TODO autogen.sh
 
     -- Find configure script and make it executable
     subdirs <- allSubdirs p
@@ -60,7 +57,7 @@ cmake v prefixPath (Just cfgLists) _ _ = do
 
 configure :: Verbosity -> FilePath -> FilePath -> Maybe [(String, String)] -> String -> FilePath -> IO ()
 configure v prefixPath configurePath procEnv lib' p =
-    putStrLn ("configuring " ++ lib' ++ "...") >>
+    putStrLn ("configuring " ++ lib' ++ "...") *>
     silentCreateProcess v ((proc configurePath ["--prefix", prefixPath, "--host", host]) { cwd = Just p, env = procEnv })
 
 findMakefile :: FilePath -> IO FilePath

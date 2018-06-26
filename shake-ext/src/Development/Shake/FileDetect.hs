@@ -14,15 +14,19 @@ module Development.Shake.FileDetect
     , getDhall
     , getElm
     , getMadlang
+    , getC
     ) where
 
-import           Control.Monad
+import           Data.Foldable     (fold)
 import           Data.Semigroup    ((<>))
 import           Development.Shake
 
 -- | Get all files ending with @.mad@.
 getMadlang :: Action [FilePath]
 getMadlang = getAll ["mad"]
+
+getC :: Action [FilePath]
+getC = getAll ["c"]
 
 getElm :: Action [FilePath]
 getElm = getAll ["elm"]
@@ -38,7 +42,7 @@ getToml = getAll ["toml"]
 
 -- | Get all haskell source files, including module signatures.
 getHs :: [FilePath] -> Action [FilePath]
-getHs files = join <$> mapM (`getAllDir` ["hs", "hs-boot", "hsig", "lhs"]) files
+getHs files = fold <$> traverse (`getAllDir` ["hs", "hs-boot", "hsig", "lhs"]) files
 
 getHappy :: Action [FilePath]
 getHappy = getAll ["y", "yl"]

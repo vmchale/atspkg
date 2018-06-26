@@ -30,9 +30,10 @@ module Development.Shake.C ( -- * Types
                            , isCross
                            ) where
 
+import           Control.Composition
 import           Control.Monad
 import           Data.List                  (isPrefixOf, isSuffixOf)
-import           Development.Shake
+import           Development.Shake          hiding ((*>))
 import           Development.Shake.Classes
 import           Development.Shake.FilePath
 import           GHC.Generics               (Generic)
@@ -50,7 +51,7 @@ mkQualified :: Monoid a => Maybe a -> Maybe a -> a -> a
 mkQualified pre suff = h [f suff, g pre]
     where g = maybe id mappend
           f = maybe id (flip mappend)
-          h = foldr fmap id
+          h = thread
 
 -- | The target triple of the host machine.
 host :: String
@@ -159,7 +160,7 @@ binaryA :: CmdResult r
         -> CConfig
         -> Action r
 binaryA cc sources out cfg =
-    need sources >>
+    need sources *>
     (command [EchoStderr False] (ccToString cc) . (("-o" : out : sources) ++) . cconfigToArgs) cfg
 
 -- | Generate compiler flags for a given configuration.
@@ -177,7 +178,7 @@ dynLibR :: CCompiler
         -> Rules ()
 dynLibR cc objFiles shLib cfg =
     shLib %> \out ->
-        need objFiles >>
+        need objFiles *>
         command [EchoStderr False] (ccToString cc) ("-shared" : "-o" : out : objFiles ++ cconfigToArgs cfg)
 
 -- | These rules build an object file from a C source file.
@@ -188,7 +189,7 @@ objectFileR :: CCompiler
             -> Rules ()
 objectFileR cc cfg srcFile objFile =
     objFile %> \out ->
-        need [srcFile] >>
+        need [srcFile] *>
         command [EchoStderr False] (ccToString cc) (srcFile : "-c" : "-fPIC" : "-o" : out : cconfigToArgs cfg)
 
 sharedLibA :: CmdResult r
@@ -198,7 +199,7 @@ sharedLibA :: CmdResult r
            -> CConfig
            -> Action r
 sharedLibA cc objFiles shrLib _ =
-    need objFiles >>
+    need objFiles *>
     command mempty (ccToString cc) ("-shared" : "-o" : shrLib : objFiles)
 
 staticLibA :: CmdResult r
@@ -208,7 +209,7 @@ staticLibA :: CmdResult r
            -> CConfig
            -> Action r
 staticLibA ar objFiles stalib _ =
-    need objFiles >>
+    need objFiles *>
     command mempty (arToString ar) ("rcs" : stalib : objFiles)
 
 sharedLibR :: CCompiler

@@ -26,4 +26,4 @@ instance Pretty PackageError where
 
 -- TODO monaderror?
 printErr :: PackageError -> IO a
-printErr e = putDoc (pretty e) >> exitFailure
+printErr e = putDoc (pretty e) *> exitFailure

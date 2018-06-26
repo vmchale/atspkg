@@ -1,4 +1,5 @@
 {
+{-# OPTIONS_GHC -fno-warn-unused-imports #-}
 module Language.C.Dependency ( getIncludes
                              , getCDepends
                              , getAll
@@ -64,18 +65,18 @@ nested_comment :: Alex Token
 nested_comment = go 1 =<< alexGetInput
 
     where go :: Int -> AlexInput -> Alex Token
-          go 0 input = alexSetInput input >> alexMonadScan
+          go 0 input = alexSetInput input *> alexMonadScan
           go n input =
             case alexGetByte input of
                 Nothing -> err input
                 Just (c, input') ->
-                    case Data.Char.chr (fromIntegral c) of
-                        '*' ->
+                    case c of
+                        42 ->
                             case alexGetByte input' of
                                 Nothing -> err input'
                                 Just (47,input_) -> go (n-1) input_
                                 Just (_,input_) -> go n input_
-                        '/' ->
+                        47 ->
                             case alexGetByte input' of
                                 Nothing -> err input'
                                 Just (c',input_) -> go (addLevel c' $ n) input_

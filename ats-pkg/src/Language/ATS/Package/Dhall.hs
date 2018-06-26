@@ -7,17 +7,19 @@ import           Language.ATS.Package.PackageSet
 import           Language.ATS.Package.Type
 import           Quaalude
 
+-- | Check a @pkg.dhall@ file.
 checkPkg :: FilePath
          -> Bool
          -> IO (Version -> ATSDependency)
 checkPkg = checkDhall
 
 checkDhall :: Interpret a
-      => FilePath
-      -> Bool
-      -> IO a
+           => FilePath
+           -> Bool
+           -> IO a
 checkDhall path d =
-    bool id detailed d $ input auto (pack ('.' : pathSeparator : path))
+    bool id detailed d $
+        input auto (pack ('.' : pathSeparator : path))
 
 checkPkgSet :: FilePath -- ^ Path to @.dhall@ file defining a package set.
             -> Bool -- ^ Whether to print detailed error messages.

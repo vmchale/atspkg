@@ -24,11 +24,13 @@ module Quaalude ( hex
                 , (&&&)
                 , (<=<)
                 , (<>)
+                , ($>)
                 , first
                 , second
                 , getEnv
                 , exitWith
                 , showVersion
+                , traverse_
                 , ExitCode (ExitSuccess)
                 , MonadIO (..)
                 -- * Miscellaneous
@@ -125,7 +127,8 @@ import           Control.Monad.IO.Class
 import           Data.Binary
 import           Data.Bool                    (bool)
 import           Data.ByteString.Lazy         (ByteString)
-import           Data.Foldable                (fold)
+import           Data.Foldable                (fold, traverse_)
+import           Data.Functor                 (($>))
 import           Data.List
 import           Data.Maybe                   (fromMaybe)
 import           Data.Semigroup

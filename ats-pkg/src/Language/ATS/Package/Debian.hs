@@ -14,7 +14,7 @@ import           Data.Dependency            (Version (..))
 import           Data.Hashable              (Hashable)
 import           Data.List                  (intercalate)
 import           Data.Text.Lazy             (Text)
-import           Development.Shake
+import           Development.Shake          hiding ((*>))
 import           Development.Shake.FilePath
 import           Dhall
 import           Quaalude
@@ -57,13 +57,13 @@ debRules deb =
             libDir = makeRel "/usr/local/lib"
             manDir = makeRel "/usr/local/share/man/man1"
 
-        mapM_ (liftIO . createDirectoryIfMissing True)
+        traverse_ (liftIO . createDirectoryIfMissing True)
             [ binDir, debianDir, manDir ]
 
         fold $ do
             mp <- manpage deb
             pure $
-                need [unpack mp] >>
+                need [unpack mp] *>
                 copyFile' (unpack mp) (manDir ++ "/" ++ takeFileName (unpack mp))
 
         zipWithM_ copyFile' (unpack <$> binaries deb) (((binDir ++ "/") ++) . unpack <$> binaries deb)

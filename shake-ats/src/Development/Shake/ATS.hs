@@ -33,7 +33,7 @@ import           Control.Monad
 import           Control.Monad.IO.Class
 import           Data.Bool                         (bool)
 import           Data.Either                       (fromRight)
-import           Data.Foldable                     (fold)
+import           Data.Foldable
 import           Data.Maybe                        (fromMaybe)
 import           Data.Semigroup                    (Semigroup (..))
 import qualified Data.Text.Lazy                    as TL
@@ -45,7 +45,6 @@ import           Development.Shake.C
 import           Development.Shake.FilePath
 import           Development.Shake.Version
 import           Language.ATS
--- import           Lens.Micro
 import           System.Directory                  (copyFile, createDirectoryIfMissing, doesFileExist)
 import           System.Environment                (getEnv)
 import           System.Exit                       (ExitCode (ExitSuccess))
@@ -125,7 +124,7 @@ cconfig tc libs' gc' extras = do
 patsEnv :: ATSToolConfig -> FilePath -> [CmdOption]
 patsEnv cfg path = EchoStderr False :
     zipWith AddEnv
-        ["PATSHOME", "PATH", "PATSHOMELOCS", "LIBGMP"]
+        ["PATSHOME", "PATH", "PATSHOMELOCS"]
         [_patsHome cfg, _patsHome cfg </> "bin:" ++ path, _patsHomeLocs cfg ]
 
 atsToC :: FilePath -> FilePath
@@ -156,11 +155,11 @@ satsGen (HATSGen x y) = genLinks x y
 atsBin :: ATSTarget -> Rules ()
 atsBin ATSTarget{..} = do
 
-    mapM_ satsGen _linkTargets
+    traverse_ satsGen _linkTargets
 
-    mapM_ hsAts _genTargets
+    traverse_ hsAts _genTargets
 
-    mapM_ (cabalForeign (_cc _toolConfig)) _hsLibs
+    traverse_ (cabalForeign (_cc _toolConfig)) _hsLibs
 
     let cTargets = atsToC <$> _src
 

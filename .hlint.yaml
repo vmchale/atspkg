@@ -16,6 +16,8 @@
 - error: {lhs: "over _2 f x", rhs: "second f x", name: "Use arrows"}
 - error: {lhs: "bool x x p", rhs: "x", name: "Avoid bool"}
 - error: {lhs: "const", rhs: "pure", name: "Use pure"}
+- error: {lhs: "mapM", rhs: "traverse"}
+- error: {lhs: "mapM_", rhs: "traverse_"}
 
 - ignore: {name: Avoid lambda, within: [Language.ATS.Types]}
 - ignore: {name: Use <$>, within: [Language.ATS.PrettyPrint]}
@@ -23,3 +25,8 @@
 - ignore: {name: Functor law, within: [Language.ATS.PrettyPrint]}
 - ignore: {name: Evaluate, within: [Language.ATS.Generate]}
 - ignore: {name: Use foldr}
+
+- fixity: infixr 8 .*
+- fixity: infixr 3 ***
+- fixity: infixr 3 &&&
+- fixity: infixr 1 <=<

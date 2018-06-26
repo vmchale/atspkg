@@ -23,11 +23,6 @@ flag development
     default: False
     manual: True
 
-flag no-executable
-    description:
-        Disable building the executable
-    default: False
-
 library
     exposed-modules:
         Language.C.Dependency
@@ -69,9 +64,6 @@ executable cdeps
         base -any,
         cdeps -any,
         optparse-applicative -any
-    
-    if flag(no-executable)
-        buildable: False
     
     if (flag(development) && impl(ghc <8.4))
         ghc-options: -Werror

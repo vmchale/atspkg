@@ -57,9 +57,9 @@ setBuildPlan p getDeps url deps = do
             pkgSet <- listDeps False url
             case mkBuildPlan getDeps pkgSet deps of
                 Left x  -> resolutionFailed x
-                Right x -> createDirectoryIfMissing True ".atspkg" >>
-                           BSL.writeFile depCache (encode x) >>
-                           pure x
+                Right x -> createDirectoryIfMissing True ".atspkg" *>
+                           BSL.writeFile depCache (encode x) $>
+                           x
 
 mkBuildPlan :: DepSelector
             -> ATSPackageSet

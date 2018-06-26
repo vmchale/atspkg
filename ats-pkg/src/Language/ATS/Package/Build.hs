@@ -42,7 +42,7 @@ buildAll :: Int
          -> Maybe String
          -> Maybe FilePath
          -> IO ()
-buildAll v tgt' p = on (>>) (=<< wants p) fetchDef setupDef
+buildAll v tgt' p = on (*>) (=<< wants p) fetchDef setupDef
     where fetchDef = fetchCompiler
           setupDef = setupCompiler (toVerbosity v) atslibSetup tgt'
 
@@ -130,7 +130,7 @@ mkPhony cmdStr f select rs =
         config <- getConfig Nothing
         let runs = bool (filter (/= cmdStr) rs) (fmap (unpack . target) . select $ config) (rs == [cmdStr])
         need runs
-        mapM_ cmd_ (f <$> runs)
+        traverse_ cmd_ (f <$> runs)
 
 mkValgrind :: [String] -> Rules ()
 mkValgrind = mkPhony "valgrind" ("valgrind " <>) bin
@@ -291,18 +291,18 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf af as
             (_, cfgBin') <- cfgBin
             need [ cfgBin', flags, ".atspkg" </> "config" ]
             v'' <- getVerbosity
-            liftIO $ fetchDeps v'' (ccFromString cc') setup (unpack . fst <$> ds) (unpack . fst <$> cdps) (unpack . fst <$> bdeps) cfgBin' atslibSetup False >> writeFile out ""
+            liftIO $ fetchDeps v'' (ccFromString cc') setup (unpack . fst <$> ds) (unpack . fst <$> cdps) (unpack . fst <$> bdeps) cfgBin' atslibSetup False *> writeFile out ""
 
         let bins = toTgt tgt . target <$> bs
         setTargets rs bins mt
 
         ph <- home' v' v
 
-        cDepsRules ph >> bits tgt rs
+        cDepsRules ph *> bits tgt rs
 
-        mapM_ (h ph) lbs
+        traverse_ (h ph) lbs
 
-        mapM_ (g ph) (bs ++ ts)
+        traverse_ (g ph) (bs ++ ts)
 
         fold (debRules <$> deb)
 

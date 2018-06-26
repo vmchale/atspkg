@@ -6,7 +6,6 @@ license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
 maintainer: vamchale@gmail.com
 author: Vanessa McHale
-homepage: https://github.com/vmchale/atspkg/tree/master/ats-pkg#readme
 bug-reports: https://github.com/vmchale/atspkg/issues
 synopsis: A build tool for ATS
 description:
@@ -29,11 +28,6 @@ custom-setup
     setup-depends: base -any,
                    Cabal >=2.2,
                    cli-setup >=0.2.0.1
-
-flag static
-    description:
-        Make static binaries
-    default: False
 
 flag profile
     description:
@@ -164,6 +158,3 @@ executable atspkg
     
     if flag(development)
         ghc-options: -Werror
-    
-    if flag(static)
-        ghc-options: -static -optc-static -optl-static

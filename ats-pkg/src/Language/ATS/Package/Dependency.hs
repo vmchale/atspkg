@@ -57,15 +57,15 @@ fetchDeps v cc' setup' deps cdeps atsBld cfgPath als b' =
             unpacked = fmap (over dirLens (pack d <>)) <$> cdeps'
             clibs = fmap (buildHelper False) (join unpacked)
             atsLibs = fmap (buildHelper False) (join atsDeps')
-            cBuild = mapM_ (setup v cc') <$> (transpose . fmap reverse) unpacked
-            atsBuild = mapM_ (atsPkgSetup als tgt') <$> (transpose . fmap reverse) atsDeps'
+            cBuild = traverse_ (setup v cc') <$> (transpose . fmap reverse) unpacked
+            atsBuild = traverse_ (atsPkgSetup als tgt') <$> (transpose . fmap reverse) atsDeps'
 
         -- Fetch all packages & build compiler
         parallel' $ join [ setup', libs', clibs, atsLibs ]
 
         let tagBuild str bld =
                 unless (null bld) $
-                    putStrLn (mconcat ["Building ", str, " dependencies..."]) >>
+                    putStrLn (mconcat ["Building ", str, " dependencies..."]) *>
                     sequence_ bld -- FIXME parallel'
 
         zipWithM_ tagBuild [ "C", "ATS" ] [ cBuild, atsBuild ]

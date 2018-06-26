@@ -7,6 +7,7 @@ module Development.Shake.ATS.Rules ( atsLex
                                    ) where
 
 import           Control.Monad
+import           Data.Foldable
 import           Data.Semigroup                 (Semigroup (..))
 import qualified Data.Text.Lazy                 as TL
 import           Development.Shake              hiding (doesDirectoryExist)
@@ -35,7 +36,7 @@ genLinks dats link =
     link %> \out -> liftIO $ do
         contents <- readFile dats
         let proc = generateLinks contents
-        writeFile out (either undefined id proc)
+        writeFile out (either undefined id proc) -- FIXME better error
 
 -- | Get subdirectories recursively.
 getSubdirs :: FilePath -> IO [FilePath]
@@ -45,12 +46,12 @@ getSubdirs p = do
         [] -> pure []
         xs -> do
             ds' <- filterM doesDirectoryExist ((p </>) <$> xs)
-            ss <- mapM getSubdirs ds'
-            pure $ ds' <> join ss
+            ss <- traverse getSubdirs ds'
+            pure $ ds' <> fold ss
 
 -- | These rules take a @.cabal@ file and the @.o@ file to be produced from
 -- them, building the @.o@ file.
-cabalForeign :: CCompiler -> ForeignCabal -> Rules ()
+cabalForeign :: CCompiler -> ForeignCabal -> Rules () -- TODO HsCompiler?
 cabalForeign (GHC _ suff) (ForeignCabal cbp' cf' obf') = do
 
     let cf = TL.unpack cf'
@@ -65,10 +66,9 @@ cabalForeign (GHC _ suff) (ForeignCabal cbp' cf' obf') = do
         ghcV' <- quietly ghcVersion
         let ghcV = maybe ghcV' (drop 1) suff
 
-        need (cf : fmap ((obfDir <> "/") <>) trDeps)
+        need (cf : fmap ((obfDir <> [pathSeparator]) <>) trDeps)
         command_ [Cwd obfDir] "cabal" ["new-build", "all", "-w", "ghc-" ++ ghcV]
 
-        -- TODO move this to the @shake-ext@ package?
         let subdir = takeDirectory cbp
             correctDir = (== "build")
             endsBuild = correctDir . last . splitPath
@@ -80,7 +80,7 @@ cabalForeign (GHC _ suff) (ForeignCabal cbp' cf' obf') = do
 
         let hdr = dropExtension obj ++ "_stub.h"
         liftIO $ copyFile hdr (takeDirectory out </> takeFileName hdr)
-cabalForeign _ _ = mempty
+cabalForeign _ _ = mempty -- FXIME error here?
 
 -- | Build a @.lats@ file using @atslex@.
 atsLex :: FilePath -- ^ Filepath of @.lats@ file

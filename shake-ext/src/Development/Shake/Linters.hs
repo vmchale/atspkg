@@ -11,18 +11,19 @@ module Development.Shake.Linters ( tomlcheck
                                  , clangFormat
                                  , atsfmt
                                  , stylishHaskell
+                                 , cFormat
                                  -- * File detection
                                  , module Development.Shake.FileDetect
                                  ) where
 
-import           Control.Monad
 import           Data.Char                    (isSpace)
+import           Data.Foldable                (traverse_)
 import           Development.Shake
 import           Development.Shake.FileDetect
 
 -- | Check all @.dhall@ files.
 dhall :: Action ()
-dhall = mapM_ checkDhall =<< getDhall
+dhall = traverse_ checkDhall =<< getDhall
 
 checkDhall :: FilePath -> Action ()
 checkDhall dh = do
@@ -30,7 +31,7 @@ checkDhall dh = do
     command [Stdin contents] "dhall" []
 
 trim :: String -> String
-trim = join fmap f
+trim = f . f
    where f = reverse . dropWhile isSpace
 
 -- | Check a given formatter is idempotent.
@@ -42,18 +43,22 @@ checkIdempotent s p = do
 
 -- | Check that given files are formatted according to @stylish-haskell@
 stylishHaskell :: [FilePath] -> Action ()
-stylishHaskell = mapM_ (checkIdempotent "stylish-haskell")
+stylishHaskell = traverse_ (checkIdempotent "stylish-haskell")
 
 -- | Check that given files are formatted according to @atsfmt@
 atsfmt :: [FilePath] -> Action ()
-atsfmt = mapM_ (checkIdempotent "atsfmt")
+atsfmt = traverse_ (checkIdempotent "atsfmt")
 
 -- | Check that given files are formatted according to @clang-format@
 clangFormat :: [FilePath] -> Action ()
-clangFormat = mapM_ (checkIdempotent "clang-format")
+clangFormat = traverse_ (checkIdempotent "clang-format")
+
+-- | Check all @.c@ files using @clang-format@.
+cFormat :: Action ()
+cFormat = clangFormat =<< getC
 
 checkFiles :: String -> [FilePath] -> Action ()
-checkFiles str = mapM_ (cmd_ . ((str ++ " ") ++))
+checkFiles str = traverse_ (cmd_ . ((str ++ " ") ++))
 
 -- | Check all @.mad@ files.
 madlang :: [FilePath] -> Action ()

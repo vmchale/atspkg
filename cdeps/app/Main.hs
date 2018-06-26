@@ -1,6 +1,7 @@
 module Main (main) where
 
 import           Control.Monad
+import           Data.Foldable
 import           Data.Semigroup        hiding (getAll)
 import           Data.Version          (showVersion)
 import           Language.C.Dependency
@@ -31,7 +32,7 @@ target = argument str
     <> cCompletions)
 
 run :: Command -> IO ()
-run (Dump cSrc is) = (mapM_ putStrLn <=< getAll is) cSrc
+run (Dump cSrc is) = (traverse_ putStrLn <=< getAll is) cSrc
 
 versionInfo :: Parser (a -> a)
 versionInfo = infoOption ("cdeps version: " ++ showVersion version) (short 'V' <> long "version" <> help "Show version")

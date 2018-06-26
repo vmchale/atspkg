@@ -13,6 +13,7 @@ import           Control.Arrow
 import           Data.Bool                    (bool)
 import           Data.Char                    (toUpper)
 import           Data.Either                  (lefts, rights)
+import           Data.Foldable
 import           Data.Maybe
 import           Language.ATS                 as ATS
 import           Language.ATS.Generate.Error
@@ -81,7 +82,7 @@ typeToType (TyApp _ t@TyApp{} t')             = over typeCallArgs <$> fmap (:) (
 typeToType (TyParen _ t)                      = typeToType t
 typeToType (TyBang _ _ _ t)                   = typeToType t
 typeToType (TyFun _ t t')                     = FunctionType "-<lincloptr1>" <$> typeToType t <*> typeToType t'
-typeToType (TyTuple _ _ ts)                   = ATS.Tuple undefined <$> mapM typeToType ts
+typeToType (TyTuple _ _ ts)                   = ATS.Tuple undefined <$> traverse typeToType ts
 typeToType _                                  = Left $ Unsupported "typeToType"
 
 fieldDeclToType :: FieldDecl a -> ErrM (String, ATS.Type b)
@@ -91,8 +92,8 @@ fieldDeclToType _                   = Left $ Unsupported "fieldDeclToType"
 conDeclToType :: ConDecl a -> ErrM (String, Maybe (ATS.Type b))
 conDeclToType (ConDecl _ n [])  = Right (toStringATS n, Nothing)
 conDeclToType (ConDecl _ n [t]) = (,) (toStringATS n) . Just <$> typeToType t
-conDeclToType (ConDecl _ n ts)  = (,) (toStringATS n) . Just . ATS.Tuple undefined <$> mapM typeToType ts
-conDeclToType (RecDecl _ n fs)  = (,) (toStringATS n) . Just . AnonymousRecord undefined <$> mapM fieldDeclToType (reverse fs)
+conDeclToType (ConDecl _ n ts)  = (,) (toStringATS n) . Just . ATS.Tuple undefined <$> traverse typeToType ts
+conDeclToType (RecDecl _ n fs)  = (,) (toStringATS n) . Just . AnonymousRecord undefined <$> traverse fieldDeclToType (reverse fs)
 conDeclToType _                 = unsupported "conDeclToType"
 
 toStringATS :: HS.Name a -> String
@@ -130,7 +131,7 @@ asATSType :: Decl a -> ErrM (Declaration b)
 asATSType (TypeDecl _ dh t) = ViewTypeDef undefined <$> (fst <$> asATSName dh) <*> (pruneATSNils . snd <$> asATSName dh) <*> typeToType t
 asATSType (DataDecl _ NewType{} _ dh [qcd] _)  = ViewTypeDef undefined <$> (fst <$> asATSName dh) <*> (pruneATSNils . snd <$> asATSName dh) <*> qualConDeclToType qcd
 asATSType (DataDecl _ DataType{} _ dh [qcd] _) = ViewTypeDef undefined <$> (fst <$> asATSName dh) <*> (pruneATSNils . snd <$> asATSName dh) <*> qualConDeclToType qcd
-asATSType (DataDecl _ DataType{} _ dh qcds _)  = SumViewType <$> (fst <$> asATSName dh) <*> (pruneATSNils . snd <$> asATSName dh) <*> mapM qualConDeclToLeaf (reverse qcds)
+asATSType (DataDecl _ DataType{} _ dh qcds _)  = SumViewType <$> (fst <$> asATSName dh) <*> (pruneATSNils . snd <$> asATSName dh) <*> traverse qualConDeclToLeaf (reverse qcds)
 asATSType _                                    = unsupported "asATSType"
 
 -- TODO GDataDecl
@@ -180,5 +181,5 @@ genATSTypes :: FilePath -- ^ Haskell source file
 genATSTypes p p' withCPP = do
     let proc = bool pure (process p) withCPP
     contents <- proc =<< readFile p
-    let warnDo (x, es) = mapM_ displayErr es >> writeFile p' x
+    let warnDo (x, es) = traverse_ displayErr es *> writeFile p' x
     either displayErr warnDo (generateATS p contents)

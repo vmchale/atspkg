@@ -203,7 +203,7 @@ main = execParser wrapper >>= run
 
 runHelper :: Bool -> Bool -> Bool -> [String] -> Maybe String -> Int -> IO ()
 runHelper rba lint tim rs tgt v = g . bool x y . (&& isNothing tgt) =<< check Nothing
-    where g xs = mkPkg rba lint tim xs rs tgt v >> stopGlobalPool
+    where g xs = mkPkg rba lint tim xs rs tgt v *> stopGlobalPool
           y = mempty
           x = [buildAll v tgt Nothing]
 
