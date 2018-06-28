@@ -26,7 +26,7 @@ in
 let curl =
   λ(x : List Natural) →
     prelude.dep ⫽
-      { libName = "ats-includes"
+      { libName = "curl"
       , dir = "curl-${prelude.showVersion x}"
       , url = "https://curl.haxx.se/download/curl-${prelude.showVersion x}.tar.xz"
       , libVersion = x
