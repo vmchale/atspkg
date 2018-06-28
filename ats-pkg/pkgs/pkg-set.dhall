@@ -23,6 +23,16 @@ let atsIncludes =
       }
 in
 
+let curl =
+  λ(x : List Natural) →
+    prelude.dep ⫽
+      { libName = "ats-includes"
+      , dir = "curl-${prelude.showVersion x}"
+      , url = "https://curl.haxx.se/download/curl-${prelude.showVersion x}.tar.xz"
+      , libVersion = x
+      }
+in
+
 let unistring =
   makeGnuPkg { version = [0,9,9], name = "unistring" }
 in
@@ -97,6 +107,7 @@ let pkgset =
   , fastArithmetic [0,6,0,6]
   , unistring
   , atsIncludes [0,3,11]
+  , curl [7,60,0]
   , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall [0,2,3]
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,8]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,2]

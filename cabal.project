@@ -22,8 +22,7 @@ constraints:
   shake-cabal +development,
   shake-c +development,
   micro-recursion-schemes -template-haskell,
-  reflection -template-haskell,
-  lens -template-haskell
+  reflection -template-haskell
 
 executable-stripping: true
 
