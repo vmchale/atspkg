@@ -13,6 +13,7 @@ module Language.ATS.Package.Build ( mkPkg
 import qualified Data.ByteString                 as BS
 import qualified Data.ByteString.Lazy            as BSL
 import           Data.List                       (intercalate)
+import qualified Data.Text                       as T
 import           Development.Shake               (alwaysRerun, getVerbosity)
 import           Development.Shake.ATS
 import           Development.Shake.C             (ccFromString)
@@ -118,7 +119,7 @@ getConfig dir' = liftIO $ do
     d <- fromMaybe <$> fmap (</> "atspkg.dhall") getCurrentDirectory <*> pure dir'
     b <- not <$> doesFileExist ".atspkg/config"
     if b
-        then input auto (pack d)
+        then input auto (T.pack d)
         else fmap (decode . BSL.fromStrict) . BS.readFile $ ".atspkg/config"
 
 manTarget :: Text -> FilePath

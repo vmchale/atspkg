@@ -9,7 +9,7 @@ module Language.ATS.Package.Config ( UserConfig (..)
 
 import qualified Data.ByteString.Lazy as BSL
 import           Data.FileEmbed
-import qualified Data.Text.Lazy       as TL
+import qualified Data.Text            as T
 import           Quaalude
 
 data UserConfig = UserConfig { defaultPkgs    :: Text
@@ -50,7 +50,7 @@ mkUserConfig = do
 
             cfgBin' %> \_ -> do
                 need [cfg]
-                cfgContents <- liftIO $ input auto (TL.pack cfg)
+                cfgContents <- liftIO $ input auto (T.pack cfg)
                 liftIO $ BSL.writeFile cfgBin' (encode (cfgContents :: UserConfig))
 
 readUserConfig :: FilePath -> FilePath -> Rules ()

@@ -132,11 +132,11 @@ import           Data.Functor                 (($>))
 import           Data.List
 import           Data.Maybe                   (fromMaybe)
 import           Data.Semigroup
-import           Data.Text.Lazy               (pack, unpack)
+import           Data.Text.Lazy               (Text, pack, unpack)
 import           Data.Version                 (showVersion)
 import           Development.Shake            hiding (getEnv)
 import           Development.Shake.FilePath
-import           Dhall                        hiding (bool)
+import           Dhall                        hiding (bool, Text)
 import           Lens.Micro                   hiding (both)
 import           Lens.Micro.Extras
 import           Network.HTTP.Client

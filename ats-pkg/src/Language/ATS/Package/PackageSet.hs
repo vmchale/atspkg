@@ -12,6 +12,7 @@ import qualified Data.ByteString.Lazy       as BSL
 import           Data.Dependency
 import qualified Data.Map                   as M
 import qualified Data.Set                   as S
+import qualified Data.Text                  as T
 import           Language.ATS.Package.Error
 import           Language.ATS.Package.Type
 import           Quaalude
@@ -39,7 +40,7 @@ displayList = putDoc . pretty <=< listDeps True
 listDeps :: Bool -- ^ Whether to sort dependencies
          -> String -- ^ URL of package set
          -> IO ATSPackageSet
-listDeps b = fmap s . input auto . pack
+listDeps b = fmap s . input auto . T.pack
     where s = bool id s' b
           s' = over atsPkgSet (sortBy (compare `on` libName))
 

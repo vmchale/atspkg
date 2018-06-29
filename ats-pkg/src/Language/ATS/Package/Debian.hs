@@ -13,10 +13,9 @@ module Language.ATS.Package.Debian ( debRules
 import           Data.Dependency            (Version (..))
 import           Data.Hashable              (Hashable)
 import           Data.List                  (intercalate)
-import           Data.Text.Lazy             (Text)
 import           Development.Shake          hiding ((*>))
 import           Development.Shake.FilePath
-import           Dhall
+import           Dhall                      hiding (Text)
 import           Quaalude
 
 data Debian = Debian { package     :: Text

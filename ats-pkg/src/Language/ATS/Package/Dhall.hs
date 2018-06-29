@@ -3,6 +3,7 @@ module Language.ATS.Package.Dhall ( checkPkgSet
                                   ) where
 
 import           Data.Dependency
+import qualified Data.Text                       as T
 import           Language.ATS.Package.PackageSet
 import           Language.ATS.Package.Type
 import           Quaalude
@@ -19,7 +20,7 @@ checkDhall :: Interpret a
            -> IO a
 checkDhall path d =
     bool id detailed d $
-        input auto (pack ('.' : pathSeparator : path))
+        input auto (T.pack ('.' : pathSeparator : path))
 
 checkPkgSet :: FilePath -- ^ Path to @.dhall@ file defining a package set.
             -> Bool -- ^ Whether to print detailed error messages.
