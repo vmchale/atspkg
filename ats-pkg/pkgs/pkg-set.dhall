@@ -23,16 +23,6 @@ let atsIncludes =
       }
 in
 
-let openssl =
-  λ(x : List Natural) →
-    prelude.dep ⫽
-      { libName = "ssl"
-      , dir = "openssl-${prelude.showVersion x}"
-      , url = "https://www.openssl.org/source/openssl-${prelude.showVersion x}h.tar.gz"
-      , libVersion = x
-      }
-in
-
 let curl =
   λ(x : List Natural) →
     prelude.dep ⫽
@@ -119,7 +109,6 @@ let pkgset =
   , unistring
   , atsIncludes [0,3,11]
   , curl [7,60,0]
-  , openssl [1,1,0]
   , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall [0,2,3]
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,8]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,2]
