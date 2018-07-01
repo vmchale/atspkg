@@ -1,7 +1,7 @@
 {- Dhall prelude functions -}
-let concatMapSep = http://hackage.haskell.org/package/dhall-1.14.0/src/Prelude/Text/concatMapSep
+let concatMapSep = http://hackage.haskell.org/package/dhall/src/Prelude/Text/concatMapSep
 in
-let map = http://hackage.haskell.org/package/dhall-1.14.0/src/Prelude/List/map
+let map = http://hackage.haskell.org/package/dhall/src/Prelude/List/map
 in
 
 {- Types for export and supporting functions -}

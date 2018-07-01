@@ -1,11 +1,11 @@
 {- Dhall prelude imports -}
-let map = http://hackage.haskell.org/package/dhall-1.14.0/src/Prelude/List/map
+let map = http://hackage.haskell.org/package/dhall/src/Prelude/List/map
 in
-let concat = http://hackage.haskell.org/package/dhall-1.14.0/src/Prelude/List/concat
+let concat = http://hackage.haskell.org/package/dhall/src/Prelude/List/concat
 in
 
 {- ATSPackage parts -}
-let prelude = https://raw.githubusercontent.com/vmchale/atspkg/master/ats-pkg/dhall/atspkg-prelude.dhall
+let prelude = http://hackage.haskell.org/package/ats-pkg/src/dhall/atspkg-prelude.dhall
 in
 
 {- Helper functions -}

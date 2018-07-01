@@ -22,14 +22,15 @@ constraints:
   shake-cabal +development,
   shake-c +development,
   micro-recursion-schemes -template-haskell,
-  reflection -template-haskell
+  reflection -template-haskell,
+  tar >= 0.5.1.0
 
 executable-stripping: true
 
 optimization: 2
-tests: True
-benchmarks: True
-documentation: True
+-- tests: True
+-- benchmarks: True
+-- documentation: True
 
 program-options
   happy-options: -gcsa
