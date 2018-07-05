@@ -28,9 +28,6 @@ constraints:
 executable-stripping: true
 
 optimization: 2
--- tests: True
--- benchmarks: True
--- documentation: True
 
 program-options
   happy-options: -gcsa

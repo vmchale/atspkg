@@ -23,7 +23,6 @@ module Quaalude ( hex
                 , (***)
                 , (&&&)
                 , (<=<)
-                , (<>)
                 , ($>)
                 , first
                 , second
@@ -131,7 +130,6 @@ import           Data.Foldable                (fold, traverse_)
 import           Data.Functor                 (($>))
 import           Data.List
 import           Data.Maybe                   (fromMaybe)
-import           Data.Semigroup
 import           Data.Text.Lazy               (Text, pack, unpack)
 import           Data.Version                 (showVersion)
 import           Development.Shake            hiding (getEnv)

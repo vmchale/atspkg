@@ -14,7 +14,7 @@ import Data.Bool (bool)
 import qualified Data.Text.Lazy as TL
 import Data.Text.Lazy.Encoding (decodeUtf8)
 import qualified Data.ByteString.Lazy as BSL
-import System.FilePath (takeDirectory)
+import System.FilePath ((</>), takeDirectory)
 import System.Environment (lookupEnv)
 import Control.Monad
 
@@ -126,7 +126,7 @@ getCDepends incls src = liftIO $ do
     let incl = includes' contents
         dir = takeDirectory src
         allDirs = dir : incls ++ split envPath
-    filterM doesFileExist ((++) <$> allDirs <*> incl)
+    filterM doesFileExist ((</>) <$> allDirs <*> incl)
 
 -- | Get transitive dependencies of a C source file.
 getAll :: MonadIO m

@@ -8,7 +8,6 @@ import           Control.Concurrent.ParallelIO.Global
 import           Control.Monad
 import           Data.Bool                            (bool)
 import           Data.Maybe                           (fromMaybe, isNothing)
-import           Data.Semigroup                       (Semigroup (..))
 import qualified Data.Text.Lazy                       as TL
 import           Data.Version                         hiding (Version (..))
 import           Development.Shake.ATS

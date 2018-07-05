@@ -19,7 +19,6 @@ import           Data.Binary
 import           Data.Functor.Foldable
 import           Data.List                    (intercalate)
 import qualified Data.Map                     as M
-import           Data.Semigroup
 import qualified Data.Set                     as S
 import           GHC.Generics                 (Generic)
 import           GHC.Natural                  (Natural)
