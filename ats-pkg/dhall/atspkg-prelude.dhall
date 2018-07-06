@@ -260,6 +260,9 @@ let noPrelude =
   [ "-D_ATS_CCOMP_PRELUDE_NONE_", "-D_ATS_CCOMP_EXCEPTION_NONE_", "-D_ATS_CCOMP_RUNTIME_NONE_" ]
 in
 
+let atsProject = "target"
+in
+
 {- We collect everything in a single record for convenience -}
 { mkDeb = mkDeb
 , emptySrc = emptySrc
@@ -285,4 +288,5 @@ in
 , ignore = ignore
 , debian = debian
 , noPrelude = noPrelude
+, atsProject
 }

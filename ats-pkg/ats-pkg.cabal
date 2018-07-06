@@ -1,6 +1,6 @@
-cabal-version: 1.18
+cabal-version: 2.0
 name: ats-pkg
-version: 2.11.0.10
+version: 3.0.0.0
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -11,9 +11,10 @@ synopsis: A build tool for ATS
 description:
     A collection of scripts to simplify building ATS projects.
 category: Development, ATS
-build-type: Custom
-extra-source-files:
+build-type: Simple
+data-files:
     man/atspkg.1
+extra-source-files:
     dhall/config.dhall
     dhall/atslib.dhall
     dhall/atspkg-prelude.dhall
@@ -23,11 +24,6 @@ extra-doc-files: README.md
 source-repository head
     type: git
     location: git@github.com:vmchale/atspkg.git
-
-custom-setup
-    setup-depends: base -any,
-                   Cabal >=2.2,
-                   cli-setup >=0.2.0.1
 
 flag profile
     description:
@@ -51,7 +47,6 @@ library
     exposed-modules:
         Language.ATS.Package
         Distribution.ATS
-    build-tools: cpphs -any
     hs-source-dirs: src
     other-modules:
         Paths_ats_pkg
@@ -61,16 +56,14 @@ library
         Language.ATS.Package.Compiler
         Language.ATS.Package.Config
         Language.ATS.Package.Dependency
-        Language.ATS.Package.Dhall
         Language.ATS.Package.Error
         Language.ATS.Package.Generic
         Language.ATS.Package.PackageSet
         Language.ATS.Package.Type
-        Language.ATS.Package.Upgrade
         Language.ATS.Package.Debian
         Distribution.ATS.Version
-        System.Process.Ext
-        Quaalude
+    autogen-modules:
+        Paths_ats_pkg
     default-language: Haskell2010
     other-extensions: OverloadedStrings GADTs
                       GeneralizedNewtypeDeriving DeriveAnyClass DeriveGeneric
@@ -91,7 +84,6 @@ library
         zlib -any,
         http-client-tls -any,
         text -any,
-        directory -any,
         process -any,
         hashable -any,
         containers -any,
@@ -102,28 +94,54 @@ library
         shake-ats >=1.8.0.0,
         shake-ext >=3.0.0.0,
         shake-c -any,
-        composition-prelude >=1.3.0.0,
         zip-archive -any,
         ansi-wl-pprint -any,
-        binary -any,
-        microlens -any,
         dependency >=1.2.0.0,
         filemanip -any,
-        filepath -any
+        quaalude -any
+    
+    if flag(development)
+        ghc-options: -Werror
+
+library quaalude
+    exposed-modules:
+        Quaalude
+    build-tools: cpphs -any
+    hs-source-dirs: internal
+    other-modules:
+        System.Process.Ext
+    default-language: Haskell2010
+    build-depends:
+        base -any,
+        http-client -any,
+        http-client-tls -any,
+        process -any,
+        directory -any,
+        filepath -any,
+        microlens -any,
+        dhall -any,
+        ansi-wl-pprint -any,
+        shake -any,
+        bytestring -any,
+        composition-prelude >=1.3.0.0,
+        binary -any,
+        text -any
     
     if !os(windows)
         build-depends:
             unix -any
-    
-    if flag(development)
-        ghc-options: -Werror
 
 executable atspkg
     main-is: Main.hs
     hs-source-dirs: app
     other-modules:
         Paths_ats_pkg
+        Language.ATS.Package.Dhall
+        Language.ATS.Package.Upgrade
+    autogen-modules:
+        Paths_ats_pkg
     default-language: Haskell2010
+    other-extensions: OverloadedStrings
     ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall
                  -with-rtsopts=-I0 -Wincomplete-uni-patterns
                  -Wincomplete-record-updates
@@ -138,7 +156,11 @@ executable atspkg
         composition-prelude -any,
         text -any,
         parallel-io -any,
-        shake -any
+        quaalude -any,
+        dependency -any,
+        bytestring -any,
+        shake -any,
+        cli-setup -any
     
     if flag(eventlog)
         ghc-options: -eventlog -with-rtsopts=-l

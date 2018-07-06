@@ -3,9 +3,8 @@ module Language.ATS.Package.Dhall ( checkPkgSet
                                   ) where
 
 import           Data.Dependency
-import qualified Data.Text                       as T
-import           Language.ATS.Package.PackageSet
-import           Language.ATS.Package.Type
+import qualified Data.Text            as T
+import           Language.ATS.Package
 import           Quaalude
 
 -- | Check a @pkg.dhall@ file.

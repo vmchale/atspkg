@@ -50,6 +50,8 @@ to $HOME/.local/share/man/man1
 **pack** - Create a tarball suitable for packaging the compiler. Takes as an
 argument a directory containing the unpacked compiler.
 
+**setup** - Set up manpages and shell completions.
+
 # OPTIONS
 
 **-h** **-\-help**

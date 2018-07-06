@@ -7,14 +7,19 @@ import           Control.Composition
 import           Control.Concurrent.ParallelIO.Global
 import           Control.Monad
 import           Data.Bool                            (bool)
+import           Data.Foldable                        (fold)
 import           Data.Maybe                           (fromMaybe, isNothing)
 import qualified Data.Text.Lazy                       as TL
 import           Data.Version                         hiding (Version (..))
 import           Development.Shake.ATS
 import           Development.Shake.FilePath
+import           Distribution.CommandLine
 import           Language.ATS.Package
+import           Language.ATS.Package.Dhall
+import           Language.ATS.Package.Upgrade
 import           Lens.Micro
 import           Options.Applicative
+import           Paths_ats_pkg
 import           System.Directory
 import           System.IO.Temp                       (withSystemTempDirectory)
 
@@ -57,6 +62,7 @@ data Command = Install { _archTarget :: Maybe String }
              | Check { _filePath :: String, _details :: Bool }
              | CheckSet { _filePath :: String, _details :: Bool }
              | List
+             | Setup
 
 userCmd :: Parser Command
 userCmd = hsubparser
@@ -72,6 +78,7 @@ userCmd = hsubparser
     <> command "check" (info check' (progDesc "Check that a pkg.dhall file is well-typed."))
     <> command "check-set" (info checkSet (progDesc "Audit a package set to ensure it is well-typed."))
     <> command "list" (info (pure List) (progDesc "List available packages"))
+    <> command "setup" (info (pure Setup) (progDesc "Install manpages and shell completions."))
     )
 
 command' :: Parser Command
@@ -220,3 +227,13 @@ run (Run ts rba v lint tim)       = runHelper rba lint tim ("run" : ts) Nothing 
 run (Install tgt)                 = runHelper False True False ["install"] tgt 0
 run (Valgrind ts)                 = runHelper False True False ("valgrind" : ts) Nothing 0
 run (Pack dir')                   = packageCompiler dir'
+run Setup                         = installActions
+
+installActions :: IO ()
+installActions = do
+    path <- getDataFileName "man/atspkg.1"
+    fold
+        [ writeManpages path "atspkg.1"
+        , writeTheFuck
+        , writeBashCompletions "atspkg"
+        ]

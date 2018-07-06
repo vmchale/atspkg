@@ -14,7 +14,6 @@ module Language.ATS.Package.Compiler
 
 import qualified Codec.Archive.Tar       as Tar
 import           Codec.Compression.GZip  (compress, decompress)
-import           Control.Composition
 import           Control.Monad
 import qualified Data.ByteString.Lazy    as BS
 import           Data.Dependency
@@ -24,7 +23,6 @@ import           Network.HTTP.Client.TLS (tlsManagerSettings)
 import           Quaalude
 import           System.Environment      (getEnv)
 import           System.FilePath.Find    (find)
-import           System.Process.Ext      (silentCreateProcess)
 
 libatsCfg :: String
 libatsCfg = $(embedStringFile ("dhall" </> "atslib.dhall"))
