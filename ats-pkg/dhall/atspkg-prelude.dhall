@@ -288,5 +288,5 @@ in
 , ignore = ignore
 , debian = debian
 , noPrelude = noPrelude
-, atsProject
+, atsProject = atsProject
 }
