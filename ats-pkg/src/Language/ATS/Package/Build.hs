@@ -237,7 +237,7 @@ pkgHome cc' = liftIO $ (</> (".atspkg" </> ccToDir cc')) <$> getEnv "HOME"
 
 -- | The directory that will be @PATSHOME@.
 patsHomeAtsPkg :: MonadIO m => Version -> m String
-patsHomeAtsPkg v = fmap (</> show v) (pkgHome (GCC Nothing))
+patsHomeAtsPkg v = fmap (</> show v) (pkgHome (GCC Nothing Nothing))
 
 home' :: MonadIO m => Version -- ^ Compiler version
                    -> Version -- ^ Library version

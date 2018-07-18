@@ -25,7 +25,7 @@ import           Language.ATS.Package.Type
 import           Quaalude
 
 getTgt :: CCompiler -> Maybe String
-getTgt (GCC x)   = x
+getTgt (GCC x _) = x
 getTgt (GHC x _) = x
 getTgt _         = Nothing
 
@@ -78,7 +78,7 @@ atsPkgSetup :: SetupScript
             -> ATSDependency
             -> IO ()
 atsPkgSetup als tgt' (ATSDependency lib' dirName' _ _ _ _ _ _ _) = do
-    lib'' <- (<> unpack lib') <$> cpkgHome (GCC Nothing)
+    lib'' <- (<> unpack lib') <$> cpkgHome (GCC Nothing Nothing)
     b <- doesFileExist lib''
     unless b $ do
         als tgt' (unpack lib') (unpack dirName')

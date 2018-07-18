@@ -116,6 +116,7 @@ let pkgset =
   , https://raw.githubusercontent.com/vmchale/either/master/pkg.dhall [0,2,2]
   , https://raw.githubusercontent.com/vmchale/ats-linecount/master/pkg.dhall [0,2,5]
   , https://raw.githubusercontent.com/vmchale/specats/master/pkg.dhall [0,2,3]
+  , https://raw.githubusercontent.com/vmchale/edit-distance/master/pkg.dhall [0,1,0]
   ]
 
 in pkgset

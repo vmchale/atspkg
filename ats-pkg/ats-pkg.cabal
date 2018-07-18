@@ -1,6 +1,6 @@
 cabal-version: 2.0
 name: ats-pkg
-version: 3.0.0.1
+version: 3.0.0.2
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -93,7 +93,7 @@ library
         ansi-wl-pprint -any,
         shake-ats >=1.8.0.0,
         shake-ext >=3.0.0.0,
-        shake-c -any,
+        shake-c >=0.4.0.0,
         zip-archive -any,
         ansi-wl-pprint -any,
         dependency >=1.2.0.0,

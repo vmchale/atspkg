@@ -134,7 +134,7 @@ import           Data.Text.Lazy               (Text, pack, unpack)
 import           Data.Version                 (showVersion)
 import           Development.Shake            hiding (getEnv)
 import           Development.Shake.FilePath
-import           Dhall                        hiding (bool, Text)
+import           Dhall                        hiding (Text, bool)
 import           Lens.Micro                   hiding (both)
 import           Lens.Micro.Extras
 import           Network.HTTP.Client
@@ -149,7 +149,7 @@ import           System.Posix.Files
 #endif
 import           System.Process               as X
 import           System.Process.Ext
-import           Text.PrettyPrint.ANSI.Leijen hiding (bool, (<$>), (<>), (</>))
+import           Text.PrettyPrint.ANSI.Leijen hiding (bool, (<$>), (</>), (<>))
 
 infixr 5 <#>
 

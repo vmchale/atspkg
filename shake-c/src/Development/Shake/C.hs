@@ -64,22 +64,22 @@ ccToString :: CCompiler -> String
 ccToString ICC            = "icc"
 ccToString Clang          = "clang"
 ccToString (Other s)      = s
-ccToString (GCC pre)      = mkQualified pre Nothing "gcc"
+ccToString (GCC pre suff) = mkQualified pre suff "gcc"
 ccToString (GHC pre suff) = mkQualified pre suff "ghc"
 ccToString CompCert       = "ccomp"
 
 stripToString :: CCompiler -> String
-stripToString (GCC pre)   = mkQualified pre Nothing "strip"
+stripToString (GCC pre _) = mkQualified pre Nothing "strip"
 stripToString (GHC pre _) = mkQualified pre Nothing "strip"
 stripToString _           = "strip"
 
 arToString :: CCompiler -> String
-arToString (GCC pre)   = mkQualified pre Nothing "ar"
+arToString (GCC pre _) = mkQualified pre Nothing "ar"
 arToString (GHC pre _) = mkQualified pre Nothing "ar"
 arToString _           = "ar"
 
 isCross :: CCompiler -> Bool
-isCross (GCC Just{})   = True
+isCross (GCC Just{} _) = True
 isCross (GHC Just{} _) = True
 isCross _              = False
 
@@ -87,20 +87,22 @@ isCross _              = False
 -- fails.
 ccFromString :: String -> CCompiler
 ccFromString "icc" = ICC
-ccFromString "gcc" = GCC Nothing
+ccFromString "gcc" = GCC Nothing Nothing
 ccFromString "ccomp" = CompCert
 ccFromString "clang" = Clang
 ccFromString "ghc" = GHC Nothing Nothing
 ccFromString s
-    | "gcc" `isSuffixOf` s = GCC (Just (reverse . drop 3 . reverse $ s))
+    | "gcc" `isSuffixOf` s = GCC (Just (reverse . drop 3 . reverse $ s)) Nothing
     | "ghc" `isSuffixOf` s = GHC (Just (reverse . drop 3 . reverse $ s)) Nothing
     | "ghc" `isPrefixOf` s = GHC Nothing (Just (drop 3 s))
+    | "gcc" `isPrefixOf` s = GCC Nothing (Just (drop 3 s))
 ccFromString _ = Other "cc"
 
 -- ALSO consider using Haskell -> C -> ICC ??
 -- TODO ICC??
 -- | A data type representing the C compiler to be used.
-data CCompiler = GCC { _prefix :: Maybe String -- ^ Usually the target triple
+data CCompiler = GCC { _prefix  :: Maybe String -- ^ Usually the target triple
+                     , _postfix :: Maybe String -- ^ The compiler version
                      }
                | Clang
                | GHC { _prefix  :: Maybe String -- ^ The target triple
