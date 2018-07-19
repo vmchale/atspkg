@@ -101,6 +101,12 @@ in
 let plainDeps = λ(x : Text) → { _1 = x, _2 = { lower = none, upper = none } }
 in
 
+let lowerDeps = λ(x : { name : Text, version : List Natural }) → { _1 = x.name, _2 = { lower = [ x.version ], upper = none } }
+in
+
+let upperDeps = λ(x : { name : Text, version : List Natural }) → { _1 = x.name, _2 = { lower = none, upper = [ x.version ] } }
+in
+
 let mapPlainDeps = λ(x : List Text) → map Text LibDep plainDeps x
 in
 
@@ -276,6 +282,8 @@ in
 , staticLib = staticLib
 , default = default
 , plainDeps = plainDeps
+, lowerDeps = lowerDeps
+, upperDeps = upperDeps
 , mapPlainDeps = mapPlainDeps
 , src = src
 , mapSrc = mapSrc
