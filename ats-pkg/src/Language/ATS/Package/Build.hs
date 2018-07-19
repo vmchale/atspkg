@@ -292,7 +292,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf af as
             (_, cfgBin') <- cfgBin
             need [ cfgBin', flags, ".atspkg" </> "config" ]
             v'' <- getVerbosity
-            liftIO $ fetchDeps v'' (ccFromString cc') setup (unpack . fst <$> ds) (unpack . fst <$> cdps) (unpack . fst <$> bdeps) cfgBin' atslibSetup False *> writeFile out ""
+            liftIO $ fetchDeps v'' (ccFromString cc') setup (first unpack <$> ds) (first unpack <$> cdps) (first unpack <$> bdeps) cfgBin' atslibSetup False *> writeFile out ""
 
         let bins = toTgt tgt . target <$> bs
         setTargets rs bins mt

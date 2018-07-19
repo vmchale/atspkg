@@ -52,7 +52,7 @@ listDeps b = fmap s . input auto . T.pack
 setBuildPlan :: FilePath -- ^ Filepath for cache inside @.atspkg@
              -> DepSelector
              -> String -- ^ URL of package set to use.
-             -> [String] -- ^ Libraries we want
+             -> [(String, ATSConstraint)] -- ^ Libraries we want
              -> IO [[ATSDependency]]
 setBuildPlan p getDeps url deps = do
     b <- doesFileExist depCache
@@ -69,12 +69,12 @@ setBuildPlan p getDeps url deps = do
 
 mkBuildPlan :: DepSelector
             -> ATSPackageSet
-            -> [String]
+            -> [(String, ATSConstraint)]
             -> DepM [[ATSDependency]]
 mkBuildPlan getDeps aps@(ATSPackageSet ps) = finalize . resolve . fmap (asDep getDeps) <=< stringBuildPlan
     where finalize = fmap (fmap (fmap (lookupVersions aps)))
           resolve = resolveDependencies (atsPkgsToPkgs libDeps aps)
-          stringBuildPlan names = sequence [ lookup' x libs | x <- names ]
+          stringBuildPlan names = sequence [ lookup' x libs | (x, _) <- names ]
               where libs = (unpack . libName &&& id) <$> ps
                     lookup' k vs = case lookup k vs of
                         Just x  -> Right x
@@ -86,8 +86,6 @@ canonicalize (ATSConstraint Nothing (Just u))  = LessThanEq u
 canonicalize (ATSConstraint Nothing Nothing)   = None
 canonicalize (ATSConstraint (Just l) (Just u)) = Bounded (GreaterThanEq l) (LessThanEq u)
 
--- FIXME: we should be able to specify a dependency in direct dependencies, not
--- just what happens now!
 asDep :: DepSelector
       -> ATSDependency
       -> Dependency

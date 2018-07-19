@@ -32,9 +32,9 @@ getTgt _         = Nothing
 fetchDeps :: Verbosity -- ^ Shake verbosity
           -> CCompiler -- ^ C compiler to use
           -> [IO ()] -- ^ Setup steps that can be performed concurrently
-          -> [String] -- ^ ATS dependencies
-          -> [String] -- ^ C Dependencies
-          -> [String] -- ^ ATS build dependencies
+          -> [(String, ATSConstraint)] -- ^ ATS dependencies
+          -> [(String, ATSConstraint)] -- ^ C Dependencies
+          -> [(String, ATSConstraint)] -- ^ ATS build dependencies
           -> FilePath -- ^ Path to configuration file
           -> SetupScript -- ^ How to install an ATS library
           -> Bool -- ^ Whether to perform setup anyhow.
