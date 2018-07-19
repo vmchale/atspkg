@@ -101,6 +101,16 @@ in
 let plainDeps = λ(x : Text) → { _1 = x, _2 = { lower = none, upper = none } }
 in
 
+let eqDeps = λ(x : { name : Text, version : List Natural }) →
+    { _1 = x.name
+    , _2 = { lower = [ x.version ]
+             : Optional (List Natural)
+           , upper = [ x.version ]
+             : Optional (List Natural)
+           }
+    }
+in
+
 let lowerDeps = λ(x : { name : Text, version : List Natural }) →
     { _1 = x.name
     , _2 = { lower = [ x.version ]

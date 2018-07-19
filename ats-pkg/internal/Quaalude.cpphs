@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Quaalude ( hex
                 , bool
@@ -30,7 +31,7 @@ module Quaalude ( hex
                 , exitWith
                 , showVersion
                 , traverse_
-                , rmdups
+                , nubSpecial
                 , ExitCode (ExitSuccess)
                 , MonadIO (..)
                 -- * Miscellaneous
@@ -129,6 +130,7 @@ import           Control.Arrow                hiding ((<+>))
 import           Control.Composition
 import           Control.Monad
 import           Control.Monad.IO.Class
+import           Control.Monad.State.Lazy
 import           Data.Binary
 import           Data.Bool                    (bool)
 import           Data.ByteString.Lazy         (ByteString)
@@ -170,8 +172,9 @@ makeExecutable :: FilePath -> IO ()
 makeExecutable = flip setFileMode ownerModes
 #endif
 
-rmdups :: (Ord a) => [a] -> [a]
-rmdups = fmap head . group . sort
+nubSpecial :: (Ord a) => [[a]] -> [[a]]
+nubSpecial = pure . rmDups . join
+    where rmDups = fmap head . group . sort
 
 makeExe :: String
 makeExe = case os of
