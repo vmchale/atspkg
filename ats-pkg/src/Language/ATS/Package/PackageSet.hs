@@ -71,7 +71,7 @@ mkBuildPlan :: DepSelector
             -> ATSPackageSet
             -> [(String, ATSConstraint)]
             -> DepM [[ATSDependency]]
-mkBuildPlan getDeps aps@(ATSPackageSet ps) names = finalize . resolve . fmap (selfDepend . asDep getDeps) <=< stringBuildPlan $ names
+mkBuildPlan getDeps aps@(ATSPackageSet ps) names = finalize . fmap rmdups . resolve . fmap (selfDepend . asDep getDeps) <=< stringBuildPlan $ names
     where finalize = fmap (fmap (fmap (lookupVersions aps)))
           resolve = resolveDependencies (atsPkgsToPkgs libDeps aps)
           selfDepend (Dependency ln ds v) = case lookup ln names of
