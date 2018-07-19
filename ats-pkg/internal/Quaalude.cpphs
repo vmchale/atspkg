@@ -172,9 +172,8 @@ makeExecutable :: FilePath -> IO ()
 makeExecutable = flip setFileMode ownerModes
 #endif
 
-nubSpecial :: (Ord a) => [[a]] -> [[a]]
-nubSpecial = pure . rmDups . join
-    where rmDups = fmap head . group . sort
+nubSpecial :: (Eq a) => [[a]] -> [[a]]
+nubSpecial = pure . nub . join
 
 makeExe :: String
 makeExe = case os of
