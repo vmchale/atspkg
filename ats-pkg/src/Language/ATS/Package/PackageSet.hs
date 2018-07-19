@@ -71,10 +71,13 @@ mkBuildPlan :: DepSelector
             -> ATSPackageSet
             -> [(String, ATSConstraint)]
             -> DepM [[ATSDependency]]
-mkBuildPlan getDeps aps@(ATSPackageSet ps) = finalize . resolve . fmap (asDep getDeps) <=< stringBuildPlan
+mkBuildPlan getDeps aps@(ATSPackageSet ps) names = finalize . resolve . fmap (selfDepend . asDep getDeps) <=< stringBuildPlan $ names
     where finalize = fmap (fmap (fmap (lookupVersions aps)))
           resolve = resolveDependencies (atsPkgsToPkgs libDeps aps)
-          stringBuildPlan names = sequence [ lookup' x libs | (x, _) <- names ]
+          selfDepend (Dependency ln ds v) = case lookup ln names of
+                Just v' -> Dependency ln ((ln, canonicalize v') : ds) v
+                Nothing -> Dependency ln ds v
+          stringBuildPlan names' = sequence [ lookup' x libs | (x, _) <- names' ]
               where libs = (unpack . libName &&& id) <$> ps
                     lookup' k vs = case lookup k vs of
                         Just x  -> Right x
