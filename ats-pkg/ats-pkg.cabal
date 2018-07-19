@@ -1,6 +1,6 @@
 cabal-version: 2.0
 name: ats-pkg
-version: 3.0.0.3
+version: 3.0.0.4
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -127,7 +127,7 @@ library quaalude
         composition-prelude >=1.3.0.0,
         binary -any,
         text -any,
-        mtl
+        mtl -any
     
     if flag(development)
         cpp-options: -DDEBUG
