@@ -101,10 +101,22 @@ in
 let plainDeps = λ(x : Text) → { _1 = x, _2 = { lower = none, upper = none } }
 in
 
-let lowerDeps = λ(x : { name : Text, version : List Natural }) → { _1 = x.name, _2 = { lower = [ x.version ], upper = none } }
+let lowerDeps = λ(x : { name : Text, version : List Natural }) →
+    { _1 = x.name
+    , _2 = { lower = [ x.version ]
+             : Optional (List Natural)
+           , upper = none
+           }
+    }
 in
 
-let upperDeps = λ(x : { name : Text, version : List Natural }) → { _1 = x.name, _2 = { lower = none, upper = [ x.version ] } }
+let upperDeps = λ(x : { name : Text, version : List Natural }) →
+    { _1 = x.name
+    , _2 = { lower = none
+           , upper = [ x.version ]
+             : Optional (List Natural)
+           }
+    }
 in
 
 let mapPlainDeps = λ(x : List Text) → map Text LibDep plainDeps x

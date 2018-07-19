@@ -10,6 +10,7 @@ module Language.ATS.Package.PackageSet ( ATSPackageSet (..)
 
 import qualified Data.ByteString.Lazy       as BSL
 import           Data.Dependency
+import           Data.List                  (nubBy)
 import qualified Data.Map                   as M
 import qualified Data.Set                   as S
 import qualified Data.Text                  as T
@@ -31,8 +32,11 @@ instance Pretty ATSDependency where
         where g (Just d) = ("description:" <+> text (unpack d) <#>)
               g Nothing  = id
 
+sameName :: ATSDependency -> ATSDependency -> Bool
+sameName = on (==) libName
+
 instance Pretty ATSPackageSet where
-    pretty (ATSPackageSet ds) = fold (punctuate hardline (pretty <$> ds))
+    pretty (ATSPackageSet ds) = fold (punctuate hardline (pretty <$> nubBy sameName ds)) -- TODO: handle version etc. better
 
 displayList :: String -> IO ()
 displayList = putDoc . pretty <=< listDeps True
