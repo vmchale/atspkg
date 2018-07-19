@@ -306,6 +306,7 @@ in
 , plainDeps = plainDeps
 , lowerDeps = lowerDeps
 , upperDeps = upperDeps
+, eqDeps = eqDeps
 , mapPlainDeps = mapPlainDeps
 , src = src
 , mapSrc = mapSrc
