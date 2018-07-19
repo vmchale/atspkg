@@ -117,6 +117,11 @@ module Quaalude ( hex
                 , each
                 , (&)
                 , (%~)
+
+#ifdef DEBUG
+                , traceShowId
+                , traceShow
+#endif
                 ) where
 
 import           Control.Arrow                hiding ((<+>))
@@ -132,6 +137,9 @@ import           Data.List
 import           Data.Maybe                   (fromMaybe)
 import           Data.Text.Lazy               (Text, pack, unpack)
 import           Data.Version                 (showVersion)
+#ifdef DEBUG
+import           Debug.Trace                  (traceShow, traceShowId)
+#endif
 import           Development.Shake            hiding (getEnv)
 import           Development.Shake.FilePath
 import           Dhall                        hiding (Text, bool)

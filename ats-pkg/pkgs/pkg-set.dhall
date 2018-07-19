@@ -35,7 +35,8 @@ let curl =
 in
 
 let unistring =
-  makeGnuPkg { version = [0,9,9], name = "unistring" }
+  λ(x : List Natural) →
+    makeGnuPkg { veresion = x, name = "unistring" }
 in
 
 let fastArithmetic = https://raw.githubusercontent.com/vmchale/hs-ats/master/fast-arithmetic/pkg.dhall -- https://hackage.haskell.org/package/fast-arithmetic-0.6.0.6/src/pkg.dhall
@@ -106,7 +107,7 @@ let pkgset =
   , atomicOps [7,6,4]
   , gc [7,6,6]
   , fastArithmetic [0,6,0,7]
-  , unistring
+  , unistring [0,9,10]
   , atsIncludes [0,3,11]
   , curl [7,60,0]
   , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall [0,2,3]
@@ -116,7 +117,6 @@ let pkgset =
   , https://raw.githubusercontent.com/vmchale/either/master/pkg.dhall [0,2,2]
   , https://raw.githubusercontent.com/vmchale/ats-linecount/master/pkg.dhall [0,2,5]
   , https://raw.githubusercontent.com/vmchale/specats/master/pkg.dhall [0,2,3]
-  , https://raw.githubusercontent.com/vmchale/specats/master/pkg.dhall [0,3,0]
   , https://raw.githubusercontent.com/vmchale/edit-distance/master/pkg.dhall [0,1,0]
   ]
 

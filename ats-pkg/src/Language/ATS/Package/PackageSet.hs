@@ -32,11 +32,12 @@ instance Pretty ATSDependency where
         where g (Just d) = ("description:" <+> text (unpack d) <#>)
               g Nothing  = id
 
-sameName :: ATSDependency -> ATSDependency -> Bool
-sameName = on (==) libName
+sameName :: [ATSDependency] -> [ATSDependency]
+sameName = reverse . nubBy go . reverse
+    where go = on (==) libName
 
 instance Pretty ATSPackageSet where
-    pretty (ATSPackageSet ds) = fold (punctuate hardline (pretty <$> nubBy sameName ds)) -- TODO: handle version etc. better
+    pretty (ATSPackageSet ds) = fold (punctuate hardline (pretty <$> sameName ds))
 
 displayList :: String -> IO ()
 displayList = putDoc . pretty <=< listDeps True
@@ -85,6 +86,8 @@ canonicalize (ATSConstraint Nothing (Just u))  = LessThanEq u
 canonicalize (ATSConstraint Nothing Nothing)   = None
 canonicalize (ATSConstraint (Just l) (Just u)) = Bounded (GreaterThanEq l) (LessThanEq u)
 
+-- FIXME: we should be able to specify a dependency in direct dependencies, not
+-- just what happens now!
 asDep :: DepSelector
       -> ATSDependency
       -> Dependency

@@ -128,6 +128,9 @@ library quaalude
         binary -any,
         text -any
     
+    if flag(development)
+        cpp-options: -DDEBUG
+    
     if !os(windows)
         build-depends:
             unix -any
