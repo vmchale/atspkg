@@ -79,7 +79,6 @@ splits :: BinOp a -> Bool
 splits Mult       = True
 splits Add        = True
 splits Div        = True
-splits Sub        = True
 splits LogicalAnd = True
 splits LogicalOr  = True
 splits _          = False
@@ -137,7 +136,7 @@ instance Eq a => Pretty (Expression a) where
         a (BinaryF op e e')
             | splits op = e </> pretty op <+> e'
             | otherwise = e <+> pretty op <+> e'
-        a (IndexF _ n e)                = pretty n <> "[" <> e <> "]"
+        a (IndexF _ n e)                = pretty n <> brackets e
         a (NamedValF nam)              = pretty nam
         a (CallF nam [] [] Nothing []) = pretty nam <> "()"
         a (CallF nam [] [] e xs) = pretty nam <> prettyArgsProof e xs
