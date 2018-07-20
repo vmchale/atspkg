@@ -168,6 +168,9 @@ instance Eq a => Pretty (Expression a) where
         a (TupleExF _ es)              = parens (mconcat $ punctuate ", " (reverse es))
         a (BoxTupleExF _ es)           = "'(" <> mconcat (punctuate ", " (reverse es)) <> ")"
         a (WhileF _ e e')              = "while" <> parens e <> e'
+        a (ForF _ e e')                = "for" <> parens e <> e'
+        a (WhileStarF _ us t as e e')  = "while*" <> prettyUsNil us <> prettyTermetric (Just t) <> prettyArgs as <+> "=>" <$> indent 4 e <$> indent 4 e'
+        a (ForStarF _ us t as e e')    = "for*" <> prettyUsNil us <> prettyTermetric (Just t) <> prettyArgs as <+> "=>" <$> indent 4 e <$> indent 4 e'
         a (ActionsF (ATS [d]))         = "{" <+> pretty d <+> "}"
         a (ActionsF as)                = "{" <$> indent 2 (pretty as) <$> "}"
         a UnderscoreLitF{}             = "_"

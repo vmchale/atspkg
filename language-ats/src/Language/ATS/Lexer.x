@@ -220,6 +220,9 @@ tokens :-
     <0> local                    { tok (\p _ -> alex $ Keyword p KwLocal) }
     <0> praxi                    { tok (\p _ -> alex $ Keyword p KwPraxi) }
     <0> while                    { tok (\p _ -> alex $ Keyword p KwWhile) }
+    <0> "while*"                 { tok (\p _ -> alex $ Keyword p KwWhileStar) }
+    <0> for                      { tok (\p _ -> alex $ Keyword p KwFor) }
+    <0> "for*"                   { tok (\p _ -> alex $ Keyword p KwForStar) }
     <0> where                    { tok (\p _ -> alex $ Keyword p KwWhere) }
     <0> begin                    { tok (\p _ -> alex $ Keyword p KwBegin) }
     <0> overload                 { tok (\p _ -> alex $ Keyword p KwOverload) }
@@ -365,6 +368,9 @@ data Keyword = KwFun
              | KwStadef
              | KwPraxi
              | KwWhile
+             | KwWhileStar
+             | KwFor
+             | KwForStar
              | KwWhere
              | KwBegin
              | KwOverload
@@ -488,6 +494,9 @@ instance Pretty Keyword where
     pretty KwStadef = "stadef"
     pretty KwPraxi = "praxi"
     pretty KwWhile = "while"
+    pretty KwWhileStar = "while*"
+    pretty KwFor = "for"
+    pretty KwForStar = "for*"
     pretty KwOverload = "overload"
     pretty KwWith = "with"
     pretty KwDataview = "dataview"

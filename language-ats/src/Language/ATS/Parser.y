@@ -102,6 +102,9 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     dataview { Keyword $$ KwDataview }
     datavtype { Keyword $$ KwDatavtype }
     while { Keyword $$ KwWhile }
+    whileStar { Keyword $$ KwWhileStar }
+    for { Keyword $$ KwFor }
+    forStar { Keyword $$ KwForStar }
     of { Keyword $$ KwOf }
     exception { Keyword $$ KwException }
     include { Keyword $$ KwInclude }
@@ -477,6 +480,9 @@ PreExpression : identifier lsqbracket PreExpression rsqbracket { Index $2 (Unqua
               | Name { NamedVal $1 }
               | lbrace ATS rbrace { Actions $2 }
               | while openParen PreExpression closeParen PreExpression { While $1 $3 $5 }
+              | for openParen PreExpression closeParen PreExpression { For $1 $3 $5 }
+              | whileStar Universals Termetric openParen Args closeParen plainArrow Expression Expression { WhileStar $1 $2 (snd $3) $5 $8 $9 }
+              | forStar Universals Termetric openParen Args closeParen plainArrow Expression Expression { ForStar $1 $2 (snd $3) $5 $8 $9 }
               | lineComment PreExpression { CommentExpr (to_string $1) $2 }
               | comma openParen identifier closeParen { MacroVar $1 (to_string $3) }
               | PreExpression where lbrace ATS rbrace { WhereExp $1 $4 }
