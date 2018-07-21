@@ -155,6 +155,7 @@ tokens :-
     <0> fnx                      { tok (\p _ -> alex $ Keyword p KwFnx) }
     <0> and                      { tok (\p _ -> alex $ Keyword p KwAnd) }
     <0> prval                    { tok (\p _ -> alex $ Keyword p KwPrval) }
+    <0> prvar                    { tok (\p _ -> alex $ Keyword p KwPrvar) }
     <0> prfn                     { tok (\p _ -> alex $ Keyword p KwPrfn) }
     <0> prfun                    { tok (\p _ -> alex $ Keyword p KwPrfun) }
     <0> datatype                 { tok (\p _ -> alex $ Keyword p KwDatatype) }
@@ -365,6 +366,7 @@ data Keyword = KwFun
              | KwOf
              | KwAbsprop
              | KwPrval
+             | KwPrvar
              | KwStadef
              | KwPraxi
              | KwWhile
@@ -491,6 +493,7 @@ instance Pretty Keyword where
     pretty KwOf = "of"
     pretty KwAbsprop = "absprop"
     pretty KwPrval = "prval"
+    pretty KwPrvar = "prvar"
     pretty KwStadef = "stadef"
     pretty KwPraxi = "praxi"
     pretty KwWhile = "while"

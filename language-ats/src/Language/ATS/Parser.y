@@ -77,6 +77,7 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     stadef { Keyword $$ KwStadef }
     val { $$@(Keyword _ (KwVal _)) }
     prval { Keyword $$ KwPrval }
+    prvar { Keyword $$ KwPrvar }
     var { Keyword $$ KwVar }
     then { Keyword $$ KwThen }
     let { Keyword $$ KwLet }
@@ -481,7 +482,8 @@ PreExpression : identifier lsqbracket PreExpression rsqbracket { Index $2 (Unqua
               | lbrace ATS rbrace { Actions $2 }
               | while openParen PreExpression closeParen PreExpression { While $1 $3 $5 }
               | for openParen PreExpression closeParen PreExpression { For $1 $3 $5 }
-              | whileStar Universals Termetric openParen Args closeParen plainArrow Expression Expression { WhileStar $1 $2 (snd $3) $5 $8 $9 }
+              | whileStar Universals Termetric openParen Args closeParen plainArrow Expression Expression { WhileStar $1 $2 (snd $3) $5 $8 $9 Nothing }
+              | whileStar Universals Termetric openParen Args closeParen colon openParen Args closeParen plainArrow Expression Expression { WhileStar $1 $2 (snd $3) $5 $12 $13 (Just $9) }
               | forStar Universals Termetric openParen Args closeParen plainArrow Expression Expression { ForStar $1 $2 (snd $3) $5 $8 $9 }
               | lineComment PreExpression { CommentExpr (to_string $1) $2 }
               | comma openParen identifier closeParen { MacroVar $1 (to_string $3) }
@@ -850,6 +852,9 @@ ValDecl : val Pattern colon Type eq PreExpression { [ Val (get_addendum $1) (Jus
 StaticDeclaration : prval Pattern eq Expression { PrVal $2 (Just $4) Nothing }
                   | prval Pattern colon Type { PrVal $2 Nothing (Just $4) }
                   | prval Pattern colon Type eq Expression { PrVal $2 (Just $6) (Just $4) }
+                  | prvar Pattern eq Expression { PrVar $2 (Just $4) Nothing }
+                  | prvar Pattern colon Type { PrVar $2 Nothing (Just $4) }
+                  | prvar Pattern colon Type eq Expression { PrVar $2 (Just $6) (Just $4) }
                   | praxi PreFunction { Func $1 (Praxi $2) }
                   | primplmnt FunArgs StaticImplementation { ProofImpl $2 $3 }
                   | StafunDecl { $1 }

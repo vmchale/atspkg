@@ -169,7 +169,8 @@ instance Eq a => Pretty (Expression a) where
         a (BoxTupleExF _ es)           = "'(" <> mconcat (punctuate ", " (reverse es)) <> ")"
         a (WhileF _ e e')              = "while" <> parens e <> e'
         a (ForF _ e e')                = "for" <> parens e <> e'
-        a (WhileStarF _ us t as e e')  = "while*" <> prettyUsNil us <> prettyTermetric (Just t) <> prettyArgs as <+> "=>" <$> indent 4 e <$> indent 4 e'
+        a (WhileStarF _ us t as e e' Nothing)   = "while*" <> prettyUsNil us <> prettyTermetric (Just t) <> prettyArgs as <+> "=>" <$> indent 4 e <$> indent 4 e'
+        a (WhileStarF _ us t as e e' (Just ty)) = "while*" <> prettyUsNil us <> prettyTermetric (Just t) <> prettyArgs as <+> ":" <+> prettyArgs ty <+> "=>" <$> indent 4 e <$> indent 4 e'
         a (ForStarF _ us t as e e')    = "for*" <> prettyUsNil us <> prettyTermetric (Just t) <> prettyArgs as <+> "=>" <$> indent 4 e <$> indent 4 e'
         a (ActionsF (ATS [d]))         = "{" <+> pretty d <+> "}"
         a (ActionsF as)                = "{" <$> indent 2 (pretty as) <$> "}"
@@ -559,6 +560,10 @@ instance Eq a => Pretty (Declaration a) where
     pretty (PrVal p Nothing (Just t))       = "prval" <+> pretty p <+> ":" <+> pretty t
     pretty (PrVal p (Just e) (Just t))      = "prval" <+> pretty p <+> ":" <+> pretty t <+> "=" <+> pretty e
     pretty PrVal{}                          = undefined
+    pretty (PrVar p (Just e) Nothing)       = "prvar" <+> pretty p <+> "=" <+> pretty e
+    pretty (PrVar p Nothing (Just t))       = "prvar" <+> pretty p <+> ":" <+> pretty t
+    pretty (PrVar p (Just e) (Just t))      = "prvar" <+> pretty p <+> ":" <+> pretty t <+> "=" <+> pretty e
+    pretty PrVar{}                          = undefined
     pretty (AndDecl t p e)                  = "and" <+> pretty p <> valSig t <+> "=" <+> pretty e
     pretty (Val a t p e)                    = "val" <> pretty a <+> pretty p <> valSig t <+> "=" <+> pretty e
     pretty (Var t p Nothing (Just e))       = "var" <+> pretty p <> valSig t <+> "with" <+> pretty e

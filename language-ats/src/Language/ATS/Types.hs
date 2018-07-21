@@ -143,6 +143,7 @@ data Declaration a = Func { pos :: a, _fun :: Function a }
                    | Val { add :: Addendum, valT :: Maybe (Type a), valPat :: Pattern a, _valExpression :: Expression a }
                    | StaVal [Universal a] String (Type a)
                    | PrVal { prvalPat :: Pattern a, _prValExpr :: Maybe (Expression a), prValType :: Maybe (Type a) }
+                   | PrVar { prvarPat :: Pattern a, _prVarExpr :: Maybe (Expression a), prVarType :: Maybe (Type a) }
                    | Var { varT :: Maybe (Type a), varPat :: Pattern a, _varExpr1 :: Maybe (Expression a), _varExpr2 :: Maybe (Expression a) }
                    | AndDecl { andT :: Maybe (Type a), andPat :: Pattern a, _andExpr :: Expression a }
                    | Include String
@@ -515,7 +516,7 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                   | TupleEx a [Expression a]
                   | BoxTupleEx a [Expression a]
                   | While a (Expression a) (Expression a)
-                  | WhileStar a [Universal a] (StaticExpression a) [Arg a] (Expression a) (Expression a) -- ^ A @while@ loop that is guaranteed to terminate.
+                  | WhileStar a [Universal a] (StaticExpression a) [Arg a] (Expression a) (Expression a) (Maybe [Arg a]) -- ^ A @while@ loop that is guaranteed to terminate.
                   | For a (Expression a) (Expression a)
                   | ForStar a [Universal a] (StaticExpression a) [Arg a] (Expression a) (Expression a) -- ^ A @for@ loop that is guaranteed to terminate.
                   | Actions (ATS a)
@@ -560,7 +561,7 @@ data ExpressionF a x = LetF a (ATS a) (Maybe x)
                      | TupleExF a [x]
                      | BoxTupleExF a [x]
                      | WhileF a x x
-                     | WhileStarF a [Universal a] (StaticExpression a) [Arg a] x x
+                     | WhileStarF a [Universal a] (StaticExpression a) [Arg a] x x (Maybe [Arg a])
                      | ForF a x x
                      | ForStarF a [Universal a] (StaticExpression a) [Arg a] x x
                      | ActionsF (ATS a)
@@ -577,94 +578,94 @@ data ExpressionF a x = LetF a (ATS a) (Maybe x)
 type instance Base (Expression a) = ExpressionF a
 
 instance Recursive (Expression a) where
-    project (Let l ds me)              = LetF l ds me
-    project (VoidLiteral l)            = VoidLiteralF l
-    project (Call n is us mps as)      = CallF n is us mps as
-    project (NamedVal n)               = NamedValF n
-    project (ListLiteral l s t es)     = ListLiteralF l s t es
-    project (If e e' me)               = IfF e e' me
-    project (UintLit u)                = UintLitF u
-    project (FloatLit f)               = FloatLitF f
-    project (IntLit i)                 = IntLitF i
-    project (HexLit s)                 = HexLitF s
-    project (UnderscoreLit l)          = UnderscoreLitF l
-    project (Lambda l lt p e)          = LambdaF l lt p e
-    project (LinearLambda l lt p e)    = LinearLambdaF l lt p e
-    project (Index l n e)              = IndexF l n e
-    project (Access l e n)             = AccessF l e n
-    project (StringLit s)              = StringLitF s
-    project (CharLit c)                = CharLitF c
-    project (AddrAt l e)               = AddrAtF l e
-    project (ViewAt l e)               = ViewAtF l e
-    project (Binary op e e')           = BinaryF op e e'
-    project (Unary op e)               = UnaryF op e
-    project (IfCase l arms)            = IfCaseF l arms
-    project (Case l k e arms)          = CaseF l k e arms
-    project (RecordValue l recs mty)   = RecordValueF l recs mty
-    project (Precede e e')             = PrecedeF e e'
-    project (ProofExpr a e e')         = ProofExprF a e e'
-    project (TypeSignature e ty)       = TypeSignatureF e ty
-    project (WhereExp e ds)            = WhereExpF e ds
-    project (TupleEx l es)             = TupleExF l es
-    project (BoxTupleEx l es)          = BoxTupleExF l es
-    project (While l e e')             = WhileF l e e'
-    project (WhileStar l us t as e e') = WhileStarF l us t as e e'
-    project (For l e e')               = ForF l e e'
-    project (ForStar l us t as e e')   = ForStarF l us t as e e'
-    project (Actions ds)               = ActionsF ds
-    project (Begin l e)                = BeginF l e
-    project (BinList op es)            = BinListF op es
-    project (PrecedeList es)           = PrecedeListF es
-    project (FixAt a s sfun)           = FixAtF a s sfun
-    project (LambdaAt a sfun)          = LambdaAtF a sfun
-    project (ParenExpr l e)            = ParenExprF l e
-    project (CommentExpr s e)          = CommentExprF s e
-    project (MacroVar l s)             = MacroVarF l s
+    project (Let l ds me)                 = LetF l ds me
+    project (VoidLiteral l)               = VoidLiteralF l
+    project (Call n is us mps as)         = CallF n is us mps as
+    project (NamedVal n)                  = NamedValF n
+    project (ListLiteral l s t es)        = ListLiteralF l s t es
+    project (If e e' me)                  = IfF e e' me
+    project (UintLit u)                   = UintLitF u
+    project (FloatLit f)                  = FloatLitF f
+    project (IntLit i)                    = IntLitF i
+    project (HexLit s)                    = HexLitF s
+    project (UnderscoreLit l)             = UnderscoreLitF l
+    project (Lambda l lt p e)             = LambdaF l lt p e
+    project (LinearLambda l lt p e)       = LinearLambdaF l lt p e
+    project (Index l n e)                 = IndexF l n e
+    project (Access l e n)                = AccessF l e n
+    project (StringLit s)                 = StringLitF s
+    project (CharLit c)                   = CharLitF c
+    project (AddrAt l e)                  = AddrAtF l e
+    project (ViewAt l e)                  = ViewAtF l e
+    project (Binary op e e')              = BinaryF op e e'
+    project (Unary op e)                  = UnaryF op e
+    project (IfCase l arms)               = IfCaseF l arms
+    project (Case l k e arms)             = CaseF l k e arms
+    project (RecordValue l recs mty)      = RecordValueF l recs mty
+    project (Precede e e')                = PrecedeF e e'
+    project (ProofExpr a e e')            = ProofExprF a e e'
+    project (TypeSignature e ty)          = TypeSignatureF e ty
+    project (WhereExp e ds)               = WhereExpF e ds
+    project (TupleEx l es)                = TupleExF l es
+    project (BoxTupleEx l es)             = BoxTupleExF l es
+    project (While l e e')                = WhileF l e e'
+    project (WhileStar l us t as e e' ty) = WhileStarF l us t as e e' ty
+    project (For l e e')                  = ForF l e e'
+    project (ForStar l us t as e e')      = ForStarF l us t as e e'
+    project (Actions ds)                  = ActionsF ds
+    project (Begin l e)                   = BeginF l e
+    project (BinList op es)               = BinListF op es
+    project (PrecedeList es)              = PrecedeListF es
+    project (FixAt a s sfun)              = FixAtF a s sfun
+    project (LambdaAt a sfun)             = LambdaAtF a sfun
+    project (ParenExpr l e)               = ParenExprF l e
+    project (CommentExpr s e)             = CommentExprF s e
+    project (MacroVar l s)                = MacroVarF l s
 
 instance Corecursive (Expression a) where
-    embed (LetF l ds me)              = Let l ds me
-    embed (VoidLiteralF l)            = VoidLiteral l
-    embed (CallF n is us mps as)      = Call n is us mps as
-    embed (NamedValF n)               = NamedVal n
-    embed (ListLiteralF l s t es)     = ListLiteral l s t es
-    embed (IfF e e' me)               = If e e' me
-    embed (UintLitF u)                = UintLit u
-    embed (IntLitF i)                 = IntLit i
-    embed (FloatLitF f)               = FloatLit f
-    embed (HexLitF s)                 = HexLit s
-    embed (UnderscoreLitF l)          = UnderscoreLit l
-    embed (LambdaF l lt p e)          = Lambda l lt p e
-    embed (LinearLambdaF l lt p e)    = LinearLambda l lt p e
-    embed (IndexF l n e)              = Index l n e
-    embed (AccessF l n e)             = Access l n e
-    embed (StringLitF s)              = StringLit s
-    embed (CharLitF c)                = CharLit c
-    embed (AddrAtF l e)               = AddrAt l e
-    embed (ViewAtF l e)               = ViewAt l e
-    embed (BinaryF op e e')           = Binary op e e'
-    embed (UnaryF op e)               = Unary op e
-    embed (IfCaseF l arms)            = IfCase l arms
-    embed (CaseF l k e arms)          = Case l k e arms
-    embed (RecordValueF l recs mty)   = RecordValue l recs mty
-    embed (PrecedeF e e')             = Precede e e'
-    embed (ProofExprF a e e')         = ProofExpr a e e'
-    embed (TypeSignatureF e ty)       = TypeSignature e ty
-    embed (WhereExpF e ds)            = WhereExp e ds
-    embed (TupleExF l es)             = TupleEx l es
-    embed (BoxTupleExF l es)          = BoxTupleEx l es
-    embed (WhileF l e e')             = While l e e'
-    embed (WhileStarF l us t as e e') = WhileStar l us t as e e'
-    embed (ForF l e e')               = For l e e'
-    embed (ForStarF l us t as e e')   = ForStar l us t as e e'
-    embed (ActionsF ds)               = Actions ds
-    embed (BeginF l e)                = Begin l e
-    embed (BinListF op es)            = BinList op es
-    embed (PrecedeListF es)           = PrecedeList es
-    embed (FixAtF a s sfun)           = FixAt a s sfun
-    embed (LambdaAtF a sfun)          = LambdaAt a sfun
-    embed (ParenExprF l e)            = ParenExpr l e
-    embed (CommentExprF s e)          = CommentExpr s e
-    embed (MacroVarF l s)             = MacroVar l s
+    embed (LetF l ds me)                 = Let l ds me
+    embed (VoidLiteralF l)               = VoidLiteral l
+    embed (CallF n is us mps as)         = Call n is us mps as
+    embed (NamedValF n)                  = NamedVal n
+    embed (ListLiteralF l s t es)        = ListLiteral l s t es
+    embed (IfF e e' me)                  = If e e' me
+    embed (UintLitF u)                   = UintLit u
+    embed (IntLitF i)                    = IntLit i
+    embed (FloatLitF f)                  = FloatLit f
+    embed (HexLitF s)                    = HexLit s
+    embed (UnderscoreLitF l)             = UnderscoreLit l
+    embed (LambdaF l lt p e)             = Lambda l lt p e
+    embed (LinearLambdaF l lt p e)       = LinearLambda l lt p e
+    embed (IndexF l n e)                 = Index l n e
+    embed (AccessF l n e)                = Access l n e
+    embed (StringLitF s)                 = StringLit s
+    embed (CharLitF c)                   = CharLit c
+    embed (AddrAtF l e)                  = AddrAt l e
+    embed (ViewAtF l e)                  = ViewAt l e
+    embed (BinaryF op e e')              = Binary op e e'
+    embed (UnaryF op e)                  = Unary op e
+    embed (IfCaseF l arms)               = IfCase l arms
+    embed (CaseF l k e arms)             = Case l k e arms
+    embed (RecordValueF l recs mty)      = RecordValue l recs mty
+    embed (PrecedeF e e')                = Precede e e'
+    embed (ProofExprF a e e')            = ProofExpr a e e'
+    embed (TypeSignatureF e ty)          = TypeSignature e ty
+    embed (WhereExpF e ds)               = WhereExp e ds
+    embed (TupleExF l es)                = TupleEx l es
+    embed (BoxTupleExF l es)             = BoxTupleEx l es
+    embed (WhileF l e e')                = While l e e'
+    embed (WhileStarF l us t as e e' ty) = WhileStar l us t as e e' ty
+    embed (ForF l e e')                  = For l e e'
+    embed (ForStarF l us t as e e')      = ForStar l us t as e e'
+    embed (ActionsF ds)                  = Actions ds
+    embed (BeginF l e)                   = Begin l e
+    embed (BinListF op es)               = BinList op es
+    embed (PrecedeListF es)              = PrecedeList es
+    embed (FixAtF a s sfun)              = FixAt a s sfun
+    embed (LambdaAtF a sfun)             = LambdaAt a sfun
+    embed (ParenExprF l e)               = ParenExpr l e
+    embed (CommentExprF s e)             = CommentExpr s e
+    embed (MacroVarF l s)                = MacroVar l s
 
 -- | An 'implement' or 'primplmnt' declaration
 data Implementation a = Implement { pos            :: a
