@@ -115,6 +115,11 @@ instance Pretty (UnOp a) where
     pretty Deref           = "!"
     pretty (SpecialOp _ s) = text s
 
+prettyProofExpr :: [Doc] -> Doc
+prettyProofExpr []  = mempty
+prettyProofExpr [e] = e
+prettyProofExpr es  = mconcat (punctuate ", " es)
+
 instance Eq a => Pretty (Expression a) where
     pretty = cata a where
         a (IfF e e' (Just e''))         = "if" <+> e <+> "then" <$> indent 2 e' <$> "else" <$> indent 2 e''
@@ -141,11 +146,15 @@ instance Eq a => Pretty (Expression a) where
         a (CallF nam [] [] Nothing []) = pretty nam <> "()"
         a (CallF nam [] [] e xs) = pretty nam <> prettyArgsProof e xs
         a (CallF nam [] us Nothing []) = pretty nam <> prettyArgsU "{" "}" us
+        a (CallF nam [] us Nothing [x])
+            | startsParens x = pretty nam <> prettyArgsU "{" "}" us <> pretty x
         a (CallF nam [] us e xs) = pretty nam <> prettyArgsU "{" "}" us <> prettyArgsProof e xs
         a (CallF nam is [] Nothing []) = pretty nam <> prettyImplicits is
         a (CallF nam is [] Nothing [x])
             | startsParens x = pretty nam <> prettyImplicits is <> pretty x
         a (CallF nam is [] e xs) = pretty nam <> prettyImplicits is <> prettyArgsProof e xs
+        a (CallF nam is us Nothing [x])
+            | startsParens x = pretty nam <> prettyImplicits is <> prettyArgsU "{" "}" us <> pretty x
         a (CallF nam is us e xs) = pretty nam <> prettyImplicits is <> prettyArgsU "{" "}" us <> prettyArgsProof e xs
         a (CaseF _ add' e cs)           = "case" <> pretty add' <+> e <+> "of" <$> indent 2 (prettyCases cs)
         a (IfCaseF _ cs)                = "ifcase" <$> indent 2 (prettyIfCase cs)
@@ -162,7 +171,7 @@ instance Eq a => Pretty (Expression a) where
         a (CharLitF '\t')              = "'\\t'"
         a (CharLitF '\0')              = "'\\0'"
         a (CharLitF c)                 = "'" <> char c <> "'"
-        a (ProofExprF _ e e')          = "(" <> e <+> "|" <+> e' <> ")"
+        a (ProofExprF _ es e')         = "(" <> prettyProofExpr es <+> "|" <+> e' <> ")"
         a (TypeSignatureF e t)         = e <+> ":" <+> pretty t
         a (WhereExpF e d)              = e <+> "where" <$> braces (" " <> nest 2 (pretty d) <> " ")
         a (TupleExF _ es)              = parens (mconcat $ punctuate ", " (reverse es))
@@ -350,6 +359,7 @@ isVal :: Declaration a -> Bool
 isVal Val{}   = True
 isVal Var{}   = True
 isVal PrVal{} = True
+isVal PrVar{} = True
 isVal _       = False
 
 glue :: Declaration a -> Declaration a -> Bool

@@ -395,12 +395,12 @@ LambdaArrow : plainArrow { Plain $1 }
 -- | Expression or named call to an expression
 Expression : identifierSpace PreExpression { Call (Unqualified $ to_string $1) [] [] Nothing [$2] }
            | PreExpression { $1 }
-           | openParen PreExpression comma PreExpression vbar PreExpression closeParen { TupleEx $1 [$2, $4, $6] } -- FIXME this is wrong
+           | openParen PreExpression comma PreExpression vbar PreExpression closeParen { ProofExpr $1 [$2, $4] $6 } -- FIXME this is wrong
+           | openParen comma_sep(PreExpression) vbar PreExpression closeParen { ProofExpr $1 $2 $4 }
            | Expression semicolon Expression { Precede $1 $3 }
            | Expression semicolon { $1 }
            | openParen Expression closeParen { $2 }
            | Expression colon Type { TypeSignature $1 $3 } -- TODO is a more general expression sensible?
-           | openParen Expression vbar Expression closeParen { ProofExpr $1 $2 $4 }
            | list_vt lbrace Type rbrace openParen ExpressionIn closeParen { ListLiteral $1 "vt" $3 $6 }
            | begin Expression extern {% left $ Expected $3 "end" "extern" }
            | Expression prfTransform underscore {% left $ Expected $2 "Rest of expression or declaration" ">>" }

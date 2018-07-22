@@ -510,7 +510,7 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                          }
                   | RecordValue a [(String, Expression a)] (Maybe (Type a))
                   | Precede (Expression a) (Expression a)
-                  | ProofExpr a (Expression a) (Expression a)
+                  | ProofExpr a [Expression a] (Expression a)
                   | TypeSignature (Expression a) (Type a)
                   | WhereExp (Expression a) (ATS a)
                   | TupleEx a [Expression a]
@@ -555,7 +555,7 @@ data ExpressionF a x = LetF a (ATS a) (Maybe x)
                      | CaseF a Addendum x [(Pattern a, LambdaType a, x)]
                      | RecordValueF a [(String, x)] (Maybe (Type a))
                      | PrecedeF x x
-                     | ProofExprF a x x
+                     | ProofExprF a [x] x
                      | TypeSignatureF x (Type a)
                      | WhereExpF x (ATS a)
                      | TupleExF a [x]

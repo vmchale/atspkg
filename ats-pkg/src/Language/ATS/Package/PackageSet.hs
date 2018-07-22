@@ -75,7 +75,7 @@ mkBuildPlan getDeps aps@(ATSPackageSet ps) names = finalize . fmap nubSpecial . 
     where finalize = fmap (fmap (fmap (lookupVersions aps)))
           resolve = resolveDependencies (atsPkgsToPkgs libDeps aps)
           selfDepend (Dependency ln ds v) = case lookup ln names of
-                Just v' -> Dependency ln ((ln, canonicalize v') : ds) (traceShowId v)
+                Just v' -> Dependency ln ((ln, canonicalize v') : ds) v
                 Nothing -> Dependency ln ds v
           stringBuildPlan names' = sequence [ lookup' x libs | (x, _) <- names' ]
               where libs = (unpack . libName &&& id) <$> ps
