@@ -148,6 +148,7 @@ instance Eq a => Pretty (Expression a) where
         a (CallF nam [] us Nothing []) = pretty nam <> prettyArgsU "{" "}" us
         a (CallF nam [] us Nothing [x])
             | startsParens x = pretty nam <> prettyArgsU "{" "}" us <> pretty x
+        a (CallF nam [] [x,y] e xs) = pretty nam <> lbrace <> pretty y <> rbrace <> lbrace <> pretty x <> rbrace <> prettyArgsProof e xs
         a (CallF nam [] us e xs) = pretty nam <> prettyArgsU "{" "}" us <> prettyArgsProof e xs
         a (CallF nam is [] Nothing []) = pretty nam <> prettyImplicits is
         a (CallF nam is [] Nothing [x])
@@ -155,7 +156,8 @@ instance Eq a => Pretty (Expression a) where
         a (CallF nam is [] e xs) = pretty nam <> prettyImplicits is <> prettyArgsProof e xs
         a (CallF nam is us Nothing [x])
             | startsParens x = pretty nam <> prettyImplicits is <> prettyArgsU "{" "}" us <> pretty x
-        a (CallF nam is us e xs) = pretty nam <> prettyImplicits is <> prettyArgsU "{" "}" us <> prettyArgsProof e xs
+        a (CallF nam is [x,y] e xs)     = pretty nam <> prettyImplicits is <> lbrace <> pretty y <> rbrace <> lbrace <> pretty x <> rbrace <> prettyArgsProof e xs
+        a (CallF nam is us e xs)        = pretty nam <> prettyImplicits is <> prettyArgsU "{" "}" us <> prettyArgsProof e xs
         a (CaseF _ add' e cs)           = "case" <> pretty add' <+> e <+> "of" <$> indent 2 (prettyCases cs)
         a (IfCaseF _ cs)                = "ifcase" <$> indent 2 (prettyIfCase cs)
         a (VoidLiteralF _)              = "()"
