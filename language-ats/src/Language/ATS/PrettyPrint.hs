@@ -16,6 +16,7 @@ module Language.ATS.PrettyPrint ( printATS
 import           Control.Composition          hiding ((&))
 import           Data.Bool                    (bool)
 import           Data.Functor.Foldable        (cata)
+import           Data.List                    (isPrefixOf)
 import           Language.ATS.Types
 import           Lens.Micro
 import           Prelude                      hiding ((<$>))
@@ -148,7 +149,6 @@ instance Eq a => Pretty (Expression a) where
         a (CallF nam [] us Nothing []) = pretty nam <> prettyArgsU "{" "}" us
         a (CallF nam [] us Nothing [x])
             | startsParens x = pretty nam <> prettyArgsU "{" "}" us <> pretty x
-        a (CallF nam [] [x,y] e xs) = pretty nam <> lbrace <> pretty y <> rbrace <> lbrace <> pretty x <> rbrace <> prettyArgsProof e xs
         a (CallF nam [] us e xs) = pretty nam <> prettyArgsU "{" "}" us <> prettyArgsProof e xs
         a (CallF nam is [] Nothing []) = pretty nam <> prettyImplicits is
         a (CallF nam is [] Nothing [x])
@@ -156,7 +156,6 @@ instance Eq a => Pretty (Expression a) where
         a (CallF nam is [] e xs) = pretty nam <> prettyImplicits is <> prettyArgsProof e xs
         a (CallF nam is us Nothing [x])
             | startsParens x = pretty nam <> prettyImplicits is <> prettyArgsU "{" "}" us <> pretty x
-        a (CallF nam is [x,y] e xs)     = pretty nam <> prettyImplicits is <> lbrace <> pretty y <> rbrace <> lbrace <> pretty x <> rbrace <> prettyArgsProof e xs
         a (CallF nam is us e xs)        = pretty nam <> prettyImplicits is <> prettyArgsU "{" "}" us <> prettyArgsProof e xs
         a (CaseF _ add' e cs)           = "case" <> pretty add' <+> e <+> "of" <$> indent 2 (prettyCases cs)
         a (IfCaseF _ cs)                = "ifcase" <$> indent 2 (prettyIfCase cs)
@@ -381,6 +380,8 @@ glue TypeDef{} TypeDef{}           = True
 glue Comment{} _                   = True
 glue (Func _ Fnx{}) (Func _ And{}) = True
 glue Assume{} Assume{}             = True
+glue Define{} _ = True
+glue _ Define{} = True
 glue _ _                           = False
 
 concatSame :: Eq a => [Declaration a] -> Doc
@@ -594,7 +595,8 @@ instance Eq a => Pretty (Declaration a) where
     -- We use 'text' here, which means indentation might get fucked up for
     -- C preprocessor macros, but you absolutely deserve it if you indent your
     -- macros.
-    pretty (Define s)                       = text s
+    pretty (Define s) | "#if" `isPrefixOf` s = text ("\n" <> s)
+                      | otherwise            = text s
     pretty (Func _ (Fn pref))               = "fn" </> pretty pref
     pretty (Func _ (Fun pref))              = "fun" </> pretty pref
     pretty (Func _ (CastFn pref))           = "castfn" </> pretty pref

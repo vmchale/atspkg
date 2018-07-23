@@ -13,6 +13,7 @@
 - [ ] `$tup(x, y)` syntax?
 - [ ] `stadef x: bool = z`
 - [ ] whatever the fuck this is: https://github.com/githwxi/ATS-Xanadu/blob/master/srcgen/xats/SATS/lexing.sats#L94
+- [ ] Fix problem with macro blocks being indented wrong
 # Deficiencies
 - [ ] Error messages
   - [ ] Add test suite for messages

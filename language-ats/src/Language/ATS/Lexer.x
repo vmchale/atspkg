@@ -67,7 +67,7 @@ $br = [\<\>]
 @slash_comment = \/\* ([^\/\*] | @not_close_slash | \n)* \*\/
 @block_comment = @paren_comment | @slash_comment
 
-@if_block = "#if" (n | "") ("def" | "") ([^\#] | "#then" | "#print" | \n)+ "#endif" .*
+@if_block = "#if" (n | "") ("def" | "") ([^\#] | "#then" | "#else" | "#print" | \n)+ "#endif" .*
 
 -- Basically anything that can go inside implicit arguments, i.e. anything
 -- necessary to construct a type.
