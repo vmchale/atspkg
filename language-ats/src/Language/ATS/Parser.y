@@ -405,12 +405,16 @@ Expression : identifierSpace PreExpression { Call (Unqualified $ to_string $1) [
            | begin Expression extern {% left $ Expected $3 "end" "extern" }
            | Expression prfTransform underscore {% left $ Expected $2 "Rest of expression or declaration" ">>" }
 
-TypeArgs : lbrace Type rbrace { [$2] }
-         | lbrace TypeIn rbrace { $2 }
-         | TypeArgs lbrace Type rbrace { $3 : $1 }
+TypeOrExpr : Type { $1 }
+           | StaticExpression { ConcreteType $1 }
+
+TypeOrExprIn : comma_sep(TypeOrExpr) { $1 }
+
+TypeArgs : lbrace TypeOrExpr rbrace { [$2] }
+         | lbrace TypeOrExprIn rbrace { $2 }
+         | TypeArgs lbrace TypeOrExpr rbrace { $3 : $1 }
          | lbrace doubleDot rbrace { [ ImplicitType $2 ] } -- FIXME only valid on function calls
-         | TypeArgs lbrace TypeIn rbrace { $3 ++ $1 }
-         | TypeArgs lbrace StaticExpression rbrace { (ConcreteType $3) : $1 }
+         | TypeArgs lbrace TypeOrExprIn rbrace { $3 ++ $1 }
 
 Call : Name doubleParens { Call $1 [] [] Nothing [] }
      | Name openParen ExpressionPrf closeParen { Call $1 [] [] (fst $3) (snd $3) }
