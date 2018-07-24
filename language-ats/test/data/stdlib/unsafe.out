@@ -35,7 +35,6 @@
 (* Start time: April, 2012 *)
 (* ****** ****** *)
 #define ATS_PACKNAME"ATSLIB.prelude.unsafe"
-
 (* ****** ****** *)
 sortdef t0p = t@ype and vt0p = vt@ype
 

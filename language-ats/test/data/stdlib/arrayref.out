@@ -36,7 +36,6 @@
 (* ****** ****** *)
 #define NSH (x) x // for commenting: no sharing
 #define SHR (x) x // for commenting: it is shared
-
 (* ****** ****** *)
 sortdef tk = tkind
 
@@ -49,6 +48,7 @@ sortdef t0p = t@ype and vt0p = vt@ype
 // reference to an array without size attached 
 //
 (* ****** ****** *)
+
 #if(0)
 //
 // HX-2013-06:
@@ -59,7 +59,6 @@ arrayref_vt0ype_int_type
   (a: vt@ype(*elt*), n: int(*size*)) = ptr
 stadef arrayref = arrayref_vt0ype_int_type
 #endif
-
 (* ****** ****** *)
 //
 praxi lemma_arrayref_param {a:vt0p}{n:int} (A0 : arrayref(a, n)) :
@@ -353,6 +352,7 @@ streamize_arrayref_elt
 // reference to an array with its size attached
 //
 (* ****** ****** *)
+
 #if(0)
 //
 // HX-2013-06:
@@ -363,7 +363,6 @@ arrszref_vt0ype_type (a: vt@ype) = ptr
 stadef arrszref = arrszref_vt0ype_type
 //
 #endif
-
 (* ****** ****** *)
 symintr arrszref
 

@@ -1,7 +1,5 @@
 #include "share/atspre_staload.hats"
-
 #define ATS_MAINATSFLAG 1
-
 staload UN = "prelude/SATS/unsafe.sats"
 
 vtypedef boring_type = @{ first = int, second = int }

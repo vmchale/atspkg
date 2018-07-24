@@ -461,7 +461,7 @@ instance Pretty Keyword where
     pretty (KwVtype a) = "vtype" <> pretty a
     pretty KwAnd = "and"
     pretty KwDatatype = "datatype"
-    pretty KwDatavtype = "datavtype" -- FIXME this wrongly squashes dataviewtype
+    pretty KwDatavtype = "datavtype"
     pretty KwFnx = "fnx"
     pretty KwAssume = "assume"
     pretty KwAbsimpl = "absimpl"

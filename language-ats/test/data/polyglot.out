@@ -1534,9 +1534,7 @@ int ncpu() {
   return sysconf(_SC_NPROCESSORS_ONLN);
 }
 %}
-
 #define NCPU 4
-
 fun apportion(includes : List0(string)) :
   (List0(string), List0(string)) =
   let

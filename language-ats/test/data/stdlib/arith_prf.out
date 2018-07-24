@@ -34,6 +34,7 @@
 (* Authoremail: hwxi AT cs DOT bu DOT edu *)
 (* Start time: September, 2011 *)
 (* ****** ****** *)
+
 #if(0)
 //
 // It is available in [basic_dyn.sats]
@@ -53,7 +54,6 @@ MUL_prop
 propdef MUL = MUL_prop
 //
 #endif
-
 (* ****** ****** *)
 praxi mul_make : { m, n : int } () -<prf> MUL(m, n, m*n)
 

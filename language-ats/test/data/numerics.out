@@ -1,5 +1,4 @@
 #define ATS_MAINATSFLAG 1
-
 #include "share/atspre_staload.hats"
 
 staload "libats/libc/SATS/math.sats"

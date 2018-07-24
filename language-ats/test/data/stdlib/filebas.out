@@ -39,7 +39,6 @@ sortdef t0p = t@ype and vt0p = vt@ype
 (* ****** ****** *)
 #define NSH (x) x // for commenting: no sharing
 #define SHR (x) x // for commenting: it is shared
-
 (* ****** ****** *)
 val stdin_ref: FILEref = "mac#%FILE_stdin"
 val stdout_ref: FILEref = "mac#%FILE_stdout"

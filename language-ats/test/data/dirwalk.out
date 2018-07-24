@@ -88,9 +88,7 @@ fun wc_line(fname : string) : int =
         (fileref_close(inp) ; nline)
       end
   end
-
 #define NCPU 4
-
 implement main0 (argc, argv) =
   {
     var fws = $FWS.fworkshop_create_exn()

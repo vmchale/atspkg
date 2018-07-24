@@ -33,10 +33,10 @@
 #include "prelude/params.hats"
 
 (* ****** ****** *)
+
 #if VERBOSE_PRELUDE #then
 #print "Loading [basics_gen.sats] starts!\n"
 #endif // end of [VERBOSE_PRELUDE]
-
 (* ****** ****** *)
 //
 fun {a:t0p} gidentity (x : INV(a)) :<> a
@@ -140,9 +140,9 @@ overload fprint with fprint_stamped_t
 
 //
 (* ****** ****** *)
+
 #if VERBOSE_PRELUDE #then
 #print "Loading [basics_gen.sats] finishes!\n"
 #endif // end of [VERBOSE_PRELUDE]
-
 (* ****** ****** *)
 (* end of [basics_gen.sats] *)

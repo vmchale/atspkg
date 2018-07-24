@@ -395,7 +395,7 @@ LambdaArrow : plainArrow { Plain $1 }
 -- | Expression or named call to an expression
 Expression : identifierSpace PreExpression { Call (Unqualified $ to_string $1) [] [] Nothing [$2] }
            | PreExpression { $1 }
-           | openParen PreExpression comma PreExpression vbar PreExpression closeParen { ProofExpr $1 [$2, $4] $6 } -- FIXME this is wrong
+           | openParen PreExpression comma PreExpression vbar PreExpression closeParen { ProofExpr $1 [$2, $4] $6 }
            | openParen comma_sep(PreExpression) vbar PreExpression closeParen { ProofExpr $1 $2 $4 }
            | Expression semicolon Expression { Precede $1 $3 }
            | Expression semicolon { $1 }
@@ -440,7 +440,7 @@ StaticExpression : Name { StaticVal $1 }
                  | StaticExpression BinOp StaticExpression { StaticBinary $2 $1 $3 }
                  | intLit { StaticInt $1 }
                  | doubleParens { StaticVoid $1 }
-                 | sif StaticExpression then StaticExpression else StaticExpression { Sif $2 $4 $6 } -- TODO separate type for static expressions
+                 | sif StaticExpression then StaticExpression else StaticExpression { Sif $2 $4 $6 }
                  | identifierSpace { StaticVal (Unqualified $ to_string $1) }
                  | identifierSpace StaticExpression { SCall (Unqualified $ to_string $1) [$2] }
                  | Name openParen StaticArgs closeParen { SCall $1 $3 }
@@ -463,7 +463,7 @@ PreExpression : identifier lsqbracket PreExpression rsqbracket { Index $2 (Unqua
               | ifcase IfCase { IfCase $1 $2 }
               | openParen Expression closeParen { ParenExpr $1 $2 }
               | PreExpression BinOp PreExpression { Binary $2 $1 $3 }
-              | UnOp PreExpression { Unary $1 $2 } -- FIXME throw error when we try to negate a string literal/time
+              | UnOp PreExpression { Unary $1 $2 }
               | PreExpression dot Name { Access $2 $1 $3 }
               | PreExpression dot intLit { Access $2 $1 (Unqualified $ show $3) }
               | PreExpression dot identifierSpace { Access $2 $1 (Unqualified $ to_string $3) }
@@ -776,7 +776,6 @@ SortArgs : openParen SortArg closeParen { Just $2 }
          | { Nothing }
 
 SumDecl : datatype IdentifierOr SortArgs eq Leaves { SumType $2 $3 $5 }
-        | datatype IdentifierOr SortArgs eq lineComment Leaves { SumType $2 $3 $6 }
         | datatype lineComment IdentifierOr SortArgs eq Leaves { SumType $3 $4 $6 }
         | datatype lineComment IdentifierOr SortArgs eq lineComment Leaves { SumType $3 $4 $7 }
         | datavtype IdentifierOr SortArgs eq Leaves { SumViewType $2 $3 $5 }
@@ -962,6 +961,7 @@ data ATSError = Expected AlexPosn String String
               | OneOf AlexPosn [String] String
               | Unknown Token
               | LexError String
+              | Exhausted
               deriving (Eq, Show, Generic, NFData)
 
 unmatched :: AlexPosn -> String -> Doc
@@ -984,11 +984,13 @@ preErr (Unknown (Special l "}")) = unmatched l "}"
 preErr (Unknown (Special l ">")) = unmatched l ">"
 preErr (Unknown t) = "unexpected token" <+> squotes (pretty t) <+> "at" <+> pretty (token_posn t) <> linebreak
 preErr (LexError s) = dullred "lexing:" <+> text s <> linebreak
+preErr Exhausted = "unexpectedly out of input"
 
 left :: ATSError -> ParseSt b
 left = lift . Left
 
 parseError :: [Token] -> ParseSt a
-parseError = left . Unknown . head 
+parseError [] = left Exhausted 
+parseError x = left . Unknown . head $ x
 
 }

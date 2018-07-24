@@ -4,9 +4,7 @@
 
 staload UN = "prelude/SATS/unsafe.sats"
 staload "contrib/atscntrb-hx-intinf/SATS/intinf_vt.sats"
-
 #define ATS_MAINATSFLAG 1
-
 // Existential types for even and odd numbers. These are only usable with the
 // ATS library.
 typedef Even = [n:nat] int(2*n)

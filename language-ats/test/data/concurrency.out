@@ -113,7 +113,7 @@ implement {a} queue_make (cap) =
   deqarray_make_cap(i2sz(cap))
 
 implement {a} queue_free (que) =
-  deqarray_free_nil($UN.castvwtp0{deqarray(a, 1, 0)}(que))
+  deqarray_free_nil($UN.castvwtp0{deqarray(a,1,0)}(que))
 
 implement {a} channel_ref (chan) =
   let

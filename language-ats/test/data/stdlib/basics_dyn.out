@@ -39,10 +39,10 @@ fun patsopt_version() : string =
 
 //
 (* ****** ****** *)
+
 #if VERBOSE_PRELUDE #then
 #print "Loading [basics_dyn.sats] starts!\n"
 #endif // end of [VERBOSE_PRELUDE]
-
 (* ****** ****** *)
 //
 sortdef t0p = t@ype and vt0p = vt@ype
@@ -60,7 +60,6 @@ datatype TYPE(a: vt@ype) =
 //
 #define true true_bool // shorthand
 #define false false_bool // shorthand
-
 //
 val true_bool: bool(true) = "mac#atsbool_true"
 
@@ -876,9 +875,9 @@ fun fprint_newline(out : FILEref) : void =
   "mac#%"
 
 (* ****** ****** *)
+
 #if VERBOSE_PRELUDE #then
 #print "Loading [basics_dyn.sats] finishes!\n"
 #endif // end of [VERBOSE_PRELUDE]
-
 (* ****** ****** *)
 (* end of [basics_dyn.sats] *)

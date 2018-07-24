@@ -37,6 +37,7 @@
 sortdef vt0p = vt@ype
 
 (* ****** ****** *)
+
 #if(0)
 //
 // HX: these decls are available in [basic_dyn.sats]
@@ -45,7 +46,6 @@ stadef option_vt = option_vt0ype_bool_vtype
 vtypedef Option_vt (a:vt0p) = [b:bool] option_vt (a, b)
 //
 #endif
-
 (* ****** ****** *)
 fun {a:vt0p} option_vt_some (x : a) :<!wrt> option_vt(a, true)
 
