@@ -110,7 +110,7 @@ let pkgset =
   , unistring [0,9,10]
   , atsIncludes [0,3,11]
   , curl [7,60,0]
-  , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall [0,3,0]
+  , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall [0,3,1]
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,8]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,2]
   , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall [0,1,7]
