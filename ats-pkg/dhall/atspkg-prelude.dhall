@@ -84,6 +84,10 @@ let src =
     }
 in
 
+let iccFlags =
+    [ "-D__PURE_INTEL_C99_HEADERS__" ]
+in
+
 let mapSrc = λ(x : List { atsSrc : Text, cTarget : Text}) → map { atsSrc : Text, cTarget : Text } Src src x
 in
 
@@ -320,4 +324,5 @@ in
 , debian = debian
 , noPrelude = noPrelude
 , atsProject = atsProject
+, iccFlags = iccFlags
 }
