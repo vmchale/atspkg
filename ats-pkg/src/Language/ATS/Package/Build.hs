@@ -199,26 +199,33 @@ mkPkg mStr rba lint tim setup rs tgt v = do
             , pkgToAction mStr setup rs tgt cfg
             ]
 
+shouldWrite :: (MonadIO m, Binary a) => a -> FilePath -> m Bool
+shouldWrite x fp = do
+    exists <- liftIO (doesFileExist fp)
+    contents <- if exists
+        then liftIO (BSL.readFile fp)
+        else pure mempty
+    pure $ BSL.length contents /= 0 && encode x /= contents
+
 mkConfig :: Maybe String -> Rules ()
 mkConfig mStr = do
 
-    (".atspkg" </> "args") %> \out -> do
+    shouldWrite' <- shouldWrite mStr args
+
+    args %> \out -> do
         alwaysRerun
-        shouldWrite <- do
-            exists <- liftIO (doesFileExist out)
-            contents <- if exists
-                then liftIO (BSL.readFile out)
-                else pure mempty
-            pure $ BSL.length contents /= 0 && encode mStr /= contents
-        if shouldWrite
+        exists <- liftIO (doesFileExist out)
+        if not exists || shouldWrite'
             then liftIO (BSL.writeFile out (encode mStr))
             else mempty
 
     (".atspkg" </> "config") %> \out -> do
-        need ["atspkg.dhall", ".atspkg" </> "args"]
+        need ["atspkg.dhall", args]
         let go = case mStr of { Just x -> (<> (" " <> x)) ; Nothing -> id }
         x <- liftIO $ input auto (T.pack (go "./atspkg.dhall"))
         liftIO $ BSL.writeFile out (encode (x :: Pkg))
+
+    where args = ".atspkg" </> "args"
 
 setTargets :: [String] -> [FilePath] -> Maybe Text -> Rules ()
 setTargets rs bins mt = when (null rs) $
@@ -291,12 +298,7 @@ pkgToAction mStr setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf 
 
         want (unpack . cTarget <$> as)
 
-        newFlag <- do
-            exists <- liftIO (doesFileExist flags)
-            contents <- if exists
-                then liftIO (BSL.readFile flags)
-                else pure mempty
-            pure $ BSL.length contents /= 0 && encode tgt /= contents
+        newFlag <- shouldWrite tgt flags
 
         -- this is dumb but w/e
         flags %> \out -> do
