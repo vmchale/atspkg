@@ -5,7 +5,6 @@
 {-# LANGUAGE FlexibleContexts   #-}
 {-# LANGUAGE FlexibleInstances  #-}
 {-# LANGUAGE OverloadedStrings  #-}
-{-# LANGUAGE PatternSynonyms    #-}
 {-# LANGUAGE StandaloneDeriving #-}
 
 module Language.ATS.PrettyPrint ( printATS
@@ -23,9 +22,6 @@ import           Prelude                      hiding ((<$>))
 import           Text.PrettyPrint.ANSI.Leijen hiding (bool)
 
 infixr 5 $$
-
-pattern NoA :: [Arg a]
-pattern NoA = [NoArgs]
 
 -- | Pretty-print with sensible defaults.
 printATS :: Eq a => ATS a -> String
@@ -54,6 +50,7 @@ instance Pretty (LambdaType a) where
     pretty Plain{}      = "=>"
     pretty Spear{}      = "=>>"
     pretty ProofArrow{} = "=/=>"
+    pretty ProofSpear{} = "=/=>>"
     pretty (Full _ v)   = "=<" <> text v <> ">"
 
 instance Pretty (BinOp a) where
@@ -101,7 +98,6 @@ prettyLarge :: Doc -> [Doc] -> Doc
 prettyLarge _ []      = mempty
 prettyLarge op (e:es) = e <$> vsep (fmap (op <+>) es)
 
--- FIXME we really need a monadic pretty printer lol.
 lengthAlt :: Doc -> Doc -> Doc
 lengthAlt d1 d2
     | length (showFast d2) >= 30 = d1 <$> indent 4 d2
@@ -235,7 +231,6 @@ argHelper _ (Arg (First s))   = pretty s
 argHelper _ (Arg (Second t))  = pretty t
 argHelper op (Arg (Both s t)) = pretty s `op` colon `op` pretty t
 argHelper op (PrfArg a a')    = prettyArgs' ", " mempty mempty a </> "|" `op` pretty a'
-argHelper _ NoArgs            = undefined
 
 instance Eq a => Pretty (SortArg a) where
     pretty (SortArg n st) = text n <> ":" <+> pretty st
@@ -349,12 +344,15 @@ prettyImplExpr (Left se) = pretty se
 prettyImplExpr (Right e) = pretty e
 
 instance Eq a => Pretty (Implementation a) where
-    pretty (Implement _ [] is [] n [] e)  = pretty n <> prettyOr is <+> "() =" <$> indent 2 (prettyImplExpr e)
-    pretty (Implement _ [] is [] n NoA e)  = pretty n <> prettyOr is <+> "=" <$> indent 2 (prettyImplExpr e)
-    pretty (Implement _ [] is [] n ias e) = pretty n <> prettyOr is <+> prettyArgs ias <+> "=" <$> indent 2 (prettyImplExpr e)
-    pretty (Implement _ [] is us n ias e) = pretty n <> prettyOr is <+> foldMap pretty us </> prettyArgs ias <+> "=" <$> indent 2 (prettyImplExpr e)
-    pretty (Implement _ ps is [] n ias e) = foldMap pretty (reverse ps) </> pretty n <> prettyOr is <+> prettyArgs ias <+> "=" <$> indent 2 (prettyImplExpr e)
-    pretty (Implement _ ps is us n ias e) = foldMap pretty (reverse ps) </> pretty n <> prettyOr is </> foldMap pretty us <+> prettyArgs ias <+> "=" <$> indent 2 (prettyImplExpr e)
+    pretty (Implement _ [] is [] n (Just []) e)  = pretty n <> prettyOr is <+> "() =" <$> indent 2 (prettyImplExpr e)
+    pretty (Implement _ [] is [] n Nothing e)    = pretty n <> prettyOr is <+> "=" <$> indent 2 (prettyImplExpr e)
+    pretty (Implement _ [] is [] n (Just ias) e) = pretty n <> prettyOr is <+> prettyArgs ias <+> "=" <$> indent 2 (prettyImplExpr e)
+    pretty (Implement _ [] is us n (Just ias) e) = pretty n <> prettyOr is <+> foldMap pretty us </> prettyArgs ias <+> "=" <$> indent 2 (prettyImplExpr e)
+    pretty (Implement _ [] is us n Nothing e) = pretty n <> prettyOr is <+> foldMap pretty us </> "=" <$> indent 2 (prettyImplExpr e)
+    pretty (Implement _ ps is [] n (Just ias) e) = foldMap pretty (reverse ps) </> pretty n <> prettyOr is <+> prettyArgs ias <+> "=" <$> indent 2 (prettyImplExpr e)
+    pretty (Implement _ ps is [] n Nothing e)    = foldMap pretty (reverse ps) </> pretty n <> prettyOr is <+> "=" <$> indent 2 (prettyImplExpr e)
+    pretty (Implement _ ps is us n (Just ias) e) = foldMap pretty (reverse ps) </> pretty n <> prettyOr is </> foldMap pretty us <+> prettyArgs ias <+> "=" <$> indent 2 (prettyImplExpr e)
+    pretty (Implement _ ps is us n Nothing e) = foldMap pretty (reverse ps) </> pretty n <> prettyOr is </> foldMap pretty us <+> "=" <$> indent 2 (prettyImplExpr e)
 
 isVal :: Declaration a -> Bool
 isVal Val{}   = True
@@ -391,7 +389,6 @@ concatSame (x:x':xs)
     | glue x x' = pretty x <$> concatSame (x':xs)
     | otherwise = pretty x <> line <$> concatSame (x':xs)
 
--- TODO - soft break
 ($$) :: Doc -> Doc -> Doc
 x $$ y = align (x <$> y)
 
@@ -490,16 +487,15 @@ prettyArgs' = fmap pretty -.*** prettyArgsG'
 prettyArgs :: (Pretty a) => [a] -> Doc
 prettyArgs = prettyArgs' ", " "(" ")"
 
-prettyArgsNil :: Eq a => [Arg a] -> Doc
-prettyArgsNil NoA = mempty
-prettyArgsNil as  = prettyArgs' ", " "(" ")" as
+prettyArgsNil :: Eq a => Maybe [Arg a] -> Doc
+prettyArgsNil Nothing   = mempty
+prettyArgsNil (Just as) = prettyArgs' ", " "(" ")" as
 
 fancyU :: Eq a => [Universal a] -> Doc
 fancyU = foldMap pretty . reverse
 
 (<#>) :: Doc -> Doc -> Doc
 (<#>) a b = lineAlt (a <$> indent 2 b) (a <+> b)
-
 
 prettySigG :: (Pretty a) => Doc -> Doc -> Maybe String -> Maybe a -> Doc
 prettySigG d d' (Just si) (Just rt) = d `op` ":" <> text si <#> pretty rt <> d'
@@ -523,7 +519,7 @@ instance Eq a => Pretty (PreFunction a) where
     pretty (PreF i si pus [] as rt Nothing (Just e)) = fancyU pus </> pretty i <> prettyArgsNil as <> prettySig si rt <> "=" <$> indent 2 (pretty e)
     pretty (PreF i si pus us as rt t (Just e)) = fancyU pus </> pretty i </> fancyU us <> prettyTermetric t <> prettyArgsNil as <> prettySig si rt <> "=" <$> indent 2 (pretty e)
     pretty (PreF i si [] [] as rt Nothing Nothing) = pretty i <> prettyArgsNil as <> prettySigNull si rt
-    pretty (PreF i si [] us NoA rt Nothing Nothing) = pretty i </> fancyU us <> prettySigNull si rt
+    pretty (PreF i si [] us Nothing rt Nothing Nothing) = pretty i </> fancyU us <> prettySigNull si rt
     pretty (PreF i si [] us as rt Nothing Nothing) = pretty i </> fancyU us </> prettyArgsNil as <> prettySigNull si rt
     pretty (PreF i si pus [] as rt t Nothing) = fancyU pus </> pretty i <> prettyTermetric t </> prettyArgsNil as <> prettySigNull si rt
     pretty (PreF i si pus us as rt t Nothing) = fancyU pus </> pretty i <> prettyTermetric t </> fancyU us </> prettyArgsNil as <> prettySigNull si rt
@@ -614,7 +610,8 @@ instance Eq a => Pretty (Declaration a) where
     pretty (SymIntr _ ns)                   = "symintr" <+> hsep (fmap pretty ns)
     pretty (Stacst _ n t Nothing)           = "stacst" </> pretty n <+> ":" </> pretty t
     pretty (Stacst _ n t (Just e))          = "stacst" </> pretty n <+> ":" </> pretty t <+> "=" </> pretty e
-    pretty (PropDef _ s as t)               = "propdef" </> text s <+> prettyArgsNil as <+> "=" </> pretty t
+    pretty (PropDef _ s as@Just{} t)        = "propdef" </> text s <+> prettyArgsNil as <+> "=" </> pretty t
+    pretty (PropDef _ s Nothing t)          = "propdef" </> text s <+> "=" </> pretty t
     pretty (Local _ (ATS ds) (ATS []))      = "local" <$> indent 2 (pretty (ATS $ reverse ds)) <$> "in end"
     pretty (Local _ d d')                   = "local" <$> indent 2 (pretty d) <$> "in" <$> indent 2 (pretty d') <$> "end"
     pretty (FixityDecl f ss)                = pretty f <+> hsep (fmap text ss)

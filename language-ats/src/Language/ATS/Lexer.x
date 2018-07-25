@@ -79,7 +79,7 @@ $br = [\<\>]
 @inner_signature = ("!wrt" | "!exn" | "!refwrt" | "!exnwrt" | "!exnrefwrt" | "!exnref" | "0" | "1" | "!all" | "!laz" | "lin" | "fun" | "clo" | "cloptr" | "cloref" | "!ntm" | "!ref" | "prf" | "fe" | @block_comment)
 @inner_signature_mult = (@inner_signature (("," | "") @inner_signature)*) | ""
 
-@lambda = "=>" | "=>>" | "=/=>" | "=<" @inner_signature_mult ">"
+@lambda = "=>" | "=>>" | "=/=>" | "=/=>>" | "=<" @inner_signature_mult ">"
 @signature = ":<" @inner_signature_mult ">" | ":"
 @func_type = "->" | "-<" @inner_signature_mult ">"
 

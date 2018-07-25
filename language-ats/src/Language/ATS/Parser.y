@@ -10,7 +10,15 @@
                                , preErr
                                ) where
 
+import Control.Composition
+import Control.DeepSeq (NFData)
+import qualified Data.Map as M
+import Control.Monad.Trans.Class
+import Control.Monad.Trans.State
+import Data.Char (toLower)
+import GHC.Generics (Generic)
 import Language.ATS.Types
+import Language.ATS.Types.Lens
 import Language.ATS.Lexer ( Token (..)
                           , AlexPosn (..)
                           , Keyword (..)
@@ -20,15 +28,7 @@ import Language.ATS.Lexer ( Token (..)
                           , get_addendum
                           , get_staload
                           )
-
-import Control.Composition
-import Control.DeepSeq (NFData)
 import Lens.Micro (over, _head)
-import qualified Data.Map as M
-import Control.Monad.Trans.Class
-import Control.Monad.Trans.State
-import Data.Char (toLower)
-import GHC.Generics (Generic)
 import Prelude
 import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
 
@@ -180,6 +180,7 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     lincloref1Arrow { Arrow $$ "=<lin,cloref1>" }
     spear { Arrow $$ "=>>" }
     proofArrow { Arrow $$ "=/=>" }
+    proofSpear { Arrow $$ "=/=>>" }
     lsqbracket { Special $$ "[" }
     rsqbracket { Special $$ "]" }
     string { StringTok _ $$ }
@@ -378,6 +379,7 @@ Tuple : PreExpression comma PreExpression { [$3, $1] }
 CaseArrow : plainArrow { Plain $1 }
           | spear { Spear $1 }
           | proofArrow { ProofArrow $1 }
+          | proofSpear { ProofSpear $1 }
           | minus {% left $ Expected $1 "Arrow" "-" }
           | eq {% left $ Expected $1 "Arrow" "=" }
           | minus {% left $ Expected $1 "Arrow" "-" }
@@ -697,13 +699,13 @@ OptType : Signature Type { Just ($1, $2) }
         | { Nothing }
 
 -- | Parse a type signature and optional function body
-PreFunction : FunName openParen Args closeParen OptType OptExpression { (PreF $1 (fmap fst $5) [] [] $3 (fmap snd $5) Nothing $6) }
-            | FunName Universals OptTermetric OptType OptExpression { PreF $1 (fmap fst $4) [] $2 [NoArgs] (fmap snd $4) $3 $5 }
-            | FunName Universals OptTermetric doubleParens OptType OptExpression { PreF $1 (fmap fst $5) [] $2 [] (fmap snd $5) $3 $6 }
-            | FunName Universals OptTermetric openParen Args closeParen OptType OptExpression { PreF $1 (fmap fst $7) [] $2 $5 (fmap snd $7) $3 $8 }
-            | Universals FunName Universals OptTermetric openParen Args closeParen OptType OptExpression { PreF $2 (fmap fst $8) $1 $3 $6 (fmap snd $8) $4 $9 }
-            | Universals FunName Universals OptTermetric doubleParens OptType OptExpression { PreF $2 (fmap fst $6) $1 $3 [] (fmap snd $6) $4 $7 }
-            | Universals FunName Universals OptTermetric OptType OptExpression { PreF $2 (fmap fst $5) $1 $3 [] (fmap snd $5) $4 $6 }
+PreFunction : FunName openParen Args closeParen OptType OptExpression { (PreF $1 (fmap fst $5) [] [] (Just $3) (fmap snd $5) Nothing $6) }
+            | FunName Universals OptTermetric OptType OptExpression { PreF $1 (fmap fst $4) [] $2 Nothing (fmap snd $4) $3 $5 }
+            | FunName Universals OptTermetric doubleParens OptType OptExpression { PreF $1 (fmap fst $5) [] $2 (Just []) (fmap snd $5) $3 $6 }
+            | FunName Universals OptTermetric openParen Args closeParen OptType OptExpression { PreF $1 (fmap fst $7) [] $2 (Just $5) (fmap snd $7) $3 $8 }
+            | Universals FunName Universals OptTermetric openParen Args closeParen OptType OptExpression { PreF $2 (fmap fst $8) $1 $3 (Just $6) (fmap snd $8) $4 $9 }
+            | Universals FunName Universals OptTermetric doubleParens OptType OptExpression { PreF $2 (fmap fst $6) $1 $3 (Just []) (fmap snd $6) $4 $7 }
+            | Universals FunName Universals OptTermetric OptType OptExpression { PreF $2 (fmap fst $5) $1 $3 Nothing (fmap snd $5) $4 $6 }
             | prval {% left $ Expected $1 "Function signature" "prval" }
             | var {% left $ Expected $1 "Function signature" "var" }
             | val {% left $ Expected (token_posn $1) "Function signature" "val" }
@@ -759,9 +761,9 @@ IdentifierOr : identifier { to_string $1 }
 MaybeType : eq Type { Just $2 }
           | { Nothing }
 
-FunArgs : { [NoArgs] }
-        | openParen Args closeParen { $2 }
-        | doubleParens { [] }
+FunArgs : { Nothing }
+        | openParen Args closeParen { Just $2 }
+        | doubleParens { Just [] }
 
 SortArg : IdentifierOr colon Sort { [ SortArg $1 $3 ] }
         | SortArg comma IdentifierOr colon Sort { SortArg $3 $5 : $1 }
@@ -933,7 +935,7 @@ Declaration : include string { Include $2 }
             | TypeDecl { $1 }
             | symintr Names { SymIntr $1 $2 }
             | stacst IdentifierOr colon Type OptExpression { Stacst $1 (Unqualified $2) $4 $5 }
-            | propdef IdentifierOr openParen Args closeParen eq Type { PropDef $1 $2 $4 $7 }
+            | propdef IdentifierOr openParen Args closeParen eq Type { PropDef $1 $2 (Just $4) $7 }
             | exception identifierSpace of doubleParens { Exception (to_string $2) (Tuple $4 mempty) }
             | exception identifierSpace of openParen Type closeParen { Exception (to_string $2) (Tuple $4 [$5]) }
             | Fixity Operators {% addSt $1 $2 }

@@ -4,8 +4,7 @@
     comments by default (instead of just position)
   - [ ] Ideally, we'd annotate things, but there is also the possibility of
     using a state monad (?)
-- [ ] Preserve `and` val declarations
-- [ ] Macros with `#else`
+- [ ] Preserve `and` val declarations?
 - [ ] `as` syntax
 - [ ] Boxed records
 - [ ] Handle `stadef mytkind = $extkind"atslib_linmap_avltree"`

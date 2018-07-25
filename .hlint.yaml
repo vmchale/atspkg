@@ -2,7 +2,7 @@
 - functions:
   - {name: unsafePerformIO, within: []}
   - {name: error, within: [Development.Shake.ATS, Language.ATS.Generate, Development.Shake.Linters, Language.C.Dependency]}  # throw real errors
-  - {name: undefined, within: [Language.ATS.PrettyPrint, Main, Language.ATS.Package.Dependency, Language.ATS.Generate, Language.ATS.Package.Build, Development.Shake.ATS, Language.ATS.Types, Development.Shake.ATS.Generate, Development.Shake.ATS.Rules]}
+  - {name: undefined, within: [Language.ATS.PrettyPrint, Main, Language.ATS.Package.Dependency, Language.ATS.Generate, Language.ATS.Package.Build, Development.Shake.ATS, Language.ATS.Rewrite, Development.Shake.ATS.Generate, Development.Shake.ATS.Rules]}
   - {name: fromJust, within: [Language.ATS.Generate]}
   - {name: foldl, within: []}
 

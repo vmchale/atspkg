@@ -67,7 +67,9 @@ import           GHC.IO.Handle.FD             (stderr)
 import           Language.ATS.Lexer
 import           Language.ATS.Parser
 import           Language.ATS.PrettyPrint
+import           Language.ATS.Rewrite
 import           Language.ATS.Types
+import           Language.ATS.Types.Lens
 import           Lens.Micro
 import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
 
