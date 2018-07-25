@@ -427,13 +427,13 @@ typedef boxed(a: t@ype) = boxed_t0ype_type(a)
 typedef boxed_t(a: t@ype) = boxed_t0ype_type(a)
 
 //
-fun {a:type} box () : (INV(a)) -> boxed_t(a)
+fun {a:type} box  : (INV(a)) -> boxed_t(a)
 
-fun {a:type} unbox () : boxed_t(INV(a)) -> (a)
+fun {a:type} unbox  : boxed_t(INV(a)) -> (a)
 
-fun {a:vtype} box_vt () : (INV(a)) -> boxed_vt(a)
+fun {a:vtype} box_vt  : (INV(a)) -> boxed_vt(a)
 
-fun {a:vtype} unbox_vt () : boxed_vt(INV(a)) -> (a)
+fun {a:vtype} unbox_vt  : boxed_vt(INV(a)) -> (a)
 
 //
 (* ****** ****** *)

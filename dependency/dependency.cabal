@@ -44,7 +44,7 @@ library
         microlens -any,
         binary -any,
         deepseq -any,
-        micro-recursion-schemes -any
+        recursion-schemes -any
     
     if flag(development)
         ghc-options: -Werror

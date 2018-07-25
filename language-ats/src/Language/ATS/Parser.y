@@ -165,8 +165,8 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     closeTermetric { Operator $$ ">." }
     mutateArrow { FuncType $$ "->" }
     mutateEq { Operator $$ ":=" }
-    lbracket { Operator $$ "<" }
-    rbracket { Operator $$ ">" }
+    lbracket { Special $$ "<" }
+    rbracket { Special $$ ">" }
     eq { Operator $$ "=" }
     or { Operator $$ "||" }
     vbar { Special $$ "|" }
@@ -183,6 +183,7 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     proofSpear { Arrow $$ "=/=>>" }
     lsqbracket { Special $$ "[" }
     rsqbracket { Special $$ "]" }
+    doubleSqBrackets { Special $$ "[]" }
     string { StringTok _ $$ }
     charLit { CharTok _ $$ }
     underscore { Special $$ "_" }
@@ -217,6 +218,7 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     mod { Keyword $$ KwMod }
     fixAt { Keyword $$ KwFixAt }
     lamAt { Keyword $$ KwLambdaAt }
+    llamAt { Keyword $$ KwLinearLambdaAt }
     infixr { FixityTok $$ "infixr" }
     infixl { FixityTok $$ "infixl" }
     prefix { FixityTok $$ "prefix" }
@@ -397,7 +399,7 @@ LambdaArrow : plainArrow { Plain $1 }
 -- | Expression or named call to an expression
 Expression : identifierSpace PreExpression { Call (Unqualified $ to_string $1) [] [] Nothing [$2] }
            | PreExpression { $1 }
-           | openParen PreExpression comma PreExpression vbar PreExpression closeParen { ProofExpr $1 [$2, $4] $6 }
+           -- | openParen PreExpression comma PreExpression vbar PreExpression closeParen { ProofExpr $1 [$2, $4] $6 }
            | openParen comma_sep(PreExpression) vbar PreExpression closeParen { ProofExpr $1 $2 $4 }
            | Expression semicolon Expression { Precede $1 $3 }
            | Expression semicolon { $1 }
@@ -407,16 +409,11 @@ Expression : identifierSpace PreExpression { Call (Unqualified $ to_string $1) [
            | begin Expression extern {% left $ Expected $3 "end" "extern" }
            | Expression prfTransform underscore {% left $ Expected $2 "Rest of expression or declaration" ">>" }
 
-TypeOrExpr : Type { $1 }
-           | StaticExpression { ConcreteType $1 }
-
-TypeOrExprIn : comma_sep(TypeOrExpr) { $1 }
-
-TypeArgs : lbrace TypeOrExpr rbrace { [$2] }
-         | lbrace TypeOrExprIn rbrace { $2 }
-         | TypeArgs lbrace TypeOrExpr rbrace { $3 : $1 }
+TypeArgs : lbrace alt(Type,ExprType) rbrace { [$2] }
+         | lbrace TypeInExpr rbrace { $2 }
+         | TypeArgs lbrace alt(Type,ExprType) rbrace { $3 : $1 }
          | lbrace doubleDot rbrace { [ ImplicitType $2 ] } -- FIXME only valid on function calls
-         | TypeArgs lbrace TypeOrExprIn rbrace { $3 ++ $1 }
+         | TypeArgs lbrace TypeInExpr rbrace { $3 ++ $1 }
 
 Call : Name doubleParens { Call $1 [] [] Nothing [] }
      | Name openParen ExpressionPrf closeParen { Call $1 [] [] (fst $3) (snd $3) }
@@ -564,9 +561,6 @@ Implicits : lspecial TypeIn rbracket { [$2] }
 MaybeImplicit : Implicits { $1 }
               | { [] }
 
-ImplExpression : StaticExpression { Left $1 }
-               | Expression { Right $1 }
-
 comment_after(p) : p { $1 }
                  | p Comment { $1 }
                  | p lineComment { $1 }
@@ -622,7 +616,7 @@ Leaves : SumLeaf { [$1] }
        | Leaves SumLeaf { $2 : $1 }
        | Universals identifierSpace of Type { [Leaf $1 (to_string $2) [] (Just $4)] }
        | Universals identifier { [Leaf $1 (to_string $2) [] Nothing] }
-       | Universals identifier openParen StaticExpressionsIn closeParen OfType { [Leaf $1 (to_string $2) $4 $6] } -- FIXME should take any static expression.
+       | Universals identifier openParen StaticExpressionsIn closeParen OfType { [Leaf $1 (to_string $2) $4 $6] }
        | dollar {% left $ Expected $1 "|" "$" }
 
 Universals : { [] }
@@ -916,7 +910,7 @@ Declaration : include string { Include $2 }
             | var Pattern eq lamAt StackFunction { Var Nothing $2 (Just $ LambdaAt $4 $5) Nothing }
             | implement FunArgs Implementation { Impl $2 $3 }
             | StaticDeclaration { $1 }
-            | overload lsqbracket rsqbracket with IdentifierOr { OverloadIdent $1 "[]" (Unqualified $5) Nothing }
+            | overload doubleSqBrackets with IdentifierOr { OverloadIdent $1 "[]" (Unqualified $4) Nothing }
             | overload BinOp with Name { OverloadOp $1 $2 $4 Nothing }
             | overload BinOp with customOperator { OverloadOp $1 $2 (Unqualified $ to_string $4) Nothing }
             | overload BinOp with identifierSpace of intLit { OverloadOp $1 $2 (Unqualified $ to_string $4) (Just $6) }
@@ -925,7 +919,7 @@ Declaration : include string { Include $2 }
             | overload identifierSpace with identifierSpace of intLit { OverloadIdent $1 (to_string $2) (Unqualified $ to_string $4) (Just $6) }
             | overload tilde with identifier { OverloadIdent $1 "~" (Unqualified $ to_string $4) Nothing } -- FIXME figure out a general solution.
             | overload tilde with identifierSpace of intLit { OverloadIdent $1 "~" (Unqualified $ to_string $4) (Just $6) }
-            | overload lsqbracket rsqbracket with identifierSpace of intLit { OverloadIdent $1 "[]" (Unqualified $ to_string $5) (Just $7) }
+            | overload doubleSqBrackets with identifierSpace of intLit { OverloadIdent $1 "[]" (Unqualified $ to_string $4) (Just $6) }
             | overload dot identifierSpace with Name { OverloadIdent $1 ('.' : (to_string $3)) $5 Nothing }
             | assume identifierSpace SortArgs eq Type { Assume (Unqualified (to_string $2)) $3 $5 }
             | assume Name SortArgs eq Type { Assume $2 $3 $5 }

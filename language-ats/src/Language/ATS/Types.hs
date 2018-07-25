@@ -43,6 +43,7 @@ module Language.ATS.Types
     , SortF (..)
     , SortArg (..)
     , SortArgs
+    , Args
     , DataSortLeaf (..)
     , Fix
     , FixityState
@@ -74,11 +75,12 @@ data Leaf a = Leaf { _constructorUniversals :: [Universal a], name :: String, co
     deriving (Show, Eq, Generic, NFData)
 
 type SortArgs a = Maybe [SortArg a]
+type Args a = Maybe [Arg a]
 
 -- | Declarations for functions, values, actions, etc.
 data Declaration a = Func { pos :: a, _fun :: Function a }
-                   | Impl { implArgs :: Maybe [Arg a], _impl :: Implementation a } -- TODO do something better for implicit universals
-                   | ProofImpl { implArgs :: Maybe [Arg a], _impl :: Implementation a }
+                   | Impl { implArgs :: Args a, _impl :: Implementation a } -- TODO do something better for implicit universals
+                   | ProofImpl { implArgs :: Args a, _impl :: Implementation a }
                    | Val { add :: Addendum, valT :: Maybe (Type a), valPat :: Pattern a, _valExpression :: Expression a }
                    | StaVal [Universal a] String (Type a)
                    | PrVal { prvalPat :: Pattern a, _prValExpr :: Maybe (Expression a), prValType :: Maybe (Type a) }
@@ -114,7 +116,7 @@ data Declaration a = Func { pos :: a, _fun :: Function a }
                    | TKind a (Name a) String
                    | SymIntr a [Name a]
                    | Stacst a (Name a) (Type a) (Maybe (Expression a))
-                   | PropDef a String (Maybe [Arg a]) (Type a)
+                   | PropDef a String (Args a) (Type a)
                    | FixityDecl (Fixity a) [String]
                    | MacDecl a String [String] (Expression a)
                    | DataSort a String [DataSortLeaf a]
@@ -415,7 +417,7 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                   | UnderscoreLit a
                   | Lambda a (LambdaType a) (Pattern a) (Expression a)
                   | LinearLambda a (LambdaType a) (Pattern a) (Expression a)
-                  | Index a (Name a) (Expression a)
+                  | Index a (Name a) (Expression a) -- ^ E.g. @array[0]@.
                   | Access a (Expression a) (Name a)
                   | StringLit String
                   | CharLit Char
@@ -439,7 +441,7 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                   | TupleEx a [Expression a]
                   | BoxTupleEx a [Expression a]
                   | While a (Expression a) (Expression a)
-                  | WhileStar a [Universal a] (StaticExpression a) [Arg a] (Expression a) (Expression a) (Maybe [Arg a]) -- ^ A @while@ loop that is guaranteed to terminate.
+                  | WhileStar a [Universal a] (StaticExpression a) [Arg a] (Expression a) (Expression a) (Args a) -- ^ A @while@ loop that is guaranteed to terminate.
                   | For a (Expression a) (Expression a)
                   | ForStar a [Universal a] (StaticExpression a) [Arg a] (Expression a) (Expression a) -- ^ A @for@ loop that is guaranteed to terminate.
                   | Actions (ATS a)
@@ -484,7 +486,7 @@ data ExpressionF a x = LetF a (ATS a) (Maybe x)
                      | TupleExF a [x]
                      | BoxTupleExF a [x]
                      | WhileF a x x
-                     | WhileStarF a [Universal a] (StaticExpression a) [Arg a] x x (Maybe [Arg a])
+                     | WhileStarF a [Universal a] (StaticExpression a) [Arg a] x x (Args a)
                      | ForF a x x
                      | ForStarF a [Universal a] (StaticExpression a) [Arg a] x x
                      | ActionsF (ATS a)
@@ -596,7 +598,7 @@ data Implementation a = Implement { pos            :: a
                                   , implicits      :: [[Type a]] -- ^ Implicit arguments
                                   , universalsI    :: [Universal a] -- ^ Universal quantifiers
                                   , nameI          :: Name a -- ^ ('Name' a) of the template being implemented
-                                  , iArgs          :: Maybe [Arg a] -- ^ Arguments
+                                  , iArgs          :: Args a -- ^ Arguments
                                   , _iExpression   :: Either (StaticExpression a) (Expression a) -- ^ Expression (or static expression) holding the function body.
                                   }
     deriving (Show, Eq, Generic, NFData)
@@ -627,7 +629,7 @@ data PreFunction a = PreF { fname         :: Name a -- ^ Function name
                           , sig           :: Maybe String -- ^ e.g. <> or \<!wrt>
                           , preUniversals :: [Universal a] -- ^ Universal quantifiers making a function generic
                           , universals    :: [Universal a] -- ^ (Universal a) quantifiers/refinement type
-                          , args          :: Maybe [Arg a] -- ^ Actual function arguments
+                          , args          :: Args a -- ^ Actual function arguments
                           , returnType    :: Maybe (Type a) -- ^ Return type
                           , termetric     :: Maybe (StaticExpression a) -- ^ Optional termination metric
                           , _expression   :: Maybe (Expression a) -- ^ Expression holding the actual function body (not present in static templates)

@@ -139,17 +139,17 @@ instance Eq a => Pretty (Expression a) where
             | splits op = e </> pretty op <+> e'
             | otherwise = e <+> pretty op <+> e'
         a (IndexF _ n e)                = pretty n <> brackets e
-        a (NamedValF nam)              = pretty nam
-        a (CallF nam [] [] Nothing []) = pretty nam <> "()"
-        a (CallF nam [] [] e xs) = pretty nam <> prettyArgsProof e xs
-        a (CallF nam [] us Nothing []) = pretty nam <> prettyArgsU "{" "}" us
+        a (NamedValF nam)               = pretty nam
+        a (CallF nam [] [] Nothing [])  = pretty nam <> "()"
+        a (CallF nam [] [] e xs)        = pretty nam <> prettyArgsProof e xs
+        a (CallF nam [] us Nothing [])  = pretty nam <> prettyArgsU "{" "}" us
         a (CallF nam [] us Nothing [x])
             | startsParens x = pretty nam <> prettyArgsU "{" "}" us <> pretty x
-        a (CallF nam [] us e xs) = pretty nam <> prettyArgsU "{" "}" us <> prettyArgsProof e xs
-        a (CallF nam is [] Nothing []) = pretty nam <> prettyImplicits is
+        a (CallF nam [] us e xs)        = pretty nam <> prettyArgsU "{" "}" us <> prettyArgsProof e xs
+        a (CallF nam is [] Nothing [])  = pretty nam <> prettyImplicits is
         a (CallF nam is [] Nothing [x])
             | startsParens x = pretty nam <> prettyImplicits is <> pretty x
-        a (CallF nam is [] e xs) = pretty nam <> prettyImplicits is <> prettyArgsProof e xs
+        a (CallF nam is [] e xs)        = pretty nam <> prettyImplicits is <> prettyArgsProof e xs
         a (CallF nam is us Nothing [x])
             | startsParens x = pretty nam <> prettyImplicits is <> prettyArgsU "{" "}" us <> pretty x
         a (CallF nam is us e xs)        = pretty nam <> prettyImplicits is <> prettyArgsU "{" "}" us <> prettyArgsProof e xs
@@ -162,7 +162,7 @@ instance Eq a => Pretty (Expression a) where
         a (PrecedeListF es)             = lineAlt (prettyArgsList "; " "(" ")" es) ("(" <> mconcat (punctuate " ; " es) <> ")")
         a (AccessF _ e n)
             | noParens e = e <> "." <> pretty n
-            | otherwise = parens e <> "." <> pretty n
+            | otherwise  = parens e <> "." <> pretty n
         a (CharLitF '\\')              = "'\\\\'"
         a (CharLitF '\n')              = "'\\n'"
         a (CharLitF '\t')              = "'\\t'"
@@ -183,7 +183,7 @@ instance Eq a => Pretty (Expression a) where
         a UnderscoreLitF{}             = "_"
         a (BeginF _ e)
             | not (startsParens e) = linebreak <> indent 2 ("begin" <$> indent 2 e <$> "end")
-            | otherwise = e
+            | otherwise          = e
         a (FixAtF _ n (StackF s as t e))  = "fix@" <+> text n <+> prettyArgs as <+> ":" <> pretty s <+> pretty t <+> "=>" <$> indent 2 (pretty e)
         a (LambdaAtF _ (StackF s as t e)) = "lam@" <+> prettyArgs as <+> ":" <> pretty s <+> pretty t <+> "=>" <$> indent 2 (pretty e)
         a (AddrAtF _ e)                   = "addr@" <> e
@@ -192,7 +192,9 @@ instance Eq a => Pretty (Expression a) where
         a (CommentExprF c e) = text c <$> e
         a (MacroVarF _ s) = ",(" <> text s <> ")"
         a BinListF{} = undefined -- Shouldn't happen
+
         prettyImplicits = mconcat . fmap (prettyArgsU "<" ">") . reverse
+
         prettyIfCase []              = mempty
         prettyIfCase [(s, l, t)]     = "|" <+> s <+> pretty l <+> t
         prettyIfCase ((s, l, t): xs) = prettyIfCase xs $$ "|" <+> s <+> pretty l <+> t
@@ -401,7 +403,7 @@ showFast d = displayS (renderCompact d) mempty
 prettyRecord :: (Pretty a) => [(String, a)] -> Doc
 prettyRecord es
     | any ((>40) . length . showFast . pretty) es = prettyRecordF True es
-    | otherwise = lineAlt (prettyRecordF True es) (prettyRecordS True es)
+    | otherwise                                   = lineAlt (prettyRecordF True es) (prettyRecordS True es)
 
 prettyRecordS :: (Pretty a) => Bool -> [(String, a)] -> Doc
 prettyRecordS _ []             = mempty
@@ -563,7 +565,7 @@ instance Eq a => Pretty (Declaration a) where
     pretty (DataView _ s as ls)             = "dataview" <+> text s <> prettySortArgs as <+> "=" <$> prettyLeaf ls
     pretty (SumType s as ls)                = "datatype" <+> text s <> prettySortArgs as <+> "=" <$> prettyLeaf ls
     pretty (DataSort _ s ls)                = "datasort" <+> text s <+> "=" <$> prettyDSL ls
-    pretty (Impl as i)                      = "implement" <+> prettyArgsNil as <> pretty i -- mconcat (fmap pretty us) <+> pretty i
+    pretty (Impl as i)                      = "implement" <+> prettyArgsNil as <> pretty i
     pretty (ProofImpl as i)                 = "primplmnt" <+> prettyArgsNil as <> pretty i
     pretty (PrVal p (Just e) Nothing)       = "prval" <+> pretty p <+> "=" <+> pretty e
     pretty (PrVal p Nothing (Just t))       = "prval" <+> pretty p <+> ":" <+> pretty t

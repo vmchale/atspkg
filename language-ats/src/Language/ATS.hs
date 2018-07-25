@@ -41,6 +41,7 @@ module Language.ATS ( -- * Functions for working with syntax
                     , SortArg (..)
                     , Sort (..)
                     , SortArgs
+                    , Args
                     , Fix
                     -- * Parser State
                     , FixityState

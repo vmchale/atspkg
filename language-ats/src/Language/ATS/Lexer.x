@@ -241,6 +241,7 @@ tokens :-
     <0> "println!"               { tok (\p s -> alex $ Identifier p s) }
     <0> "fix@"                   { tok (\p _ -> alex $ Keyword p KwFixAt) }
     <0> "lam@"                   { tok (\p _ -> alex $ Keyword p KwLambdaAt) }
+    <0> "llam@"                  { tok (\p _ -> alex $ Keyword p KwLinearLambdaAt) }
     <0> "addr"                   { tok (\p _ -> alex $ Keyword p KwAddr) }
     <0> "addr@"                  { tok (\p _ -> alex $ Keyword p KwAddrAt) }
     <0> "view@"                  { tok (\p _ -> alex $ Keyword p KwViewAt) }
@@ -267,6 +268,9 @@ tokens :-
     <0> @box_record              { tok (\p s -> alex $ Special p "'{") }
     <0> $br / @ref_call          { tok (\p s -> alex $ SpecialBracket p) }
     <0> @signature               { tok (\p s -> alex $ SignatureTok p (tail s)) }
+    <0> "<"                      { tok (\p _ -> alex $ Special p "<") }
+    <0> ">"                      { tok (\p _ -> alex $ Special p ">") }
+    <0> "[]"                     { tok (\p _ -> alex $ Special p "[]") }
     <0> @operator                { tok (\p s -> alex $ Operator p s) }
     <0> @builtin                 { tok (\p s -> alex $ SpecialIdentifier p (tail s)) }
     <0> $special                 { tok (\p s -> alex $ Special p s) }
@@ -401,6 +405,7 @@ data Keyword = KwFun
              | KwMod
              | KwFixAt
              | KwLambdaAt
+             | KwLinearLambdaAt
              | KwAddrAt
              | KwAddr
              | KwSta
@@ -525,6 +530,7 @@ instance Pretty Keyword where
     pretty KwMod = "mod"
     pretty KwFixAt = "fix@"
     pretty KwLambdaAt = "lam@"
+    pretty KwLinearLambdaAt = "llam@"
     pretty KwAddrAt = "addr@"
     pretty KwAddr = "addr"
     pretty KwSta = "sta"

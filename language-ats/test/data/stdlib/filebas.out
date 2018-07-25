@@ -207,7 +207,7 @@ typedef fileref_load_type(a: t@ype) = (FILEref, &a? >> opt(a, b)) -<fun1> #[b:bo
 
 // end of [fileref_load_type]
 //
-fun {a:t0p} fileref_load () : fileref_load_type(a)
+fun {a:t0p} fileref_load  : fileref_load_type(a)
 
 //
 fun fileref_load_int : fileref_load_type(int) =
