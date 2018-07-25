@@ -19,7 +19,7 @@
 - error: {lhs: "mapM", rhs: "traverse"}
 - error: {lhs: "mapM_", rhs: "traverse_"}
 
-- ignore: {name: Avoid lambda, within: [Language.ATS.Types]}
+- ignore: {name: Avoid lambda, within: [Language.ATS.Types.Lens]}
 - ignore: {name: Use <$>, within: [Language.ATS.PrettyPrint]}
 - ignore: {name: Unused LANGUAGE pragma, within: [Language.ATS.PrettyPrint]}
 - ignore: {name: Functor law, within: [Language.ATS.PrettyPrint]}
