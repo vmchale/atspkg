@@ -202,9 +202,17 @@ mkPkg mStr rba lint tim setup rs tgt v = do
 mkConfig :: Maybe String -> Rules ()
 mkConfig mStr = do
 
-    (".atspkg" </> "args") %> \out ->
-        alwaysRerun >>
-        liftIO (BSL.writeFile out (encode mStr))
+    (".atspkg" </> "args") %> \out -> do
+        alwaysRerun
+        shouldWrite <- do
+            exists <- liftIO (doesFileExist out)
+            contents <- if exists
+                then liftIO (BSL.readFile out)
+                else pure mempty
+            pure $ BSL.length contents /= 0 && encode mStr /= contents
+        if shouldWrite
+            then liftIO (BSL.writeFile out (encode mStr))
+            else mempty
 
     (".atspkg" </> "config") %> \out -> do
         need ["atspkg.dhall", ".atspkg" </> "args"]
