@@ -29,21 +29,22 @@ import           Language.ATS.Package.Dependency
 import           Language.ATS.Package.Type
 import           Quaalude
 
-check :: Maybe FilePath -> IO Bool
-check p = do
+check :: Maybe String -> Maybe FilePath -> IO Bool
+check mStr p = do
     home <- getEnv "HOME"
-    v <- wants p
+    v <- wants mStr p
     doesFileExist (home </> ".atspkg" </> show v </> "bin" </> "patscc")
 
-wants :: Maybe FilePath -> IO Version
-wants p = compiler <$> getConfig p
+wants :: Maybe String -> Maybe FilePath -> IO Version
+wants mStr p = compiler <$> getConfig mStr p
 
 -- | Build in current directory or indicated directory
 buildAll :: Int
          -> Maybe String
+         -> Maybe String
          -> Maybe FilePath
          -> IO ()
-buildAll v tgt' p = on (*>) (=<< wants p) fetchDef setupDef
+buildAll v mStr tgt' p = on (*>) (=<< wants mStr p) fetchDef setupDef
     where fetchDef = fetchCompiler
           setupDef = setupCompiler (toVerbosity v) atslibSetup tgt'
 
@@ -52,14 +53,14 @@ build' :: FilePath -- ^ Directory
        -> [String] -- ^ Targets
        -> IO ()
 build' dir tgt' rs = withCurrentDirectory dir (mkPkgEmpty mempty)
-    where mkPkgEmpty ts = mkPkg False True False ts rs tgt' 1
+    where mkPkgEmpty ts = mkPkg Nothing False True False ts rs tgt' 1
 
 -- | Build a set of targets
 build :: Int
       -> [String] -- ^ Targets
       -> IO ()
-build v rs = bool (mkPkgEmpty [buildAll v Nothing Nothing]) (mkPkgEmpty mempty) =<< check Nothing
-    where mkPkgEmpty ts = mkPkg False True False ts rs Nothing 1
+build v rs = bool (mkPkgEmpty [buildAll v Nothing Nothing Nothing]) (mkPkgEmpty mempty) =<< check Nothing Nothing
+    where mkPkgEmpty ts = mkPkg Nothing False True False ts rs Nothing 1
 
 -- TODO clean generated ATS
 mkClean :: Rules ()
@@ -72,10 +73,11 @@ mkClean = "clean" ~> do
 
 -- TODO take more arguments, in particular, include + library dirs
 mkInstall :: Maybe String -- ^ Optional target triple
+          -> Maybe String -- ^ Optional argument to @atspkg.dhall@
           -> Rules ()
-mkInstall tgt =
+mkInstall tgt mStr =
     "install" ~> do
-        config <- getConfig Nothing
+        config <- getConfig mStr Nothing
         let libs' = fmap (unpack . libTarget) . libraries $ config
             bins = fmap (unpack . target) . bin $ config
             incs = ((fmap unpack . includes) =<<) . libraries $ config
@@ -104,9 +106,9 @@ mkInstall tgt =
                 copyFile' com' comDest
             Nothing -> pure ()
 
-mkManpage :: Rules ()
-mkManpage = do
-    c <- getConfig Nothing
+mkManpage :: Maybe String -> Rules ()
+mkManpage mStr = do
+    c <- getConfig mStr Nothing
     b <- pandoc
     case man c of
         Just _ -> bool (pure ()) manpages b
@@ -114,33 +116,34 @@ mkManpage = do
 
 -- FIXME this doesn't rebuild when it should; it should rebuild when
 -- @atspkg.dhall@ changes.
-getConfig :: MonadIO m => Maybe FilePath -> m Pkg
-getConfig dir' = liftIO $ do
+getConfig :: MonadIO m => Maybe String -> Maybe FilePath -> m Pkg
+getConfig mStr dir' = liftIO $ do
     d <- fromMaybe <$> fmap (</> "atspkg.dhall") getCurrentDirectory <*> pure dir'
     b <- not <$> doesFileExist ".atspkg/config"
+    let str = fromMaybe mempty mStr
     if b
-        then input auto (T.pack d)
+        then input auto (T.pack (d <> " " <> str))
         else fmap (decode . BSL.fromStrict) . BS.readFile $ ".atspkg/config"
 
 manTarget :: Text -> FilePath
 manTarget m = unpack m -<.> "1"
 
-mkPhony :: String -> (String -> String) -> (Pkg -> [Bin]) -> [String] -> Rules ()
-mkPhony cmdStr f select rs =
+mkPhony :: Maybe String -> String -> (String -> String) -> (Pkg -> [Bin]) -> [String] -> Rules ()
+mkPhony mStr cmdStr f select rs =
     cmdStr ~> do
-        config <- getConfig Nothing
+        config <- getConfig mStr Nothing
         let runs = bool (filter (/= cmdStr) rs) (fmap (unpack . target) . select $ config) (rs == [cmdStr])
         need runs
         traverse_ cmd_ (f <$> runs)
 
-mkValgrind :: [String] -> Rules ()
-mkValgrind = mkPhony "valgrind" ("valgrind " <>) bin
+mkValgrind :: Maybe String -> [String] -> Rules ()
+mkValgrind mStr = mkPhony mStr "valgrind" ("valgrind " <>) bin
 
-mkTest :: [String] -> Rules ()
-mkTest = mkPhony "test" id test
+mkTest :: Maybe String -> [String] -> Rules ()
+mkTest mStr = mkPhony mStr "test" id test
 
-mkRun :: [String] -> Rules ()
-mkRun = mkPhony "run" id bin
+mkRun :: Maybe String -> [String] -> Rules ()
+mkRun mStr = mkPhony mStr "run" id bin
 
 toVerbosity :: Int -> Verbosity
 toVerbosity 0 = Normal
@@ -173,11 +176,12 @@ rebuildTargets rba rs = foldMap g [ (rba, (RebuildNow ,) <$> patterns rs) ]
           patterns = thread (mkPattern <$> ["c", "o", "so", "a", "deb"])
           mkPattern ext = ("//*." <> ext :)
 
-cleanConfig :: (MonadIO m) => [String] -> m Pkg
-cleanConfig ["clean"] = pure undefined
-cleanConfig _         = getConfig Nothing
+cleanConfig :: (MonadIO m) => Maybe String -> [String] -> m Pkg
+cleanConfig _ ["clean"] = pure undefined
+cleanConfig mStr _      = getConfig mStr Nothing
 
-mkPkg :: Bool -- ^ Force rebuild
+mkPkg :: Maybe String -- ^ Optional argument to @atspkg.dhall@
+      -> Bool -- ^ Force rebuild
       -> Bool -- ^ Run linter
       -> Bool -- ^ Print build profiling information
       -> [IO ()] -- ^ Setup
@@ -185,21 +189,27 @@ mkPkg :: Bool -- ^ Force rebuild
       -> Maybe String -- ^ Target triple
       -> Int -- ^ Verbosity
       -> IO ()
-mkPkg rba lint tim setup rs tgt v = do
-    cfg <- cleanConfig rs
+mkPkg mStr rba lint tim setup rs tgt v = do
+    cfg <- cleanConfig mStr rs
     let opt = options rba lint tim v $ pkgToTargets cfg tgt rs
     shake opt $
         mconcat
             [ want (pkgToTargets cfg tgt rs)
             , mkClean
-            , pkgToAction setup rs tgt cfg
+            , pkgToAction mStr setup rs tgt cfg
             ]
 
-mkConfig :: Rules ()
-mkConfig =
+mkConfig :: Maybe String -> Rules ()
+mkConfig mStr = do
+
+    (".atspkg" </> "args") %> \out ->
+        alwaysRerun >>
+        liftIO (BSL.writeFile out (encode mStr))
+
     (".atspkg" </> "config") %> \out -> do
-        need ["atspkg.dhall"]
-        x <- liftIO $ input auto "./atspkg.dhall"
+        need ["atspkg.dhall", ".atspkg" </> "args"]
+        let go = case mStr of { Just x -> (<> (" " <> x)) ; Nothing -> id }
+        x <- liftIO $ input auto (T.pack (go "./atspkg.dhall"))
         liftIO $ BSL.writeFile out (encode (x :: Pkg))
 
 setTargets :: [String] -> [FilePath] -> Maybe Text -> Rules ()
@@ -208,9 +218,9 @@ setTargets rs bins mt = when (null rs) $
         (Just m) -> want . bool bins (manTarget m : bins) =<< pandoc
         Nothing  -> want bins
 
-bits :: Maybe String -> [String] -> Rules ()
-bits tgt rs = mconcat $ [ mkManpage, mkInstall tgt, mkConfig ] <>
-    sequence [ mkRun, mkTest, mkValgrind ] rs
+bits :: Maybe String -> Maybe String -> [String] -> Rules ()
+bits mStr tgt rs = mconcat $ sequence [ mkManpage, mkInstall tgt, mkConfig ] mStr <>
+    bisequence' [ mkRun, mkTest, mkValgrind ] mStr rs
 
 pkgToTargets :: Pkg -> Maybe String -> [FilePath] -> [FilePath]
 pkgToTargets ~Pkg{..} tgt [] = (toTgt tgt . target <$> bin) <> (unpack . libTarget <$> libraries)
@@ -257,12 +267,13 @@ toTgt tgt = maybeTgt tgt . unpack
     where maybeTgt (Just t) = (<> ('-' : t))
           maybeTgt Nothing  = id
 
-pkgToAction :: [IO ()] -- ^ Setup actions to be performed
+pkgToAction :: Maybe String -- ^ Optional extra expression to which we should apply @atspkg.dhall@
+            -> [IO ()] -- ^ Setup actions to be performed
             -> [String] -- ^ Targets
             -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
             -> Pkg -- ^ Package data type
             -> Rules ()
-pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf af as dl slv deb al) =
+pkgToAction mStr setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf af as dl slv deb al) =
 
     unless (rs == ["clean"]) $ do
 
@@ -299,7 +310,7 @@ pkgToAction setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf af as
 
         ph <- home' v' v
 
-        cDepsRules ph *> bits tgt rs
+        cDepsRules ph *> bits mStr tgt rs
 
         traverse_ (h ph) lbs
 

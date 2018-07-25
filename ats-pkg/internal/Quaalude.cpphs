@@ -47,6 +47,7 @@ module Quaalude ( hex
                 , (.*)
                 , (.**)
                 , thread
+                , bisequence'
                 -- * Dhall reëxports
                 , Interpret
                 , Inject

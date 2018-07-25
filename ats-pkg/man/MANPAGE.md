@@ -60,6 +60,9 @@ argument a directory containing the unpacked compiler.
 **-V** **-\-version**
 :   Display version information
 
+**-\-pkg-args**
+:   Arguments to be passed to atspkg.dhall
+
 **-c** **-\-no-cache**
 :   Ignore cached configuration file
 

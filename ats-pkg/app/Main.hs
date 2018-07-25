@@ -33,9 +33,12 @@ wrapper = info (helper <*> versionInfo <*> command')
 versionInfo :: Parser (a -> a)
 versionInfo = infoOption ("atspkg version: " ++ showVersion atspkgVersion) (short 'V' <> long "version" <> help "Show version")
 
-data Command = Install { _archTarget :: Maybe String }
+data Command = Install { _archTarget :: Maybe String
+                       , _atspkgArg  :: Maybe String
+                       }
              | Build { _targets    :: [String]
                      , _archTarget :: Maybe String
+                     , _atspkgArg  :: Maybe String
                      , _rebuildAll :: Bool
                      , _verbosity  :: Int
                      , _lint       :: Bool
@@ -44,16 +47,22 @@ data Command = Install { _archTarget :: Maybe String }
              | Clean
              | Pack { _target :: String }
              | Test { _targets    :: [String]
+                    , _atspkgArg  :: Maybe String
                     , _rebuildAll :: Bool
                     , _verbosity  :: Int
                     , _lint       :: Bool
                     , _prof       :: Bool
                     }
-             | Fetch { _url :: String }
+             | Fetch { _url       :: String
+                     , _atspkgArg :: Maybe String
+                     }
              | Nuke
              | Upgrade
-             | Valgrind { _targets :: [String] }
+             | Valgrind { _targets   :: [String]
+                        , _atspkgArg :: Maybe String
+                        }
              | Run { _targets    :: [String]
+                   , _atspkgArg  :: Maybe String
                    , _rebuildAll :: Bool
                    , _verbosity  :: Int
                    , _lint       :: Bool
@@ -97,6 +106,7 @@ pack = Pack
 install :: Parser Command
 install = Install
     <$> triple
+    <*> pkgArgs
 
 checkSet :: Parser Command
 checkSet = CheckSet
@@ -123,6 +133,7 @@ dhallCompletions = ftypeCompletions "dhall"
 run' :: Parser Command
 run' = Run
     <$> targets "run"
+    <*> pkgArgs
     <*> rebuild
     <*> verbosity
     <*> noLint
@@ -131,13 +142,16 @@ run' = Run
 test' :: Parser Command
 test' = Test
     <$> targets "test"
+    <*> pkgArgs
     <*> rebuild
     <*> verbosity
     <*> noLint
     <*> profile
 
 valgrind :: Parser Command
-valgrind = Valgrind <$> targets "run with valgrind"
+valgrind = Valgrind
+    <$> targets "run with valgrind"
+    <*> pkgArgs
 
 targets :: String -> Parser [String]
 targets = targetP mempty many
@@ -168,6 +182,12 @@ triple = optional
     <> short 't'
     <> help "Set target by using its triple"))
 
+pkgArgs :: Parser (Maybe String)
+pkgArgs = optional
+    (strOption
+    (long "pkg-args"
+    <> help "Arguments to be passed to 'atspkg.dhall'"))
+
 verbosity :: Parser Int
 verbosity = length <$>
     many (flag' () (short 'v' <> long "verbose" <> help "Turn up verbosity"))
@@ -175,6 +195,7 @@ verbosity = length <$>
 build' :: Parser Command
 build' = Build
     <$> targets "build"
+    <*> pkgArgs
     <*> triple
     <*> rebuild
     <*> verbosity
@@ -193,41 +214,42 @@ fetch = Fetch <$>
     argument str
     (metavar "URL"
     <> help "URL pointing to a tarball containing the package to be installed.")
+    <*> pkgArgs
 
-fetchPkg :: String -> IO ()
-fetchPkg pkg = withSystemTempDirectory "atspkg" $ \p -> do
+fetchPkg :: Maybe String -> String -> IO ()
+fetchPkg mStr pkg = withSystemTempDirectory "atspkg" $ \p -> do
     let (dirName, url') = (p, pkg) & each %~ TL.pack
     buildHelper True (ATSDependency mempty dirName url' undefined undefined mempty mempty mempty mempty)
     ps <- getSubdirs p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
-    let setup = [buildAll 0 Nothing (Just pkgDir)]
-    withCurrentDirectory (takeDirectory pkgDir) (mkPkg False False False setup ["install"] Nothing 0)
+    let setup = [buildAll 0 mStr Nothing (Just pkgDir)]
+    withCurrentDirectory (takeDirectory pkgDir) (mkPkg mStr False False False setup ["install"] Nothing 0)
     stopGlobalPool
 
 main :: IO ()
 main = execParser wrapper >>= run
 
-runHelper :: Bool -> Bool -> Bool -> [String] -> Maybe String -> Int -> IO ()
-runHelper rba lint tim rs tgt v = g . bool x y . (&& isNothing tgt) =<< check Nothing
-    where g xs = mkPkg rba lint tim xs rs tgt v *> stopGlobalPool
+runHelper :: Bool -> Bool -> Bool -> [String] -> Maybe String -> Maybe String -> Int -> IO ()
+runHelper rba lint tim rs mStr tgt v = g . bool x y . (&& isNothing tgt) =<< check mStr Nothing
+    where g xs = mkPkg mStr rba lint tim xs rs tgt v *> stopGlobalPool
           y = mempty
-          x = [buildAll v tgt Nothing]
+          x = [buildAll v mStr tgt Nothing]
 
 run :: Command -> IO ()
-run List                          = displayList "https://raw.githubusercontent.com/vmchale/atspkg/master/ats-pkg/pkgs/pkg-set.dhall"
-run (Check p b)                   = void $ ($ Version [0,1,0]) <$> checkPkg p b
-run (CheckSet p b)                = void $ checkPkgSet p b
-run Upgrade                       = upgradeBin "vmchale" "atspkg"
-run Nuke                          = cleanAll
-run (Fetch u)                     = fetchPkg u
-run Clean                         = mkPkg False True False mempty ["clean"] Nothing 0
-run (Build rs tgt rba v lint tim) = runHelper rba lint tim rs tgt v
-run (Test ts rba v lint tim)      = runHelper rba lint tim ("test" : ts) Nothing v
-run (Run ts rba v lint tim)       = runHelper rba lint tim ("run" : ts) Nothing v
-run (Install tgt)                 = runHelper False True False ["install"] tgt 0
-run (Valgrind ts)                 = runHelper False True False ("valgrind" : ts) Nothing 0
-run (Pack dir')                   = packageCompiler dir'
-run Setup                         = installActions
+run List                               = displayList "https://raw.githubusercontent.com/vmchale/atspkg/master/ats-pkg/pkgs/pkg-set.dhall"
+run (Check p b)                        = void $ ($ Version [0,1,0]) <$> checkPkg p b
+run (CheckSet p b)                     = void $ checkPkgSet p b
+run Upgrade                            = upgradeBin "vmchale" "atspkg"
+run Nuke                               = cleanAll
+run (Fetch u mArg)                     = fetchPkg mArg u
+run Clean                              = mkPkg Nothing False True False mempty ["clean"] Nothing 0
+run (Build rs mArg tgt rba v lint tim) = runHelper rba lint tim rs mArg tgt v
+run (Test ts mArg rba v lint tim)      = runHelper rba lint tim ("test" : ts) mArg Nothing v
+run (Run ts mArg rba v lint tim)       = runHelper rba lint tim ("run" : ts) mArg Nothing v
+run (Install tgt mArg)                 = runHelper False True False ["install"] mArg tgt 0
+run (Valgrind ts mArg)                 = runHelper False True False ("valgrind" : ts) mArg Nothing 0
+run (Pack dir')                        = packageCompiler dir'
+run Setup                              = installActions
 
 installActions :: IO ()
 installActions = do
