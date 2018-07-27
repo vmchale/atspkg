@@ -17,11 +17,11 @@ fn levenshtein {m:nat}{n:nat}(s1 : string(m), s2 : string(n)) : int =
         }
     
     val () = loop1(sz2i(s1_l))
-    val () = while* {i:nat}  .<i>. (i : int(i)) =>
+    val () = while* {i:nat} .<i>. (i : int(i)) =>
         (i > 0)
         (column[i] := i ; i := i - 1)
     val () = while(i > 0)(column[i] := i ; i := i - 1)
-    val () = for* { i : nat | i <= m }  .<i>. (i : int(i)) =>
+    val () = for* { i : nat | i <= m } .<i>. (i : int(i)) =>
         (i := sz2i(s1_l) ; i > 0 ; i := i - 1)
         (column[i] := i)
     

@@ -52,6 +52,7 @@ module Language.ATS.Types
 import           Control.DeepSeq       (NFData)
 import           Data.Function         (on)
 import           Data.Functor.Foldable hiding (Fix (..))
+import           Data.List.NonEmpty    (NonEmpty)
 import qualified Data.Map              as M
 import           Data.Semigroup        (Semigroup)
 import           GHC.Generics          (Generic)
@@ -115,7 +116,7 @@ data Declaration a = Func { pos :: a, _fun :: Function a }
                    | Assume (Name a) (SortArgs a) (Type a)
                    | TKind a (Name a) String
                    | SymIntr a [Name a]
-                   | Stacst a (Name a) (Type a) (Maybe (Expression a))
+                   | Stacst a (Name a) (Type a) (Maybe (StaticExpression a))
                    | PropDef a String (Args a) (Type a)
                    | FixityDecl (Fixity a) [String]
                    | MacDecl a String [String] (Expression a)
@@ -133,23 +134,22 @@ data DataPropLeaf a = DataPropLeaf { propU :: [Universal a], _propExpr1 :: Expre
 
 -- | A type for parsed ATS types
 data Type a = Tuple a [Type a]
-            | BoxTuple a [Type a]
+            | BoxTuple a (NonEmpty (Type a))
             | Named (Name a)
             | Ex (Existential a) (Maybe (Type a))
             | ForA (Universal a) (Type a)
             | Dependent { _typeCall :: Name a, _typeCallArgs :: [Type a] }
             | Unconsumed (Type a) -- @!a@
-            | AsProof (Type a) (Maybe (Type a)) -- @a >> b@
+            | AsProof (Type a) (Maybe (Type a)) -- @a >> b@ If the second field is 'Nothing' this will print as @a >> _@.
             | FromVT (Type a) -- | @a?!@
             | MaybeVal (Type a) -- | @a?@
             | AtExpr a (Type a) (StaticExpression a)
             | AtType a (Type a)
-            | ProofType a [Type a] (Type a) -- Aka (prf | val)
+            | ProofType a (NonEmpty (Type a)) (Type a) -- Aka (prf | val)
             | ConcreteType (StaticExpression a)
             | RefType (Type a)
             | ViewType a (Type a)
             | FunctionType String (Type a) (Type a)
-            | NoneType a
             | ImplicitType a
             | ViewLiteral Addendum
             | AnonymousRecord a [(String, Type a)]
@@ -158,7 +158,7 @@ data Type a = Tuple a [Type a]
             deriving (Show, Eq, Generic, NFData)
 
 data TypeF a x = TupleF a [x]
-               | BoxTupleF a [x]
+               | BoxTupleF a (NonEmpty x)
                | NamedF (Name a)
                | ExF (Existential a) (Maybe x)
                | ForAF (Universal a) x
@@ -169,12 +169,11 @@ data TypeF a x = TupleF a [x]
                | MaybeValF x
                | AtExprF a x (StaticExpression a)
                | AtTypeF a x
-               | ProofTypeF a [x] x
+               | ProofTypeF a (NonEmpty x) x
                | ConcreteTypeF (StaticExpression a)
                | RefTypeF x
                | ViewTypeF a x
                | FunctionTypeF String x x
-               | NoneTypeF a
                | ImplicitTypeF a
                | ViewLiteralF Addendum
                | AnonymousRecordF a [(String, x)]
@@ -202,7 +201,6 @@ instance Recursive (Type a) where
     project (RefType ty)               = RefTypeF ty
     project (ViewType l ty)            = ViewTypeF l ty
     project (FunctionType s ty ty')    = FunctionTypeF s ty ty'
-    project (NoneType l)               = NoneTypeF l
     project (ImplicitType l)           = ImplicitTypeF l
     project (ViewLiteral a)            = ViewLiteralF a
     project (AnonymousRecord l stys)   = AnonymousRecordF l stys
@@ -435,11 +433,11 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                          }
                   | RecordValue a [(String, Expression a)] (Maybe (Type a))
                   | Precede (Expression a) (Expression a)
-                  | ProofExpr a [Expression a] (Expression a)
+                  | ProofExpr a (NonEmpty (Expression a)) (Expression a)
                   | TypeSignature (Expression a) (Type a)
                   | WhereExp (Expression a) (ATS a)
-                  | TupleEx a [Expression a]
-                  | BoxTupleEx a [Expression a]
+                  | TupleEx a (NonEmpty (Expression a))
+                  | BoxTupleEx a (NonEmpty (Expression a))
                   | While a (Expression a) (Expression a)
                   | WhileStar a [Universal a] (StaticExpression a) [Arg a] (Expression a) (Expression a) (Args a) -- ^ A @while@ loop that is guaranteed to terminate.
                   | For a (Expression a) (Expression a)
@@ -480,11 +478,11 @@ data ExpressionF a x = LetF a (ATS a) (Maybe x)
                      | CaseF a Addendum x [(Pattern a, LambdaType a, x)]
                      | RecordValueF a [(String, x)] (Maybe (Type a))
                      | PrecedeF x x
-                     | ProofExprF a [x] x
+                     | ProofExprF a (NonEmpty x) x
                      | TypeSignatureF x (Type a)
                      | WhereExpF x (ATS a)
-                     | TupleExF a [x]
-                     | BoxTupleExF a [x]
+                     | TupleExF a (NonEmpty x)
+                     | BoxTupleExF a (NonEmpty x)
                      | WhileF a x x
                      | WhileStarF a [Universal a] (StaticExpression a) [Arg a] x x (Args a)
                      | ForF a x x

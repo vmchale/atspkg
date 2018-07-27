@@ -32,13 +32,13 @@ fn levenshtein {m:nat}{n:nat}(s1 : string(m), s2 : string(n)) : int =
         prvar pf1 = pf_arr
         
         //
-        val () = while* { i : nat | i <= m }  .<m-i>. ( i : int(i)
-                                                      , p : ptr(larr+i*sizeof(int))
-                                                      , pf0 : array_v(int, larr, i)
-                                                      , pf1 : array_v(int?, larr+i*sizeof(int), m-i)
-                                                      ) : ( pf0 : array_v(int, larr, m)
-                                                          , pf1 : array_v(int?, larr+i*sizeof(int), 0)
-                                                          ) =>
+        val () = while* { i : nat | i <= m } .<m-i>. ( i : int(i)
+                                                     , p : ptr(larr+i*sizeof(int))
+                                                     , pf0 : array_v(int, larr, i)
+                                                     , pf1 : array_v(int?, larr+i*sizeof(int), m-i)
+                                                     ) : ( pf0 : array_v(int, larr, m)
+                                                         , pf1 : array_v(int?, larr+i*sizeof(int), 0)
+                                                         ) =>
             (i < sz2i(s1_l))
             {
               //

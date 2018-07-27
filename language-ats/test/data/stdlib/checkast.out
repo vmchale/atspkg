@@ -35,6 +35,7 @@
 (* Start time: December, 2013 *)
 (* ****** ****** *)
 #define ATS_PACKNAME"ATSLIB.prelude.checkast"
+
 (* ****** ****** *)
 sortdef t0p = t@ype and vt0p = vt@ype
 

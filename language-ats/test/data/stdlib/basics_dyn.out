@@ -60,6 +60,7 @@ datatype TYPE(a: vt@ype) =
 //
 #define true true_bool // shorthand
 #define false false_bool // shorthand
+
 //
 val true_bool: bool(true) = "mac#atsbool_true"
 

@@ -16,6 +16,8 @@ import qualified Data.Map as M
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
 import Data.Char (toLower)
+import Data.List.NonEmpty (NonEmpty (..))
+import Data.Foldable (toList)
 import GHC.Generics (Generic)
 import Language.ATS.Types
 import Language.ATS.Types.Lens
@@ -238,8 +240,8 @@ many(p)
     : some(p) p { $2 : $1 }
     | { [] }
 
-sep_by(p,sep) : p { [$1] }
-              | sep_by(p,sep) sep p { $3 : $1 }
+sep_by(p,sep) : p { $1 :| [] }
+              | sep_by(p,sep) sep p { $3 :| (toList $1) }
 
 comma_sep(p)
     : sep_by(p, comma) { $1 }
@@ -251,7 +253,7 @@ parens(p) : between(openParen, p, closeParen) { $1 }
 alt(p,q) : p { $1 }
          | q { $1 }
 
-ATS : Declarations { ATS $1 }
+ATS : Declarations { ATS (reverse $1) }
 
 -- | Parse declarations in a list
 Declarations : { [] } 
@@ -264,7 +266,7 @@ TypeIn : comma_sep(Type) { $1 }
 
 ExprType : StaticExpression { ConcreteType $1 }
 
-TypeInExpr : comma_sep(alt(Type,ExprType)) { $1 }
+TypeInExpr : comma_sep(alt(Type,ExprType)) { toList $1 }
 
 -- | Parse a type
 Type : Name parens(TypeInExpr) { Dependent $1 $2 }
@@ -292,13 +294,13 @@ Type : Name parens(TypeInExpr) { Dependent $1 $2 }
      | atbrace Records rbrace { AnonymousRecord $1 $2 }
      | openParen TypeIn vbar Type closeParen { ProofType $1 $2 $4 }
      | identifierSpace identifier { Dependent (Unqualified $ to_string $1) [Named (Unqualified $ to_string $2)] }
-     | openParen TypeIn closeParen { Tuple $1 $2 }
-     | openParen TypeIn closeParen lineComment { Tuple $1 $2 }
+     | openParen TypeIn closeParen { Tuple $1 (toList $2) }
+     | openParen TypeIn closeParen lineComment { Tuple $1 (toList $2) }
      | boxTuple TypeIn closeParen { BoxTuple $1 $2 }
      | boxTuple TypeIn closeParen lineComment { BoxTuple $1 $2 }
      | openParen Type closeParen { ParenType $1 $2 }
      | openParen TypeIn rbrace {% left $ Expected $3 ")" "}" }
-     | doubleParens { NoneType $1 }
+     | doubleParens { Tuple $1 mempty }
      | Type where IdentifierOr SortArgs eq Type { WhereType $2 $1 $3 $4 $6 }
      | dollar {% left $ Expected $1 "Type" "$" }
      | identifierSpace identifier openParen {% left $ Expected (token_posn $2) "Static integer expression" (to_string $2) }
@@ -331,7 +333,7 @@ Literal : uintLit { UintLit $1 }
         | doubleParens { VoidLiteral $1 }
 
 -- | Parse a list of comma-separated patterns
-PatternIn : comma_sep(Pattern) { $1 }
+PatternIn : comma_sep(Pattern) { reverse (toList $1) }
 
 -- | Parse a pattern match
 Pattern : Name { PName $1 [] }
@@ -372,10 +374,10 @@ ExpressionPrf : ExpressionIn { (Nothing, $1) }
               | ExpressionIn vbar ExpressionIn { (Just $1, $3) } -- FIXME only passes one proof?
 
 -- | A list of comma-separated expressions
-ExpressionIn : comma_sep(Expression) { $1 }
+ExpressionIn : comma_sep(Expression) { toList $1 }
 
-Tuple : PreExpression comma PreExpression { [$3, $1] }
-      | Tuple comma PreExpression { $3 : $1 }
+Tuple : PreExpression comma PreExpression { $3 :| [$1] }
+      | Tuple comma PreExpression { $3 :| toList $1 }
 
 -- | Parse an arrow in a case statement
 CaseArrow : plainArrow { Plain $1 }
@@ -425,10 +427,11 @@ Call : Name doubleParens { Call $1 [] [] Nothing [] }
      | Name Implicits openParen ExpressionPrf closeParen { Call $1 $2 [] (fst $4) (snd $4) }
      | Name Implicits { Call $1 $2 [] Nothing [] }
      | raise PreExpression { Call (SpecialName $1 "raise") [] [] Nothing [$2] } -- $raise can have at most one argument
+     | Name Implicits openParen ExpressionPrf fun {% left $ Expected $5 ")" "fun" }
      | Name openParen ExpressionPrf end {% left $ Expected $4 ")" "end"}
      | Name openParen ExpressionPrf else {% left $ Expected $4 ")" "else"}
 
-StaticArgs : comma_sep(StaticExpression) { $1 }
+StaticArgs : comma_sep(StaticExpression) { reverse (toList $1) }
 
 StaticDecls : StaticDeclaration { [$1] }
             | StaticDecls StaticDeclaration { $2 : $1 }
@@ -531,7 +534,7 @@ Sort : t0pPlain { T0p None }
      | IdentifierOr { NamedSort $1 }
      | IdentifierOr plus { NamedSort ($1 <> "+") }
 
-QuantifierArgs : comma_sep(IdentifierOr) { $1 }
+QuantifierArgs : comma_sep(IdentifierOr) { reverse (toList $1) }
                | { [] }
 
 -- FIXME handle [l:addr;n:int]
@@ -551,12 +554,12 @@ Universal : lbrace QuantifierArgs rbrace { Universal $2 Nothing [] }
           | lbrace QuantifierArgs colon Sort rbrace { Universal $2 (Just $4) [] }
           | lbrace QuantifierArgs colon Sort vbar Predicates rbrace { Universal $2 (Just $4) $6 }
 
-Implicits : lspecial TypeIn rbracket { [$2] }
-          | Implicits lspecial TypeIn rbracket { $3 : $1 }
+Implicits : lspecial TypeIn rbracket { [toList $2] }
+          | Implicits lspecial TypeIn rbracket { toList $3 : $1 }
           | doubleBrackets { [[Named (Unqualified "")]] }
           | Implicits doubleBrackets { [Named (Unqualified "")] : $1 }
-          | lbracket TypeIn rbracket { [$2] }
-          | Implicits lspecial TypeIn rbracket { $3 : $1 }
+          | lbracket TypeIn rbracket { [toList $2] }
+          | Implicits lspecial TypeIn rbracket { toList $3 : $1 }
           
 MaybeImplicit : Implicits { $1 }
               | { [] }
@@ -599,12 +602,12 @@ RecordVal : IdentifierOr eq Expression { [($1, $3)] }
 Records : IdentifierOr eq Type { [($1, $3)] }
         | Records comma IdentifierOr eq Type { ($3, $5) : $1 }
 
-IdentifiersIn : comma_sep(IdentifierOr) { $1 }
+IdentifiersIn : comma_sep(IdentifierOr) { toList $1 }
 
 OfType : { Nothing }
        | of Type { Just $2 }
 
-StaticExpressionsIn : comma_sep(StaticExpression) { $1 }
+StaticExpressionsIn : comma_sep(StaticExpression) { toList $1 }
 
 -- | Parse a constructor for a sum type
 SumLeaf : vbar Universals identifier { Leaf $2 (to_string $3) [] Nothing }
@@ -619,9 +622,11 @@ Leaves : SumLeaf { [$1] }
        | Universals identifier openParen StaticExpressionsIn closeParen OfType { [Leaf $1 (to_string $2) $4 $6] }
        | dollar {% left $ Expected $1 "|" "$" }
 
-Universals : { [] }
-           | doubleBraces { [] }
-           | Universals Universal { $2 : $1 }
+PreUniversals : { [] }
+              | doubleBraces { [] }
+              | PreUniversals Universal { $2 : $1 }
+
+Universals : PreUniversals { reverse $1 }
 
 -- | Optionally parse a termetric
 OptTermetric : { Nothing }
@@ -663,6 +668,9 @@ OptExpression : { Nothing }
               | eq fun {% left $ Expected $2 "Expression" "=" }
               | eq lineComment fun {% left $ Expected $3 "Expression" "=" }
               | lbrace {% left $ Expected $1 "Expression" "{" }
+
+OptStaticExpression : { Nothing }
+                    | eq StaticExpression { Just $2 }
 
 -- | Parse a constructor for a 'dataprop'
 DataPropLeaf : vbar Universals Expression { DataPropLeaf $2 $3 Nothing }
@@ -928,7 +936,7 @@ Declaration : include string { Include $2 }
             | tkindef IdentifierOr eq string { TKind $1 (Unqualified $2) $4 }
             | TypeDecl { $1 }
             | symintr Names { SymIntr $1 $2 }
-            | stacst IdentifierOr colon Type OptExpression { Stacst $1 (Unqualified $2) $4 $5 }
+            | stacst IdentifierOr colon Type OptStaticExpression { Stacst $1 (Unqualified $2) $4 $5 }
             | propdef IdentifierOr openParen Args closeParen eq Type { PropDef $1 $2 (Just $4) $7 }
             | exception identifierSpace of doubleParens { Exception (to_string $2) (Tuple $4 mempty) }
             | exception identifierSpace of openParen Type closeParen { Exception (to_string $2) (Tuple $4 [$5]) }

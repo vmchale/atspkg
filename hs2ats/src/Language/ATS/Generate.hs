@@ -146,7 +146,7 @@ filterModule _                   = []
 
 modulePrint :: Module a -> (String, [GenerateError])
 modulePrint = g . fmap asATSType . filterModule
-    where g = (h . ATS . reverse . rights) &&& lefts
+    where g = (h . ATS . rights) &&& lefts
           h :: ATS AlexPosn -> String
           h = printATS
 

@@ -36,6 +36,7 @@
 (* ****** ****** *)
 #define NSH (x) x // for commenting: no sharing
 #define SHR (x) x // for commenting: it is shared
+
 (* ****** ****** *)
 sortdef tk = tkind
 
