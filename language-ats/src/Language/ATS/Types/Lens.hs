@@ -20,6 +20,7 @@ module Language.ATS.Types.Lens ( -- * Lenses
                                , comment
                                ) where
 
+import           Data.List.NonEmpty (NonEmpty)
 import           Language.ATS.Types
 import           Lens.Micro
 
@@ -83,7 +84,7 @@ propLeaves :: Traversal' (Declaration a) [DataPropLeaf a]
 propLeaves f (DataProp l n as pl) = DataProp l n as <$> f pl
 propLeaves _ x                    = pure x
 
-leaves :: Traversal' (Declaration a) [Leaf a]
+leaves :: Traversal' (Declaration a) (NonEmpty (Leaf a))
 leaves f (SumType t as l)     = SumType t as <$> f l
 leaves f (SumViewType t as l) = SumViewType t as <$> f l
 leaves _ x                    = pure x

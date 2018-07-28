@@ -14,6 +14,7 @@ import           Data.Bool                    (bool)
 import           Data.Char                    (toUpper)
 import           Data.Either                  (lefts, rights)
 import           Data.Foldable
+import qualified Data.List.NonEmpty           as NE
 import           Data.Maybe
 import           Language.ATS                 as ATS
 import           Language.ATS.Generate.Error
@@ -93,7 +94,8 @@ conDeclToType :: ConDecl a -> ErrM (String, Maybe (ATS.Type b))
 conDeclToType (ConDecl _ n [])  = Right (toStringATS n, Nothing)
 conDeclToType (ConDecl _ n [t]) = (,) (toStringATS n) . Just <$> typeToType t
 conDeclToType (ConDecl _ n ts)  = (,) (toStringATS n) . Just . ATS.Tuple undefined <$> traverse typeToType ts
-conDeclToType (RecDecl _ n fs)  = (,) (toStringATS n) . Just . AnonymousRecord undefined <$> traverse fieldDeclToType (reverse fs)
+conDeclToType (RecDecl _ _ []) = malformed "conDeclToType"
+conDeclToType (RecDecl _ n fs)  = (,) (toStringATS n) . Just . AnonymousRecord undefined <$> traverse fieldDeclToType (NE.fromList (reverse fs))
 conDeclToType _                 = unsupported "conDeclToType"
 
 toStringATS :: HS.Name a -> String
@@ -129,9 +131,10 @@ pruneATSNils x  = Just x
 -- TODO if it derives functor, use +
 asATSType :: Decl a -> ErrM (Declaration b)
 asATSType (TypeDecl _ dh t) = ViewTypeDef undefined <$> (fst <$> asATSName dh) <*> (pruneATSNils . snd <$> asATSName dh) <*> typeToType t
+asATSType (DataDecl _ DataType{} _ _ [] _)    = malformed "asATSType"
 asATSType (DataDecl _ NewType{} _ dh [qcd] _)  = ViewTypeDef undefined <$> (fst <$> asATSName dh) <*> (pruneATSNils . snd <$> asATSName dh) <*> qualConDeclToType qcd
 asATSType (DataDecl _ DataType{} _ dh [qcd] _) = ViewTypeDef undefined <$> (fst <$> asATSName dh) <*> (pruneATSNils . snd <$> asATSName dh) <*> qualConDeclToType qcd
-asATSType (DataDecl _ DataType{} _ dh qcds _)  = SumViewType <$> (fst <$> asATSName dh) <*> (pruneATSNils . snd <$> asATSName dh) <*> traverse qualConDeclToLeaf (reverse qcds)
+asATSType (DataDecl _ DataType{} _ dh qcds _)  = SumViewType <$> (fst <$> asATSName dh) <*> (pruneATSNils . snd <$> asATSName dh) <*> traverse qualConDeclToLeaf (NE.fromList (reverse qcds))
 asATSType _                                    = unsupported "asATSType"
 
 -- TODO GDataDecl

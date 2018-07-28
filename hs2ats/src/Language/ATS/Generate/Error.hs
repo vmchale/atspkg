@@ -12,6 +12,7 @@ module Language.ATS.Generate.Error ( -- * Types
                                    -- * Helper functions
                                    , unsupported
                                    , syntaxError
+                                   , malformed
                                    ) where
 
 import           Control.Composition
@@ -34,12 +35,17 @@ syntaxError = Left .* HaskellSyntaxError
 unsupported :: String -> ErrM a
 unsupported = Left . Unsupported
 
+malformed :: String -> ErrM a
+malformed = Left . Malformed
+
 data GenerateError = Unsupported String
                    | HaskellSyntaxError SrcLoc String
                    | Internal String
+                   | Malformed String
                    deriving (Eq, Show, Generic, NFData)
 
 instance Pretty GenerateError where
     pretty (Unsupported s)            = dullyellow "Warning:" <+> "skipping unsupported construct" <$$> indent 2 (squotes (text s)) <> linebreak
     pretty (HaskellSyntaxError loc s) = dullred "Error:" <+> "failed to parse" <+> text (show loc) <> colon <$$> indent 2 (text s) <> linebreak
     pretty (Internal s)               = dullred "Error:" <+> "internal error: " <$$> indent 2 (text s) <> linebreak
+    pretty (Malformed s)              = dullred "Error:" <+> "incompatible type" <$$> indent 2 (squotes (text s)) <> linebreak

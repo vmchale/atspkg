@@ -14,7 +14,7 @@ module Language.ATS.PrettyPrint ( printATS
 
 import           Control.Composition          hiding ((&))
 import           Data.Bool                    (bool)
-import           Data.Foldable                (toList)
+import           Data.Foldable                (fold, toList)
 import           Data.Functor.Foldable        (cata)
 import           Data.List                    (isPrefixOf)
 import           Data.List.NonEmpty           (NonEmpty (..))
@@ -195,7 +195,7 @@ instance Eq a => Pretty (Expression a) where
         a (MacroVarF _ s) = ",(" <> text s <> ")"
         a BinListF{} = undefined -- Shouldn't happen
 
-        prettyImplicits = mconcat . fmap (prettyArgsU "<" ">") . reverse
+        prettyImplicits = fold . fmap (prettyArgsU "<" ">") . reverse
 
         prettyIfCase []              = mempty
         prettyIfCase [(s, l, t)]     = "|" <+> s <+> pretty l <+> t
@@ -404,10 +404,10 @@ lineAlt = group .* flatAlt
 showFast :: Doc -> String
 showFast d = displayS (renderCompact d) mempty
 
-prettyRecord :: (Pretty a) => [(String, a)] -> Doc
+prettyRecord :: (Pretty a) => NonEmpty (String, a) -> Doc
 prettyRecord es
-    | any ((>40) . length . showFast . pretty) es = prettyRecordF True es
-    | otherwise                                   = lineAlt (prettyRecordF True es) (prettyRecordS True es)
+    | any ((>40) . length . showFast . pretty) es = prettyRecordF True (toList es)
+    | otherwise                                   = lineAlt (prettyRecordF True (toList es)) (prettyRecordS True (toList es))
 
 prettyRecordS :: (Pretty a) => Bool -> [(String, a)] -> Doc
 prettyRecordS _ []             = mempty
@@ -565,10 +565,10 @@ instance Eq a => Pretty (Declaration a) where
     pretty (AbsType _ s as t)               = "abstype" <+> text s <> prettySortArgs as <> prettyMaybeType t
     pretty (AbsViewType _ s as Nothing)     = "absvtype" <+> text s <> prettySortArgs as
     pretty (AbsViewType _ s as (Just t))    = "absvtype" <+> text s <> prettySortArgs as <+> "=" <+> pretty t
-    pretty (SumViewType s as ls)            = "datavtype" <+> text s <> prettySortArgs as <+> "=" <$> prettyLeaf ls
-    pretty (DataView _ s as ls)             = "dataview" <+> text s <> prettySortArgs as <+> "=" <$> prettyLeaf ls
-    pretty (SumType s as ls)                = "datatype" <+> text s <> prettySortArgs as <+> "=" <$> prettyLeaf ls
-    pretty (DataSort _ s ls)                = "datasort" <+> text s <+> "=" <$> prettyDSL ls
+    pretty (SumViewType s as ls)            = "datavtype" <+> text s <> prettySortArgs as <+> "=" <$> prettyLeaf (toList ls)
+    pretty (DataView _ s as ls)             = "dataview" <+> text s <> prettySortArgs as <+> "=" <$> prettyLeaf (toList ls)
+    pretty (SumType s as ls)                = "datatype" <+> text s <> prettySortArgs as <+> "=" <$> prettyLeaf (toList ls)
+    pretty (DataSort _ s ls)                = "datasort" <+> text s <+> "=" <$> prettyDSL (toList ls)
     pretty (Impl as i)                      = "implement" <+> prettyArgsNil as <> pretty i
     pretty (ProofImpl as i)                 = "primplmnt" <+> prettyArgsNil as <> pretty i
     pretty (PrVal p (Just e) Nothing)       = "prval" <+> pretty p <+> "=" <+> pretty e

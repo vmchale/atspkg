@@ -556,8 +556,8 @@ Universal : lbrace QuantifierArgs rbrace { Universal $2 Nothing [] }
 
 Implicits : lspecial TypeIn rbracket { [toList $2] }
           | Implicits lspecial TypeIn rbracket { toList $3 : $1 }
-          | doubleBrackets { [[Named (Unqualified "")]] }
-          | Implicits doubleBrackets { [Named (Unqualified "")] : $1 }
+          | doubleBrackets { [[]] }
+          | Implicits doubleBrackets { [] : $1 }
           | lbracket TypeIn rbracket { [toList $2] }
           | Implicits lspecial TypeIn rbracket { toList $3 : $1 }
           
@@ -594,13 +594,13 @@ Name : identifier { Unqualified (to_string $1) }
      | dollar {% left $ Expected $1 "Name" "$" }
 
 -- | Parse a list of values in a record
-RecordVal : IdentifierOr eq Expression { [($1, $3)] }
-          | RecordVal comma IdentifierOr eq Expression { ($3, $5) : $1 }
+RecordVal : IdentifierOr eq Expression { ($1, $3) :| [] }
+          | RecordVal comma IdentifierOr eq Expression { ($3, $5) :| toList $1 }
           | IdentifierOr eq comma {% left $ Expected $3 "Expression" "," }
 
 -- | Parse a list of types in a record
-Records : IdentifierOr eq Type { [($1, $3)] }
-        | Records comma IdentifierOr eq Type { ($3, $5) : $1 }
+Records : IdentifierOr eq Type { ($1, $3) :| [] }
+        | Records comma IdentifierOr eq Type { ($3, $5) :| toList $1 }
 
 IdentifiersIn : comma_sep(IdentifierOr) { toList $1 }
 
@@ -615,11 +615,11 @@ SumLeaf : vbar Universals identifier { Leaf $2 (to_string $3) [] Nothing }
         | vbar Universals IdentifierOr openParen StaticExpressionsIn closeParen OfType { Leaf $2 $3 $5 $7 } -- FIXME could also be e.g. '0' (static expression)
 
 -- | Parse all constructors of a sum type
-Leaves : SumLeaf { [$1] }
-       | Leaves SumLeaf { $2 : $1 }
-       | Universals identifierSpace of Type { [Leaf $1 (to_string $2) [] (Just $4)] }
-       | Universals identifier { [Leaf $1 (to_string $2) [] Nothing] }
-       | Universals identifier openParen StaticExpressionsIn closeParen OfType { [Leaf $1 (to_string $2) $4 $6] }
+Leaves : SumLeaf { $1 :| [] }
+       | Leaves SumLeaf { $2 :| toList $1 }
+       | Universals identifierSpace of Type { Leaf $1 (to_string $2) [] (Just $4) :| [] }
+       | Universals identifier { Leaf $1 (to_string $2) [] Nothing :| [] }
+       | Universals identifier openParen StaticExpressionsIn closeParen OfType { Leaf $1 (to_string $2) $4 $6 :| [] }
        | dollar {% left $ Expected $1 "|" "$" }
 
 PreUniversals : { [] }
@@ -871,8 +871,8 @@ DataSortLeaf : vbar Universals Sort { DataSortLeaf $2 $3 Nothing }
              | vbar Universals Sort of Sort { DataSortLeaf $2 $3 (Just $5) }
              | DataSortLeaf Comment { $1 }
 
-DataSortLeaves : DataSortLeaf { [$1] }
-               | DataSortLeaves DataSortLeaf { $2 : $1 }
+DataSortLeaves : DataSortLeaf { $1 :| [] }
+               | DataSortLeaves DataSortLeaf { $2 :| toList $1 }
 
 CommentContents : commentContents { Comment $1 }
                 | CommentContents commentContents { over comment (<> $2) $1 }

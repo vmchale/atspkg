@@ -94,8 +94,8 @@ data Declaration a = Func { pos :: a, _fun :: Function a }
                    | CBlock String
                    | TypeDef a String (SortArgs a) (Type a) (Maybe (Sort a))
                    | ViewTypeDef a String (SortArgs a) (Type a)
-                   | SumType { typeName :: String, typeArgs :: SortArgs a, _leaves :: [Leaf a] }
-                   | SumViewType { typeName :: String, typeArgs :: SortArgs a, _leaves :: [Leaf a] }
+                   | SumType { typeName :: String, typeArgs :: SortArgs a, _leaves :: NonEmpty (Leaf a) }
+                   | SumViewType { typeName :: String, typeArgs :: SortArgs a, _leaves :: NonEmpty (Leaf a) }
                    | AbsType a String (SortArgs a) (Maybe (Type a))
                    | AbsViewType a String (SortArgs a) (Maybe (Type a))
                    | AbsView a String (SortArgs a) (Maybe (Type a))
@@ -106,7 +106,7 @@ data Declaration a = Func { pos :: a, _fun :: Function a }
                    | OverloadIdent a String (Name a) (Maybe Int)
                    | Comment { _comment :: String }
                    | DataProp { pos :: a, propName :: String, propArgs :: SortArgs a, _propLeaves :: [DataPropLeaf a] }
-                   | DataView a String (SortArgs a) [Leaf a]
+                   | DataView a String (SortArgs a) (NonEmpty (Leaf a))
                    | Extern a (Declaration a)
                    | Define String
                    | SortDef a String (Either (Sort a) (Universal a))
@@ -120,7 +120,7 @@ data Declaration a = Func { pos :: a, _fun :: Function a }
                    | PropDef a String (Args a) (Type a)
                    | FixityDecl (Fixity a) [String]
                    | MacDecl a String [String] (Expression a)
-                   | DataSort a String [DataSortLeaf a]
+                   | DataSort a String (NonEmpty (DataSortLeaf a))
                    | Exception String (Type a)
                    | ExtVar a String (Expression a)
                    | AbsImpl a (Name a) (SortArgs a) (Type a)
@@ -152,7 +152,7 @@ data Type a = Tuple a [Type a]
             | FunctionType String (Type a) (Type a)
             | ImplicitType a
             | ViewLiteral Addendum
-            | AnonymousRecord a [(String, Type a)]
+            | AnonymousRecord a (NonEmpty (String, Type a))
             | ParenType a (Type a)
             | WhereType a (Type a) String (SortArgs a) (Type a)
             deriving (Show, Eq, Generic, NFData)
@@ -176,7 +176,7 @@ data TypeF a x = TupleF a [x]
                | FunctionTypeF String x x
                | ImplicitTypeF a
                | ViewLiteralF Addendum
-               | AnonymousRecordF a [(String, x)]
+               | AnonymousRecordF a (NonEmpty (String, x))
                | ParenTypeF a x
                | WhereTypeF a x String (SortArgs a) x
                deriving (Functor)
@@ -431,7 +431,7 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                          , val   :: Expression a
                          , _arms :: [(Pattern a, LambdaType a, Expression a)] -- ^ Each (('Pattern' a), ('Expression' a)) pair corresponds to a branch of the 'case' statement
                          }
-                  | RecordValue a [(String, Expression a)] (Maybe (Type a))
+                  | RecordValue a (NonEmpty (String, Expression a)) (Maybe (Type a))
                   | Precede (Expression a) (Expression a)
                   | ProofExpr a (NonEmpty (Expression a)) (Expression a)
                   | TypeSignature (Expression a) (Type a)
@@ -476,7 +476,7 @@ data ExpressionF a x = LetF a (ATS a) (Maybe x)
                      | UnaryF (UnOp a) x
                      | IfCaseF a [(x, LambdaType a, x)]
                      | CaseF a Addendum x [(Pattern a, LambdaType a, x)]
-                     | RecordValueF a [(String, x)] (Maybe (Type a))
+                     | RecordValueF a (NonEmpty (String, x)) (Maybe (Type a))
                      | PrecedeF x x
                      | ProofExprF a (NonEmpty x) x
                      | TypeSignatureF x (Type a)

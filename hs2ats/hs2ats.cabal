@@ -35,7 +35,7 @@ library
     build-depends:
         base >=4.7 && <5,
         haskell-src-exts -any,
-        language-ats >=1.4.0.0,
+        language-ats >=1.5.0.0,
         casing -any,
         microlens -any,
         ansi-wl-pprint -any,
