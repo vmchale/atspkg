@@ -442,7 +442,7 @@ fun {a:vtype} unbox_vt  : boxed_vt(INV(a)) -> (a)
 stadef array (a: vt@ype, n: int) = @[a][n]
 
 //
-viewdef array_v(a: vt@ype, l: addr, n: int) = @[a][n] @l
+viewdef array_v(a: vt@ype, l: addr, n: int) = @[a][n] @ l
 
 //
 absvtype arrayptr_vt0ype_addr_int_vtype( a: vt0ype+

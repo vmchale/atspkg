@@ -83,8 +83,8 @@ $br = [\<\>]
 @signature = ":<" @inner_signature_mult ">" | ":"
 @func_type = "->" | "-<" @inner_signature_mult ">"
 
-@at_brace = \@ ($white | @block_comment)* \{
-@at_tuple = \@ ($white | @block_comment)* \(
+@at_brace = \@ (@block_comment)* \{
+@at_tuple = \@ (@block_comment)* \(
 
 @box_tuple = \' ($white | @block_comment)* \(
 @box_record = \' ($white | @block_comment)* \{

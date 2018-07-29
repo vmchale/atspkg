@@ -6,7 +6,6 @@ license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
 maintainer: vamchale@gmail.com
 author: Vanessa McHale
-homepage: https://github.com/vmchale/hs2ats#readme
 synopsis: Create ATS types from Haskell types
 description:
     This package enables scanning Haskell source files for data types and then generating [ATS](http://www.ats-lang.org/) types from them.

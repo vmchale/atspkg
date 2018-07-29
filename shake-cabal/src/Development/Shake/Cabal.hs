@@ -11,6 +11,7 @@ module Development.Shake.Cabal ( getCabalDeps
                                , prettyShow
                                ) where
 
+import           Control.Applicative
 import           Control.Arrow
 import           Control.Composition
 import           Control.Monad
@@ -23,6 +24,7 @@ import           Distribution.PackageDescription
 import           Distribution.PackageDescription.Parsec
 import           Distribution.Pretty
 import           Distribution.Types.CondTree
+import           Distribution.Types.ForeignLib
 import           Distribution.Types.PackageId
 import           Distribution.Verbosity                 as Distribution
 import           Distribution.Version
@@ -46,13 +48,28 @@ platform = arch ++ "-" ++ processOS os
     where processOS "darwin" = "osx"
           processOS x        = x
 
--- FIXME: should also work with .x, .cpphs, .y files
+-- FIXME: should also work with .x, .cpphs, .y, .c2hs files
 libraryToFiles :: Library -> [FilePath]
 libraryToFiles lib = fold [cs, is, hs]
     where (cs, is) = (cSources &&& includes) $ libBuildInfo lib
           hs = (++ ".hs") . toFilePath <$> explicitLibModules lib
 
-extract :: CondTree a b Library -> [Library]
+fileHelper :: (a -> [ModuleName]) -> a -> [FilePath]
+fileHelper = (fmap ((++ ".hs") . toFilePath) .)
+
+exeToFiles :: Executable -> [FilePath]
+exeToFiles = liftA2 (:) modulePath (fileHelper exeModules)
+
+testToFiles :: TestSuite -> [FilePath]
+testToFiles = fileHelper testModules
+
+benchToFiles :: Benchmark -> [FilePath]
+benchToFiles = fileHelper benchmarkModules
+
+foreignToFiles :: ForeignLib -> [FilePath]
+foreignToFiles = fileHelper foreignLibModules
+
+extract :: CondTree a b c -> [c]
 extract (CondNode d _ []) = [d]
 extract (CondNode d _ bs) = d : (g =<< bs)
     where g (CondBranch _ tb fb) = join $ catMaybes [Just $ extract tb, extract <$> fb]
@@ -83,10 +100,50 @@ getCabalDepsV v p = do
     let descr = packageDescription pkg
         extraSrc = extraSrcFiles descr
         vers = pkgVersion (package descr)
+
+        mkHelper f = (toList . fmap snd . f) pkg
+
         libs = toList (condLibrary pkg)
-        normalSrc = (libraryToFiles <=< extract) =<< libs
-        dir = (fmap (++ "/") . hsSourceDirs . libBuildInfo <=< extract) =<< libs
-        dirge = ((++) <$> dir <*>)
+        exes = mkHelper condExecutables
+        subLibs = mkHelper condSubLibraries
+        tests = mkHelper condTestSuites
+        benches = mkHelper condBenchmarks
+        foreigns = mkHelper condForeignLibs
+
+        extractHelper f xs = (f <=< extract) =<< xs
+
+        normalSrc = extractHelper libraryToFiles libs
+        exeSrc = extractHelper exeToFiles exes
+        subSrc = extractHelper libraryToFiles subLibs
+        testSrc = extractHelper testToFiles tests
+        benchSrc = extractHelper benchToFiles benches
+        foreignSrc = extractHelper foreignToFiles foreigns
+
+        dirHelper f xs = (fmap (++ "/") . hsSourceDirs . f <=< extract) =<< xs
+
+        dir = dirHelper libBuildInfo libs
+        exeDir = dirHelper buildInfo exes
+        subDirs = dirHelper libBuildInfo subLibs
+        testDirs = dirHelper testBuildInfo tests
+        benchDirs = dirHelper benchmarkBuildInfo benches
+        foreignDirs = dirHelper foreignLibBuildInfo foreigns
+
+        dirgeHelper d = ((++) <$> d <*>)
+
+        dirge = dirgeHelper dir
+        dirgeExe = dirgeHelper exeDir
+        dirgeSub = dirgeHelper subDirs
+        dirgeTest = dirgeHelper testDirs
+        dirgeBench = dirgeHelper benchDirs
+        dirgeForeign = dirgeHelper foreignDirs
+
         h = filterM doesFileExist
+
     norms <- h (dirge normalSrc)
-    pure (vers, extraSrc ++ norms)
+    exeFiles <- h (dirgeExe exeSrc)
+    subFiles <- h (dirgeSub subSrc)
+    testFiles <- h (dirgeTest testSrc)
+    benchFiles <- h (dirgeBench benchSrc)
+    foreignFiles <- h (dirgeForeign foreignSrc)
+
+    pure (vers, extraSrc ++ norms ++ exeFiles ++ subFiles ++ testFiles ++ benchFiles ++ foreignFiles)

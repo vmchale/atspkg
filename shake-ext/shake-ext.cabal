@@ -6,7 +6,6 @@ license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
 maintainer: vamchale@gmail.com
 author: Vanessa McHale
-homepage: https://hub.darcs.net/vmchale/shake-ext
 bug-reports: https://hub.darcs.net/vmchale/ats/issues
 synopsis: Helper functions for linting with shake
 description:

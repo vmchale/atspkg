@@ -1,12 +1,12 @@
 cabal-version: 1.18
 name: shake-cabal
-version: 0.1.0.1
+version: 0.1.0.4
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
 maintainer: vanessa.mchale@iohk.io
 author: Vanessa McHale
-bug-reports: https://github.com/vmchale/atspkg/issues
+bug-reports: https://hub.darcs.net/vmchale/ats/issues
 synopsis: Shake library for use with cabal
 description:
     A library for using [shake](http://hackage.haskell.org/package/shake) alongside [cabal](https://www.haskell.org/cabal/).

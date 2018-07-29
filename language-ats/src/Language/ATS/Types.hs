@@ -90,7 +90,7 @@ data Declaration a = Func { pos :: a, _fun :: Function a }
                    | AndDecl { andT :: Maybe (Type a), andPat :: Pattern a, _andExpr :: Expression a }
                    | Include String
                    | Load { static :: Bool, withOctothorpe :: Bool, qualName :: Maybe String, fileName :: String }
-                   | Stadef String (SortArgs a) (Either (StaticExpression a, Maybe (Sort a)) (Type a))
+                   | Stadef String (SortArgs a) (Either (StaticExpression a, Maybe (Sort a)) (Maybe (Type a), Type a))
                    | CBlock String
                    | TypeDef a String (SortArgs a) (Type a) (Maybe (Sort a))
                    | ViewTypeDef a String (SortArgs a) (Type a)
@@ -119,7 +119,7 @@ data Declaration a = Func { pos :: a, _fun :: Function a }
                    | Stacst a (Name a) (Type a) (Maybe (StaticExpression a))
                    | PropDef a String (Args a) (Type a)
                    | FixityDecl (Fixity a) [String]
-                   | MacDecl a String [String] (Expression a)
+                   | MacDecl a String (Maybe [String]) (Expression a)
                    | DataSort a String (NonEmpty (DataSortLeaf a))
                    | Exception String (Type a)
                    | ExtVar a String (Expression a)
@@ -144,8 +144,8 @@ data Type a = Tuple a [Type a]
             | FromVT (Type a) -- | @a?!@
             | MaybeVal (Type a) -- | @a?@
             | AtExpr a (Type a) (StaticExpression a)
-            | AtType a (Type a)
-            | ProofType a (NonEmpty (Type a)) (Type a) -- Aka (prf | val)
+            | ArrayType a (Type a) (StaticExpression a)
+            | ProofType a (NonEmpty (Type a)) (NonEmpty (Type a)) -- Aka (prf | val)
             | ConcreteType (StaticExpression a)
             | RefType (Type a)
             | ViewType a (Type a)
@@ -155,6 +155,7 @@ data Type a = Tuple a [Type a]
             | AnonymousRecord a (NonEmpty (String, Type a))
             | ParenType a (Type a)
             | WhereType a (Type a) String (SortArgs a) (Type a)
+            | AddrType a -- ^ @addr@
             deriving (Show, Eq, Generic, NFData)
 
 data TypeF a x = TupleF a [x]
@@ -168,8 +169,8 @@ data TypeF a x = TupleF a [x]
                | FromVTF x
                | MaybeValF x
                | AtExprF a x (StaticExpression a)
-               | AtTypeF a x
-               | ProofTypeF a (NonEmpty x) x
+               | ArrayTypeF a x (StaticExpression a)
+               | ProofTypeF a (NonEmpty x) (NonEmpty x)
                | ConcreteTypeF (StaticExpression a)
                | RefTypeF x
                | ViewTypeF a x
@@ -179,6 +180,7 @@ data TypeF a x = TupleF a [x]
                | AnonymousRecordF a (NonEmpty (String, x))
                | ParenTypeF a x
                | WhereTypeF a x String (SortArgs a) x
+               | AddrTypeF a
                deriving (Functor)
 
 type instance Base (Type a) = TypeF a
@@ -195,7 +197,7 @@ instance Recursive (Type a) where
     project (FromVT ty)                = FromVTF ty
     project (MaybeVal ty)              = MaybeValF ty
     project (AtExpr l ty se)           = AtExprF l ty se
-    project (AtType l ty)              = AtTypeF l ty
+    project (ArrayType l ty n)         = ArrayTypeF l ty n
     project (ProofType l tys ty')      = ProofTypeF l tys ty'
     project (ConcreteType se)          = ConcreteTypeF se
     project (RefType ty)               = RefTypeF ty
@@ -206,6 +208,7 @@ instance Recursive (Type a) where
     project (AnonymousRecord l stys)   = AnonymousRecordF l stys
     project (ParenType l ty)           = ParenTypeF l ty
     project (WhereType l ty s sas ty') = WhereTypeF l ty s sas ty'
+    project (AddrType l)               = AddrTypeF l
 
 -- | A type for @=>@, @=\<cloref1>@, etc.
 data LambdaType a = Plain a
@@ -358,6 +361,7 @@ pattern Con l = SpecialInfix l "::"
 data StaticExpression a = StaticVal (Name a)
                         | StaticBinary (BinOp a) (StaticExpression a) (StaticExpression a)
                         | StaticInt Int
+                        | StaticHex String
                         | SPrecede (StaticExpression a) (StaticExpression a)
                         | StaticVoid a
                         | Sif { scond :: StaticExpression a, whenTrue :: StaticExpression a, selseExpr :: StaticExpression a } -- Static if (for proofs)
@@ -365,11 +369,13 @@ data StaticExpression a = StaticVal (Name a)
                         | SUnary (UnOp a) (StaticExpression a)
                         | SLet a [Declaration a] (Maybe (StaticExpression a))
                         | SCase Addendum (StaticExpression a) [(Pattern a, LambdaType a, StaticExpression a)]
+                        | SString String -- ^ @ext#@
                         deriving (Show, Eq, Generic, NFData)
 
 data StaticExpressionF a x = StaticValF (Name a)
                            | StaticBinaryF (BinOp a) x x
                            | StaticIntF Int
+                           | StaticHexF String
                            | SPrecedeF x x
                            | StaticVoidF a
                            | SifF x x x
@@ -377,6 +383,7 @@ data StaticExpressionF a x = StaticValF (Name a)
                            | SUnaryF (UnOp a) x
                            | SLetF a [Declaration a] (Maybe x)
                            | SCaseF Addendum x [(Pattern a, LambdaType a, x)]
+                           | SStringF String
                            deriving (Functor)
 
 type instance Base (StaticExpression a) = StaticExpressionF a
@@ -384,6 +391,7 @@ type instance Base (StaticExpression a) = StaticExpressionF a
 instance Recursive (StaticExpression a) where
     project (StaticVal n)         = StaticValF n
     project (StaticBinary b x x') = StaticBinaryF b x x'
+    project (StaticHex h)         = StaticHexF h
     project (StaticInt i)         = StaticIntF i
     project (SPrecede x x')       = SPrecedeF x x'
     project (StaticVoid x)        = StaticVoidF x
@@ -392,6 +400,7 @@ instance Recursive (StaticExpression a) where
     project (SUnary u x)          = SUnaryF u x
     project (SLet x ds e)         = SLetF x ds e
     project (SCase a x ples)      = SCaseF a x ples
+    project (SString s)           = SStringF s
 
 -- | A (possibly effectful) expression.
 data Expression a = Let a (ATS a) (Maybe (Expression a))

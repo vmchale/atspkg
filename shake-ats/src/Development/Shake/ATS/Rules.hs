@@ -60,8 +60,8 @@ cabalForeign (GHC _ suff) (ForeignCabal cbp' cf' obf') = do
         obfDir = takeDirectory (obf -<.> "hs")
         libName = takeBaseName cf
 
-    (v, trDeps) <- liftIO $ getCabalDeps cf
     obf %> \out -> do
+        (v, trDeps) <- liftIO $ getCabalDeps cf
 
         ghcV' <- quietly ghcVersion
         let ghcV = maybe ghcV' (drop 1) suff

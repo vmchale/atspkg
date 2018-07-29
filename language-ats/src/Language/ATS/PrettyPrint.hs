@@ -260,6 +260,7 @@ instance Eq a => Pretty (StaticExpression a) where
             | squish op = se <> pretty op <> se'
             | otherwise = se <+> pretty op <+> se'
         a (StaticIntF i)            = pretty i
+        a (StaticHexF h)            = text h
         a StaticVoidF{}             = "()"
         a (SifF e e' e'')           = "sif" <+> e <+> "then" <$> indent 2 e' <$> "else" <$> indent 2 e''
         a (SCallF n cs)             = pretty n <> parens (mconcat (punctuate "," . fmap pretty $ cs))
@@ -269,6 +270,7 @@ instance Eq a => Pretty (StaticExpression a) where
             ("let" <$> indent 2 (pretty e) <$> endLet e')
             ("let" <+> pretty e <$> endLet e')
         a (SCaseF ad e sls) = "case" <> pretty ad <+> e <+> "of" <$> indent 2 (prettyCases sls)
+        a (SStringF s)      = text s
 
 instance Eq a => Pretty (Sort a) where
     pretty = cata a where
@@ -298,9 +300,9 @@ instance Eq a => Pretty (Type a) where
         a (FromVTF t)                      = t <> "?!"
         a (MaybeValF t)                    = t <> "?"
         a (AtExprF _ t t')                 = t <+> "@" <+> pretty t'
-        a (AtTypeF _ t)                    = "@" <> t
-        a (ProofTypeF _ t t')              = parens (pre' `op` "|" <+> t')
-            where pre' = prettyArgsG mempty mempty (toList t)
+        a (ArrayTypeF _ t n)               = "@[" <> t <> "][" <> pretty n <> "]"
+        a (ProofTypeF _ t t')              = parens (pre' `op` "|" <+> prettyArgsG mempty mempty t')
+            where pre' = prettyArgsG mempty mempty t
                   op = bool (<+>) (<>) ('\n' `elem` showFast pre')
         a (ConcreteTypeF e)                = pretty e
         a (TupleF _ ts)                    = parens (mconcat (punctuate ", " (fmap pretty (reverse ts))))
@@ -312,6 +314,7 @@ instance Eq a => Pretty (Type a) where
         a (AnonymousRecordF _ rs)          = prettyRecord rs
         a (ParenTypeF _ t)                 = parens t
         a (WhereTypeF _ t i sa t')         = t <#> indent 2 ("where" </> pretty i <+> prettySortArgs sa <+> "=" <+> pretty t')
+        a AddrTypeF{}                      = "addr"
 
 gan :: Eq a => Maybe (Sort a) -> Doc
 gan (Just t) = " : " <> pretty t <> " "
@@ -473,23 +476,23 @@ prettyBody :: Doc -> Doc -> [Doc] -> Doc
 prettyBody c1 c2 [d] = c1 <> d <> c2
 prettyBody c1 c2 ds  = (c1 <>) . align . indent (-1) . cat . (<> pure c2) $ ds
 
-prettyArgsG' :: Doc -> Doc -> Doc -> [Doc] -> Doc
-prettyArgsG' c3 c1 c2 = prettyBody c1 c2 . prettyHelper c3 . reverse
+prettyArgsG' :: Foldable t => Doc -> Doc -> Doc -> t Doc -> Doc
+prettyArgsG' c3 c1 c2 = prettyBody c1 c2 . prettyHelper c3 . reverse . toList
 
-prettyArgsList :: Doc -> Doc -> Doc -> [Doc] -> Doc
-prettyArgsList c3 c1 c2 = prettyBody c1 c2 . va . prettyHelper c3
+prettyArgsList :: Foldable t => Doc -> Doc -> Doc -> t Doc -> Doc
+prettyArgsList c3 c1 c2 = prettyBody c1 c2 . va . prettyHelper c3 . toList
     where va = (& _tail.traverse %~ group)
 
-prettyArgsG :: Doc -> Doc -> [Doc] -> Doc
+prettyArgsG :: Foldable t => Doc -> Doc -> t Doc -> Doc
 prettyArgsG = prettyArgsG' ", "
 
-prettyArgsU :: (Pretty a) => Doc -> Doc -> [a] -> Doc
+prettyArgsU :: (Pretty a, Foldable f, Functor f) => Doc -> Doc -> f a -> Doc
 prettyArgsU = prettyArgs' ","
 
-prettyArgs' :: (Pretty a) => Doc -> Doc -> Doc -> [a] -> Doc
+prettyArgs' :: (Pretty a, Functor f, Foldable f) => Doc -> Doc -> Doc -> f a -> Doc
 prettyArgs' = fmap pretty -.*** prettyArgsG'
 
-prettyArgs :: (Pretty a) => [a] -> Doc
+prettyArgs :: (Pretty a, Foldable f, Functor f) => f a -> Doc
 prettyArgs = prettyArgs' ", " "(" ")"
 
 prettyArgsNil :: Eq a => Maybe [Arg a] -> Doc
@@ -622,9 +625,11 @@ instance Eq a => Pretty (Declaration a) where
     pretty (Local _ d d')                   = "local" <$> indent 2 (pretty d) <$> "in" <$> indent 2 (pretty d') <$> "end"
     pretty (FixityDecl f ss)                = pretty f <+> hsep (fmap text ss)
     pretty (StaVal us i t)                  = "val" </> mconcat (fmap pretty us) <+> text i <+> ":" <+> pretty t
-    pretty (Stadef i as (Right t))          = "stadef" <+> text i <+> prettySortArgs as <+> "=" <+> pretty t
+    pretty (Stadef i as (Right (Nothing, t))) = "stadef" <+> text i <+> prettySortArgs as <+> "=" <+> pretty t
+    pretty (Stadef i as (Right (Just ty, t))) = "stadef" <+> text i <+> prettySortArgs as <+> ":" <+> pretty ty <+> "=" <+> pretty t
     pretty (Stadef i as (Left (se, mt)))    = "stadef" <+> text i <+> prettySortArgs as <+> "=" <+> pretty se <> maybeT mt
-    pretty (AndD d (Stadef i as (Right t))) = pretty d <+> "and" <+> text i <+> prettySortArgs as <+> "=" <+> pretty t
+    pretty (AndD d (Stadef i as (Right (Nothing, t)))) = pretty d <+> "and" <+> text i <+> prettySortArgs as <+> "=" <+> pretty t
+    pretty (AndD d (Stadef i as (Right (Just ty, t)))) = pretty d <+> "and" <+> text i <+> prettySortArgs as <+> ":" <+> pretty ty <+> "=" <+> pretty t
     pretty (AndD d (Stadef i as (Left (se, mt)))) = pretty d <+> "and" <+> text i <+> prettySortArgs as <+> "=" <+> pretty se <> maybeT mt
     pretty (AbsView _ i as t)               = "absview" <+> text i <> prettySortArgs as <> prettyMaybeType t
     pretty (AbsVT0p _ i as t)               = "absvt@ype" <+> text i <> prettySortArgs as <> prettyMaybeType t
@@ -634,7 +639,8 @@ instance Eq a => Pretty (Declaration a) where
     pretty (TKind _ n s)                    = pretty n <+> "=" <+> text s
     pretty (SortDef _ s t)                  = "sortdef" <+> text s <+> "=" <+> either pretty pretty t
     pretty (AndD d (SortDef _ i t))         = pretty d <+> "and" <+> text i <+> "=" <+> either pretty pretty t
-    pretty (MacDecl _ n is e)               = "macdef" <+> text n <> "(" <> mconcat (punctuate ", " (fmap text is)) <> ") =" <+> pretty e
+    pretty (MacDecl _ n (Just is) e)        = "macdef" <+> text n <> "(" <> mconcat (punctuate ", " (fmap text is)) <> ") =" <+> pretty e
+    pretty (MacDecl _ n Nothing e)          = "macdef" <+> text n <+> "=" <+> pretty e
     pretty (ExtVar _ s e)                   = "extvar" <+> text s <+> "=" <+> pretty e
     pretty (AbsImpl _ n as e)               = "absimpl" </> pretty n <> prettySortArgs as <+> "=" </> pretty e
     pretty AndD{}                           = undefined -- probably not valid syntax if we get to this point

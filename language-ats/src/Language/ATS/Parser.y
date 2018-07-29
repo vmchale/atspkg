@@ -63,6 +63,7 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
 %nonassoc mutateEq
 %nonassoc maybeProof
 %nonassoc prfTransform
+%nonassoc raise
 
 %token
     fun { Keyword $$ KwFun }
@@ -290,18 +291,19 @@ Type : Name parens(TypeInExpr) { Dependent $1 $2 }
      | Existential { Ex $1 Nothing }
      | Universal Type { ForA $1 $2 }
      | Type at StaticExpression { AtExpr $2 $1 $3 }
-     | at Type { AtType $1 $2 }
+     | at lsqbracket Type rsqbracket lsqbracket StaticExpression rsqbracket { ArrayType $1 $3 $6 }
      | atbrace Records rbrace { AnonymousRecord $1 $2 }
-     | openParen TypeIn vbar Type closeParen { ProofType $1 $2 $4 }
+     | openParen TypeIn vbar TypeIn closeParen { ProofType $1 $2 $4 }
      | identifierSpace identifier { Dependent (Unqualified $ to_string $1) [Named (Unqualified $ to_string $2)] }
      | openParen TypeIn closeParen { Tuple $1 (toList $2) }
      | openParen TypeIn closeParen lineComment { Tuple $1 (toList $2) }
      | boxTuple TypeIn closeParen { BoxTuple $1 $2 }
      | boxTuple TypeIn closeParen lineComment { BoxTuple $1 $2 }
      | openParen Type closeParen { ParenType $1 $2 }
-     | openParen TypeIn rbrace {% left $ Expected $3 ")" "}" }
+     | addr { AddrType $1 }
      | doubleParens { Tuple $1 mempty }
      | Type where IdentifierOr SortArgs eq Type { WhereType $2 $1 $3 $4 $6 }
+     | openParen TypeIn rbrace {% left $ Expected $3 ")" "}" }
      | dollar {% left $ Expected $1 "Type" "$" }
      | identifierSpace identifier openParen {% left $ Expected (token_posn $2) "Static integer expression" (to_string $2) }
      | Type identifierSpace {% left $ Expected (token_posn $2) "," (to_string $2) }
@@ -321,7 +323,7 @@ TypeArg : IdentifierOr { Arg (First $1) }
         | exclamation IdentifierOr colon {% left $ OneOf $3 [",", ")"] ":" }
 
 Arg : TypeArg { $1 }
-    | StaticExpression { Arg (Second (ConcreteType $1)) }
+    | StaticExpression { Arg (Second (ConcreteType $1)) } -- TODO: have some sort of stop showing bound variables that we can use to disambiguate types vs. static expressions?
 
 -- | Parse a literal
 Literal : uintLit { UintLit $1 }
@@ -441,6 +443,8 @@ StaticDecls : StaticDeclaration { [$1] }
 StaticExpression : Name { StaticVal $1 }
                  | StaticExpression BinOp StaticExpression { StaticBinary $2 $1 $3 }
                  | intLit { StaticInt $1 }
+                 | hexLit { StaticHex $1 }
+                 | string { SString $1 }
                  | doubleParens { StaticVoid $1 }
                  | sif StaticExpression then StaticExpression else StaticExpression { Sif $2 $4 $6 }
                  | identifierSpace { StaticVal (Unqualified $ to_string $1) }
@@ -453,6 +457,7 @@ StaticExpression : Name { StaticVal $1 }
                  | let StaticDecls comment_after(in) end { SLet $1 $2 Nothing }
                  | let StaticDecls in StaticExpression end { SLet $1 $2 (Just $4) }
                  | openParen StaticExpression closeParen { $2 }
+                 | openParen lineComment StaticExpression closeParen { $3 }
                  | case StaticExpression of StaticCase { SCase $1 $2 $4 }
 
 -- | Parse an expression that can be called without parentheses
@@ -701,7 +706,7 @@ OptType : Signature Type { Just ($1, $2) }
         | { Nothing }
 
 -- | Parse a type signature and optional function body
-PreFunction : FunName openParen Args closeParen OptType OptExpression { (PreF $1 (fmap fst $5) [] [] (Just $3) (fmap snd $5) Nothing $6) }
+PreFunction : FunName openParen Args closeParen OptType OptExpression { PreF $1 (fmap fst $5) [] [] (Just $3) (fmap snd $5) Nothing $6 }
             | FunName Universals OptTermetric OptType OptExpression { PreF $1 (fmap fst $4) [] $2 Nothing (fmap snd $4) $3 $5 }
             | FunName Universals OptTermetric doubleParens OptType OptExpression { PreF $1 (fmap fst $5) [] $2 (Just []) (fmap snd $5) $3 $6 }
             | FunName Universals OptTermetric openParen Args closeParen OptType OptExpression { PreF $1 (fmap fst $7) [] $2 (Just $5) (fmap snd $7) $3 $8 }
@@ -720,13 +725,15 @@ AndSort : AndSort and IdentifierOr eq Sort { AndD $1 (SortDef $2 $3 (Left $5)) }
         | sortdef IdentifierOr eq Sort { SortDef $1 $2 (Left $4) }
         | sortdef IdentifierOr eq Universal { SortDef $1 $2 (Right $4) }
 
-StaticDef : eq Type { Right $2 }
+StaticDef : eq Type { Right (Nothing, $2) }
           | eq StaticExpression MaybeAnnot { Left ($2, $3) }
+          | colon Type eq StaticExpression { Right (Just $2, ConcreteType $4) } -- FIXME wrong wrong bad!!
 
 MaybeAnnot : colon Sort { Just $2 }
            | { Nothing }
 
 AndStadef : stadef IdentifierOr SortArgs StaticDef { Stadef $2 $3 $4 }
+          | stadef IdentifierOr lineComment SortArgs StaticDef { Stadef $2 $4 $5 }
           | stadef Operator SortArgs StaticDef { Stadef $2 $3 $4 }
           | AndStadef and IdentifierOr SortArgs StaticDef { AndD $1 (Stadef $3 $4 $5) }
           | AndStadef and Operator SortArgs StaticDef { AndD $1 (Stadef $3 $4 $5) }
@@ -889,6 +896,10 @@ Names : Name { [$1] }
 Load : staload { (True, $1) }
      | dynload { (False, $1) }
 
+MacroArgs : doubleParens { Just [] }
+          | openParen IdentifiersIn closeParen { Just $2 }
+          | { Nothing }
+
 -- | Parse a declaration
 Declaration : include string { Include $2 }
             | define { Define $1 }
@@ -898,10 +909,8 @@ Declaration : include string { Include $2 }
             | define identifierSpace intLit { Define ($1 ++ " " ++ to_string $2 ++ " " ++ show $3) }
             | cblock { CBlock $1 }
             | datasort identifierSpace eq DataSortLeaves { DataSort $1 (to_string $2) $4 }
-            | macdef IdentifierOr doubleParens eq Expression { MacDecl $1 $2 [] $5 }
-            | macdef customOperator doubleParens eq Expression { MacDecl $1 (to_string $2) [] $5 }
-            | macdef IdentifierOr openParen IdentifiersIn closeParen eq Expression { MacDecl $1 $2 $4 $7 }
-            | macdef customOperator openParen IdentifiersIn closeParen eq Expression { MacDecl $1 (to_string $2) $4 $7 }
+            | macdef IdentifierOr MacroArgs eq Expression { MacDecl $1 $2 $3 $5 }
+            | macdef customOperator MacroArgs eq Expression { MacDecl $1 (to_string $2) $3 $5 }
             | lineComment { Comment (to_string $1) }
             | Comment { $1 }
             | Load underscore eq string { Load (fst $1) (get_staload $ snd $1) (Just "_") $4 }
