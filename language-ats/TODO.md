@@ -13,6 +13,8 @@
 - [ ] `stadef x: bool = z`
 - [ ] `language-xats` library: https://github.com/githwxi/ATS-Xanadu/tree/master/srcgen/xats/SATS
 - [ ] Fix problem with macro blocks being indented wrong
+- [ ] handle `absprop someprop` and `absprop some_prop(prop, prop+)`
+- [ ] fix for https://github.com/ats-lang/ats-lang.github.io/blob/master/DOCUMENT/INT2PROGINATS/CODE/CHAP_THMPRVING/sqrt2_irrat.dats
 # Deficiencies
 - [ ] Error messages
   - [ ] Add test suite for messages

@@ -114,16 +114,20 @@ mkManpage mStr = do
         Just _ -> bool (pure ()) manpages b
         _      -> pure ()
 
+-- cfgFile :: FilePath
+-- cfgFile = ".atspkg" </> "config"
+
 -- FIXME this doesn't rebuild when it should; it should rebuild when
 -- @atspkg.dhall@ changes.
 getConfig :: MonadIO m => Maybe String -> Maybe FilePath -> m Pkg
 getConfig mStr dir' = liftIO $ do
     d <- fromMaybe <$> fmap (</> "atspkg.dhall") getCurrentDirectory <*> pure dir'
-    b <- not <$> doesFileExist ".atspkg/config"
-    let str = fromMaybe mempty mStr
-    if b
-        then input auto (T.pack (d <> " " <> str))
-        else fmap (decode . BSL.fromStrict) . BS.readFile $ ".atspkg/config"
+    b <- not <$> doesFileExist (".atspkg" </> "config")
+    let strMod = maybe id (\s -> (<> (" " <> s))) mStr
+    b' <- shouldWrite mStr (".atspkg" </> "args")
+    if b || b'
+        then input auto (T.pack (strMod d))
+        else fmap (decode . BSL.fromStrict) . BS.readFile $ ".atspkg" </> "config"
 
 manTarget :: Text -> FilePath
 manTarget m = unpack m -<.> "1"
@@ -198,14 +202,6 @@ mkPkg mStr rba lint tim setup rs tgt v = do
             , mkClean
             , pkgToAction mStr setup rs tgt cfg
             ]
-
-shouldWrite :: (MonadIO m, Binary a) => a -> FilePath -> m Bool
-shouldWrite x fp = do
-    exists <- liftIO (doesFileExist fp)
-    contents <- if exists
-        then liftIO (BSL.readFile fp)
-        else pure mempty
-    pure $ BSL.length contents /= 0 && encode x /= contents
 
 mkConfig :: Maybe String -> Rules ()
 mkConfig mStr = do
@@ -311,9 +307,9 @@ pkgToAction mStr setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf 
         -- TODO depend on tgt somehow?
         specialDeps %> \out -> do
             (_, cfgBin') <- cfgBin
-            need [ cfgBin', flags, ".atspkg" </> "config" ]
+            need [ cfgBin', flags, ".atspkg" </> "config"]
             v'' <- getVerbosity
-            liftIO $ fetchDeps v'' (ccFromString cc') setup (first unpack <$> ds) (first unpack <$> cdps) (first unpack <$> bdeps) cfgBin' atslibSetup False *> writeFile out ""
+            liftIO $ fetchDeps v'' (ccFromString cc') mStr setup (first unpack <$> ds) (first unpack <$> cdps) (first unpack <$> bdeps) cfgBin' atslibSetup False *> writeFile out ""
 
         let bins = toTgt tgt . target <$> bs
         setTargets rs bins mt

@@ -51,12 +51,14 @@ listDeps b = fmap s . input auto . T.pack
 
 setBuildPlan :: FilePath -- ^ Filepath for cache inside @.atspkg@
              -> DepSelector
+             -> Maybe String -- ^ Arguments
              -> String -- ^ URL of package set to use.
              -> [(String, ATSConstraint)] -- ^ Libraries we want
              -> IO [[ATSDependency]]
-setBuildPlan p getDeps url deps = do
+setBuildPlan p getDeps mStr url deps = do
     b <- doesFileExist depCache
-    bool setBuildPlan' (decode <$> BSL.readFile depCache) b
+    b' <- shouldWrite mStr (".atspkg" </> "args")
+    bool setBuildPlan' (decode <$> BSL.readFile depCache) (b && b')
 
     where depCache = ".atspkg/buildplan-" ++ p
           setBuildPlan' = do

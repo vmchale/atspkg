@@ -454,6 +454,7 @@ StaticExpression : Name { StaticVal $1 }
                  | StaticExpression semicolon StaticExpression { SPrecede $1 $3 }
                  | UnOp StaticExpression { SUnary $1 $2 }
                  | identifierSpace doubleParens { SCall (Unqualified $ to_string $1) [] }
+                 | identifier doubleParens { SCall (Unqualified $ to_string $1) [] }
                  | let StaticDecls comment_after(in) end { SLet $1 $2 Nothing }
                  | let StaticDecls in StaticExpression end { SLet $1 $2 (Just $4) }
                  | openParen StaticExpression closeParen { $2 }

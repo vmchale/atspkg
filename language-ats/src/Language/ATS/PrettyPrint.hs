@@ -534,10 +534,6 @@ instance Eq a => Pretty (PreFunction a) where
     pretty (PreF i si pus [] as rt t Nothing) = fancyU pus </> pretty i <> prettyMTermetric t </> prettyArgsNil as <> prettySigNull si rt
     pretty (PreF i si pus us as rt t Nothing) = fancyU pus </> pretty i <> prettyMTermetric t </> fancyU us </> prettyArgsNil as <> prettySigNull si rt
 
-instance Eq a => Pretty (DataPropLeaf a) where
-    pretty (DataPropLeaf us e Nothing)   = "|" <+> foldMap pretty (reverse us) <+> pretty e
-    pretty (DataPropLeaf us e (Just e')) = "|" <+> foldMap pretty (reverse us) <+> pretty e <+> "of" <+> pretty e'
-
 prettyFix :: (Pretty a) => Either a String -> Doc
 prettyFix (Left i)  = pretty i
 prettyFix (Right s) = parens (text s)

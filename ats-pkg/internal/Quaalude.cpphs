@@ -36,6 +36,7 @@ module Quaalude ( hex
                 , MonadIO (..)
                 -- * Miscellaneous
                 , makeExe
+                , shouldWrite
                 -- * "System.Process.Ext" reëxports
                 , silentCreateProcess
                 -- * "Data.Text.Lazy" reëxports
@@ -135,6 +136,7 @@ import           Control.Monad.State.Lazy
 import           Data.Binary
 import           Data.Bool                    (bool)
 import           Data.ByteString.Lazy         (ByteString)
+import qualified Data.ByteString.Lazy         as BSL
 import           Data.Foldable                (fold, traverse_)
 import           Data.Functor                 (($>))
 import           Data.List
@@ -144,7 +146,7 @@ import           Data.Version                 (showVersion)
 #ifdef DEBUG
 import           Debug.Trace                  (traceShow, traceShowId)
 #endif
-import           Development.Shake            hiding (getEnv)
+import           Development.Shake            hiding (doesFileExist, getEnv)
 import           Development.Shake.FilePath
 import           Dhall                        hiding (Text, bool)
 import           Lens.Micro                   hiding (both)
@@ -199,3 +201,11 @@ instance (Semigroup a, Monoid a) => Monoid (Action a) where
 -- prelude.
 (<#>) :: Doc -> Doc -> Doc
 (<#>) a b = a <> line <> b
+
+shouldWrite :: (MonadIO m, Binary a) => a -> FilePath -> m Bool
+shouldWrite x fp = do
+    exists <- liftIO (doesFileExist fp)
+    contents <- if exists
+        then liftIO (BSL.readFile fp)
+        else pure mempty
+    pure $ BSL.length contents /= 0 && encode x /= contents

@@ -31,6 +31,7 @@ getTgt _         = Nothing
 
 fetchDeps :: Verbosity -- ^ Shake verbosity
           -> CCompiler -- ^ C compiler to use
+          -> Maybe String -- ^ Args
           -> [IO ()] -- ^ Setup steps that can be performed concurrently
           -> [(String, ATSConstraint)] -- ^ ATS dependencies
           -> [(String, ATSConstraint)] -- ^ C Dependencies
@@ -39,16 +40,16 @@ fetchDeps :: Verbosity -- ^ Shake verbosity
           -> SetupScript -- ^ How to install an ATS library
           -> Bool -- ^ Whether to perform setup anyhow.
           -> IO ()
-fetchDeps v cc' setup' deps cdeps atsBld cfgPath als b' =
+fetchDeps v cc' mStr setup' deps cdeps atsBld cfgPath als b' =
 
     unless (null deps && null cdeps && null atsBld && b' && False) $ do
 
         putStrLn "Resolving dependencies..."
 
         pkgSet <- unpack . defaultPkgs . decode <$> BSL.readFile cfgPath
-        deps' <- setBuildPlan "ats" libDeps pkgSet deps
-        atsDeps' <- setBuildPlan "atsbld" libBldDeps pkgSet atsBld
-        cdeps' <- setBuildPlan "c" libDeps pkgSet cdeps
+        deps' <- setBuildPlan "ats" libDeps mStr pkgSet deps
+        atsDeps' <- setBuildPlan "atsbld" libBldDeps mStr pkgSet atsBld
+        cdeps' <- setBuildPlan "c" libDeps mStr pkgSet cdeps
 
         -- Set up actions
         d <- (</> "lib/") <$> cpkgHome cc'
