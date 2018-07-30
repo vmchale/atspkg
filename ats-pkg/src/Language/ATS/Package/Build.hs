@@ -117,16 +117,19 @@ mkManpage mStr = do
 -- cfgFile :: FilePath
 -- cfgFile = ".atspkg" </> "config"
 
+parens :: String -> String
+parens s = mconcat [ "(", s, ")" ]
+
 -- FIXME this doesn't rebuild when it should; it should rebuild when
 -- @atspkg.dhall@ changes.
 getConfig :: MonadIO m => Maybe String -> Maybe FilePath -> m Pkg
 getConfig mStr dir' = liftIO $ do
     d <- fromMaybe <$> fmap (</> "atspkg.dhall") getCurrentDirectory <*> pure dir'
     b <- not <$> doesFileExist (".atspkg" </> "config")
-    let strMod = maybe id (\s -> (<> (" " <> s))) mStr
+    let go = case mStr of { Just x -> (<> (" " <> parens x)) ; Nothing -> id }
     b' <- shouldWrite mStr (".atspkg" </> "args")
     if b || b'
-        then input auto (T.pack (strMod d))
+        then input auto (T.pack (go d))
         else fmap (decode . BSL.fromStrict) . BS.readFile $ ".atspkg" </> "config"
 
 manTarget :: Text -> FilePath
@@ -217,7 +220,7 @@ mkConfig mStr = do
 
     (".atspkg" </> "config") %> \out -> do
         need ["atspkg.dhall", args]
-        let go = case mStr of { Just x -> (<> (" " <> x)) ; Nothing -> id }
+        let go = case mStr of { Just x -> (<> (" " <> parens x)) ; Nothing -> id }
         x <- liftIO $ input auto (T.pack (go "./atspkg.dhall"))
         liftIO $ BSL.writeFile out (encode (x :: Pkg))
 
