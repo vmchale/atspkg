@@ -25,7 +25,6 @@ constraints:
   reflection -template-haskell
 
 executable-stripping: true
-documentation: true
 
 optimization: 2
 

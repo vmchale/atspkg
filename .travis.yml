@@ -74,11 +74,9 @@ script:
 - mv $BINPATH1 atspkg-$TARGET
 - mv $BINPATH2 atsfmt-$TARGET
 - mv $BINPATH3 hs2ats-$TARGET
-- mv $BINPATH4 cdeps-$TARGET
 - strip atspkg-$TARGET
 - strip atsfmt-$TARGET
 - strip hs2ats-$TARGET
-- strip cdeps-$TARGET
 - du -h atspkg-$TARGET
 - cd ats-pkg/test/data/hello-world
 - ../../../../atspkg-$TARGET run -vv
@@ -91,7 +89,6 @@ deploy:
   - atspkg-$TARGET
   - atsfmt-$TARGET
   - hs2ats-$TARGET
-  - cdeps-$TARGET
   on:
     tags: true
   provider: releases
