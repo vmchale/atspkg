@@ -47,8 +47,8 @@ before_install:
     cabal update
   fi
 
-install:
-- cabal new-build all --dependencies-only
+  #install:
+  #- cabal new-build all --dependencies-only
 
 script:
 - rm -rf dist-newstyle
