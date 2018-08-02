@@ -147,6 +147,7 @@ cBin :: CCompiler
      -> Rules ()
 cBin cc sources bin cfg = bin %> \out -> binaryA cc sources out cfg
 -- TODO depend on config!!
+-- TODO depend on the source files transitively (optionally)
 
 stripA :: CmdResult r
        => FilePath -- ^ Build product to be stripped

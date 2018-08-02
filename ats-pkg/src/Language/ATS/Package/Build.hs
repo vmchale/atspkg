@@ -114,23 +114,29 @@ mkManpage mStr = do
         Just _ -> bool (pure ()) manpages b
         _      -> pure ()
 
--- cfgFile :: FilePath
--- cfgFile = ".atspkg" </> "config"
-
 parens :: String -> String
 parens s = mconcat [ "(", s, ")" ]
+
+cfgFile :: FilePath
+cfgFile = ".atspkg" </> "config"
+
+cfgArgs :: FilePath
+cfgArgs = ".atspkg" </> "args"
+
+dhallFile :: FilePath
+dhallFile = "atspkg.dhall"
 
 -- FIXME this doesn't rebuild when it should; it should rebuild when
 -- @atspkg.dhall@ changes.
 getConfig :: MonadIO m => Maybe String -> Maybe FilePath -> m Pkg
 getConfig mStr dir' = liftIO $ do
-    d <- fromMaybe <$> fmap (</> "atspkg.dhall") getCurrentDirectory <*> pure dir'
-    b <- not <$> doesFileExist (".atspkg" </> "config")
+    d <- fromMaybe <$> fmap (</> dhallFile) getCurrentDirectory <*> pure dir'
+    b <- not <$> doesFileExist cfgFile
     let go = case mStr of { Just x -> (<> (" " <> parens x)) ; Nothing -> id }
-    b' <- shouldWrite mStr (".atspkg" </> "args")
+    b' <- shouldWrite mStr cfgArgs
     if b || b'
         then input auto (T.pack (go d))
-        else fmap (decode . BSL.fromStrict) . BS.readFile $ ".atspkg" </> "config"
+        else fmap (decode . BSL.fromStrict) . BS.readFile $ cfgFile
 
 manTarget :: Text -> FilePath
 manTarget m = unpack m -<.> "1"
@@ -209,22 +215,20 @@ mkPkg mStr rba lint tim setup rs tgt v = do
 mkConfig :: Maybe String -> Rules ()
 mkConfig mStr = do
 
-    shouldWrite' <- shouldWrite mStr args
+    shouldWrite' <- shouldWrite mStr cfgArgs
 
-    args %> \out -> do
+    cfgArgs %> \out -> do
         alwaysRerun
         exists <- liftIO (doesFileExist out)
         if not exists || shouldWrite'
             then liftIO (BSL.writeFile out (encode mStr))
             else mempty
 
-    (".atspkg" </> "config") %> \out -> do
-        need ["atspkg.dhall", args]
+    cfgFile %> \out -> do
+        need [dhallFile, cfgArgs]
         let go = case mStr of { Just x -> (<> (" " <> parens x)) ; Nothing -> id }
         x <- liftIO $ input auto (T.pack (go "./atspkg.dhall"))
         liftIO $ BSL.writeFile out (encode (x :: Pkg))
-
-    where args = ".atspkg" </> "args"
 
 setTargets :: [String] -> [FilePath] -> Maybe Text -> Rules ()
 setTargets rs bins mt = when (null rs) $
@@ -250,9 +254,8 @@ atslibSetup :: Maybe String -- ^ Optional target triple
 atslibSetup tgt' lib' p = do
     putStrLn $ "installing " ++ lib' ++ "..."
     subdirs <- (p:) <$> allSubdirs p
-    pkgPath <- fromMaybe p <$> findFile subdirs "atspkg.dhall"
+    pkgPath <- fromMaybe p <$> findFile subdirs dhallFile
     let installDir = takeDirectory pkgPath
-    -- removeDirectoryRecursive (installDir </> ".atspkg")
     build' installDir tgt' ["install"]
 
 -- | The directory @~/.atspkg@
@@ -310,7 +313,7 @@ pkgToAction mStr setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf 
         -- TODO depend on tgt somehow?
         specialDeps %> \out -> do
             (_, cfgBin') <- cfgBin
-            need [ cfgBin', flags, ".atspkg" </> "config"]
+            need [ cfgBin', flags, cfgFile]
             v'' <- getVerbosity
             liftIO $ fetchDeps v'' (ccFromString cc') mStr setup (first unpack <$> ds) (first unpack <$> cdps) (first unpack <$> bdeps) cfgBin' atslibSetup False *> writeFile out ""
 
@@ -341,10 +344,10 @@ pkgToAction mStr setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf 
           cDepsRules ph = unless (null as) $ do
               let targets = fmap (unpack . cTarget) as
                   sources = fmap (unpack . atsSrc) as
-              zipWithM_ (cgen (atsToolConfig ph) [specialDeps, ".atspkg" </> "config"] (fmap (unpack . ats) . atsGen =<< as)) sources targets
+              zipWithM_ (cgen (atsToolConfig ph) [specialDeps, cfgFile] (fmap (unpack . ats) . atsGen =<< as)) sources targets
 
           cc' = maybe (unpack ccLocal) (<> "-gcc") tgt
-          deps = (flags:) . (specialDeps:) . ((".atspkg" </> "config"):) . fmap unpack
+          deps = (flags:) . (specialDeps:) . (cfgFile:) . fmap unpack
 
           unpackLinks :: (Text, Text) -> HATSGen
           unpackLinks (t, t') = HATSGen (unpack t) (unpack t')

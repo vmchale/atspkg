@@ -60,20 +60,25 @@ script:
     export BINPATH1="$(find dist-newstyle/ -name atspkg -perm 755 | tail -n1)"
     export BINPATH2="$(find dist-newstyle/ -name atsfmt -perm 755 | tail -n1)"
     export BINPATH3="$(find dist-newstyle/ -name hs2ats -perm 755 | tail -n1)"
+    export BINPATH3="$(find dist-newstyle/ -name cdeps -perm 755 | tail -n1)"
   else
     export BINPATH1="$(find dist-newstyle/ -name atspkg -executable | tail -n1)"
     export BINPATH2="$(find dist-newstyle/ -name atsfmt -executable | tail -n1)"
     export BINPATH3="$(find dist-newstyle/ -name hs2ats -executable | tail -n1)"
+    export BINPATH3="$(find dist-newstyle/ -name cdeps -executable | tail -n1)"
   fi
 - echo $BINPATH1
 - echo $BINPATH2
 - echo $BINPATH3
+- echo $BINPATH4
 - mv $BINPATH1 atspkg-$TARGET
 - mv $BINPATH2 atsfmt-$TARGET
 - mv $BINPATH3 hs2ats-$TARGET
+- mv $BINPATH4 cdeps-$TARGET
 - strip atspkg-$TARGET
 - strip atsfmt-$TARGET
 - strip hs2ats-$TARGET
+- strip cdeps-$TARGET
 - du -h atspkg-$TARGET
 - cd ats-pkg/test/data/hello-world
 - ../../../../atspkg-$TARGET run -vv
@@ -86,6 +91,7 @@ deploy:
   - atspkg-$TARGET
   - atsfmt-$TARGET
   - hs2ats-$TARGET
+  - cdeps-$TARGET
   on:
     tags: true
   provider: releases

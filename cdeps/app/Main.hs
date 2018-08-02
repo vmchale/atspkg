@@ -1,6 +1,7 @@
 module Main (main) where
 
 import           Control.Monad
+import           Data.Bool             (bool)
 import           Data.Foldable
 import           Data.Version          (showVersion)
 import           Language.C.Dependency
@@ -8,20 +9,31 @@ import           Options.Applicative
 import           Paths_cdeps           (version)
 
 includes' :: Parser [FilePath]
-includes' = many $ strOption $ mconcat
-    [ long "include"
-    , short 'I'
-    , help "Directories for inclusions."
-    ]
+includes' = many $ strOption
+    (long "include"
+    <> metavar "DIR"
+    <> short 'I'
+    <> help "Directories for inclusions."
+    <> dirCompletions)
 
-data Command = Dump FilePath [FilePath]
+noRecurse :: Parser Bool
+noRecurse = switch
+    (long "no-recurse"
+    <> short 'r'
+    <> help "Do not search for dependencies recursively.")
+
+data Command = Dump FilePath [FilePath] Bool
 
 dump :: Parser Command
 dump = Dump
     <$> target
     <*> includes'
+    <*> noRecurse
 
-cCompletions :: Mod ArgumentFields a
+dirCompletions :: HasCompleter f => Mod f a
+dirCompletions = action "directory"
+
+cCompletions :: HasCompleter f => Mod f a
 cCompletions = completer . bashCompleter $ "file -X '!*.c' -o plusdirs"
 
 target :: Parser FilePath
@@ -31,7 +43,8 @@ target = argument str
     <> cCompletions)
 
 run :: Command -> IO ()
-run (Dump cSrc is) = (traverse_ putStrLn <=< getAll is) cSrc
+run (Dump cSrc is nr) = (traverse_ putStrLn <=< go is) cSrc
+    where go = bool getAll getCDepends nr
 
 versionInfo :: Parser (a -> a)
 versionInfo = infoOption ("cdeps version: " ++ showVersion version) (short 'V' <> long "version" <> help "Show version")
