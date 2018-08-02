@@ -38,7 +38,7 @@ before_install:
   if [ `uname` = "Darwin" ]
   then
     brew install lzlib
-   brew install xz
+    brew install xz
     brew install bzip2
     brew install cabal-install
     cabal update
@@ -53,7 +53,7 @@ before_install:
 script:
 - rm -rf dist-newstyle
 - curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s ats-format ats-pkg cdeps dependency hs2ats language-ats shake-ats shake-ext
-- travis_wait 20 cabal new-build all
+- travis_wait 30 cabal new-build all
 - |
   if [ `uname` = "Darwin" ]
   then
@@ -74,9 +74,11 @@ script:
 - mv $BINPATH1 atspkg-$TARGET
 - mv $BINPATH2 atsfmt-$TARGET
 - mv $BINPATH3 hs2ats-$TARGET
+- mv $BINPATH4 cdeps-$TARGET
 - strip atspkg-$TARGET
 - strip atsfmt-$TARGET
 - strip hs2ats-$TARGET
+- strip cdeps-$TARGET
 - du -h atspkg-$TARGET
 - cd ats-pkg/test/data/hello-world
 - ../../../../atspkg-$TARGET run -vv
