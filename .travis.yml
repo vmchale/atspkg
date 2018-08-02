@@ -91,6 +91,7 @@ deploy:
   - atspkg-$TARGET
   - atsfmt-$TARGET
   - hs2ats-$TARGET
+  - cdeps-$TARGET
   on:
     tags: true
   provider: releases
