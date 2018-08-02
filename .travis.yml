@@ -38,7 +38,7 @@ before_install:
   if [ `uname` = "Darwin" ]
   then
     brew install lzlib
-    brew install xz
+   brew install xz
     brew install bzip2
     brew install cabal-install
     cabal update
@@ -60,12 +60,12 @@ script:
     export BINPATH1="$(find dist-newstyle/ -name atspkg -perm 755 | tail -n1)"
     export BINPATH2="$(find dist-newstyle/ -name atsfmt -perm 755 | tail -n1)"
     export BINPATH3="$(find dist-newstyle/ -name hs2ats -perm 755 | tail -n1)"
-    export BINPATH3="$(find dist-newstyle/ -name cdeps -perm 755 | tail -n1)"
+    export BINPATH4="$(find dist-newstyle/ -name cdeps -perm 755 | tail -n1)"
   else
     export BINPATH1="$(find dist-newstyle/ -name atspkg -executable | tail -n1)"
     export BINPATH2="$(find dist-newstyle/ -name atsfmt -executable | tail -n1)"
     export BINPATH3="$(find dist-newstyle/ -name hs2ats -executable | tail -n1)"
-    export BINPATH3="$(find dist-newstyle/ -name cdeps -executable | tail -n1)"
+    export BINPATH4="$(find dist-newstyle/ -name cdeps -executable | tail -n1)"
   fi
 - echo $BINPATH1
 - echo $BINPATH2
