@@ -247,17 +247,6 @@ pkgToTargets _  _ ts         = ts
 noConstr :: ATSConstraint
 noConstr = ATSConstraint Nothing Nothing
 
-includeString :: String
-includeString =
-    "typedef int uid_t;\ntypedef int gid_t;\n"
-
-modifyTypesFile :: FilePath -> IO ()
-modifyTypesFile fp = do
-    contents <- readFile fp
-    let postStr = includeString ++ contents
-    when (length postStr > 1) $
-        writeFile fp postStr
-
 atslibSetup :: Maybe String -- ^ Optional target triple
             -> String -- ^ Library name
             -> FilePath -- ^ Filepath
@@ -269,10 +258,6 @@ atslibSetup tgt' lib' p = do
     pkgPath <- fromMaybe p <$> findFile subdirs dhallFile
 
     let installDir = takeDirectory pkgPath
-        typesFile = installDir </> "lib" </> "ats2-postiats-0.3.11" </> "libats" </> "libc" </> "CATS" </> "sys" </> "types.cats"
-
-    when (tgt' == Just "x86_64-w64-mingw32") $
-        modifyTypesFile typesFile
 
     build' installDir tgt' ["install"]
 
