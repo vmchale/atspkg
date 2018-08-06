@@ -239,7 +239,7 @@ data Pattern a = Wildcard a
                | UniversalPattern a String [Universal a] (Pattern a)
                | ExistentialPattern (Existential a) (Pattern a)
                | As a (Pattern a) (Pattern a)
-               | BinPattern a (BinOp a) (Pattern a) (Pattern a)
+               | BinPattern a (BinOp a) (Pattern a) (Pattern a) -- ^ For use with e.g. @::@.
                deriving (Show, Eq, Generic, NFData)
 
 data PatternF a x = WildcardF a
