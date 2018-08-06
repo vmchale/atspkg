@@ -239,6 +239,7 @@ data Pattern a = Wildcard a
                | UniversalPattern a String [Universal a] (Pattern a)
                | ExistentialPattern (Existential a) (Pattern a)
                | As a (Pattern a) (Pattern a)
+               | BinPattern a (BinOp a) (Pattern a) (Pattern a)
                deriving (Show, Eq, Generic, NFData)
 
 data PatternF a x = WildcardF a
@@ -254,6 +255,7 @@ data PatternF a x = WildcardF a
                   | UniversalPatternF a String [Universal a] x
                   | ExistentialPatternF (Existential a) x
                   | AsF a x x
+                  | BinPatternF a (BinOp a) x x
                   deriving (Functor)
 
 type instance Base (Pattern a) = PatternF a
@@ -272,6 +274,7 @@ instance Recursive (Pattern a) where
     project (UniversalPattern x s us p) = UniversalPatternF x s us p
     project (ExistentialPattern e x)    = ExistentialPatternF e x
     project (As x p p')                 = AsF x p p'
+    project (BinPattern a op p p')      = BinPatternF a op p p'
 
 data Paired a b = Both a b
                 | First a

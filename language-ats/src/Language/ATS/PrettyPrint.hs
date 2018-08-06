@@ -229,6 +229,7 @@ instance Eq a => Pretty (Pattern a) where
         a (UniversalPatternF _ n us p) = text n <> prettyArgsU "" "" us <> p
         a (ExistentialPatternF e p)    = pretty e <> p
         a (AsF _ p p')                 = p <+> "as" <+> p'
+        a (BinPatternF _ op p p')      = p <+> pretty op <+> p'
 
 argHelper :: Eq a => (Doc -> Doc -> Doc) -> Arg a -> Doc
 argHelper _ (Arg (First s))   = pretty s

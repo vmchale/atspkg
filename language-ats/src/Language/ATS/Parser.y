@@ -354,6 +354,7 @@ Pattern : Name { PName $1 [] }
         | at Pattern { AtPattern $1 $2 }
         | identifier Universals Pattern { UniversalPattern (token_posn $1) (to_string $1) $2 $3 }
         | identifierSpace Universals Pattern { UniversalPattern (token_posn $1) (to_string $1) $2 $3 }
+        | Pattern customOperator Pattern { BinPattern (token_posn $2) (SpecialInfix (token_posn $2) (to_string $2)) $1 $3 }
         | Pattern as Pattern { As $2 $1 $3 }
         | Existential Pattern { ExistentialPattern $1 $2 }
         | minus {% left $ Expected $1 "Pattern" "-" }
