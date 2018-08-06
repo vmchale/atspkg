@@ -73,7 +73,7 @@ library
     ghc-options: -Wall -Wincomplete-uni-patterns
                  -Wincomplete-record-updates
     build-depends:
-        base >=4.11 && <5,
+        base >=4.10 && <5,
         http-client -any,
         bytestring -any,
         file-embed -any,
@@ -151,21 +151,21 @@ executable atspkg
                  -with-rtsopts=-I0 -Wincomplete-uni-patterns
                  -Wincomplete-record-updates
     build-depends:
-        base >=4.11,
+        base >=4.10,
         ats-pkg -any,
         optparse-applicative -any,
         shake-ats -any,
         microlens -any,
         temporary -any,
         directory -any,
-        composition-prelude -any,
         text -any,
         parallel-io -any,
         quaalude -any,
         dependency -any,
         bytestring -any,
         shake -any,
-        cli-setup -any
+        cli-setup -any,
+        quaalude
     
     if flag(eventlog)
         ghc-options: -eventlog -with-rtsopts=-l

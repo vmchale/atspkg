@@ -39,7 +39,7 @@ library
         directory -any,
         filepath -any
     
-    if flag(development)
+    if (flag(development) && impl(ghc <8.4))
         ghc-options: -Werror
     
     if !impl(ghc >=8.0)
@@ -61,11 +61,11 @@ executable cdeps
     default-language: Haskell2010
     ghc-options: -Wall
     build-depends:
-        base >=4.11 && <5,
+        base >=4.10 && <5,
         cdeps -any,
         optparse-applicative -any
     
-    if flag(development)
+    if (flag(development) && impl(ghc <8.4))
         ghc-options: -Werror
     
     if impl(ghc >=8.0)

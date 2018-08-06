@@ -3,6 +3,7 @@ module Main (main) where
 import           Control.Monad
 import           Data.Bool             (bool)
 import           Data.Foldable
+import           Data.Semigroup        hiding (getAll)
 import           Data.Version          (showVersion)
 import           Language.C.Dependency
 import           Options.Applicative

@@ -1,5 +1,6 @@
 ---
 sudo: false
+language: c
 cache:
   directories:
   - $HOME/.cabal
@@ -24,12 +25,20 @@ matrix:
         packages:
         - ghc-8.4.3
         - cabal-install-2.2
-    language: c
+
+  - env: TARGET=x86_64-unknown-linux
+    addons:
+      apt:
+        update: true
+        sources:
+        - hvr-ghc
+        packages:
+        - ghc-8.2.2
+        - cabal-install-2.2
 
   # OS X
   - env: TARGET=x86_64-apple-darwin
     os: osx
-    language: c
 
 before_install:
 - mkdir -p ~/.local/bin
@@ -41,10 +50,10 @@ before_install:
     brew install xz
     brew install bzip2
     brew install cabal-install
-    cabal update
+    cabal new-update
   else
     export PATH=/opt/ghc/bin:$PATH
-    cabal update
+    cabal new-update
   fi
 
   #install:

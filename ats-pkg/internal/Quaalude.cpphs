@@ -23,6 +23,7 @@ module Quaalude ( hex
                 , encode
                 , decode
                 , fromMaybe
+                , isNothing
                 , isPrefixOf
                 , isSuffixOf
                 , on
@@ -38,6 +39,7 @@ module Quaalude ( hex
                 , showVersion
                 , traverse_
                 , nubSpecial
+                , (<>)
                 , ExitCode (ExitSuccess)
                 , MonadIO (..)
                 -- * Miscellaneous
@@ -127,7 +129,6 @@ module Quaalude ( hex
                 , each
                 , (&)
                 , (%~)
-
 #ifdef DEBUG
                 , traceShowId
                 , traceShow
@@ -148,8 +149,11 @@ import           Data.Containers.ListUtils    (nubOrd)
 #endif
 import           Data.Foldable                (fold, traverse_)
 import           Data.Functor                 (($>))
+#if !MIN_VERSION_base(4,11,0)
+import           Data.Semigroup
+#endif
 import           Data.List
-import           Data.Maybe                   (fromMaybe)
+import           Data.Maybe                   (fromMaybe, isNothing)
 import           Data.Text.Lazy               (Text, pack, unpack)
 import           Data.Version                 (showVersion)
 #ifdef DEBUG

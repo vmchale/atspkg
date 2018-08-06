@@ -3,12 +3,7 @@
 module Main ( main
             ) where
 
-import           Control.Composition
 import           Control.Concurrent.ParallelIO.Global
-import           Control.Monad
-import           Data.Bool                            (bool)
-import           Data.Foldable                        (fold)
-import           Data.Maybe                           (fromMaybe, isNothing)
 import qualified Data.Text.Lazy                       as TL
 import           Data.Version                         hiding (Version (..))
 import           Development.Shake.ATS
@@ -20,7 +15,7 @@ import           Language.ATS.Package.Upgrade
 import           Lens.Micro
 import           Options.Applicative
 import           Paths_ats_pkg
-import           System.Directory
+import           Quaalude                             hiding (command, pack)
 import           System.IO.Temp                       (withSystemTempDirectory)
 
 -- TODO command to list available packages.

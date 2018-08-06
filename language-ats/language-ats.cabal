@@ -16,6 +16,8 @@ data-files:
     test/data/*.dats
     test/data/*.sats
     test/data/*.out
+    test/data/stdlib/*.sats
+    test/data/stdlib/*.out
 extra-doc-files: README.md
 
 source-repository head

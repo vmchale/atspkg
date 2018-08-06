@@ -38,7 +38,7 @@ library
     ghc-options: -Wall -Wincomplete-uni-patterns
                  -Wincomplete-record-updates -Wcompat
     build-depends:
-        base >=4.11 && <5,
+        base >=4.10 && <5,
         ansi-wl-pprint -any,
         containers >=0.5.9,
         microlens -any,
@@ -46,7 +46,7 @@ library
         deepseq -any,
         recursion-schemes -any
     
-    if flag(development)
+    if (flag(development) && impl(ghc <8.4))
         ghc-options: -Werror
 
 test-suite dependency-test
