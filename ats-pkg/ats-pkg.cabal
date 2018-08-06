@@ -165,7 +165,7 @@ executable atspkg
         bytestring -any,
         shake -any,
         cli-setup -any,
-        quaalude
+        quaalude -any
     
     if flag(eventlog)
         ghc-options: -eventlog -with-rtsopts=-l
