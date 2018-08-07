@@ -29,6 +29,7 @@ import           Distribution.Types.PackageId
 import           Distribution.Verbosity                 as Distribution
 import           Distribution.Version
 import           System.Directory                       (doesFileExist)
+import           System.FilePath                        (pathSeparator)
 import           System.Info                            (arch, os)
 
 data HsCompiler = GHC { _suff :: Maybe String -- ^ Compiler version
@@ -119,7 +120,7 @@ getCabalDepsV v p = do
         benchSrc = extractHelper benchToFiles benches
         foreignSrc = extractHelper foreignToFiles foreigns
 
-        dirHelper f xs = (fmap (++ "/") . hsSourceDirs . f <=< extract) =<< xs
+        dirHelper f xs = (fmap (++ [pathSeparator]) . hsSourceDirs . f <=< extract) =<< xs
 
         dir = dirHelper libBuildInfo libs
         exeDir = dirHelper buildInfo exes

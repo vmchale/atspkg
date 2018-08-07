@@ -35,7 +35,8 @@ library
         shake >=0.14,
         Cabal >=2.2,
         directory -any,
-        composition-prelude -any
+        composition-prelude -any,
+        filepath -any
     
     if flag(development)
         ghc-options: -Werror

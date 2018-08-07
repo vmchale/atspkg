@@ -248,7 +248,7 @@ run Setup                              = installActions
 
 installActions :: IO ()
 installActions = do
-    path <- getDataFileName "man/atspkg.1"
+    path <- getDataFileName ("man" </> "atspkg.1")
     fold
         [ writeManpages path "atspkg.1"
         , writeTheFuck

@@ -1,6 +1,6 @@
 cabal-version: 2.0
 name: ats-pkg
-version: 3.1.0.12
+version: 3.2.0.0
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -21,6 +21,7 @@ extra-source-files:
     dhall/atspkg-prelude.dhall
 extra-doc-files: README.md
                  docs/manual.tex
+                 CHANGELOG.md
 
 source-repository head
     type: git
@@ -58,7 +59,6 @@ library
         Language.ATS.Package.Config
         Language.ATS.Package.Dependency
         Language.ATS.Package.Error
-        Language.ATS.Package.Generic
         Language.ATS.Package.PackageSet
         Language.ATS.Package.Type
         Language.ATS.Package.Debian
@@ -66,10 +66,9 @@ library
     autogen-modules:
         Paths_ats_pkg
     default-language: Haskell2010
-    other-extensions: OverloadedStrings GADTs
-                      GeneralizedNewtypeDeriving DeriveAnyClass DeriveGeneric
-                      TemplateHaskell RecordWildCards TupleSections StandaloneDeriving
-                      DerivingStrategies
+    other-extensions: OverloadedStrings GeneralizedNewtypeDeriving
+                      DeriveAnyClass DeriveGeneric TemplateHaskell RecordWildCards
+                      TupleSections StandaloneDeriving DerivingStrategies
     ghc-options: -Wall -Wincomplete-uni-patterns
                  -Wincomplete-record-updates
     build-depends:

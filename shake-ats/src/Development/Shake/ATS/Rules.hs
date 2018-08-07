@@ -75,7 +75,7 @@ cabalForeign (GHC _ suff) (ForeignCabal cbp' cf' obf') = do
             pkgDir = subdir </> "dist-newstyle" </> "build" </> platform </> "ghc-" ++ ghcV </> libName ++ "-" ++ prettyShow v
 
         dir <- filter endsBuild <$> liftIO (getSubdirs pkgDir)
-        let obj = head dir ++ "/" ++ takeFileName obf
+        let obj = head dir </> takeFileName obf
         liftIO $ copyFile obj out
 
         let hdr = dropExtension obj ++ "_stub.h"

@@ -19,6 +19,7 @@ data-files:
     test/data/stdlib/*.sats
     test/data/stdlib/*.out
 extra-doc-files: README.md
+                 CHANGELOG.md
 
 source-repository head
     type: darcs
