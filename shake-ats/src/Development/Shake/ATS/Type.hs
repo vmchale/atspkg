@@ -14,7 +14,6 @@ module Development.Shake.ATS.Type ( ForeignCabal (..)
 
 import           Data.Binary         (Binary (..))
 import           Data.Dependency     (Version (..))
-import           Data.Hashable       (Hashable)
 import qualified Data.Text.Lazy      as TL
 import           Development.Shake.C
 import           GHC.Generics        (Generic)
@@ -98,4 +97,4 @@ data ATSTarget = ATSTarget { _cFlags      :: [String] -- ^ Flags to be passed to
 data ForeignCabal = ForeignCabal { projectFile :: Maybe TL.Text -- ^ @cabal.project@ file to track
                                  , cabalFile   :: TL.Text -- ^ @.cabal@ file associated with the library
                                  , objectFile  :: TL.Text -- ^ Object file to be generated
-                                 } deriving (Eq, Show, Generic, Binary, Hashable)
+                                 } deriving (Eq, Show, Generic, Binary)

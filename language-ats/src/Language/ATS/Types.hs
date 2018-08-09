@@ -226,8 +226,7 @@ data Name a = Unqualified String
             deriving (Show, Eq, Generic, NFData)
 
 -- | A data type for patterns.
-data Pattern a = Wildcard a
-               | PName (Name a) [Pattern a]
+data Pattern a = PName (Name a) [Pattern a]
                | PSum String (Pattern a)
                | PLiteral (Expression a)
                | Guarded a (Expression a) (Pattern a)
@@ -242,8 +241,7 @@ data Pattern a = Wildcard a
                | BinPattern a (BinOp a) (Pattern a) (Pattern a) -- ^ For use with e.g. @::@.
                deriving (Show, Eq, Generic, NFData)
 
-data PatternF a x = WildcardF a
-                  | PNameF (Name a) [x]
+data PatternF a x = PNameF (Name a) [x]
                   | PSumF String x
                   | PLiteralF (Expression a)
                   | GuardedF a (Expression a) x
@@ -261,7 +259,6 @@ data PatternF a x = WildcardF a
 type instance Base (Pattern a) = PatternF a
 
 instance Recursive (Pattern a) where
-    project (Wildcard a)                = WildcardF a
     project (PName x ps)                = PNameF x ps
     project (PSum x p)                  = PSumF x p
     project (PLiteral e)                = PLiteralF e
@@ -368,11 +365,12 @@ data StaticExpression a = StaticVal (Name a)
                         | SPrecede (StaticExpression a) (StaticExpression a)
                         | StaticVoid a
                         | Sif { scond :: StaticExpression a, whenTrue :: StaticExpression a, selseExpr :: StaticExpression a } -- Static if (for proofs)
-                        | SCall (Name a) [StaticExpression a]
+                        | SCall (Name a) [Type a] [StaticExpression a]
                         | SUnary (UnOp a) (StaticExpression a)
                         | SLet a [Declaration a] (Maybe (StaticExpression a))
                         | SCase Addendum (StaticExpression a) [(Pattern a, LambdaType a, StaticExpression a)]
                         | SString String -- ^ @ext#@
+                        | Witness a (StaticExpression a) (StaticExpression a) -- ^ @#[ m | () ]@
                         deriving (Show, Eq, Generic, NFData)
 
 data StaticExpressionF a x = StaticValF (Name a)
@@ -382,11 +380,12 @@ data StaticExpressionF a x = StaticValF (Name a)
                            | SPrecedeF x x
                            | StaticVoidF a
                            | SifF x x x
-                           | SCallF (Name a) [x]
+                           | SCallF (Name a) [Type a] [x]
                            | SUnaryF (UnOp a) x
                            | SLetF a [Declaration a] (Maybe x)
                            | SCaseF Addendum x [(Pattern a, LambdaType a, x)]
                            | SStringF String
+                           | WitnessF a x x
                            deriving (Functor)
 
 type instance Base (StaticExpression a) = StaticExpressionF a
@@ -399,11 +398,12 @@ instance Recursive (StaticExpression a) where
     project (SPrecede x x')       = SPrecedeF x x'
     project (StaticVoid x)        = StaticVoidF x
     project (Sif e e' e'')        = SifF e e' e''
-    project (SCall n es)          = SCallF n es
+    project (SCall n ts es)       = SCallF n ts es
     project (SUnary u x)          = SUnaryF u x
     project (SLet x ds e)         = SLetF x ds e
     project (SCase a x ples)      = SCaseF a x ples
     project (SString s)           = SStringF s
+    project (Witness a e e')      = WitnessF a e e'
 
 -- | A (possibly effectful) expression.
 data Expression a = Let a (ATS a) (Maybe (Expression a))
@@ -443,7 +443,8 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                          , val   :: Expression a
                          , _arms :: [(Pattern a, LambdaType a, Expression a)] -- ^ Each (('Pattern' a), ('Expression' a)) pair corresponds to a branch of the 'case' statement
                          }
-                  | RecordValue a (NonEmpty (String, Expression a)) (Maybe (Type a))
+                  | RecordValue a (NonEmpty (String, Expression a))
+                  | BoxRecordValue a (NonEmpty (String, Expression a))
                   | Precede (Expression a) (Expression a)
                   | ProofExpr a (NonEmpty (Expression a)) (Expression a)
                   | TypeSignature (Expression a) (Type a)
@@ -488,7 +489,8 @@ data ExpressionF a x = LetF a (ATS a) (Maybe x)
                      | UnaryF (UnOp a) x
                      | IfCaseF a [(x, LambdaType a, x)]
                      | CaseF a Addendum x [(Pattern a, LambdaType a, x)]
-                     | RecordValueF a (NonEmpty (String, x)) (Maybe (Type a))
+                     | RecordValueF a (NonEmpty (String, x))
+                     | BoxRecordValueF a (NonEmpty (String, x))
                      | PrecedeF x x
                      | ProofExprF a (NonEmpty x) x
                      | TypeSignatureF x (Type a)
@@ -536,7 +538,8 @@ instance Recursive (Expression a) where
     project (Unary op e)                  = UnaryF op e
     project (IfCase l arms)               = IfCaseF l arms
     project (Case l k e arms)             = CaseF l k e arms
-    project (RecordValue l recs mty)      = RecordValueF l recs mty
+    project (RecordValue l recs)          = RecordValueF l recs
+    project (BoxRecordValue l recs)       = BoxRecordValueF l recs
     project (Precede e e')                = PrecedeF e e'
     project (ProofExpr a e e')            = ProofExprF a e e'
     project (TypeSignature e ty)          = TypeSignatureF e ty
@@ -581,7 +584,8 @@ instance Corecursive (Expression a) where
     embed (UnaryF op e)                  = Unary op e
     embed (IfCaseF l arms)               = IfCase l arms
     embed (CaseF l k e arms)             = Case l k e arms
-    embed (RecordValueF l recs mty)      = RecordValue l recs mty
+    embed (RecordValueF l recs)          = RecordValue l recs
+    embed (BoxRecordValueF l recs)       = RecordValue l recs
     embed (PrecedeF e e')                = Precede e e'
     embed (ProofExprF a e e')            = ProofExpr a e e'
     embed (TypeSignatureF e ty)          = TypeSignature e ty

@@ -38,7 +38,6 @@ library
     ghc-options: -Wall
     build-depends:
         base >=4.9 && <5,
-        hashable -any,
         language-ats -any,
         shake-ext >=3.0.0.0,
         hs2ats >=0.2.0.1,

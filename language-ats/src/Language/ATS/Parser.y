@@ -157,6 +157,7 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     closeParen { Special $$ ")" }
     openParen { Special $$ "(" }
     boxTuple { Special $$ "'(" }
+    boxRecord { Special $$ "'{" }
     colon { SignatureTok $$ "" }
     signature { SignatureTok _ $$ }
     comma { Special $$ "," }
@@ -340,7 +341,6 @@ PatternIn : comma_sep(Pattern) { reverse (toList $1) }
 -- | Parse a pattern match
 Pattern : Name { PName $1 [] }
         | identifierSpace { PName (Unqualified $ to_string $1) [] }
-        | underscore { Wildcard $1 }
         | identifier doubleParens { PName (Unqualified (to_string $1 ++ "()")) [] }
         | tilde Pattern { Free $2 }
         | Name openParen PatternIn closeParen { PName $1 $3 }
@@ -449,18 +449,20 @@ StaticExpression : Name { StaticVal $1 }
                  | doubleParens { StaticVoid $1 }
                  | sif StaticExpression then StaticExpression else StaticExpression { Sif $2 $4 $6 }
                  | identifierSpace { StaticVal (Unqualified $ to_string $1) }
-                 | identifierSpace StaticExpression { SCall (Unqualified $ to_string $1) [$2] }
-                 | Name openParen StaticArgs closeParen { SCall $1 $3 }
-                 | identifierSpace openParen StaticArgs closeParen { SCall (Unqualified $ to_string $1) $3 }
+                 | identifierSpace StaticExpression { SCall (Unqualified $ to_string $1) [] [$2] }
+                 | Name openParen StaticArgs closeParen { SCall $1 [] $3 }
+                 | identifierSpace openParen StaticArgs closeParen { SCall (Unqualified $ to_string $1) [] $3 }
                  | StaticExpression semicolon StaticExpression { SPrecede $1 $3 }
                  | UnOp StaticExpression { SUnary $1 $2 }
-                 | identifierSpace doubleParens { SCall (Unqualified $ to_string $1) [] }
-                 | identifier doubleParens { SCall (Unqualified $ to_string $1) [] }
-                 | let StaticDecls comment_after(in) end { SLet $1 $2 Nothing }
-                 | let StaticDecls in StaticExpression end { SLet $1 $2 (Just $4) }
+                 | identifierSpace doubleParens { SCall (Unqualified $ to_string $1) [] [] }
+                 | identifier TypeArgs doubleParens { SCall (Unqualified $ to_string $1) $2 [] }
+                 | identifier doubleParens { SCall (Unqualified $ to_string $1) [] [] }
+                 | let StaticDecls comment_after(in) end { SLet $1 (reverse $2) Nothing }
+                 | let StaticDecls in StaticExpression end { SLet $1 (reverse $2) (Just $4) }
                  | openParen StaticExpression closeParen { $2 }
                  | openParen lineComment StaticExpression closeParen { $3 }
                  | case StaticExpression of StaticCase { SCase $1 $2 $4 }
+                 | openExistential StaticExpression vbar StaticExpression rsqbracket { Witness $1 $2 $4 }
 
 -- | Parse an expression that can be called without parentheses
 PreExpression : identifier lsqbracket PreExpression rsqbracket { Index $2 (Unqualified $ to_string $1) $3 }
@@ -487,8 +489,8 @@ PreExpression : identifier lsqbracket PreExpression rsqbracket { Index $2 (Unqua
               | llambda Pattern LambdaArrow Expression { LinearLambda $1 $3 $2 $4 }
               | addrAt PreExpression { AddrAt $1 $2 }
               | viewAt PreExpression { ViewAt $1 $2 }
-              | atbrace RecordVal rbrace { RecordValue $1 $2 Nothing }
-              | atbrace RecordVal rbrace colon Type { RecordValue $1 $2 (Just $5) }
+              | atbrace RecordVal rbrace { RecordValue $1 $2 }
+              | boxRecord RecordVal rbrace { RecordValue $1 $2 }
               | begin Expression end { Begin $1 $2 }
               | identifierSpace { NamedVal (Unqualified $ to_string $1) }
               | Name { NamedVal $1 }
@@ -673,6 +675,7 @@ OptExpression : { Nothing }
               | let {% left $ Expected $1 "=" "let" }
               | ifcase {% left $ Expected $1 "=" "ifcase" }
               | eq fun {% left $ Expected $2 "Expression" "=" }
+              | eq fn {% left $ Expected $2 "Expression" "=" }
               | eq lineComment fun {% left $ Expected $3 "Expression" "=" }
               | lbrace {% left $ Expected $1 "Expression" "{" }
 
@@ -861,7 +864,7 @@ StackFunction : parens(Args) Signature Type plainArrow Expression { StackF $2 $1
 
 ValDecl : val Pattern colon Type eq PreExpression { [ Val (get_addendum $1) (Just $4) $2 $6 ] }
         | val Pattern eq Expression { [ Val (get_addendum $1) Nothing $2 $4 ] }
-        | ValDecl and Pattern eq Expression { Val None Nothing $3 $5 : $1 }
+        | ValDecl and Pattern eq Expression { AndDecl Nothing $3 $5 : $1 }
         | extern ValDecl { over _head (Extern $1) $2 }
         | val Pattern eq colon {% left $ Expected $4 "Expression" ":" }
 

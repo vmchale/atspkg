@@ -25,7 +25,6 @@ module Language.ATS.Package.Type ( -- * Types
                                  ) where
 
 import           Data.Dependency
-import           Data.Hashable               (Hashable)
 import           Development.Shake.ATS
 import           Language.ATS.Package.Debian
 import           Quaalude
@@ -33,7 +32,7 @@ import           Quaalude
 data ATSConstraint = ATSConstraint { lower :: Maybe Version
                                    , upper :: Maybe Version
                                    }
-                deriving (Eq, Show, Generic, Binary, Interpret, Hashable)
+                deriving (Eq, Show, Generic, Binary, Interpret)
 
 deriving newtype instance Inject Version
 
@@ -54,7 +53,7 @@ data ATSDependency = ATSDependency { libName     :: Text -- ^ Library name, e.g.
                                    , libCDeps    :: [LibDep] -- ^ C dependencies to be built
                                    , script      :: [Text] -- ^ Optional build script for C library
                                    }
-                   deriving (Generic, Interpret, Binary, Hashable)
+                   deriving (Generic, Interpret, Binary)
 
 dirLens :: Lens' ATSDependency Text
 dirLens f s = fmap (\x -> s { dir = x }) (f (dir s))
@@ -63,11 +62,10 @@ dirLens f s = fmap (\x -> s { dir = x }) (f (dir s))
 data TargetPair = TargetPair { hs    :: Text
                              , ats   :: Text
                              , cpphs :: Bool
-                             } deriving (Generic, Interpret, Binary, Hashable)
+                             } deriving (Generic, Interpret, Binary)
 
 deriving instance Interpret ForeignCabal
 
-deriving instance Hashable Solver
 deriving instance Interpret Solver
 
 data Src = Src { atsSrc  :: Text
@@ -75,7 +73,7 @@ data Src = Src { atsSrc  :: Text
                , atsGen  :: [TargetPair]
                , extras  :: [Text]
                }
-         deriving (Generic, Interpret, Binary, Hashable)
+         deriving (Generic, Interpret, Binary)
 
 data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
                , target :: Text -- ^ Binary to be built
@@ -85,7 +83,7 @@ data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
                , gcBin  :: Bool -- ^ Whether to use the garbage collector
                , extras :: [Text] -- ^ Extra source files the build depends on
                }
-         deriving (Generic, Interpret, Binary, Hashable)
+         deriving (Generic, Interpret, Binary)
 
 data Lib = Lib { name      :: Text -- ^ Name of library being provided
                , src       :: [Text] -- ^ Source files (should end with @.dats@) to be compiled to object files
@@ -98,7 +96,7 @@ data Lib = Lib { name      :: Text -- ^ Name of library being provided
                , extras    :: [Text] -- ^ Other source files the build depends on
                , static    :: Bool -- ^ Whether to make a static library
                }
-         deriving (Generic, Interpret, Binary, Hashable)
+         deriving (Generic, Interpret, Binary)
 
 -- | Data type associated with @atspkg.dhall@ file.
 data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
@@ -120,4 +118,4 @@ data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , debPkg       :: Maybe Debian -- ^ Optional specificiation as a debian package.
                , atsLib       :: Bool -- ^ Whether to link/build @atslib@.
                }
-         deriving (Generic, Interpret, Binary, Hashable)
+         deriving (Generic, Interpret, Binary)

@@ -85,7 +85,6 @@ library
         http-client-tls -any,
         text -any,
         process -any,
-        hashable -any,
         containers -any,
         parallel-io -any,
         mtl -any,

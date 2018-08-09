@@ -111,7 +111,7 @@ data CCompiler = GCC { _prefix  :: Maybe String -- ^ Usually the target triple
                | CompCert
                | ICC
                | Other String
-               deriving (Generic, Binary) -- Show, Eq, Generic, Typeable, Hashable, Binary, NFData)
+               deriving (Generic, Binary)
 
 mapFlags :: String -> ([String] -> [String])
 mapFlags s = fmap (s ++)
@@ -122,7 +122,7 @@ data CConfig = CConfig { includes   :: [String] -- ^ Directories to be included.
                        , extras     :: [String] -- ^ Extra flags to be passed to the compiler
                        , staticLink :: Bool -- ^ Whether to link against static versions of libraries
                        }
-             deriving (Generic, Binary) -- Show, Eq, Generic, Typeable, Hashable, Binary, NFData)
+             deriving (Generic, Binary)
 
 -- | Rules for making a static library from C source files. Unlike 'staticLibR',
 -- this also creates rules for creating object files.

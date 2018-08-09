@@ -158,8 +158,8 @@ instance Eq a => Pretty (Expression a) where
         a (CaseF _ add' e cs)           = "case" <> pretty add' <+> e <+> "of" <$> indent 2 (prettyCases cs)
         a (IfCaseF _ cs)                = "ifcase" <$> indent 2 (prettyIfCase cs)
         a (VoidLiteralF _)              = "()"
-        a (RecordValueF _ es Nothing)   = prettyRecord es
-        a (RecordValueF _ es (Just x))  = prettyRecord es <+> ":" <+> pretty x
+        a (RecordValueF _ es)           = prettyRecord es
+        a (BoxRecordValueF _ es)        = "'" <> prettyRecord es
         a (PrecedeF e e')               = parens (e <+> ";" </> e')
         a (PrecedeListF es)             = lineAlt (prettyArgsList "; " "(" ")" es) ("(" <> mconcat (punctuate " ; " es) <> ")")
         a (AccessF _ e n)
@@ -214,7 +214,6 @@ patternHelper ps = mconcat (punctuate ", " ps)
 
 instance Eq a => Pretty (Pattern a) where
     pretty = cata a where
-        a (WildcardF _)                = "_"
         a (PSumF s x)                  = string s <+> x
         a (PLiteralF e)                = pretty e
         a (PNameF s [])                = pretty s
@@ -264,14 +263,16 @@ instance Eq a => Pretty (StaticExpression a) where
         a (StaticHexF h)            = text h
         a StaticVoidF{}             = "()"
         a (SifF e e' e'')           = "sif" <+> e <+> "then" <$> indent 2 e' <$> "else" <$> indent 2 e''
-        a (SCallF n cs)             = pretty n <> parens (mconcat (punctuate "," . fmap pretty $ cs))
+        a (SCallF n [] cs)          = pretty n <> parens (mconcat (punctuate "," . fmap pretty $ cs))
+        a (SCallF n us cs)          = pretty n <> prettyArgsU "{" "}" us <> parens (mconcat (punctuate "," . fmap pretty $ cs))
         a (SPrecedeF e e')          = e <> ";" <+> e'
         a (SUnaryF op e)            = pretty op <> e
         a (SLetF _ e e') = flatAlt
-            ("let" <$> indent 2 (pretty e) <$> endLet e')
-            ("let" <+> pretty e <$> endLet e')
+            ("let" <$> indent 2 (concatSame e) <$> endLet e')
+            ("let" <+> concatSame e <$> endLet e')
         a (SCaseF ad e sls) = "case" <> pretty ad <+> e <+> "of" <$> indent 2 (prettyCases sls)
         a (SStringF s)      = text s
+        a (WitnessF _ e e') = "#[" <+> e <+> "|" <+> e' <+> "]"
 
 instance Eq a => Pretty (Sort a) where
     pretty = cata a where
@@ -362,11 +363,12 @@ instance Eq a => Pretty (Implementation a) where
     pretty (Implement _ ps is us n Nothing e) = foldMap pretty (reverse ps) </> pretty n <> prettyOr is </> foldMap pretty us <+> "=" <$> indent 2 (prettyImplExpr e)
 
 isVal :: Declaration a -> Bool
-isVal Val{}   = True
-isVal Var{}   = True
-isVal PrVal{} = True
-isVal PrVar{} = True
-isVal _       = False
+isVal Val{}     = True
+isVal Var{}     = True
+isVal PrVal{}   = True
+isVal PrVar{}   = True
+isVal AndDecl{} = True
+isVal _         = False
 
 notDefine :: String -> Bool
 notDefine = not . ("#define" `isPrefixOf`)

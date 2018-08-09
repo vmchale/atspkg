@@ -11,7 +11,6 @@ module Language.ATS.Package.Debian ( debRules
                                    ) where
 
 import           Data.Dependency            (Version (..))
-import           Data.Hashable              (Hashable)
 import           Data.List                  (intercalate)
 import           Development.Shake          hiding ((*>))
 import           Development.Shake.FilePath
@@ -27,10 +26,9 @@ data Debian = Debian { package     :: Text
                      , binaries    :: [Text]
                      , libraries   :: [Text]
                      }
-                     deriving (Generic, Hashable, Binary, Interpret)
+                     deriving (Generic, Binary, Interpret)
 
 deriving newtype instance Interpret Version
-deriving newtype instance Hashable Version
 
 control :: Debian -> String
 control Debian{..} = intercalate "\n"
