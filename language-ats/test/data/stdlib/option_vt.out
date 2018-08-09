@@ -71,7 +71,6 @@ fun option_vt_is_none {a:vt0p}{b:bool} (opt : !option_vt(INV(a), b)) :<>
 fun {a:vt0p} option_vt_unsome (opt : option_vt(INV(a), true)) :<!wrt>
   (a)
 
-//
 fun {a:vt0p} option_vt_unnone (opt : option_vt(INV(a), false)) :<!wrt>
   void
 

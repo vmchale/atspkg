@@ -314,7 +314,6 @@ instance Eq a => Pretty (Type a) where
         a (ViewLiteralF c)                 = "view" <> pretty c
         a ImplicitTypeF{}                  = ".."
         a (AnonymousRecordF _ rs)          = prettyRecord rs
-        a (ParenTypeF _ t)                 = parens t
         a (WhereTypeF _ t i sa t')         = t <#> indent 2 ("where" </> pretty i <+> prettySortArgs sa <+> "=" <+> pretty t')
         a AddrTypeF{}                      = "addr"
 

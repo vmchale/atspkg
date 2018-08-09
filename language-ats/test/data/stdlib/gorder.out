@@ -110,7 +110,6 @@ fun {a:t0p} gmax_val_val (x : a, y : a) :<> (a)
 
 fun {a:t0p} gmin_val_val (x : a, y : a) :<> (a)
 
-//
 (* ****** ****** *)
 //
 fun {a:vt0p} glt_ref_ref (x : &INV(a), y : &a) :<> bool

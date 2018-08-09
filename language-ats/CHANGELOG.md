@@ -9,6 +9,7 @@
   * Fix parse error on expressions like `list_vt_cons(x, _)`
   * Add support for proof expressions introducing witnesses (`[ m | [] ]`)
   * Remove `Wildcard` constructor and instead treat `_` as a name
+  * Remove `ParenType` and instead use tuples
 
 ## 1.5.0.0
 

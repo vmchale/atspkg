@@ -248,12 +248,17 @@ sep_by(p,sep) : p { $1 :| [] }
 comma_sep(p)
     : sep_by(p, comma) { $1 }
 
-between(p1,p,p2) : p1 p p2 { $2 }
+parens(p) : openParen p closeParen { $2 }
 
-parens(p) : between(openParen, p, closeParen) { $1 }
+sqbrackets(p) : lsqbracket p rsqbracket { $2 }
+
+braces(p) : lbrace p rbrace { $2 }
 
 alt(p,q) : p { $1 }
          | q { $1 }
+
+optional(p) : p { Just $1 }
+            | { Nothing }
 
 ATS : Declarations { ATS (reverse $1) }
 
@@ -273,7 +278,7 @@ TypeInExpr : comma_sep(alt(Type,ExprType)) { toList $1 }
 -- | Parse a type
 Type : Name parens(TypeInExpr) { Dependent $1 $2 }
      | Name doubleParens { Dependent $1 [] }
-     | identifierSpace openParen TypeInExpr closeParen { Dependent (Unqualified $ to_string $1) $3 }
+     | identifierSpace parens(TypeInExpr) { Dependent (Unqualified $ to_string $1) $2 }
      | identifierSpace { Named (Unqualified $ to_string $1) }
      | specialIdentifier string { Dependent (SpecialName (token_posn $1) (to_string $1)) [Named (Unqualified $ $2)] }
      | Name { Named $1 }
@@ -285,14 +290,12 @@ Type : Name parens(TypeInExpr) { Dependent $1 $2 }
      | Name maybeProof { MaybeVal (Named $1) }
      | Type fromVT { FromVT $1 }
      | Type prfTransform Type { AsProof $1 (Just $3) }
-     | Type prfTransform underscore { AsProof $1 Nothing }
      | view at Type { ViewType $1 $3 }
      | viewPlusMinus { ViewLiteral $1 }
-     | Existential Type { Ex $1 (Just $2) }
-     | Existential { Ex $1 Nothing }
+     | Existential optional(Type) { Ex $1 $2 }
      | Universal Type { ForA $1 $2 }
      | Type at StaticExpression { AtExpr $2 $1 $3 }
-     | at lsqbracket Type rsqbracket lsqbracket StaticExpression rsqbracket { ArrayType $1 $3 $6 }
+     | at sqbrackets(Type) sqbrackets(StaticExpression) { ArrayType $1 $2 $3 }
      | atbrace Records rbrace { AnonymousRecord $1 $2 }
      | openParen TypeIn vbar TypeIn closeParen { ProofType $1 $2 $4 }
      | identifierSpace identifier { Dependent (Unqualified $ to_string $1) [Named (Unqualified $ to_string $2)] }
@@ -300,7 +303,6 @@ Type : Name parens(TypeInExpr) { Dependent $1 $2 }
      | openParen TypeIn closeParen lineComment { Tuple $1 (toList $2) }
      | boxTuple TypeIn closeParen { BoxTuple $1 $2 }
      | boxTuple TypeIn closeParen lineComment { BoxTuple $1 $2 }
-     | openParen Type closeParen { ParenType $1 $2 }
      | addr { AddrType $1 }
      | doubleParens { Tuple $1 mempty }
      | Type where IdentifierOr SortArgs eq Type { WhereType $2 $1 $3 $4 $6 }
@@ -324,7 +326,7 @@ TypeArg : IdentifierOr { Arg (First $1) }
         | exclamation IdentifierOr colon {% left $ OneOf $3 [",", ")"] ":" }
 
 Arg : TypeArg { $1 }
-    | StaticExpression { Arg (Second (ConcreteType $1)) } -- TODO: have some sort of stop showing bound variables that we can use to disambiguate types vs. static expressions?
+    | StaticExpression { Arg (Second (ConcreteType $1)) } -- TODO: have some sort of state showing bound variables that we can use to disambiguate types vs. static expressions?
 
 -- | Parse a literal
 Literal : uintLit { UintLit $1 }
@@ -374,7 +376,7 @@ StaticCase : case_pattern(Pattern, StaticExpression) { $1 }
 IfCase : case_pattern(Expression, Expression) { $1 }
 
 ExpressionPrf : ExpressionIn { (Nothing, $1) }
-              | ExpressionIn vbar ExpressionIn { (Just $1, $3) } -- FIXME only passes one proof?
+              | ExpressionIn vbar ExpressionIn { (Just $1, $3) }
 
 -- | A list of comma-separated expressions
 ExpressionIn : comma_sep(Expression) { toList $1 }
@@ -404,30 +406,29 @@ LambdaArrow : plainArrow { Plain $1 }
 -- | Expression or named call to an expression
 Expression : identifierSpace PreExpression { Call (Unqualified $ to_string $1) [] [] Nothing [$2] }
            | PreExpression { $1 }
-           -- | openParen PreExpression comma PreExpression vbar PreExpression closeParen { ProofExpr $1 [$2, $4] $6 }
            | openParen comma_sep(PreExpression) vbar PreExpression closeParen { ProofExpr $1 $2 $4 }
            | Expression semicolon Expression { Precede $1 $3 }
            | Expression semicolon { $1 }
            | openParen Expression closeParen { $2 }
-           | Expression colon Type { TypeSignature $1 $3 } -- TODO is a more general expression sensible?
-           | list_vt lbrace Type rbrace openParen ExpressionIn closeParen { ListLiteral $1 "vt" $3 $6 }
+           | Expression colon Type { TypeSignature $1 $3 }
+           | list_vt braces(Type) parens(ExpressionIn) { ListLiteral $1 "vt" $2 $3 }
            | begin Expression extern {% left $ Expected $3 "end" "extern" }
            | Expression prfTransform underscore {% left $ Expected $2 "Rest of expression or declaration" ">>" }
 
-TypeArgs : lbrace alt(Type,ExprType) rbrace { [$2] }
-         | lbrace TypeInExpr rbrace { $2 }
-         | TypeArgs lbrace alt(Type,ExprType) rbrace { $3 : $1 }
-         | lbrace doubleDot rbrace { [ ImplicitType $2 ] } -- FIXME only valid on function calls
-         | TypeArgs lbrace TypeInExpr rbrace { $3 ++ $1 }
+TypeArgs : braces(alt(Type,ExprType)) { [$1] }
+         | braces(TypeInExpr) { $1 }
+         | TypeArgs braces(alt(Type,ExprType)) { $2 : $1 }
+         | braces(doubleDot) { [ ImplicitType $1 ] } -- FIXME only valid on function calls
+         | TypeArgs braces(TypeInExpr) { $2 ++ $1 }
 
 Call : Name doubleParens { Call $1 [] [] Nothing [] }
-     | Name openParen ExpressionPrf closeParen { Call $1 [] [] (fst $3) (snd $3) }
-     | identifierSpace openParen ExpressionPrf closeParen { Call (Unqualified $ to_string $1) [] [] (fst $3) (snd $3) }
-     | Name TypeArgs openParen ExpressionPrf closeParen { Call $1 [] $2 (fst $4) (snd $4) }
+     | Name parens(ExpressionPrf) { Call $1 [] [] (fst $2) (snd $2) }
+     | identifierSpace parens(ExpressionPrf) { Call (Unqualified $ to_string $1) [] [] (fst $2) (snd $2) }
+     | Name TypeArgs parens(ExpressionPrf) { Call $1 [] $2 (fst $3) (snd $3) }
      | Name TypeArgs doubleParens { Call $1 [] $2 Nothing [VoidLiteral $3] }
      | Name TypeArgs { Call $1 [] $2 Nothing [] }
      | Name Implicits doubleParens { Call $1 $2 [] Nothing [VoidLiteral $3] }
-     | Name Implicits openParen ExpressionPrf closeParen { Call $1 $2 [] (fst $4) (snd $4) }
+     | Name Implicits parens(ExpressionPrf) { Call $1 $2 [] (fst $3) (snd $3) }
      | Name Implicits { Call $1 $2 [] Nothing [] }
      | raise PreExpression { Call (SpecialName $1 "raise") [] [] Nothing [$2] } -- $raise can have at most one argument
      | Name Implicits openParen ExpressionPrf fun {% left $ Expected $5 ")" "fun" }
@@ -450,8 +451,8 @@ StaticExpression : Name { StaticVal $1 }
                  | sif StaticExpression then StaticExpression else StaticExpression { Sif $2 $4 $6 }
                  | identifierSpace { StaticVal (Unqualified $ to_string $1) }
                  | identifierSpace StaticExpression { SCall (Unqualified $ to_string $1) [] [$2] }
-                 | Name openParen StaticArgs closeParen { SCall $1 [] $3 }
-                 | identifierSpace openParen StaticArgs closeParen { SCall (Unqualified $ to_string $1) [] $3 }
+                 | Name parens(StaticArgs) { SCall $1 [] $2 }
+                 | identifierSpace parens(StaticArgs) { SCall (Unqualified $ to_string $1) [] $2 } -- TODO: static tuple?
                  | StaticExpression semicolon StaticExpression { SPrecede $1 $3 }
                  | UnOp StaticExpression { SUnary $1 $2 }
                  | identifierSpace doubleParens { SCall (Unqualified $ to_string $1) [] [] }
@@ -459,7 +460,7 @@ StaticExpression : Name { StaticVal $1 }
                  | identifier doubleParens { SCall (Unqualified $ to_string $1) [] [] }
                  | let StaticDecls comment_after(in) end { SLet $1 (reverse $2) Nothing }
                  | let StaticDecls in StaticExpression end { SLet $1 (reverse $2) (Just $4) }
-                 | openParen StaticExpression closeParen { $2 }
+                 | parens(StaticExpression) { $1 }
                  | openParen lineComment StaticExpression closeParen { $3 }
                  | case StaticExpression of StaticCase { SCase $1 $2 $4 }
                  | openExistential StaticExpression vbar StaticExpression rsqbracket { Witness $1 $2 $4 }
@@ -494,15 +495,15 @@ PreExpression : identifier lsqbracket PreExpression rsqbracket { Index $2 (Unqua
               | begin Expression end { Begin $1 $2 }
               | identifierSpace { NamedVal (Unqualified $ to_string $1) }
               | Name { NamedVal $1 }
-              | lbrace ATS rbrace { Actions $2 }
-              | while openParen PreExpression closeParen PreExpression { While $1 $3 $5 }
-              | for openParen PreExpression closeParen PreExpression { For $1 $3 $5 }
-              | whileStar Universals Termetric openParen Args closeParen plainArrow Expression Expression { WhileStar $1 $2 (snd $3) $5 $8 $9 Nothing }
-              | whileStar Universals Termetric openParen Args closeParen colon openParen Args closeParen plainArrow Expression Expression { WhileStar $1 $2 (snd $3) $5 $12 $13 (Just $9) }
-              | forStar Universals Termetric openParen Args closeParen plainArrow Expression Expression { ForStar $1 $2 (snd $3) $5 $8 $9 }
+              | braces(ATS) { Actions $1 }
+              | while parens(PreExpression) PreExpression { While $1 $2 $3 }
+              | for parens(PreExpression) PreExpression { For $1 $2 $3 }
+              | whileStar Universals Termetric parens(Args) plainArrow Expression Expression { WhileStar $1 $2 (snd $3) $4 $6 $7 Nothing }
+              | whileStar Universals Termetric parens(Args) colon openParen Args closeParen plainArrow Expression Expression { WhileStar $1 $2 (snd $3) $4 $10 $11 (Just $7) }
+              | forStar Universals Termetric parens(Args) plainArrow Expression Expression { ForStar $1 $2 (snd $3) $4 $6 $7 }
               | lineComment PreExpression { CommentExpr (to_string $1) $2 }
-              | comma openParen identifier closeParen { MacroVar $1 (to_string $3) }
-              | PreExpression where lbrace ATS rbrace { WhereExp $1 $4 }
+              | comma parens(identifier) { MacroVar $1 (to_string $2) }
+              | PreExpression where braces(ATS) { WhereExp $1 $3 }
               | include {% left $ Expected $1 "Expression" "include" }
               | staload {% left $ Expected (token_posn $1) "Expression" "staload" }
               | overload {% left $ Expected $1 "Expression" "overload" }
@@ -551,7 +552,7 @@ Existential : lsqbracket QuantifierArgs colon Sort vbar StaticExpression rsqbrac
             | lsqbracket QuantifierArgs colon Sort rsqbracket { Existential $2 False (Just $4) Nothing }
             | openExistential QuantifierArgs colon Sort rsqbracket { Existential $2 True (Just $4) Nothing }
             | openExistential QuantifierArgs colon Sort vbar StaticExpression rsqbracket { Existential $2 True (Just $4) (Just $6) }
-            | lsqbracket StaticExpression rsqbracket { Existential mempty False Nothing (Just $2) }
+            | sqbrackets(StaticExpression) { Existential mempty False Nothing (Just $1) }
 
 Predicates : { [] }
            | StaticExpression { [$1] }
@@ -787,7 +788,7 @@ SortArg : IdentifierOr colon Sort { [ SortArg $1 $3 ] }
         | Sort { [Anonymous $1] }
         | SortArg Comment { $1 }
 
-SortArgs : openParen SortArg closeParen { Just $2 }
+SortArgs : parens(SortArg) { Just $1 }
          | doubleParens { Just [] }
          | { Nothing }
 
@@ -812,7 +813,7 @@ TypeDecl : typedef IdentifierOr SortArgs eq Type MaybeAnnot { TypeDef $1 $2 $3 $
          | abstype IdentifierOr SortArgs MaybeType { AbsType $1 $2 $3 $4 }
          | absvtype IdentifierOr SortArgs MaybeType { AbsViewType $1 $2 $3 $4 }
          | dataprop IdentifierOr SortArgs eq DataPropLeaves { DataProp $1 $2 $3 $5 }
-         | absprop IdentifierOr openParen Args closeParen { AbsProp $1 $2 $4 }
+         | absprop IdentifierOr parens(Args) { AbsProp $1 $2 $3 }
          | AndSort { $1 }
          | AndStadef { $1 }
          | SumDecl { $1 }
@@ -825,7 +826,7 @@ TypeDecl : typedef IdentifierOr SortArgs eq Type MaybeAnnot { TypeDef $1 $2 $3 $
          | dataprop IdentifierOr SortArgs vbar {% left $ Expected $4 "=" "|" }
 
 EitherInt : intLit { Left $1 }
-          | openParen Operator closeParen { Right $2 }
+          | parens(Operator) { Right $1 }
 
 Fixity : infixr EitherInt { RightFix $1 $2 }
        | infixl EitherInt { LeftFix $1 $2 }
@@ -902,7 +903,7 @@ Load : staload { (True, $1) }
      | dynload { (False, $1) }
 
 MacroArgs : doubleParens { Just [] }
-          | openParen IdentifiersIn closeParen { Just $2 }
+          | parens(IdentifiersIn) { Just $1 }
           | { Nothing }
 
 -- | Parse a declaration

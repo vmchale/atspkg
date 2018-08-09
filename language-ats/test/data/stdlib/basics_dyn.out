@@ -218,10 +218,8 @@ overload free with cloptr_free of 0
 //
 fun {a:t0p} lazy_force (lazyval : lazy(INV(a))) :<!laz> (a)
 
-//
 fun {a:vt0p} lazy_vt_force (lazyval : lazy_vt(INV(a))) :<!all> (a)
 
-//
 (*
 //
 // HX-2016-08:
@@ -436,7 +434,6 @@ fun {a:vtype} box_vt  : (INV(a)) -> boxed_vt(a)
 
 fun {a:vtype} unbox_vt  : boxed_vt(INV(a)) -> (a)
 
-//
 (* ****** ****** *)
 //
 stadef array (a: vt@ype, n: int) = @[a][n]
@@ -562,7 +559,6 @@ praxi opt_unsome {a:vt0p} (x : !opt(INV(a), true) >> a) :<prf> void
 //
 fun {a:vt0p} opt_unsome_get (x : &opt(INV(a), true) >> a?) : (a)
 
-//
 praxi opt_none {a:vt0p} (x : !(a?) >> opt(a, false)) :<prf> void
 
 praxi opt_unnone {a:vt0p} (x : !opt(INV(a), false) >> a?) :<prf> void
@@ -581,7 +577,6 @@ dataview or_view_view_int_view(a0: view+, a1: view+, int) =
   | VOR_l(a0, a1, 0) of (INV(a0))
   | VOR_r(a0, a1, 1) of (INV(a1))
 
-//
 stadef por  = or_prop_prop_int_prop
 stadef vor  = or_view_view_int_view
 

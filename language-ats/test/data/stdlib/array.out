@@ -321,7 +321,6 @@ macdef array2list = array_copy_to_list_vt
 //
 fun {a:vt0p} array_tabulate$fopr (i : size_t) : (a)
 
-//
 fun {a:vt0p} array_ptr_tabulate {n:int} (asz : size_t(n)) :
   [l:addr] (array_v(a, l, n), mfree_gc_v(l)| ptr(l))
 

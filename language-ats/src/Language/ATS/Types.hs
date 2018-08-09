@@ -153,7 +153,6 @@ data Type a = Tuple a [Type a]
             | ImplicitType a
             | ViewLiteral Addendum
             | AnonymousRecord a (NonEmpty (String, Type a))
-            | ParenType a (Type a)
             | WhereType a (Type a) String (SortArgs a) (Type a)
             | AddrType a -- ^ @addr@
             deriving (Show, Eq, Generic, NFData)
@@ -178,7 +177,6 @@ data TypeF a x = TupleF a [x]
                | ImplicitTypeF a
                | ViewLiteralF Addendum
                | AnonymousRecordF a (NonEmpty (String, x))
-               | ParenTypeF a x
                | WhereTypeF a x String (SortArgs a) x
                | AddrTypeF a
                deriving (Functor)
@@ -206,7 +204,6 @@ instance Recursive (Type a) where
     project (ImplicitType l)           = ImplicitTypeF l
     project (ViewLiteral a)            = ViewLiteralF a
     project (AnonymousRecord l stys)   = AnonymousRecordF l stys
-    project (ParenType l ty)           = ParenTypeF l ty
     project (WhereType l ty s sas ty') = WhereTypeF l ty s sas ty'
     project (AddrType l)               = AddrTypeF l
 

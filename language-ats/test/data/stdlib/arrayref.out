@@ -140,7 +140,6 @@ fun {a:t0p} arrayref_make_rlist {n:int} ( asz : int(n)
 //
 fun {a:t0p} arrayref_head {n:pos} (A : arrayref(a, n)) :<!ref> (a)
 
-// A[0]
 fun {a:t0p} arrayref_tail {n:pos} (A : arrayref(a, n)) :<!ref>
   arrayref(a, n-1)
 
@@ -150,12 +149,10 @@ fun {a:t0p} arrayref_tail {n:pos} (A : arrayref(a, n)) :<!ref>
 fun {a:t0p}{tk:tk} arrayref_get_at_gint {n:int}{ i : nat | i < n }
 (A0 : arrayref(a, n), i : g1int(tk, i)) :<!ref> (a)
 
-// arrayref_get_at_gint
 //
 fun {a:t0p}{tk:tk} arrayref_get_at_guint {n:int}{ i : nat | i < n }
 (A0 : arrayref(a, n), i : g1uint(tk, i)) :<!ref> (a)
 
-// arrayref_get_at_guint
 //
 symintr arrayref_get_at
 
