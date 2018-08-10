@@ -90,7 +90,7 @@ script:
 - strip cdeps-$TARGET
 - du -h atspkg-$TARGET
 - cd ats-pkg/test/data/hello-world
-- ../../../../atspkg-$TARGET run -vv
+  # - ../../../../atspkg-$TARGET run -vv
 - cd -
 
 deploy:

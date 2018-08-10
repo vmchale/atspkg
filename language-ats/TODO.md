@@ -12,6 +12,7 @@
 - [ ] `language-xats` library: https://github.com/githwxi/ATS-Xanadu/tree/master/srcgen/xats/SATS
 - [ ] Fix problem with macro blocks being indented wrong
 - [ ] handle `absprop someprop` and `absprop some_prop(prop, prop+)`
+- [ ] Parse `fix` keyword correctly.
 # Deficiencies
 - [ ] Error messages
   - [ ] Add test suite for messages
