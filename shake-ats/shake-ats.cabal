@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: shake-ats
-version: 1.9.0.2
+version: 1.9.0.3
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -13,6 +13,7 @@ description:
 category: Development, Build, ATS, Shake
 build-type: Simple
 extra-doc-files: README.md
+                 CHANGELOG.md
 
 source-repository head
     type: darcs

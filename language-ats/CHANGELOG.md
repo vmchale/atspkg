@@ -12,7 +12,7 @@ Enhancements:
 
   * Better Error messages
   * Add support for boxed records
-  * Add support for proof expressions introducing witnesses (`[ m | [] ]`)
+  * Add support for proof expressions introducing witnesses (`[ m | () ]`)
 
 Bug Fixes:
 

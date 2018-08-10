@@ -92,7 +92,7 @@ mkInstall tgt mStr =
         zipWithM_ copyFile' (bins ++ libs' ++ incs) (binDest ++ libDest ++ inclDest)
         pa <- pandoc
         case man config of
-            Just mt -> if not pa then pure () else do
+            Just mt -> when pa $ do
                 let mt' = manTarget mt
                     manDest = home </> ".local" </> "share" </> "man" </> "man1" </> takeFileName mt'
                 need [mt']
@@ -100,7 +100,7 @@ mkInstall tgt mStr =
             Nothing -> pure ()
         co <- compleat
         case completions config of
-            Just com -> if not co then pure () else do
+            Just com -> when co $ do
                 let com' = unpack com
                     comDest = home </> ".compleat" </> takeFileName com'
                 need [com'] -- FIXME do this all in one step

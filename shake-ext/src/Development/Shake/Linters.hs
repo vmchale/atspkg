@@ -16,6 +16,7 @@ module Development.Shake.Linters ( tomlcheck
                                  , module Development.Shake.FileDetect
                                  ) where
 
+import           Control.Monad                (when)
 import           Data.Char                    (isSpace)
 import           Data.Foldable                (traverse_)
 import           Development.Shake
@@ -39,7 +40,7 @@ checkIdempotent :: String -> FilePath -> Action ()
 checkIdempotent s p = do
     contents <- liftIO $ readFile p
     (Stdout out) <- cmd (s ++ " " ++ p)
-    if trim contents == trim out then pure () else error "formatter is not fully applied!"
+    when (trim contents /= trim out) (error "formatter is not fully applied!")
 
 -- | Check that given files are formatted according to @stylish-haskell@
 stylishHaskell :: [FilePath] -> Action ()

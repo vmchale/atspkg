@@ -7,7 +7,7 @@ import           Control.Monad.IO.Class
 import qualified Data.Text.Lazy             as TL
 import           Development.Shake.C
 import           Development.Shake.FilePath
-import           System.Environment         (getEnv)
+import           System.Directory
 
 -- | Given a C compiler, return the appropriate directory for its globally
 -- installed artifacts. This is used to keep libraries built for different
@@ -18,7 +18,7 @@ ccToDir _                = ""
 
 -- | The directory @~/.atspkg@
 pkgHome :: MonadIO m => CCompiler -> m String
-pkgHome cc' = liftIO $ (</> (".atspkg" </> ccToDir cc')) <$> getEnv "HOME"
+pkgHome cc' = liftIO $ getAppUserDataDirectory ("atspkg" </> ccToDir cc')
 
 fixDir :: FilePath -> String -> String
 fixDir p =
