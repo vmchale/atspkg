@@ -20,7 +20,6 @@ import           System.IO                    (hPutStr, stderr)
 import           System.Process               (readCreateProcess, shell)
 import           Text.PrettyPrint.ANSI.Leijen (pretty)
 import           Text.Toml
--- import           Text.Toml.Types              hiding (Parser)
 
 data Program = Program { _path :: Maybe FilePath, _inplace :: Bool, _noConfig :: Bool, _defaultConfig :: Bool }
 

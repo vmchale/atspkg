@@ -5,6 +5,7 @@ module Language.ATS.Package.Build.C ( clibSetup
 
 import           Development.Shake.ATS
 import           Development.Shake.C
+import           GHC.Conc
 import           Quaalude
 
 cpkgHome :: CCompiler -> IO FilePath
@@ -70,7 +71,8 @@ make :: Verbosity -> String -> FilePath -> IO ()
 make v lib' p = do
     putStrLn ("building " ++ lib' ++ "...")
     p' <- findMakefile p
-    silentCreateProcess v ((proc makeExe ["-j4"]) { cwd = Just p' })
+    cpus <- getNumCapabilities
+    silentCreateProcess v ((proc makeExe ["-j" ++ show cpus]) { cwd = Just p' })
 
 install :: Verbosity -> String -> FilePath -> IO ()
 install v lib' p = do

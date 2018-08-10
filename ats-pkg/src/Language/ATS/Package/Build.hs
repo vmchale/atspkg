@@ -21,6 +21,7 @@ import           Development.Shake.Check
 import           Development.Shake.Clean
 import           Development.Shake.Man
 import           Distribution.ATS.Version
+import           GHC.Conc
 import           Language.ATS.Package.Build.C
 import           Language.ATS.Package.Compiler
 import           Language.ATS.Package.Config
@@ -168,18 +169,19 @@ toVerbosity _ = Diagnostic -- should be a warning
 options :: Bool -- ^ Whether to rebuild all targets
         -> Bool -- ^ Whether to run the linter
         -> Bool -- ^ Whether to display profiling information for the build
+        -> Int -- ^ Number of CPUs
         -> Int -- ^ Verbosity level
         -> [String] -- ^ A list of targets
         -> ShakeOptions
-options rba lint tim v rs = shakeOptions { shakeFiles = ".atspkg"
-                                         , shakeThreads = 4
-                                         , shakeLint = bool Nothing (Just LintBasic) lint
-                                         , shakeVersion = showVersion atspkgVersion
-                                         , shakeRebuild = rebuildTargets rba rs
-                                         , shakeChange = ChangeModtimeAndDigestInput
-                                         , shakeVerbosity = toVerbosity v
-                                         , shakeTimings = tim
-                                         }
+options rba lint tim cpus v rs = shakeOptions { shakeFiles = ".atspkg"
+                                              , shakeThreads = cpus
+                                              , shakeLint = bool Nothing (Just LintBasic) lint
+                                              , shakeVersion = showVersion atspkgVersion
+                                              , shakeRebuild = rebuildTargets rba rs
+                                              , shakeChange = ChangeModtimeAndDigestInput
+                                              , shakeVerbosity = toVerbosity v
+                                              , shakeTimings = tim
+                                              }
 
 rebuildTargets :: Bool -- ^ Force rebuild of all targets
                -> [String] -- ^ Targets
@@ -204,7 +206,9 @@ mkPkg :: Maybe String -- ^ Optional argument to @atspkg.dhall@
       -> IO ()
 mkPkg mStr rba lint tim setup rs tgt v = do
     cfg <- cleanConfig mStr rs
-    let opt = options rba lint tim v $ pkgToTargets cfg tgt rs
+    setNumCapabilities =<< getNumProcessors
+    cpus <- getNumCapabilities
+    let opt = options rba lint tim cpus v $ pkgToTargets cfg tgt rs
     shake opt $
         mconcat
             [ want (pkgToTargets cfg tgt rs)
