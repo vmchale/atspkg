@@ -14,7 +14,7 @@ module Language.ATS.PrettyPrint ( printATS
 
 import           Control.Composition          hiding ((&))
 import           Data.Bool                    (bool)
-import           Data.Foldable                (fold, toList)
+import           Data.Foldable                (toList)
 import           Data.Functor.Foldable        (cata)
 import           Data.List                    (isPrefixOf)
 import           Data.List.NonEmpty           (NonEmpty (..))
@@ -144,17 +144,17 @@ instance Eq a => Pretty (Expression a) where
         a (NamedValF nam)               = pretty nam
         a (CallF nam [] [] Nothing [])  = pretty nam <> "()"
         a (CallF nam [] [] e xs)        = pretty nam <> prettyArgsProof e xs
-        a (CallF nam [] us Nothing [])  = pretty nam <> prettyArgsU "{" "}" us
+        a (CallF nam [] us Nothing [])  = pretty nam <> prettyTypes us
         a (CallF nam [] us Nothing [x])
-            | startsParens x = pretty nam <> prettyArgsU "{" "}" us <> pretty x
-        a (CallF nam [] us e xs)        = pretty nam <> prettyArgsU "{" "}" us <> prettyArgsProof e xs
+            | startsParens x = pretty nam <> prettyTypes us <> pretty x
+        a (CallF nam [] us e xs)        = pretty nam <> prettyTypes us <> prettyArgsProof e xs
         a (CallF nam is [] Nothing [])  = pretty nam <> prettyImplicits is
         a (CallF nam is [] Nothing [x])
             | startsParens x = pretty nam <> prettyImplicits is <> pretty x
         a (CallF nam is [] e xs)        = pretty nam <> prettyImplicits is <> prettyArgsProof e xs
         a (CallF nam is us Nothing [x])
-            | startsParens x = pretty nam <> prettyImplicits is <> prettyArgsU "{" "}" us <> pretty x
-        a (CallF nam is us e xs)        = pretty nam <> prettyImplicits is <> prettyArgsU "{" "}" us <> prettyArgsProof e xs
+            | startsParens x = pretty nam <> prettyImplicits is <> prettyTypes us <> pretty x
+        a (CallF nam is us e xs)        = pretty nam <> prettyImplicits is <> prettyTypes us <> prettyArgsProof e xs
         a (CaseF _ add' e cs)           = "case" <> pretty add' <+> e <+> "of" <$> indent 2 (prettyCases cs)
         a (IfCaseF _ cs)                = "ifcase" <$> indent 2 (prettyIfCase cs)
         a (VoidLiteralF _)              = "()"
@@ -194,8 +194,6 @@ instance Eq a => Pretty (Expression a) where
         a (CommentExprF c e) = text c <$> e
         a (MacroVarF _ s) = ",(" <> text s <> ")"
         a BinListF{} = undefined -- Shouldn't happen
-
-        prettyImplicits = fold . fmap (prettyArgsU "<" ">") . reverse
 
         prettyIfCase []              = mempty
         prettyIfCase [(s, l, t)]     = "|" <+> s <+> pretty l <+> t
@@ -253,6 +251,15 @@ endLet :: Maybe Doc -> Doc
 endLet Nothing  = "in end"
 endLet (Just d) = "in" <$> indent 2 d <$> "end"
 
+prettyExtras :: Pretty a => Doc -> Doc -> [[a]] -> Doc
+prettyExtras d1 d2 = foldMap (prettyArgsU d1 d2) . reverse
+
+prettyTypes :: Pretty a => [[a]] -> Doc
+prettyTypes = prettyExtras "{" "}"
+
+prettyImplicits :: Pretty a => [[a]] -> Doc
+prettyImplicits = prettyExtras "<" ">"
+
 instance Eq a => Pretty (StaticExpression a) where
     pretty = cata a where
         a (StaticValF n)            = pretty n
@@ -264,7 +271,7 @@ instance Eq a => Pretty (StaticExpression a) where
         a StaticVoidF{}             = "()"
         a (SifF e e' e'')           = "sif" <+> e <+> "then" <$> indent 2 e' <$> "else" <$> indent 2 e''
         a (SCallF n [] cs)          = pretty n <> parens (mconcat (punctuate "," . fmap pretty $ cs))
-        a (SCallF n us cs)          = pretty n <> prettyArgsU "{" "}" us <> parens (mconcat (punctuate "," . fmap pretty $ cs))
+        a (SCallF n us cs)          = pretty n <> prettyTypes us <> parens (mconcat (punctuate "," . fmap pretty $ cs))
         a (SPrecedeF e e')          = e <> ";" <+> e'
         a (SUnaryF op e)            = pretty op <> e
         a (SLetF _ e e') = flatAlt

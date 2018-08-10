@@ -415,11 +415,11 @@ Expression : identifierSpace PreExpression { Call (Unqualified $ to_string $1) [
            | begin Expression extern {% left $ Expected $3 "end" "extern" }
            | Expression prfTransform underscore {% left $ Expected $2 "Rest of expression or declaration" ">>" }
 
-TypeArgs : braces(alt(Type,ExprType)) { [$1] }
-         | braces(TypeInExpr) { $1 }
-         | TypeArgs braces(alt(Type,ExprType)) { $2 : $1 }
-         | braces(doubleDot) { [ ImplicitType $1 ] } -- FIXME only valid on function calls
-         | TypeArgs braces(TypeInExpr) { $2 ++ $1 }
+TypeArgs : braces(alt(Type,ExprType)) { [[$1]] }
+         | braces(TypeInExpr) { [$1] }
+         | TypeArgs braces(alt(Type,ExprType)) { [$2] : $1 }
+         | braces(doubleDot) { [[ ImplicitType $1 ]] } -- FIXME only valid on function calls
+         | TypeArgs braces(TypeInExpr) { [$2] ++ $1 }
 
 Call : Name doubleParens { Call $1 [] [] Nothing [] }
      | Name parens(ExpressionPrf) { Call $1 [] [] (fst $2) (snd $2) }

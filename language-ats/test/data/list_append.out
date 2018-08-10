@@ -17,7 +17,7 @@ fun {a:t@ype} list_append2 { m, n : nat }( xs : list(a, m)
                     ) : void =
       (case+ xs of
         | list_cons (x, xs1) => let
-          val () = res := list_cons{a,0}(x, _)
+          val () = res := list_cons{a}{0}(x, _)
           val+ list_cons (_, res1) = res
           val () = loop((xs1, ys, res1))
           

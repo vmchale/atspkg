@@ -49,7 +49,7 @@ primplmnt mylemma_main {m,n,p} (pfprm) =
     prval pfmod2 = mylemma1{m,p}(pfmod1, pfprm)
     prval [m2:int]EQINT() = lemma_MOD0_elim(pfmod2)
     prval EQINT() = pfeq_mm_pnn
-    prval () = __assert{p,p*m2*m2,n*n}() where
+    prval () = __assert{p}{p*m2*m2,n*n}() where
     { extern
       prfun __assert {p:pos}{ x, y : int | p*x == p*y } () : [x == y] void }
   in

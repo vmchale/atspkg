@@ -362,7 +362,7 @@ data StaticExpression a = StaticVal (Name a)
                         | SPrecede (StaticExpression a) (StaticExpression a)
                         | StaticVoid a
                         | Sif { scond :: StaticExpression a, whenTrue :: StaticExpression a, selseExpr :: StaticExpression a } -- Static if (for proofs)
-                        | SCall (Name a) [Type a] [StaticExpression a]
+                        | SCall (Name a) [[Type a]] [StaticExpression a]
                         | SUnary (UnOp a) (StaticExpression a)
                         | SLet a [Declaration a] (Maybe (StaticExpression a))
                         | SCase Addendum (StaticExpression a) [(Pattern a, LambdaType a, StaticExpression a)]
@@ -377,7 +377,7 @@ data StaticExpressionF a x = StaticValF (Name a)
                            | SPrecedeF x x
                            | StaticVoidF a
                            | SifF x x x
-                           | SCallF (Name a) [Type a] [x]
+                           | SCallF (Name a) [[Type a]] [x]
                            | SUnaryF (UnOp a) x
                            | SLetF a [Declaration a] (Maybe x)
                            | SCaseF Addendum x [(Pattern a, LambdaType a, x)]
@@ -407,7 +407,7 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                   | VoidLiteral a -- ^ The '()' literal representing inaction.
                   | Call { callName       :: Name a
                          , callImplicits  :: [[Type a]] -- ^ E.g. @some_function<a>@
-                         , callUniversals :: [Type a] -- ^ E.g. @some_function{a}@
+                         , callUniversals :: [[Type a]] -- ^ E.g. @some_function{a}@
                          , callProofs     :: Maybe [Expression a] -- ^ E.g. @pf@ in @call(pf | str)@.
                          , callArgs       :: [Expression a] -- ^ The actual call arguments.
                          }
@@ -465,7 +465,7 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
 
 data ExpressionF a x = LetF a (ATS a) (Maybe x)
                      | VoidLiteralF a
-                     | CallF (Name a) [[Type a]] [Type a] (Maybe [x]) [x]
+                     | CallF (Name a) [[Type a]] [[Type a]] (Maybe [x]) [x]
                      | NamedValF (Name a)
                      | ListLiteralF a String (Type a) [x]
                      | IfF x x (Maybe x)
