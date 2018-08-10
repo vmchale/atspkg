@@ -21,7 +21,6 @@ import           Data.FileEmbed
 import           Network.HTTP.Client     hiding (decompress)
 import           Network.HTTP.Client.TLS (tlsManagerSettings)
 import           Quaalude
-import           System.Environment      (getEnv)
 import           System.FilePath.Find    (find)
 
 libatsCfg :: String
@@ -29,7 +28,7 @@ libatsCfg = $(embedStringFile ("dhall" </> "atslib.dhall"))
 
 compilerDir :: Version -> IO FilePath
 compilerDir v = makeAbsolute =<< dir
-    where dir = (</> (".atspkg" </> show v)) <$> getEnv "HOME"
+    where dir = getAppUserDataDirectory ("atspkg" </> show v)
 
 -- | Make a tarball from a directory containing the compiler.
 packageCompiler :: FilePath -> IO ()
@@ -110,7 +109,7 @@ setupCompiler v' als tgt' v = do
 
 cleanAll :: IO ()
 cleanAll = do
-    d <- (</> ".atspkg") <$> getEnv "HOME"
+    d <- getAppUserDataDirectory "atspkg"
     b <- doesDirectoryExist d
     when b $ do
         putStrLn "Cleaning everything..."

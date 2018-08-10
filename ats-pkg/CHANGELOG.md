@@ -1,8 +1,6 @@
 # ats-pkg
 
-## 3.2.0.0
+## 3.2.1.0
 
-Breaking Changes:
-
-  * Remove `Language.ATS.Package.Generic` module and facilities for generic
-    packaging.
+  * Use `getAppUserDirectory` for better portability
+  * Only build C sources when sensible to do so

@@ -1,6 +1,6 @@
 cabal-version: 2.0
 name: ats-pkg
-version: 3.2.0.0
+version: 3.2.1.0
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -115,7 +115,7 @@ library quaalude
         http-client -any,
         http-client-tls -any,
         process -any,
-        directory -any,
+        directory >=1.2.3.0,
         filepath -any,
         microlens -any,
         dhall -any,

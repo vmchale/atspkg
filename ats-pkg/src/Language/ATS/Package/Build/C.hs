@@ -8,7 +8,7 @@ import           Development.Shake.C
 import           Quaalude
 
 cpkgHome :: CCompiler -> IO FilePath
-cpkgHome cc' = (</> (".atspkg" </> ccToDir cc')) <$> getEnv "HOME"
+cpkgHome cc' = getAppUserDataDirectory ("atspkg" </> ccToDir cc')
 
 allSubdirs :: FilePath -> IO [FilePath]
 allSubdirs [] = pure mempty

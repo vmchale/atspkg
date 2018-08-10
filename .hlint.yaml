@@ -18,6 +18,8 @@
 - error: {lhs: "const", rhs: "pure", name: "Use pure"}
 - error: {lhs: "mapM", rhs: "traverse"}
 - error: {lhs: "mapM_", rhs: "traverse_"}
+- error: {lhs: "if p then x else pure mempty", rhs: "when p x"}
+- error: {lhs: "if p then pure mempty else x", rhs: "when (not p) x"}
 
 - ignore: {name: Avoid lambda, within: [Language.ATS.Types.Lens]}
 - ignore: {name: Use <$>, within: [Language.ATS.PrettyPrint]}

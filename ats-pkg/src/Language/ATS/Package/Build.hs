@@ -31,9 +31,8 @@ import           Quaalude
 
 check :: Maybe String -> Maybe FilePath -> IO Bool
 check mStr p = do
-    home <- getEnv "HOME"
     v <- wants mStr p
-    doesFileExist (home </> ".atspkg" </> show v </> "bin" </> "patscc")
+    doesFileExist =<< getAppUserDataDirectory ("atspkg" </> show v </> "bin" </> "patscc")
 
 wants :: Maybe String -> Maybe FilePath -> IO Version
 wants mStr p = compiler <$> getConfig mStr p
@@ -84,10 +83,11 @@ mkInstall tgt mStr =
             libDir = maybe mempty (<> [pathSeparator]) tgt
         need (bins <> libs')
         home <- liftIO $ getEnv "HOME"
+        atspkgDir <- liftIO $ getAppUserDataDirectory "atspkg"
         let g str = fmap (((home </> str) </>) . takeFileName)
             binDest =  g (".local" </> "bin") bins
-            libDest = ((home </> ".atspkg" </> libDir </> "lib") </>) . takeFileName <$> libs'
-            inclDest = ((home </> ".atspkg" </> "include") </>) . takeFileName <$> incs
+            libDest = ((atspkgDir </> libDir </> "lib") </>) . takeFileName <$> libs'
+            inclDest = ((atspkgDir </> "include") </>) . takeFileName <$> incs
         zipWithM_ copyFile' (bins ++ libs' ++ incs) (binDest ++ libDest ++ inclDest)
         pa <- pandoc
         case man config of
@@ -241,7 +241,7 @@ bits mStr tgt rs = mconcat $ sequence [ mkManpage, mkInstall tgt, mkConfig ] mSt
     bisequence' [ mkRun, mkTest, mkValgrind ] mStr rs
 
 pkgToTargets :: Pkg -> Maybe String -> [FilePath] -> [FilePath]
-pkgToTargets ~Pkg{..} tgt [] = (toTgt tgt . target <$> bin) <> (unpack . libTarget <$> libraries)
+pkgToTargets ~Pkg{..} tgt [] = (toTgt tgt . target <$> bin) <> (unpack . libTarget <$> libraries) <> (unpack . cTarget <$> atsSource)
 pkgToTargets _  _ ts         = ts
 
 noConstr :: ATSConstraint
@@ -263,7 +263,7 @@ atslibSetup tgt' lib' p = do
 
 -- | The directory @~/.atspkg@
 pkgHome :: MonadIO m => CCompiler -> m String
-pkgHome cc' = liftIO $ (</> (".atspkg" </> ccToDir cc')) <$> getEnv "HOME"
+pkgHome cc' = liftIO $ getAppUserDataDirectory ("atspkg" </> ccToDir cc')
 
 -- | The directory that will be @PATSHOME@.
 patsHomeAtsPkg :: MonadIO m => Version -> m String
@@ -301,8 +301,6 @@ pkgToAction mStr setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf 
 
         mkUserConfig
 
-        want (unpack . cTarget <$> as)
-
         newFlag <- shouldWrite tgt flags
 
         -- this is dumb but w/e
@@ -315,7 +313,7 @@ pkgToAction mStr setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf 
 
         -- TODO depend on tgt somehow?
         specialDeps %> \out -> do
-            (_, cfgBin') <- cfgBin
+            cfgBin' <- cfgBin
             need [ cfgBin', flags, cfgFile]
             v'' <- getVerbosity
             liftIO $ fetchDeps v'' (ccFromString cc') mStr setup (first unpack <$> ds) (first unpack <$> cdps) (first unpack <$> bdeps) cfgBin' atslibSetup False *> writeFile out ""

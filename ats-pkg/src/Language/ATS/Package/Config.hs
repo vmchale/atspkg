@@ -21,44 +21,43 @@ data UserConfig = UserConfig { defaultPkgs    :: Text
 cfgFile :: String
 cfgFile = $(embedStringFile ("dhall" </> "config.dhall"))
 
-defaultFileConfig :: FilePath -> IO ()
-defaultFileConfig p = do
-    let dir = p </> ".config" </> "atspkg"
+defaultFileConfig :: IO ()
+defaultFileConfig = do
+    dir <- getXdgDirectory XdgConfig "atspkg"
     createDirectoryIfMissing True dir
     writeFile (dir </> "config.dhall") cfgFile
 
-cfgBin :: (MonadIO m) => m (FilePath, FilePath)
-cfgBin = liftIO io
-    where io = (id &&& (</> (".atspkg" </> "config"))) <$> getEnv "HOME"
+cfgBin :: (MonadIO m) => m FilePath
+cfgBin = liftIO $ getAppUserDataDirectory ("atspkg" </> "config")
 
 mkUserConfig :: Rules ()
 mkUserConfig = do
 
-    (h, cfgBin') <- cfgBin
+    cfgBin' <- cfgBin
 
     join (unless
         <$> liftIO (doesFileExist cfgBin')
-        <*> pure (g h cfgBin'))
+        <*> pure (g cfgBin'))
 
-    where g h cfgBin' = do
+    where g cfgBin' = do
 
-            let cfg = h </> ".config" </> "atspkg" </> "config.dhall"
+            cfg <- liftIO (getXdgDirectory XdgConfig ("atspkg" </> "config.dhall"))
 
             want [cfgBin']
 
-            readUserConfig h cfg
+            readUserConfig cfg
 
             cfgBin' %> \_ -> do
                 need [cfg]
                 cfgContents <- liftIO $ input auto (T.pack cfg)
                 liftIO $ BSL.writeFile cfgBin' (encode (cfgContents :: UserConfig))
 
-readUserConfig :: FilePath -> FilePath -> Rules ()
-readUserConfig h cfg = do
+readUserConfig :: FilePath -> Rules ()
+readUserConfig cfg = do
 
     want [cfg]
 
     e <- liftIO $ doesFileExist cfg
 
     cfg %> \_ -> unless e $
-        liftIO (defaultFileConfig h)
+        liftIO defaultFileConfig
