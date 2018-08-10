@@ -27,7 +27,6 @@ constraints:
 executable-stripping: true
 
 optimization: 2
-documentation: true
 
 program-options
   happy-options: -gcsa
