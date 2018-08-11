@@ -36,6 +36,8 @@ import           Data.Either                       (fromRight)
 import           Data.Foldable
 import           Data.Maybe                        (fromMaybe)
 import           Data.Semigroup                    (Semigroup (..))
+import qualified Data.Text                         as T
+import qualified Data.Text.IO                      as TIO
 import qualified Data.Text.Lazy                    as TL
 import           Development.Shake                 hiding (doesFileExist, getEnv)
 import           Development.Shake.ATS.Environment
@@ -62,7 +64,14 @@ atsCommand tc sourceFile out = do
                 Ignore -> ("--constraint-ignore":)
                 _      -> id
 
-    command env patsc (f ["--output", out, "-dd", sourceFile, "-cc"] ++ _patsFlags tc)
+    (<*)
+        (command env patsc (f ["--output", out, "-dd", sourceFile, "-cc"] ++ _patsFlags tc))
+        (liftIO $ deleteLine out)
+
+deleteLine :: FilePath -> IO ()
+deleteLine fp = TIO.writeFile fp . del =<< TIO.readFile fp
+    where del = T.unlines . fmap snd . filter p . zip [(1::Int)..] . T.lines
+          p = (4 /=) . fst
 
 -- | Filter any generated errors with @pats-filter@.
 withPF :: Action (Exit, Stderr String, Stdout String) -- ^ Result of a 'cmd' or 'command'

@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.2.1.8
+
+  * Update Dhall prelude
+
 ## 3.2.1.2
 
 Bug Fixes:
