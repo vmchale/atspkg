@@ -20,6 +20,9 @@ in
 let TargetPair = { hs : Text, ats : Text, cpphs : Bool }
 in
 
+let CCompiler = < CompCert : {} | Clang : {} | GCC : {} | ICC : {} | CC : {} >
+in
+
 let Bin =
   { src : Text
   , target : Text
@@ -295,6 +298,45 @@ in
 let atsProject = "target"
 in
 
+let CCConstructors = constructors CCompiler
+in
+
+let gcc = CCConstructors.GCC {=}
+in
+let clang = CCConstructors.Clang {=}
+in
+let compCert = CCConstructors.CompCert {=}
+in
+let icc = CCConstructors.ICC {=}
+in
+let cc = CCConstructors.CC {=}
+in
+
+let printCompiler =
+    λ(cc : CCompiler) →
+        merge { CompCert = λ(_ : {}) → "ccomp"
+              , Clang = λ(_ : {}) → "clang"
+              , GCC = λ(_ : {}) → "gcc"
+              , ICC = λ(_ : {}) → "icc"
+              , CC = λ(_ : {}) → "cc"
+              }
+              cc
+in
+
+let ccFlags =
+    λ(cc : CCompiler) →
+        merge { CompCert = λ(_ : {}) → [ "-O2", "-fstruct-passing" ]
+              , Clang = λ(_ : {}) → [ "-O2", "-mtune=native", "-flto" ]
+              , GCC = λ(_ : {}) → [ "-O2", "-mtune=native", "-flto" ]
+              , ICC = λ(_ : {}) → [ "-O2", "-mtune=native", "-flto", "-D__PURE_INTEL_C99_HEADERS__" ]
+              , CC = λ(_ : {}) → [ "-O2" ]
+              }
+              cc
+in
+
+let iccFlags = [ "-D__PURE_INTEL_C99_HEADERS__" ]
+in
+
 {- We collect everything in a single record for convenience -}
 { mkDeb = mkDeb
 , emptySrc = emptySrc
@@ -324,5 +366,11 @@ in
 , debian = debian
 , noPrelude = noPrelude
 , atsProject = atsProject
+, gcc = gcc
+, clang = clang
+, compCert = compCert
+, icc = icc
+, printCompiler = printCompiler
+, ccFlags = ccFlags
 , iccFlags = iccFlags
 }

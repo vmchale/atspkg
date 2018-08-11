@@ -363,10 +363,10 @@ instance Eq a => Pretty (Implementation a) where
     pretty (Implement _ [] is [] n (Just ias) e) = pretty n <> prettyOr is <+> prettyArgs ias <+> "=" <$> indent 2 (prettyImplExpr e)
     pretty (Implement _ [] is us n (Just ias) e) = pretty n <> prettyOr is <+> foldMap pretty us </> prettyArgs ias <+> "=" <$> indent 2 (prettyImplExpr e)
     pretty (Implement _ [] is us n Nothing e) = pretty n <> prettyOr is <+> foldMap pretty us </> "=" <$> indent 2 (prettyImplExpr e)
-    pretty (Implement _ ps is [] n (Just ias) e) = foldMap pretty (reverse ps) </> pretty n <> prettyOr is <+> prettyArgs ias <+> "=" <$> indent 2 (prettyImplExpr e)
-    pretty (Implement _ ps is [] n Nothing e)    = foldMap pretty (reverse ps) </> pretty n <> prettyOr is <+> "=" <$> indent 2 (prettyImplExpr e)
-    pretty (Implement _ ps is us n (Just ias) e) = foldMap pretty (reverse ps) </> pretty n <> prettyOr is </> foldMap pretty us <+> prettyArgs ias <+> "=" <$> indent 2 (prettyImplExpr e)
-    pretty (Implement _ ps is us n Nothing e) = foldMap pretty (reverse ps) </> pretty n <> prettyOr is </> foldMap pretty us <+> "=" <$> indent 2 (prettyImplExpr e)
+    pretty (Implement _ ps is [] n (Just ias) e) = foldMap pretty ps </> pretty n <> prettyOr is <+> prettyArgs ias <+> "=" <$> indent 2 (prettyImplExpr e)
+    pretty (Implement _ ps is [] n Nothing e)    = foldMap pretty ps </> pretty n <> prettyOr is <+> "=" <$> indent 2 (prettyImplExpr e)
+    pretty (Implement _ ps is us n (Just ias) e) = foldMap pretty ps </> pretty n <> prettyOr is </> foldMap pretty us <+> prettyArgs ias <+> "=" <$> indent 2 (prettyImplExpr e)
+    pretty (Implement _ ps is us n Nothing e) = foldMap pretty ps </> pretty n <> prettyOr is </> foldMap pretty us <+> "=" <$> indent 2 (prettyImplExpr e)
 
 isVal :: Declaration a -> Bool
 isVal Val{}     = True
