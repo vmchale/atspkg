@@ -370,6 +370,7 @@ in
 , clang = clang
 , compCert = compCert
 , icc = icc
+, cc = cc
 , printCompiler = printCompiler
 , ccFlags = ccFlags
 , iccFlags = iccFlags
