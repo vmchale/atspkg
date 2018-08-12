@@ -451,17 +451,19 @@ StaticExpression : Name { StaticVal $1 }
                  | intLit { StaticInt $1 }
                  | hexLit { StaticHex $1 }
                  | string { SString $1 }
-                 | doubleParens { StaticVoid $1 }
+                 | doubleParens { StaticVoid $1 } -- TODO: static tuple?
                  | sif StaticExpression then StaticExpression else StaticExpression { Sif $2 $4 $6 }
                  | identifierSpace { StaticVal (Unqualified $ to_string $1) }
                  | identifierSpace StaticExpression { SCall (Unqualified $ to_string $1) [] [$2] }
                  | Name parens(StaticArgs) { SCall $1 [] $2 }
-                 | identifierSpace parens(StaticArgs) { SCall (Unqualified $ to_string $1) [] $2 } -- TODO: static tuple?
+                 | Name TypeArgs parens(StaticArgs) { SCall $1 $2 $3 }
+                 | Name TypeArgs doubleParens { SCall $1 $2 [] }
+                 | Name doubleParens { SCall $1 [] [] }
+                 | identifierSpace TypeArgs parens(StaticArgs) { SCall (Unqualified $ to_string $1) $2 $3 }
+                 | identifierSpace parens(StaticArgs) { SCall (Unqualified $ to_string $1) [] $2 }
+                 | identifierSpace doubleParens { SCall (Unqualified $ to_string $1) [] [] } -- TODO: this causes an ambiguity because we might have SCall void instead!
                  | StaticExpression semicolon StaticExpression { SPrecede $1 $3 }
                  | UnOp StaticExpression { SUnary $1 $2 }
-                 | identifierSpace doubleParens { SCall (Unqualified $ to_string $1) [] [] }
-                 | identifier TypeArgs doubleParens { SCall (Unqualified $ to_string $1) $2 [] }
-                 | identifier doubleParens { SCall (Unqualified $ to_string $1) [] [] }
                  | let StaticDecls comment_after(in) end { SLet $1 (reverse $2) Nothing }
                  | let StaticDecls in StaticExpression end { SLet $1 (reverse $2) (Just $4) }
                  | parens(StaticExpression) { $1 }
@@ -470,6 +472,7 @@ StaticExpression : Name { StaticVal $1 }
                  | openExistential StaticExpression vbar StaticExpression rsqbracket { Witness $1 $2 $4 }
                  | lambda Pattern LambdaArrow StaticExpression { ProofLambda $1 $3 $2 $4 }
                  | llambda Pattern LambdaArrow StaticExpression { ProofLinearLambda $1 $3 $2 $4 }
+                 | StaticExpression where braces(ATS) { WhereStaExp $1 $3 }
 
 -- | Parse an expression that can be called without parentheses
 PreExpression : identifier lsqbracket PreExpression rsqbracket { Index $2 (Unqualified $ to_string $1) $3 }

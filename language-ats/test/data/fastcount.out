@@ -52,14 +52,14 @@ implement wclbuf (pf | p, pz, c, res) =
       let
         prval (pf21, pf22) = array_v_uncons(pf2)
         var res = wclbuf(pf22 | ptr_succ<byte>(p2), pz, c, res + 1)
-        prval () = pf2 := array_v_cons(pf21, pf22)
-        prval () = pf := bytes_v_unsplit(pf1, pf2)
+        prval () = pf2 := array_v_cons(pf21,pf22)
+        prval () = pf := bytes_v_unsplit(pf1,pf2)
       in
         res
       end
     else
       let
-        prval () = pf := bytes_v_unsplit(pf1, pf2)
+        prval () = pf := bytes_v_unsplit(pf1,pf2)
       in
         res
       end

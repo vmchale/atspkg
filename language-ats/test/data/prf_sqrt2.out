@@ -46,7 +46,7 @@ primplmnt mylemma_main {m,n,p} (pfprm) =
     prval () = square_is_nat{n}()
     prval () = lemma_PRIME_param(pfprm)
     prval pfmod1 = lemma_MOD0_intr{m*m,p,n*n}()
-    prval pfmod2 = mylemma1{m,p}(pfmod1, pfprm)
+    prval pfmod2 = mylemma1{m,p}(pfmod1,pfprm)
     prval [m2:int]EQINT() = lemma_MOD0_elim(pfmod2)
     prval EQINT() = pfeq_mm_pnn
     prval () = __assert{p}{p*m2*m2,n*n}() where
@@ -70,21 +70,16 @@ primplmnt sqrt2_irrat {m,n} () =
     prfun auxmain { m, n : nat | n >= 1; m*m == 2*n*n } .<m>. () :
       [false] void =
       let
-        //
         prval pfprm = __assert() where
         { extern
           praxi __assert() : PRIME(2) }
         prval [m2:int]() = mylemma_main{m,n,2}(pfprm)
-        
-        //
         prval () = __assert() where
         { extern
           praxi __assert() : [m > n] void }
         prval () = __assert() where
         { extern
           praxi __assert() : [m2 >= 1] void }
-        
-        //
       in
         auxmain{n,m2}()
       end

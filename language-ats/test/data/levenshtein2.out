@@ -51,7 +51,7 @@ fn levenshtein {m:nat}{n:nat}(s1 : string(m), s2 : string(n)) : int =
               val () = p := ptr1_succ<int>(p)
               
               //
-              prval () = pf0 := array_v_extend{int}(pf0, pf_at)
+              prval () = pf0 := array_v_extend{int}(pf0,pf_at)
               val () = i := i + 1
               
               //
@@ -61,7 +61,7 @@ fn levenshtein {m:nat}{n:nat}(s1 : string(m), s2 : string(n)) : int =
         //
         prval () = pf_arr := pf0
         prval () = array_v_unnil{int?}(pf1)
-        prval pf_arr = array_v_cons{int}(pf1_at, pf_arr)
+        prval pf_arr = array_v_cons{int}(pf1_at,pf_arr)
         
         //
         val res = arrayptr_encode(pf_arr, pf_gc | p_arr)

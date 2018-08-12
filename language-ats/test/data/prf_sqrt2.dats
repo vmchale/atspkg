@@ -100,7 +100,6 @@ auxmain
 (
 // argless
 ) : [false] void = let
-//
 prval pfprm =
 __assert() where
 {
@@ -108,12 +107,10 @@ __assert() where
 }
 prval
 [m2:int] () = mylemma_main{m,n,2}(pfprm)
-//
 prval () =
 __assert() where { extern praxi __assert(): [m > n] void }
 prval () =
 __assert() where { extern praxi __assert(): [m2 >= 1] void }
-//
 in
   auxmain{n,m2}()
 end

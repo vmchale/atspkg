@@ -370,6 +370,7 @@ data StaticExpression a = StaticVal (Name a)
                         | Witness a (StaticExpression a) (StaticExpression a) -- ^ @#[ m | () ]@
                         | ProofLambda a (LambdaType a) (Pattern a) (StaticExpression a) -- TODO: are linear proof-level lambdas allowed?
                         | ProofLinearLambda a (LambdaType a) (Pattern a) (StaticExpression a) -- TODO: are linear proof-level lambdas allowed?
+                        | WhereStaExp (StaticExpression a) (ATS a)
                         deriving (Show, Eq, Generic, NFData)
 
 data StaticExpressionF a x = StaticValF (Name a)
@@ -387,6 +388,7 @@ data StaticExpressionF a x = StaticValF (Name a)
                            | WitnessF a x x
                            | ProofLambdaF a (LambdaType a) (Pattern a) x
                            | ProofLinearLambdaF a (LambdaType a) (Pattern a) x
+                           | WhereStaExpF x (ATS a)
                            deriving (Functor)
 
 type instance Base (StaticExpression a) = StaticExpressionF a
@@ -407,6 +409,7 @@ instance Recursive (StaticExpression a) where
     project (Witness a e e')            = WitnessF a e e'
     project (ProofLambda a l p e)       = ProofLambdaF a l p e
     project (ProofLinearLambda a l p e) = ProofLinearLambdaF a l p e
+    project (WhereStaExp e ds)          = WhereStaExpF e ds
 
 -- | A (possibly effectful) expression.
 data Expression a = Let a (ATS a) (Maybe (Expression a))

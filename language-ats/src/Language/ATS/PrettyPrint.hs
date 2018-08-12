@@ -26,6 +26,10 @@ import           Text.PrettyPrint.ANSI.Leijen hiding (bool)
 
 infixr 5 $$
 
+instance Eq Doc where
+    (==) = (==) `on` (($ "") . displayS . renderCompact)
+
+
 -- | Pretty-print with sensible defaults.
 printATS :: Eq a => ATS a -> String
 printATS = (<> "\n") . printATSCustom 0.6 120
@@ -175,7 +179,7 @@ instance Eq a => Pretty (Expression a) where
         a (CharLitF c)                 = "'" <> char c <> "'"
         a (ProofExprF _ es e')         = "(" <> prettyProofExpr es <+> "|" <+> e' <> ")"
         a (TypeSignatureF e t)         = e <+> ":" <+> pretty t
-        a (WhereExpF e d)              = e <+> "where" <$> braces (" " <> nest 2 (pretty d) <> " ")
+        a (WhereExpF e d)              = prettyWhere e d
         a (TupleExF _ es)              = parens (mconcat $ punctuate ", " (toList $ NE.reverse es))
         a (BoxTupleExF _ es)           = "'(" <> mconcat (punctuate ", " (toList $ NE.reverse es)) <> ")"
         a (WhileF _ e e')              = "while" <> parens e <> e'
@@ -263,6 +267,9 @@ prettyTypes = prettyExtras "{" "}"
 prettyImplicits :: Pretty a => [[a]] -> Doc
 prettyImplicits = prettyExtras "<" ">"
 
+prettyWhere :: Pretty a => Doc -> a -> Doc
+prettyWhere e d = e <+> "where" <$> braces (" " <> nest 2 (pretty d) <> " ")
+
 instance Eq a => Pretty (StaticExpression a) where
     pretty = cata a where
         a (StaticValF n)            = pretty n
@@ -273,6 +280,8 @@ instance Eq a => Pretty (StaticExpression a) where
         a (StaticHexF h)            = text h
         a StaticVoidF{}             = "()"
         a (SifF e e' e'')           = "sif" <+> e <+> "then" <$> indent 2 e' <$> "else" <$> indent 2 e''
+        a (SCallF n [] ["()"])      = pretty n <> "()"
+        a (SCallF n us ["()"])      = pretty n <> prettyTypes us <> "()"
         a (SCallF n [] cs)          = pretty n <> parens (mconcat (punctuate "," . fmap pretty $ cs))
         a (SCallF n us cs)          = pretty n <> prettyTypes us <> parens (mconcat (punctuate "," . fmap pretty $ cs))
         a (SPrecedeF e e')          = e <> ";" <+> e'
@@ -285,6 +294,7 @@ instance Eq a => Pretty (StaticExpression a) where
         a (WitnessF _ e e') = "#[" <+> e <+> "|" <+> e' <+> "]"
         a (ProofLambdaF _ lt p e)       = prettyLam "lam" p lt e
         a (ProofLinearLambdaF _ lt p e) = prettyLam "llam" p lt e
+        a (WhereStaExpF e ds) = prettyWhere e ds
 
 instance Eq a => Pretty (Sort a) where
     pretty = cata a where
