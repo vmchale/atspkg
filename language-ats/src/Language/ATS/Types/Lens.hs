@@ -27,11 +27,8 @@ import           Lens.Micro
 constructorUniversals :: Lens' (Leaf a) [Universal a]
 constructorUniversals f s = fmap (\x -> s { _constructorUniversals = x}) (f (_constructorUniversals s))
 
-expression :: Lens' (PreFunction a) (Maybe (Expression a))
+expression :: Lens' (PreFunction ek a) (Maybe (ek a))
 expression f s = fmap (\x -> s { _expression = x}) (f (_expression s))
-
-preF :: Lens' (Function a) (PreFunction a)
-preF f s = fmap (\x -> s { _preF = x}) (f (_preF s))
 
 iExpression :: Lens' (Implementation a) (Either (StaticExpression a) (Expression a))
 iExpression f s = fmap (\x -> s { _iExpression = x}) (f (_iExpression s))
@@ -42,6 +39,13 @@ propExpr1 f s = fmap (\x -> s { _propExpr1 = x}) (f (_propExpr1 s))
 propExpr2 :: Lens' (DataPropLeaf a) (Maybe (Expression a))
 propExpr2 f s = fmap (\x -> s { _propExpr2 = x}) (f (_propExpr2 s))
 
+preF :: Traversal' (Function a) (PreFunction Expression a)
+preF f (Fun x)    = (\x' -> Fun x') <$> f x
+preF f (Fn x)     = (\x' -> Fn x') <$> f x
+preF f (CastFn x) = (\x' -> CastFn x') <$> f x
+preF f (Fnx x)    = (\x' -> Fnx x') <$> f x
+preF f (And x)    = (\x' -> And x') <$> f x
+preF _ x          = pure x
 
 typeCall :: Traversal' (Type a) (Name a)
 typeCall f (Dependent x y) = (\x' -> Dependent x' y) <$> f x

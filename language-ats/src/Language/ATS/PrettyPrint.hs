@@ -537,7 +537,7 @@ prettyMTermetric :: Pretty a => Maybe a -> Doc
 prettyMTermetric = maybe mempty prettyTermetric
 
 -- FIXME figure out a nicer algorithm for when/how to split lines.
-instance Eq a => Pretty (PreFunction a) where
+instance (Eq a, Pretty (ek a)) => Pretty (PreFunction ek a) where
     pretty (PreF i si [] [] as rt Nothing (Just e)) = pretty i <> prettyArgsNil as <> prettySig si rt <> "=" <$> indent 2 (pretty e)
     pretty (PreF i si [] us as rt t (Just e)) = pretty i </> fancyU us <> prettyMTermetric t <> prettyArgsNil as <> prettySig si rt <> "=" <$> indent 2 (pretty e)
     pretty (PreF i si pus [] as rt Nothing (Just e)) = fancyU pus </> pretty i <> prettyArgsNil as <> prettySig si rt <> "=" <$> indent 2 (pretty e)

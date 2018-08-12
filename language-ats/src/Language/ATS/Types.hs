@@ -622,14 +622,14 @@ data Implementation a = Implement { pos            :: a
 
 -- | A function declaration accounting for all keywords ATS uses to
 -- define them.
-data Function a = Fun { _preF :: PreFunction a }
-                | Fn { _preF :: PreFunction a }
-                | Fnx { _preF :: PreFunction a }
-                | And { _preF :: PreFunction a }
-                | PrFun { _preF :: PreFunction a }
-                | PrFn { _preF :: PreFunction a }
-                | Praxi { _preF :: PreFunction a }
-                | CastFn { _preF :: PreFunction a }
+data Function a = Fun { _preF :: PreFunction Expression a }
+                | Fn { _preF :: PreFunction Expression a }
+                | Fnx { _preF :: PreFunction Expression a }
+                | And { _preF :: PreFunction Expression a }
+                | PrFun { _preStaF :: PreFunction StaticExpression a }
+                | PrFn { _preStaF :: PreFunction StaticExpression a }
+                | Praxi { _preStaF :: PreFunction StaticExpression a }
+                | CastFn { _preF :: PreFunction Expression a }
                 deriving (Show, Eq, Generic, NFData)
 
 -- | A type for stack-allocated functions. See
@@ -642,16 +642,16 @@ data StackFunction a = StackF { stSig        :: String
                               }
                               deriving (Show, Eq, Generic, NFData)
 
-data PreFunction a = PreF { fname         :: Name a -- ^ Function name
-                          , sig           :: Maybe String -- ^ e.g. <> or \<!wrt>
-                          , preUniversals :: [Universal a] -- ^ Universal quantifiers making a function generic
-                          , universals    :: [Universal a] -- ^ (Universal a) quantifiers/refinement type
-                          , args          :: Args a -- ^ Actual function arguments
-                          , returnType    :: Maybe (Type a) -- ^ Return type
-                          , termetric     :: Maybe (StaticExpression a) -- ^ Optional termination metric
-                          , _expression   :: Maybe (Expression a) -- ^ Expression holding the actual function body (not present in static templates)
-                          }
-                          deriving (Show, Eq, Generic, NFData)
+data PreFunction ek a = PreF { fname         :: Name a -- ^ Function name
+                             , sig           :: Maybe String -- ^ e.g. <> or \<!wrt>
+                             , preUniversals :: [Universal a] -- ^ Universal quantifiers making a function generic
+                             , universals    :: [Universal a] -- ^ (Universal a) quantifiers/refinement type
+                             , args          :: Args a -- ^ Actual function arguments
+                             , returnType    :: Maybe (Type a) -- ^ Return type
+                             , termetric     :: Maybe (StaticExpression a) -- ^ Optional termination metric
+                             , _expression   :: Maybe (ek a) -- ^ Expression holding the actual function body (not present in static templates)
+                             }
+                             deriving (Show, Eq, Generic, NFData)
 
 -- FIXME left vs. right shouldn't be treated the same
 instance (Eq a) => Ord (Fixity a) where

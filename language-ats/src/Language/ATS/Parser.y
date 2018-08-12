@@ -717,6 +717,8 @@ Signature : signature { $1 }
 OptType : Signature Type { Just ($1, $2) }
         | { Nothing }
 
+PreStaFunction : FunName openParen Args closeParen OptType OptStaticExpression { PreF $1 (fmap fst $5) [] [] (Just $3) (fmap snd $5) Nothing $6 }
+
 -- | Parse a type signature and optional function body
 PreFunction : FunName openParen Args closeParen OptType OptExpression { PreF $1 (fmap fst $5) [] [] (Just $3) (fmap snd $5) Nothing $6 }
             | FunName Universals OptTermetric OptType OptExpression { PreF $1 (fmap fst $4) [] $2 Nothing (fmap snd $4) $3 $5 }
@@ -750,8 +752,8 @@ AndStadef : stadef IdentifierOr SortArgs StaticDef { Stadef $2 $3 $4 }
           | AndStadef and IdentifierOr SortArgs StaticDef { AndD $1 (Stadef $3 $4 $5) }
           | AndStadef and Operator SortArgs StaticDef { AndD $1 (Stadef $3 $4 $5) }
 
-StafunDecl : prfun PreFunction { Func $1 (PrFun $2) }
-           | prfn PreFunction { Func $1 (PrFn $2) }
+StafunDecl : prfun PreStaFunction { Func $1 (PrFun $2) }
+           | prfn PreStaFunction { Func $1 (PrFn $2) }
 
 -- | Function declaration
 FunDecl : fun PreFunction { [ Func $1 (Fun $2) ] }
@@ -875,13 +877,13 @@ ValDecl : val Pattern colon Type eq PreExpression { [ Val (get_addendum $1) (Jus
         | extern ValDecl { over _head (Extern $1) $2 }
         | val Pattern eq colon {% left $ Expected $4 "Expression" ":" }
 
-StaticDeclaration : prval Pattern eq Expression { PrVal $2 (Just $4) Nothing }
+StaticDeclaration : prval Pattern eq Expression { PrVal $2 (Just $4) Nothing } -- FIXME: prval should use static expressions as well.
                   | prval Pattern colon Type { PrVal $2 Nothing (Just $4) }
                   | prval Pattern colon Type eq Expression { PrVal $2 (Just $6) (Just $4) }
                   | prvar Pattern eq Expression { PrVar $2 (Just $4) Nothing }
                   | prvar Pattern colon Type { PrVar $2 Nothing (Just $4) }
                   | prvar Pattern colon Type eq Expression { PrVar $2 (Just $6) (Just $4) }
-                  | praxi PreFunction { Func $1 (Praxi $2) }
+                  | praxi PreStaFunction { Func $1 (Praxi $2) }
                   | primplmnt FunArgs StaticImplementation { ProofImpl $2 $3 }
                   | StafunDecl { $1 }
                   | extern StaticDeclaration { Extern $1 $2 }
