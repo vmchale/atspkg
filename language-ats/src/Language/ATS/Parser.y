@@ -880,12 +880,12 @@ ValDecl : val Pattern colon Type eq PreExpression { [ Val (get_addendum $1) (Jus
         | extern ValDecl { over _head (Extern $1) $2 }
         | val Pattern eq colon {% left $ Expected $4 "Expression" ":" }
 
-StaticDeclaration : prval Pattern eq Expression { PrVal $2 (Just $4) Nothing } -- FIXME: prval should use static expressions as well.
+StaticDeclaration : prval Pattern eq StaticExpression { PrVal $2 (Just $4) Nothing } -- FIXME: prval should use static expressions as well.
                   | prval Pattern colon Type { PrVal $2 Nothing (Just $4) }
-                  | prval Pattern colon Type eq Expression { PrVal $2 (Just $6) (Just $4) }
-                  | prvar Pattern eq Expression { PrVar $2 (Just $4) Nothing }
+                  | prval Pattern colon Type eq StaticExpression { PrVal $2 (Just $6) (Just $4) }
+                  | prvar Pattern eq StaticExpression { PrVar $2 (Just $4) Nothing }
                   | prvar Pattern colon Type { PrVar $2 Nothing (Just $4) }
-                  | prvar Pattern colon Type eq Expression { PrVar $2 (Just $6) (Just $4) }
+                  | prvar Pattern colon Type eq StaticExpression { PrVar $2 (Just $6) (Just $4) }
                   | praxi PreStaFunction { Func $1 (Praxi $2) }
                   | primplmnt FunArgs StaticImplementation { ProofImpl $2 $3 }
                   | StafunDecl { $1 }

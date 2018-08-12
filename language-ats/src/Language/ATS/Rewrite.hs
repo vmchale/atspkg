@@ -24,7 +24,6 @@ rewriteDecl st x@Val{} = exprLens st valExpression x
 rewriteDecl st x@Var{} = exprLenses st [varExpr1._Just, varExpr2._Just] x
 rewriteDecl st x@Func{} = exprLens st (fun.preF.expression._Just) x
 rewriteDecl st x@Impl{} = exprLens st (impl.iExpression._Right) x
-rewriteDecl st x@PrVal{} = exprLens st (prValExpr._Just) x
 rewriteDecl st x@AndDecl{} = exprLens st andExpr x
 rewriteDecl st x@DataProp{} = exprLenses st (fmap ((propLeaves.each).) [propExpr1, propExpr2._Just]) x
 rewriteDecl _ x@SumViewType{} = g x

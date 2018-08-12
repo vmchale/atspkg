@@ -1,10 +1,15 @@
 # language-ats 
 
-## 1.6.0.1
+## 1.7.0.0
 
 Bug Fixes:
   
   * Now accepts proof-level lambdas.
+
+Breaking Changes:
+  
+  * `PrVar` and `PrVal` now take a `StaticExpression`
+  * `PrFun`, `PrFn`, and `Praxi` now take a `StaticExpression`
 
 ## 1.6.0.0
 

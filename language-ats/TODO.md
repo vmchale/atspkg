@@ -15,6 +15,7 @@
 - [ ] Parse `fix` keyword correctly.
 - [ ] Lambdas in static functions
 - [ ] Fix for `llam@` - linear stack allocated functions
+- [ ] Handle `extern prval {A:prop}{B:prop} EMPTY_FUNCTOR {n:nat} : BASE_FUNCTOR_PROP(A, FUNCTOR_PROP(A, n))` correctly
 # Deficiencies
 - [ ] Error messages
   - [ ] Add test suite for messages

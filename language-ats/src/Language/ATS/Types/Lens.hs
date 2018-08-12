@@ -11,7 +11,6 @@ module Language.ATS.Types.Lens ( -- * Lenses
                                , fun
                                , impl
                                , valExpression
-                               , prValExpr
                                , varExpr1
                                , varExpr2
                                , andExpr
@@ -67,10 +66,6 @@ impl _ x               = pure x
 valExpression :: Traversal' (Declaration a) (Expression a)
 valExpression f (Val a v p e) = Val a v p <$> f e
 valExpression _ x             = pure x
-
-prValExpr :: Traversal' (Declaration a) (Maybe (Expression a))
-prValExpr f (PrVal p me t) = (\me' -> PrVal p me' t) <$> f me
-prValExpr _ x              = pure x
 
 varExpr1 :: Traversal' (Declaration a) (Maybe (Expression a))
 varExpr1 f (Var t p e e') = (\e'' -> Var t p e'' e') <$> f e

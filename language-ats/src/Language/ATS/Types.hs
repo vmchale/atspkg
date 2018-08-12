@@ -84,8 +84,8 @@ data Declaration a = Func { pos :: a, _fun :: Function a }
                    | ProofImpl { implArgs :: Args a, _impl :: Implementation a }
                    | Val { add :: Addendum, valT :: Maybe (Type a), valPat :: Pattern a, _valExpression :: Expression a }
                    | StaVal [Universal a] String (Type a)
-                   | PrVal { prvalPat :: Pattern a, _prValExpr :: Maybe (Expression a), prValType :: Maybe (Type a) }
-                   | PrVar { prvarPat :: Pattern a, _prVarExpr :: Maybe (Expression a), prVarType :: Maybe (Type a) }
+                   | PrVal { prvalPat :: Pattern a, _prValExpr :: Maybe (StaticExpression a), prValType :: Maybe (Type a) }
+                   | PrVar { prvarPat :: Pattern a, _prVarExpr :: Maybe (StaticExpression a), prVarType :: Maybe (Type a) }
                    | Var { varT :: Maybe (Type a), varPat :: Pattern a, _varExpr1 :: Maybe (Expression a), _varExpr2 :: Maybe (Expression a) }
                    | AndDecl { andT :: Maybe (Type a), andPat :: Pattern a, _andExpr :: Expression a }
                    | Include String
