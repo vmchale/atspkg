@@ -182,6 +182,8 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     cloptr1Arrow { Arrow $$ "=<cloptr1>" }
     lincloptr1Arrow { Arrow $$ "=<lincloptr1>" }
     lincloref1Arrow { Arrow $$ "=<lin,cloref1>" }
+    proofLambda { Arrow $$ "=<prf>" }
+    proofLinearLambda { Arrow $$ "=<lin,prf>" }
     spear { Arrow $$ "=>>" }
     proofArrow { Arrow $$ "=/=>" }
     proofSpear { Arrow $$ "=/=>>" }
@@ -399,6 +401,8 @@ LambdaArrow : plainArrow { Plain $1 }
             | cloptr1Arrow { Full $1 "cloptr1" }
             | lincloptr1Arrow { Full $1 "lincloptr1" }
             | lincloref1Arrow { Full $1 "lin,cloref1" }
+            | proofLambda { Full $1 "prf" }
+            | proofLinearLambda { Full $1 "lin,prf" }
             | minus {% left $ Expected $1 "Arrow" "-" }
             | openParen {% left $ Expected $1 "Arrow" "(" }
             | closeParen {% left $ Expected $1 "Arrow" ")" }
@@ -464,6 +468,8 @@ StaticExpression : Name { StaticVal $1 }
                  | openParen lineComment StaticExpression closeParen { $3 }
                  | case StaticExpression of StaticCase { SCase $1 $2 $4 }
                  | openExistential StaticExpression vbar StaticExpression rsqbracket { Witness $1 $2 $4 }
+                 | lambda Pattern LambdaArrow StaticExpression { ProofLambda $1 $3 $2 $4 }
+                 | llambda Pattern LambdaArrow StaticExpression { ProofLinearLambda $1 $3 $2 $4 }
 
 -- | Parse an expression that can be called without parentheses
 PreExpression : identifier lsqbracket PreExpression rsqbracket { Index $2 (Unqualified $ to_string $1) $3 }

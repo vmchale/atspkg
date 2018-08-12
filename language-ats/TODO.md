@@ -13,6 +13,8 @@
 - [ ] Fix problem with macro blocks being indented wrong
 - [ ] handle `absprop someprop` and `absprop some_prop(prop, prop+)`
 - [ ] Parse `fix` keyword correctly.
+- [ ] Lambdas in static functions
+- [ ] Fix for `llam@` - linear stack allocated functions
 # Deficiencies
 - [ ] Error messages
   - [ ] Add test suite for messages

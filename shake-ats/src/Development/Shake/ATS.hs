@@ -68,6 +68,7 @@ atsCommand tc sourceFile out = do
         (command env patsc (f ["--output", out, "-dd", sourceFile, "-cc"] ++ _patsFlags tc))
         (liftIO $ deleteLine out)
 
+-- TODO: consider removing and caching that?
 deleteLine :: FilePath -> IO ()
 deleteLine fp = TIO.writeFile fp . del =<< TIO.readFile fp
     where del = T.unlines . fmap snd . filter p . zip [(1::Int)..] . T.lines

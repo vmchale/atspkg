@@ -368,6 +368,8 @@ data StaticExpression a = StaticVal (Name a)
                         | SCase Addendum (StaticExpression a) [(Pattern a, LambdaType a, StaticExpression a)]
                         | SString String -- ^ @ext#@
                         | Witness a (StaticExpression a) (StaticExpression a) -- ^ @#[ m | () ]@
+                        | ProofLambda a (LambdaType a) (Pattern a) (StaticExpression a) -- TODO: are linear proof-level lambdas allowed?
+                        | ProofLinearLambda a (LambdaType a) (Pattern a) (StaticExpression a) -- TODO: are linear proof-level lambdas allowed?
                         deriving (Show, Eq, Generic, NFData)
 
 data StaticExpressionF a x = StaticValF (Name a)
@@ -383,24 +385,28 @@ data StaticExpressionF a x = StaticValF (Name a)
                            | SCaseF Addendum x [(Pattern a, LambdaType a, x)]
                            | SStringF String
                            | WitnessF a x x
+                           | ProofLambdaF a (LambdaType a) (Pattern a) x
+                           | ProofLinearLambdaF a (LambdaType a) (Pattern a) x
                            deriving (Functor)
 
 type instance Base (StaticExpression a) = StaticExpressionF a
 
 instance Recursive (StaticExpression a) where
-    project (StaticVal n)         = StaticValF n
-    project (StaticBinary b x x') = StaticBinaryF b x x'
-    project (StaticHex h)         = StaticHexF h
-    project (StaticInt i)         = StaticIntF i
-    project (SPrecede x x')       = SPrecedeF x x'
-    project (StaticVoid x)        = StaticVoidF x
-    project (Sif e e' e'')        = SifF e e' e''
-    project (SCall n ts es)       = SCallF n ts es
-    project (SUnary u x)          = SUnaryF u x
-    project (SLet x ds e)         = SLetF x ds e
-    project (SCase a x ples)      = SCaseF a x ples
-    project (SString s)           = SStringF s
-    project (Witness a e e')      = WitnessF a e e'
+    project (StaticVal n)               = StaticValF n
+    project (StaticBinary b x x')       = StaticBinaryF b x x'
+    project (StaticHex h)               = StaticHexF h
+    project (StaticInt i)               = StaticIntF i
+    project (SPrecede x x')             = SPrecedeF x x'
+    project (StaticVoid x)              = StaticVoidF x
+    project (Sif e e' e'')              = SifF e e' e''
+    project (SCall n ts es)             = SCallF n ts es
+    project (SUnary u x)                = SUnaryF u x
+    project (SLet x ds e)               = SLetF x ds e
+    project (SCase a x ples)            = SCaseF a x ples
+    project (SString s)                 = SStringF s
+    project (Witness a e e')            = WitnessF a e e'
+    project (ProofLambda a l p e)       = ProofLambdaF a l p e
+    project (ProofLinearLambda a l p e) = ProofLinearLambdaF a l p e
 
 -- | A (possibly effectful) expression.
 data Expression a = Let a (ATS a) (Maybe (Expression a))

@@ -1,5 +1,11 @@
 # language-ats 
 
+## 1.6.0.1
+
+Bug Fixes:
+  
+  * Now accepts proof-level lambdas.
+
 ## 1.6.0.0
 
 Breaking Changes:

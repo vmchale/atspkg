@@ -119,6 +119,9 @@ prettyProofExpr :: NonEmpty Doc -> Doc
 prettyProofExpr (e:|[]) = e
 prettyProofExpr es      = mconcat (punctuate ", " (toList es))
 
+prettyLam :: (Pretty a, Pretty b) => Doc -> a -> b -> Doc -> Doc
+prettyLam bind p lt e = let pre = bind <+> pretty p <+> pretty lt in flatAlt (lengthAlt pre e) (pre <+> e)
+
 instance Eq a => Pretty (Expression a) where
     pretty = cata a where
         a (IfF e e' (Just e''))         = "if" <+> e <+> "then" <$> indent 2 e' <$> "else" <$> indent 2 e''
@@ -129,8 +132,8 @@ instance Eq a => Pretty (Expression a) where
         a (UintLitF u)                  = pretty u <> "u"
         a (IntLitF i)                   = pretty i
         a (HexLitF hi)                  = "0x" <> text hi
-        a (LambdaF _ lt p e)            = let pre = "lam" <+> pretty p <+> pretty lt in flatAlt (lengthAlt pre e) (pre <+> e)
-        a (LinearLambdaF _ lt p e)      = let pre = "llam" <+> pretty p <+> pretty lt in flatAlt (lengthAlt pre e) (pre <+> e)
+        a (LambdaF _ lt p e)            = prettyLam "lam" p lt e
+        a (LinearLambdaF _ lt p e)      = prettyLam "llam" p lt e
         a (FloatLitF f)                 = pretty f
         a (StringLitF s)                = text s -- FIXME escape indentation in multi-line strings.
         a (ParenExprF _ e)              = parens e
@@ -280,6 +283,8 @@ instance Eq a => Pretty (StaticExpression a) where
         a (SCaseF ad e sls) = "case" <> pretty ad <+> e <+> "of" <$> indent 2 (prettyCases sls)
         a (SStringF s)      = text s
         a (WitnessF _ e e') = "#[" <+> e <+> "|" <+> e' <+> "]"
+        a (ProofLambdaF _ lt p e)       = prettyLam "lam" p lt e
+        a (ProofLinearLambdaF _ lt p e) = prettyLam "llam" p lt e
 
 instance Eq a => Pretty (Sort a) where
     pretty = cata a where
