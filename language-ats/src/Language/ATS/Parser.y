@@ -717,22 +717,25 @@ Signature : signature { $1 }
 OptType : Signature Type { Just ($1, $2) }
         | { Nothing }
 
-PreStaFunction : FunName openParen Args closeParen OptType OptStaticExpression { PreF $1 (fmap fst $5) [] [] (Just $3) (fmap snd $5) Nothing $6 }
-
 -- | Parse a type signature and optional function body
-PreFunction : FunName openParen Args closeParen OptType OptExpression { PreF $1 (fmap fst $5) [] [] (Just $3) (fmap snd $5) Nothing $6 }
-            | FunName Universals OptTermetric OptType OptExpression { PreF $1 (fmap fst $4) [] $2 Nothing (fmap snd $4) $3 $5 }
-            | FunName Universals OptTermetric doubleParens OptType OptExpression { PreF $1 (fmap fst $5) [] $2 (Just []) (fmap snd $5) $3 $6 }
-            | FunName Universals OptTermetric openParen Args closeParen OptType OptExpression { PreF $1 (fmap fst $7) [] $2 (Just $5) (fmap snd $7) $3 $8 }
-            | Universals FunName Universals OptTermetric openParen Args closeParen OptType OptExpression { PreF $2 (fmap fst $8) $1 $3 (Just $6) (fmap snd $8) $4 $9 }
-            | Universals FunName Universals OptTermetric doubleParens OptType OptExpression { PreF $2 (fmap fst $6) $1 $3 (Just []) (fmap snd $6) $4 $7 }
-            | Universals FunName Universals OptTermetric OptType OptExpression { PreF $2 (fmap fst $5) $1 $3 Nothing (fmap snd $5) $4 $6 }
-            | prval {% left $ Expected $1 "Function signature" "prval" }
-            | var {% left $ Expected $1 "Function signature" "var" }
-            | val {% left $ Expected (token_posn $1) "Function signature" "val" }
-            | lambda {% left $ Expected $1 "Function signature" "lam" }
-            | llambda {% left $ Expected $1 "Function signature" "llam" }
-            | lsqbracket {% left $ Expected $1 "Function signature" "[" }
+preFunction(p)
+    : FunName openParen Args closeParen OptType p { PreF $1 (fmap fst $5) [] [] (Just $3) (fmap snd $5) Nothing $6 }
+    | FunName Universals OptTermetric OptType p { PreF $1 (fmap fst $4) [] $2 Nothing (fmap snd $4) $3 $5 }
+    | FunName Universals OptTermetric doubleParens OptType p { PreF $1 (fmap fst $5) [] $2 (Just []) (fmap snd $5) $3 $6 }
+    | FunName Universals OptTermetric openParen Args closeParen OptType p { PreF $1 (fmap fst $7) [] $2 (Just $5) (fmap snd $7) $3 $8 }
+    | Universals FunName Universals OptTermetric openParen Args closeParen OptType p { PreF $2 (fmap fst $8) $1 $3 (Just $6) (fmap snd $8) $4 $9 }
+    | Universals FunName Universals OptTermetric doubleParens OptType p { PreF $2 (fmap fst $6) $1 $3 (Just []) (fmap snd $6) $4 $7 }
+    | Universals FunName Universals OptTermetric OptType p { PreF $2 (fmap fst $5) $1 $3 Nothing (fmap snd $5) $4 $6 }
+    | prval {% left $ Expected $1 "Function signature" "prval" }
+    | var {% left $ Expected $1 "Function signature" "var" }
+    | val {% left $ Expected (token_posn $1) "Function signature" "val" }
+    | lambda {% left $ Expected $1 "Function signature" "lam" }
+    | llambda {% left $ Expected $1 "Function signature" "llam" }
+    | lsqbracket {% left $ Expected $1 "Function signature" "[" }
+
+PreStaFunction : preFunction(OptStaticExpression) { $1 }
+
+PreFunction : preFunction(OptExpression) { $1 }
 
 -- | Parse affiliated `sortdef`s
 AndSort : AndSort and IdentifierOr eq Sort { AndD $1 (SortDef $2 $3 (Left $5)) }

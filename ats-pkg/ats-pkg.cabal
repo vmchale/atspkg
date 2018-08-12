@@ -19,7 +19,6 @@ extra-source-files:
     dhall/config.dhall
     dhall/atslib.dhall
     dhall/atspkg-prelude.dhall
-    pkgs/pkg-set.dhall
 extra-doc-files: README.md
                  docs/manual.tex
                  CHANGELOG.md
