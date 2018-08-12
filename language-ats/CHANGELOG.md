@@ -10,6 +10,7 @@ Breaking Changes:
   
   * `PrVar` and `PrVal` now take a `StaticExpression`
   * `PrFun`, `PrFn`, and `Praxi` now take a `StaticExpression`
+  * Add a rewrite phase for `StaticExpression`s
 
 ## 1.6.0.0
 

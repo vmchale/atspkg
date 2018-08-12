@@ -411,6 +411,24 @@ instance Recursive (StaticExpression a) where
     project (ProofLinearLambda a l p e) = ProofLinearLambdaF a l p e
     project (WhereStaExp e ds)          = WhereStaExpF e ds
 
+instance Corecursive (StaticExpression a) where
+    embed (StaticValF n)               = StaticVal n
+    embed (StaticBinaryF b e e')       = StaticBinary b e e'
+    embed (StaticHexF h)               = StaticHex h
+    embed (StaticIntF i)               = StaticInt i
+    embed (SPrecedeF e e')             = SPrecede e e'
+    embed (StaticVoidF l)              = StaticVoid l
+    embed (SifF e e' e'')              = Sif e e' e''
+    embed (SCallF n ts es)             = SCall n ts es
+    embed (SUnaryF u e)                = SUnary u e
+    embed (SLetF l ds e)               = SLet l ds e
+    embed (SCaseF a x ples)            = SCase a x ples
+    embed (SStringF s)                 = SString s
+    embed (WitnessF l e e')            = Witness l e e'
+    embed (ProofLambdaF a l p e)       = ProofLambda a l p e
+    embed (ProofLinearLambdaF a l p e) = ProofLinearLambda a l p e
+    embed (WhereStaExpF e ds)          = WhereStaExp e ds
+
 -- | A (possibly effectful) expression.
 data Expression a = Let a (ATS a) (Maybe (Expression a))
                   | VoidLiteral a -- ^ The '()' literal representing inaction.

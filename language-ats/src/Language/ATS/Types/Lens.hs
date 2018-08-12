@@ -17,6 +17,7 @@ module Language.ATS.Types.Lens ( -- * Lenses
                                , propLeaves
                                , leaves
                                , comment
+                               , prValExpr
                                ) where
 
 import           Data.List.NonEmpty (NonEmpty)
@@ -66,6 +67,11 @@ impl _ x               = pure x
 valExpression :: Traversal' (Declaration a) (Expression a)
 valExpression f (Val a v p e) = Val a v p <$> f e
 valExpression _ x             = pure x
+
+prValExpr :: Traversal' (Declaration a) (Maybe (StaticExpression a))
+prValExpr f (PrVal p me mt) = (\e -> PrVal p e mt) <$> f me
+prValExpr f (PrVar p me mt) = (\e -> PrVar p e mt) <$> f me
+prValExpr _ x               = pure x
 
 varExpr1 :: Traversal' (Declaration a) (Maybe (Expression a))
 varExpr1 f (Var t p e e') = (\e'' -> Var t p e'' e') <$> f e
