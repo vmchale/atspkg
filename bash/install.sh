@@ -25,7 +25,7 @@ main() {
     mkdir -p "$HOME/.local/bin"
     mkdir -p "$HOME/.local/share/man/man1/"
 
-    latest="$(curl -s https://github.com/vmchale/atspkg/releases/latest/ | cut -d'"' -f2 | rev | cut -d'/' -f1 | rev)"
+    latest="$(curl -Ls -o /dev/null -w %\{url_effective\} https://github.com/vmchale/atspkg/releases/latest | cut -d'"' -f2 | rev | cut -d'/' -f1 | rev)"
     binname=$(getTarget)
 
     url="https://github.com/vmchale/atspkg/releases/download/$latest/$binname"
