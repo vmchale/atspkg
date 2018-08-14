@@ -945,6 +945,7 @@ Declaration : include string { Include $2 }
             | var Pattern colon Type { Var (Just $4) $2 Nothing Nothing }
             | var Pattern eq fixAt IdentifierOr StackFunction { Var Nothing $2 (Just $ FixAt $4 $5 $6) Nothing }
             | var Pattern eq lamAt StackFunction { Var Nothing $2 (Just $ LambdaAt $4 $5) Nothing }
+            | var Pattern eq llamAt StackFunction { Var Nothing $2 (Just $ LinearLambdaAt $4 $5) Nothing }
             | implement FunArgs Implementation { Impl $2 $3 }
             | StaticDeclaration { $1 }
             | overload doubleSqBrackets with IdentifierOr { OverloadIdent $1 "[]" (Unqualified $4) Nothing }

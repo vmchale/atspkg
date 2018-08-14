@@ -318,7 +318,7 @@ pkgToAction mStr setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf 
         -- TODO depend on tgt somehow?
         specialDeps %> \out -> do
             cfgBin' <- cfgBin
-            need [ cfgBin', flags, cfgFile]
+            need [ cfgBin', flags, cfgFile ]
             v'' <- getVerbosity
             liftIO $ fetchDeps v'' (ccFromString cc') mStr setup (first unpack <$> ds) (first unpack <$> cdps) (first unpack <$> bdeps) cfgBin' atslibSetup False *> writeFile out ""
 

@@ -15,6 +15,8 @@ module Development.Shake.FileDetect
     , getElm
     , getMadlang
     , getC
+    , getRust
+    , getSixten
     ) where
 
 import           Data.Foldable     (fold)
@@ -39,6 +41,12 @@ getYml = getAll ["yaml", "yml", "yamllint"]
 
 getToml :: Action [FilePath]
 getToml = getAll ["toml"]
+
+getSixten :: Action [FilePath]
+getSixten = getAll ["vix"]
+
+getRust :: Action [FilePath]
+getRust = getAll ["rs"]
 
 -- | Get all haskell source files, including module signatures.
 getHs :: [FilePath] -> Action [FilePath]

@@ -6,7 +6,7 @@ license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
 maintainer: vamchale@gmail.com
 author: Vanessa McHale
-tested-with: ghc ==8.4.3
+tested-with: ghc ==8.4.3 ghc ==8.2.2
 bug-reports: https://github.com/vmchale/atspkg/issues
 synopsis: A build tool for ATS
 description:

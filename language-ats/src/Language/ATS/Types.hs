@@ -368,8 +368,8 @@ data StaticExpression a = StaticVal (Name a)
                         | SCase Addendum (StaticExpression a) [(Pattern a, LambdaType a, StaticExpression a)]
                         | SString String -- ^ @ext#@
                         | Witness a (StaticExpression a) (StaticExpression a) -- ^ @#[ m | () ]@
-                        | ProofLambda a (LambdaType a) (Pattern a) (StaticExpression a) -- TODO: are linear proof-level lambdas allowed?
-                        | ProofLinearLambda a (LambdaType a) (Pattern a) (StaticExpression a) -- TODO: are linear proof-level lambdas allowed?
+                        | ProofLambda a (LambdaType a) (Pattern a) (StaticExpression a)
+                        | ProofLinearLambda a (LambdaType a) (Pattern a) (StaticExpression a)
                         | WhereStaExp (StaticExpression a) (ATS a)
                         deriving (Show, Eq, Generic, NFData)
 
@@ -449,7 +449,7 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                   | IntLit Int
                   | HexLit String
                   | UnderscoreLit a
-                  | Lambda a (LambdaType a) (Pattern a) (Expression a)
+                  | Lambda a (LambdaType a) (Pattern a) (Expression a) -- TODO: Fix
                   | LinearLambda a (LambdaType a) (Pattern a) (Expression a)
                   | Index a (Name a) (Expression a) -- ^ E.g. @array[0]@.
                   | Access a (Expression a) (Name a)
@@ -485,6 +485,7 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                   | PrecedeList { _exprs :: [Expression a] }
                   | FixAt a String (StackFunction a)
                   | LambdaAt a (StackFunction a)
+                  | LinearLambdaAt a (StackFunction a)
                   | ParenExpr a (Expression a)
                   | CommentExpr String (Expression a)
                   | MacroVar a String
@@ -531,6 +532,7 @@ data ExpressionF a x = LetF a (ATS a) (Maybe x)
                      | PrecedeListF [x]
                      | FixAtF a String (StackFunction a)
                      | LambdaAtF a (StackFunction a)
+                     | LinearLambdaAtF a (StackFunction a)
                      | ParenExprF a x
                      | CommentExprF String x
                      | MacroVarF a String
@@ -580,6 +582,7 @@ instance Recursive (Expression a) where
     project (PrecedeList es)              = PrecedeListF es
     project (FixAt a s sfun)              = FixAtF a s sfun
     project (LambdaAt a sfun)             = LambdaAtF a sfun
+    project (LinearLambdaAt a sfun)       = LinearLambdaAtF a sfun
     project (ParenExpr l e)               = ParenExprF l e
     project (CommentExpr s e)             = CommentExprF s e
     project (MacroVar l s)                = MacroVarF l s
@@ -626,6 +629,7 @@ instance Corecursive (Expression a) where
     embed (PrecedeListF es)              = PrecedeList es
     embed (FixAtF a s sfun)              = FixAt a s sfun
     embed (LambdaAtF a sfun)             = LambdaAt a sfun
+    embed (LinearLambdaAtF a sfun)       = LinearLambdaAt a sfun
     embed (ParenExprF l e)               = ParenExpr l e
     embed (CommentExprF s e)             = CommentExpr s e
     embed (MacroVarF l s)                = MacroVar l s

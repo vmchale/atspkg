@@ -1,10 +1,17 @@
 # language-ats 
 
+## 1.7.0.2
+
+Bug fixes:
+  
+  * Support `llam@` keyword
+
 ## 1.7.0.0
 
 Bug Fixes:
   
   * Now accepts proof-level lambdas.
+  * Include all test data
 
 Breaking Changes:
   

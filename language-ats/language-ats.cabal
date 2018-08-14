@@ -1,12 +1,12 @@
 cabal-version: 1.18
 name: language-ats
-version: 1.7.0.0
+version: 1.7.0.1
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
 maintainer: vamchale@gmail.com
 author: Vanessa McHale
-stability: experimental
+stability: stable
 synopsis: Parser and pretty-printer for ATS.
 description:
     Parser and pretty-printer for [ATS](http://www.ats-lang.org/), written with Happy and Alex.
@@ -18,6 +18,8 @@ data-files:
     test/data/*.out
     test/data/stdlib/*.sats
     test/data/stdlib/*.out
+    test/data/stdlib/DATS/*.dats
+    test/data/stdlib/DATS/*.out
 extra-doc-files: README.md
                  CHANGELOG.md
 

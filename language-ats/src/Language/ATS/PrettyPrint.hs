@@ -152,15 +152,9 @@ instance Eq a => Pretty (Expression a) where
         a (CallF nam [] [] Nothing [])  = pretty nam <> "()"
         a (CallF nam [] [] e xs)        = pretty nam <> prettyArgsProof e xs
         a (CallF nam [] us Nothing [])  = pretty nam <> prettyTypes us
-        a (CallF nam [] us Nothing [x])
-            | startsParens x = pretty nam <> prettyTypes us <> pretty x
         a (CallF nam [] us e xs)        = pretty nam <> prettyTypes us <> prettyArgsProof e xs
         a (CallF nam is [] Nothing [])  = pretty nam <> prettyImplicits is
-        a (CallF nam is [] Nothing [x])
-            | startsParens x = pretty nam <> prettyImplicits is <> pretty x
         a (CallF nam is [] e xs)        = pretty nam <> prettyImplicits is <> prettyArgsProof e xs
-        a (CallF nam is us Nothing [x])
-            | startsParens x = pretty nam <> prettyImplicits is <> prettyTypes us <> pretty x
         a (CallF nam is us e xs)        = pretty nam <> prettyImplicits is <> prettyTypes us <> prettyArgsProof e xs
         a (CaseF _ add' e cs)           = "case" <> pretty add' <+> e <+> "of" <$> indent 2 (prettyCases cs)
         a (IfCaseF _ cs)                = "ifcase" <$> indent 2 (prettyIfCase cs)
@@ -195,6 +189,7 @@ instance Eq a => Pretty (Expression a) where
             | otherwise          = e
         a (FixAtF _ n (StackF s as t e))  = "fix@" <+> text n <+> prettyArgs as <+> ":" <> pretty s <+> pretty t <+> "=>" <$> indent 2 (pretty e)
         a (LambdaAtF _ (StackF s as t e)) = "lam@" <+> prettyArgs as <+> ":" <> pretty s <+> pretty t <+> "=>" <$> indent 2 (pretty e)
+        a (LinearLambdaAtF _ (StackF s as t e)) = "llam@" <+> prettyArgs as <+> ":" <> pretty s <+> pretty t <+> "=>" <$> indent 2 (pretty e)
         a (AddrAtF _ e)                   = "addr@" <> e
         a (ViewAtF _ e)                   = "view@" <> e
         a (ListLiteralF _ s t es)         = "list" <> string s <> "{" <> pretty t <> "}" <> prettyArgs es
