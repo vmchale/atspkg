@@ -6,8 +6,8 @@ module Language.ATS.Rewrite ( rewriteDecl
                             ) where
 
 import           Control.Composition
+import           Control.Recursion
 import           Data.Function           (on)
-import           Data.Functor.Foldable
 import qualified Data.Map                as M
 import           Data.Maybe              (isJust)
 import           Language.ATS.Types
@@ -87,11 +87,13 @@ compareFixity st = (== GT) .* on compare (getFixity st)
 
 rewriteStaATS :: Eq a => FixityState a -> StaticExpression a -> StaticExpression a
 rewriteStaATS st = cata a where
-    a (SCallF n ts [StaticVoid{}]) = SCall n ts []
+    a (SCallF n is ts [StaticVoid{}]) = SCall n is ts []
     a (StaticBinaryF op (StaticBinary op' e e') e'')
         | compareFixity st op op'  = StaticBinary op e (StaticBinary op' e' e'')
     a (WhereStaExpF se (ATS ds))   = WhereStaExp se (ATS (rewriteDecl st <$> ds))
-    a x                            = embed x
+    a (SPrecedeF e e'@SPrecedeList{})                 = SPrecedeList (e : _sExprs e')
+    a (SPrecedeF e e')                                = SPrecedeList [e, e']
+    a x                                               = embed x
 
 -- | Among other things, this rewrites expressions so that operator precedence
 -- is respected; this ensures @1 + 2 * 3@ will be parsed as the correct

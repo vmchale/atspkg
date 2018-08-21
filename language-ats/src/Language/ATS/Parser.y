@@ -454,14 +454,15 @@ StaticExpression : Name { StaticVal $1 }
                  | doubleParens { StaticVoid $1 } -- TODO: static tuple?
                  | sif StaticExpression then StaticExpression else StaticExpression { Sif $2 $4 $6 }
                  | identifierSpace { StaticVal (Unqualified $ to_string $1) }
-                 | identifierSpace StaticExpression { SCall (Unqualified $ to_string $1) [] [$2] }
-                 | Name parens(StaticArgs) { SCall $1 [] $2 }
-                 | Name TypeArgs parens(StaticArgs) { SCall $1 $2 $3 }
-                 | Name TypeArgs doubleParens { SCall $1 $2 [] }
-                 | Name doubleParens { SCall $1 [] [] }
-                 | identifierSpace TypeArgs parens(StaticArgs) { SCall (Unqualified $ to_string $1) $2 $3 }
-                 | identifierSpace parens(StaticArgs) { SCall (Unqualified $ to_string $1) [] $2 }
-                 | identifierSpace doubleParens { SCall (Unqualified $ to_string $1) [] [] } -- TODO: this causes an ambiguity because we might have SCall void instead!
+                 | identifierSpace StaticExpression { SCall (Unqualified $ to_string $1) [] [] [$2] }
+                 | Name parens(StaticArgs) { SCall $1 [] [] $2 }
+                 | Name Implicits parens(StaticArgs) { SCall $1 $2 [] $3 }
+                 | Name TypeArgs parens(StaticArgs) { SCall $1 [] $2 $3 }
+                 | Name TypeArgs doubleParens { SCall $1 [] $2 [] }
+                 | Name doubleParens { SCall $1 [] [] [] }
+                 | identifierSpace TypeArgs parens(StaticArgs) { SCall (Unqualified $ to_string $1) [] $2 $3 }
+                 | identifierSpace parens(StaticArgs) { SCall (Unqualified $ to_string $1) [] [] $2 }
+                 | identifierSpace doubleParens { SCall (Unqualified $ to_string $1) [] [] [] } -- TODO: this causes an ambiguity because we might have SCall void instead!
                  | StaticExpression semicolon StaticExpression { SPrecede $1 $3 }
                  | UnOp StaticExpression { SUnary $1 $2 }
                  | let StaticDecls comment_after(in) end { SLet $1 (reverse $2) Nothing }

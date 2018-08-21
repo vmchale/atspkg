@@ -1,10 +1,7 @@
-{-# LANGUAGE DeriveAnyClass    #-}
-{-# LANGUAGE DeriveFoldable    #-}
-{-# LANGUAGE DeriveFunctor     #-}
-{-# LANGUAGE DeriveGeneric     #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE PatternSynonyms   #-}
-{-# LANGUAGE TypeFamilies      #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveFoldable #-}
+{-# LANGUAGE DeriveFunctor  #-}
+{-# LANGUAGE DeriveGeneric  #-}
 
 module Data.Dependency.Type ( Dependency (..)
                             , Version (..)
@@ -14,16 +11,14 @@ module Data.Dependency.Type ( Dependency (..)
                             , check
                             ) where
 
-import           Control.DeepSeq              (NFData)
+import           Control.DeepSeq (NFData)
 import           Data.Binary
-import           Data.Functor.Foldable
-import           Data.List                    (intercalate)
-import qualified Data.Map                     as M
+import           Data.List       (intercalate)
+import qualified Data.Map        as M
 import           Data.Semigroup
-import qualified Data.Set                     as S
-import           GHC.Generics                 (Generic)
-import           GHC.Natural                  (Natural)
-import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>), (<>))
+import qualified Data.Set        as S
+import           GHC.Generics    (Generic)
+import           GHC.Natural     (Natural)
 
 -- | A package set is simply a map between package names and a set of packages.
 newtype PackageSet a = PackageSet { _packageSet :: M.Map String (S.Set a) }
@@ -78,27 +73,3 @@ satisfies (GreaterThanEq x) y = x <= y
 satisfies (Eq x) y            = x == y
 satisfies (Bounded x y) z     = satisfies x z && satisfies y z
 satisfies None _              = True
-
-data ConstraintF a x = LessThanEqF a
-                     | GreaterThanEqF a
-                     | EqF a
-                     | BoundedF x x
-                     | NoneF
-                     deriving (Functor)
-
-type instance Base (Constraint a) = ConstraintF a
-
-instance Recursive (Constraint a) where
-    project (LessThanEq x)    = LessThanEqF x
-    project (GreaterThanEq x) = GreaterThanEqF x
-    project (Eq x)            = EqF x
-    project (Bounded x y)     = BoundedF x y
-    project None              = NoneF
-
-instance Pretty a => Pretty (Constraint a) where
-    pretty = cata a where
-        a (LessThanEqF v)    = "≤" <+> pretty v
-        a (GreaterThanEqF v) = "≥" <+> pretty v
-        a (EqF v)            = "≡" <+> pretty v
-        a (BoundedF c c')    = c <+> "∧" <+> c'
-        a NoneF              = mempty

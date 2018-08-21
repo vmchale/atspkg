@@ -1,11 +1,10 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-{-# LANGUAGE DeriveAnyClass     #-}
-{-# LANGUAGE DeriveGeneric      #-}
-{-# LANGUAGE FlexibleContexts   #-}
-{-# LANGUAGE FlexibleInstances  #-}
-{-# LANGUAGE OverloadedStrings  #-}
-{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE DeriveAnyClass      #-}
+{-# LANGUAGE DeriveGeneric       #-}
+{-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving  #-}
 
 module Language.ATS.PrettyPrint ( printATS
                                 , printATSCustom
@@ -13,9 +12,9 @@ module Language.ATS.PrettyPrint ( printATS
                                 ) where
 
 import           Control.Composition          hiding ((&))
+import           Control.Recursion            (cata)
 import           Data.Bool                    (bool)
 import           Data.Foldable                (toList)
-import           Data.Functor.Foldable        (cata)
 import           Data.List                    (isPrefixOf)
 import           Data.List.NonEmpty           (NonEmpty (..))
 import qualified Data.List.NonEmpty           as NE
@@ -274,16 +273,22 @@ instance Eq a => Pretty (StaticExpression a) where
         a (StaticBinaryF op se se')
             | squish op = se <> pretty op <> se'
             | otherwise = se <+> pretty op <+> se'
-        a (StaticIntF i)            = pretty i
-        a (StaticHexF h)            = text h
-        a StaticVoidF{}             = "()"
-        a (SifF e e' e'')           = "sif" <+> e <+> "then" <$> indent 2 e' <$> "else" <$> indent 2 e''
-        a (SCallF n [] ["()"])      = pretty n <> "()"
-        a (SCallF n us ["()"])      = pretty n <> prettyTypes us <> "()"
-        a (SCallF n [] cs)          = pretty n <> parens (mconcat (punctuate "," . fmap pretty $ cs))
-        a (SCallF n us cs)          = pretty n <> prettyTypes us <> parens (mconcat (punctuate "," . fmap pretty $ cs))
-        a (SPrecedeF e e')          = e <> ";" <+> e'
-        a (SUnaryF op e)            = pretty op <> e
+        a (StaticIntF i)               = pretty i
+        a (StaticHexF h)               = text h
+        a StaticVoidF{}                = "()"
+        a (SifF e e' e'')              = "sif" <+> e <+> "then" <$> indent 2 e' <$> "else" <$> indent 2 e''
+        a (SCallF n [] [] ["()"])      = pretty n <> "()"
+        a (SCallF n [] us ["()"])      = pretty n <> prettyTypes us <> "()"
+        a (SCallF n [] [] cs)          = pretty n <> parens (mconcat (punctuate "," . fmap pretty $ cs))
+        a (SCallF n [] us cs)          = pretty n <> prettyTypes us <> parens (mconcat (punctuate "," . fmap pretty $ cs))
+        a (SCallF n is [] ["()"])      = pretty n <> prettyImplicits is <> "()"
+        a (SCallF n is us ["()"])      = pretty n <> prettyImplicits is <> prettyTypes us <> "()"
+        a (SCallF n is [] cs)          = pretty n <> prettyImplicits is <> parens (mconcat (punctuate "," . fmap pretty $ cs))
+        a (SCallF n is us cs)          = pretty n <> prettyImplicits is <> prettyTypes us <> parens (mconcat (punctuate "," . fmap pretty $ cs))
+        a (SPrecedeF e e')             = e <> ";" <+> e'
+        a (SPrecedeListF es)           = lineAlt (prettyArgsList "; " "(" ")" es) ("(" <> mconcat (punctuate " ; " es) <> ")")
+        a (SParensF e)                 = parens e
+        a (SUnaryF op e)               = pretty op <> e
         a (SLetF _ e e') = flatAlt
             ("let" <$> indent 2 (concatSame e) <$> endLet e')
             ("let" <+> concatSame e <$> endLet e')

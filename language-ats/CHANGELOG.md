@@ -6,6 +6,10 @@ Bug fixes:
   
   * Support `llam@` keyword
 
+Enhancements:
+  
+  * Use `recursion` library to incur fewer dependencies 
+
 ## 1.7.0.0
 
 Bug Fixes:

@@ -18,6 +18,7 @@
 # Deficiencies
 - [ ] Error messages
   - [ ] Add test suite for messages
+- [ ] Treat `;` as a binary operator
 # Performance
 - [ ] `ByteString` lexer?
 - [ ] Get rid of `identifierSpace`

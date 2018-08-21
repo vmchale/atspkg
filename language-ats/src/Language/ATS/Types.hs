@@ -5,6 +5,7 @@
 {-# LANGUAGE DerivingStrategies         #-}
 {-# LANGUAGE DuplicateRecordFields      #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses      #-}
 {-# LANGUAGE PatternSynonyms            #-}
 {-# LANGUAGE TypeFamilies               #-}
 
@@ -49,14 +50,14 @@ module Language.ATS.Types
     , FixityState
     ) where
 
-import           Control.DeepSeq       (NFData)
-import           Data.Function         (on)
-import           Data.Functor.Foldable hiding (Fix (..))
-import           Data.List.NonEmpty    (NonEmpty)
-import qualified Data.Map              as M
-import           Data.Semigroup        (Semigroup)
-import           GHC.Generics          (Generic)
-import           Language.ATS.Lexer    (Addendum (..))
+import           Control.DeepSeq    (NFData)
+import           Control.Recursion  hiding (Fix (..))
+import           Data.Function      (on)
+import           Data.List.NonEmpty (NonEmpty)
+import qualified Data.Map           as M
+import           Data.Semigroup     (Semigroup)
+import           GHC.Generics       (Generic)
+import           Language.ATS.Lexer (Addendum (..))
 
 type Fix = Either Int String
 
@@ -360,9 +361,10 @@ data StaticExpression a = StaticVal (Name a)
                         | StaticInt Int
                         | StaticHex String
                         | SPrecede (StaticExpression a) (StaticExpression a)
+                        | SPrecedeList { _sExprs :: [StaticExpression a] }
                         | StaticVoid a
                         | Sif { scond :: StaticExpression a, whenTrue :: StaticExpression a, selseExpr :: StaticExpression a } -- Static if (for proofs)
-                        | SCall (Name a) [[Type a]] [StaticExpression a]
+                        | SCall (Name a) [[Type a]] [[Type a]] [StaticExpression a]
                         | SUnary (UnOp a) (StaticExpression a)
                         | SLet a [Declaration a] (Maybe (StaticExpression a))
                         | SCase Addendum (StaticExpression a) [(Pattern a, LambdaType a, StaticExpression a)]
@@ -371,6 +373,7 @@ data StaticExpression a = StaticVal (Name a)
                         | ProofLambda a (LambdaType a) (Pattern a) (StaticExpression a)
                         | ProofLinearLambda a (LambdaType a) (Pattern a) (StaticExpression a)
                         | WhereStaExp (StaticExpression a) (ATS a)
+                        | SParens (StaticExpression a)
                         deriving (Show, Eq, Generic, NFData)
 
 data StaticExpressionF a x = StaticValF (Name a)
@@ -378,9 +381,10 @@ data StaticExpressionF a x = StaticValF (Name a)
                            | StaticIntF Int
                            | StaticHexF String
                            | SPrecedeF x x
+                           | SPrecedeListF [x]
                            | StaticVoidF a
                            | SifF x x x
-                           | SCallF (Name a) [[Type a]] [x]
+                           | SCallF (Name a) [[Type a]] [[Type a]] [x]
                            | SUnaryF (UnOp a) x
                            | SLetF a [Declaration a] (Maybe x)
                            | SCaseF Addendum x [(Pattern a, LambdaType a, x)]
@@ -389,6 +393,7 @@ data StaticExpressionF a x = StaticValF (Name a)
                            | ProofLambdaF a (LambdaType a) (Pattern a) x
                            | ProofLinearLambdaF a (LambdaType a) (Pattern a) x
                            | WhereStaExpF x (ATS a)
+                           | SParensF x
                            deriving (Functor)
 
 type instance Base (StaticExpression a) = StaticExpressionF a
@@ -399,9 +404,10 @@ instance Recursive (StaticExpression a) where
     project (StaticHex h)               = StaticHexF h
     project (StaticInt i)               = StaticIntF i
     project (SPrecede x x')             = SPrecedeF x x'
+    project (SPrecedeList xs)           = SPrecedeListF xs
     project (StaticVoid x)              = StaticVoidF x
     project (Sif e e' e'')              = SifF e e' e''
-    project (SCall n ts es)             = SCallF n ts es
+    project (SCall n is ts es)          = SCallF n is ts es
     project (SUnary u x)                = SUnaryF u x
     project (SLet x ds e)               = SLetF x ds e
     project (SCase a x ples)            = SCaseF a x ples
@@ -410,6 +416,7 @@ instance Recursive (StaticExpression a) where
     project (ProofLambda a l p e)       = ProofLambdaF a l p e
     project (ProofLinearLambda a l p e) = ProofLinearLambdaF a l p e
     project (WhereStaExp e ds)          = WhereStaExpF e ds
+    project (SParens e)                 = SParensF e
 
 instance Corecursive (StaticExpression a) where
     embed (StaticValF n)               = StaticVal n
@@ -417,9 +424,10 @@ instance Corecursive (StaticExpression a) where
     embed (StaticHexF h)               = StaticHex h
     embed (StaticIntF i)               = StaticInt i
     embed (SPrecedeF e e')             = SPrecede e e'
+    embed (SPrecedeListF es)           = SPrecedeList es
     embed (StaticVoidF l)              = StaticVoid l
     embed (SifF e e' e'')              = Sif e e' e''
-    embed (SCallF n ts es)             = SCall n ts es
+    embed (SCallF n is ts es)          = SCall n is ts es
     embed (SUnaryF u e)                = SUnary u e
     embed (SLetF l ds e)               = SLet l ds e
     embed (SCaseF a x ples)            = SCase a x ples
@@ -428,6 +436,7 @@ instance Corecursive (StaticExpression a) where
     embed (ProofLambdaF a l p e)       = ProofLambda a l p e
     embed (ProofLinearLambdaF a l p e) = ProofLinearLambda a l p e
     embed (WhereStaExpF e ds)          = WhereStaExp e ds
+    embed (SParensF e)                 = SParens e
 
 -- | A (possibly effectful) expression.
 data Expression a = Let a (ATS a) (Maybe (Expression a))
@@ -538,7 +547,7 @@ data ExpressionF a x = LetF a (ATS a) (Maybe x)
                      | MacroVarF a String
                      deriving (Functor)
 
-type instance Base (Expression a) = ExpressionF a
+type instance Base (Expression a) = (ExpressionF a)
 
 instance Recursive (Expression a) where
     project (Let l ds me)                 = LetF l ds me

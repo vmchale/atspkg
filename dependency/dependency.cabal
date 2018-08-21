@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: dependency
-version: 1.2.0.2
+version: 1.2.0.3
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -12,6 +12,7 @@ description:
 category: Development, Build
 build-type: Simple
 extra-doc-files: README.md
+                 CHANGELOG.md
 
 source-repository head
     type: darcs
@@ -33,18 +34,16 @@ library
         Data.Dependency.Sort
     default-language: Haskell2010
     other-extensions: DeriveAnyClass DeriveGeneric OverloadedStrings
-                      DeriveFoldable DeriveFunctor DeriveGeneric DeriveTraversable
-                      OverloadedStrings TypeFamilies TupleSections
+                      DeriveFoldable DeriveFunctor TupleSections
     ghc-options: -Wall -Wincomplete-uni-patterns
                  -Wincomplete-record-updates -Wcompat
     build-depends:
-        base >=4.10 && <5,
+        base >=4.9 && <5,
         ansi-wl-pprint -any,
         containers >=0.5.9,
         microlens -any,
         binary -any,
-        deepseq -any,
-        recursion-schemes -any
+        deepseq -any
     
     if (flag(development) && impl(ghc <8.4))
         ghc-options: -Werror

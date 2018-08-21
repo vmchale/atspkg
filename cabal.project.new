@@ -19,9 +19,7 @@ constraints:
   hs2ats +development,
   cdeps +development,
   shake-cabal +development,
-  shake-c +development,
-  recursion-schemes -template-haskell,
-  reflection -template-haskell
+  shake-c +development
 
 executable-stripping: true
 
