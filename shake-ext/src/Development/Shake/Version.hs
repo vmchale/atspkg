@@ -2,6 +2,7 @@ module Development.Shake.Version ( ghcVersion
                                  , cabalVersion
                                  , commonVersion
                                  , pandocVersion
+                                 , elmVersion
                                  ) where
 
 import           Development.Shake
@@ -17,6 +18,9 @@ ghcVersion :: Action String
 ghcVersion = do
     ~(Stdout o) <- command [] "ghc" ["--numeric-version"]
     pure (head (lines o))
+
+elmVersion :: Action String
+elmVersion = commonVersion "elm"
 
 cabalVersion :: Action String
 cabalVersion = commonVersion "cabal"

@@ -38,12 +38,11 @@ main() {
         wget "$url" -O "$dest"
         wget "$man_url" -O "$man_dest"
     else
-        curl "$url" -o "$dest"
-        curl "$man_url" -o "$man_dest"
+        curl -L "$url" -o "$dest"
+        curl -L "$man_url" -o "$man_dest"
     fi
 
     chmod +x "$dest"
-
 
     case :$PATH: in 
         *:$HOME/.local/bin:*) ;;

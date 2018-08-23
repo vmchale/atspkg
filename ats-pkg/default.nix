@@ -8,8 +8,8 @@
 }:
 mkDerivation {
   pname = "ats-pkg";
-  version = "3.2.1.8";
-  sha256 = "183gdyivl6kab2k3z0jm6dk0wh83qwz3zvai7ayfkq3rjc6lb8ms";
+  version = "3.2.1.10";
+  src = ./.;
   isLibrary = true;
   isExecutable = true;
   enableSeparateDataOutput = true;

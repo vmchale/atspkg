@@ -50,7 +50,7 @@ written in ATS.
 The easiest way to install is via a script, viz.
 
 ```bash
-curl -sSl https://raw.githubusercontent.com/vmchale/atspkg/master/bash/install.sh | bash -s
+curl -sSl https://raw.githubusercontent.com/vmchale/atspkg/master/bash/install.sh | sh -s
 ```
 
 Thereafter, you can run

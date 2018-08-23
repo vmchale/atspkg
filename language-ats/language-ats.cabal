@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: language-ats
-version: 1.7.0.2
+version: 1.7.0.3
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale

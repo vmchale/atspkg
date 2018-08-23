@@ -1,5 +1,9 @@
 # language-ats 
 
+## 1.7.0.3
+
+  * Bump `recursion` version bounds
+
 ## 1.7.0.2
 
 Bug fixes:
