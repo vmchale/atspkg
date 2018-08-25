@@ -1,5 +1,4 @@
-packages: cdeps
-        , language-ats
+packages: language-ats
         , ats-pkg
         , ats-format
         , shake-ats
@@ -17,7 +16,6 @@ constraints:
   ats-setup +development,
   dependency +development,
   hs2ats +development,
-  cdeps +development,
   shake-cabal +development,
   shake-c +development
 

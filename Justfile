@@ -44,7 +44,7 @@ ci: install
     yamllint .travis.yml
     yamllint appveyor.yml
     tomlcheck --file ats-format/.atsfmt.toml
-    hlint ats-pkg language-ats shake-ext ats-format cdeps shake-cabal shake-c
+    hlint ats-pkg language-ats ats-format shake-cabal shake-c
 
 install:
     @cabal new-build all
