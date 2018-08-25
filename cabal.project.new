@@ -1,7 +1,6 @@
 packages: cdeps
         , language-ats
         , ats-format
-        , shake-ext
         , shake-ats
         , dependency
         , hs2ats
