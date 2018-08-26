@@ -11,6 +11,7 @@
 - [ ] `shake-ats` should allow builds with `patscc` some other way
 - [ ] Set target triple in `shake-ext`?
 # Deficiencies
+- [ ] Use `discrimination` to get efficient linear sorts?
 - [ ] Cross-compiler should not rebuild full compiler, only static library
   - [ ] and even then only if necessary
 - [ ] Installations should be installed locally based on configuration
