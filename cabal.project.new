@@ -5,6 +5,7 @@ packages: language-ats
         , hs2ats
         , shake-cabal
         , shake-c
+        , ats-pkg
 
 constraints:
   ats-format +development -static,
@@ -16,7 +17,10 @@ constraints:
   dependency +development,
   hs2ats +development,
   shake-cabal +development,
-  shake-c +development
+  shake-c +development,
+  ats-pkg +development
+
+with-compiler: ghc-8.6.1
 
 executable-stripping: true
 
