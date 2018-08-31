@@ -997,7 +997,7 @@ data ATSError = Expected AlexPosn String String
               | Unknown Token
               | LexError String
               | Exhausted
-              deriving (Eq, Show, Generic, NFData)
+              deriving (Generic, NFData)
 
 unmatched :: AlexPosn -> String -> Doc
 unmatched l chr = "unmatched" <+> squotes (text chr) <+> "at" <+> pretty l <> linebreak 

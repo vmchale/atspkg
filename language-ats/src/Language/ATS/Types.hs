@@ -66,15 +66,15 @@ data Fixity a = RightFix { pos :: a, ifix :: Fix }
               | Pre { pos :: a, ifix :: Fix }
               | Post { pos :: a, ifix :: Fix }
               | Infix { pos :: a, ifix :: Fix }
-              deriving (Show, Eq, Generic, NFData)
+              deriving (Eq, Generic, NFData)
 
 -- | An ATS file, containing a list of declarations
 newtype ATS a = ATS { unATS :: [Declaration a] }
-    deriving (Show, Eq, Generic)
+    deriving (Eq, Generic)
     deriving newtype (NFData, Semigroup, Monoid)
 
 data Leaf a = Leaf { _constructorUniversals :: [Universal a], name :: String, constructorArgs :: [StaticExpression a], maybeType :: Maybe (Type a) }
-    deriving (Show, Eq, Generic, NFData)
+    deriving (Eq, Generic, NFData)
 
 type SortArgs a = Maybe [SortArg a]
 type Args a = Maybe [Arg a]
@@ -125,13 +125,13 @@ data Declaration a = Func { pos :: a, _fun :: Function a }
                    | Exception String (Type a)
                    | ExtVar a String (Expression a)
                    | AbsImpl a (Name a) (SortArgs a) (Type a)
-                   deriving (Show, Eq, Generic, NFData)
+                   deriving (Eq, Generic, NFData)
 
 data DataSortLeaf a = DataSortLeaf [Universal a] (Sort a) (Maybe (Sort a))
-                    deriving (Show, Eq, Generic, NFData)
+                    deriving (Eq, Generic, NFData)
 
 data DataPropLeaf a = DataPropLeaf { propU :: [Universal a], _propExpr1 :: Expression a, _propExpr2 :: Maybe (Expression a) }
-                    deriving (Show, Eq, Generic, NFData)
+                    deriving (Eq, Generic, NFData)
 
 -- | A type for parsed ATS types
 data Type a = Tuple a [Type a]
@@ -156,7 +156,7 @@ data Type a = Tuple a [Type a]
             | AnonymousRecord a (NonEmpty (String, Type a))
             | WhereType a (Type a) String (SortArgs a) (Type a)
             | AddrType a -- ^ @addr@
-            deriving (Show, Eq, Generic, NFData)
+            deriving (Eq, Generic, NFData)
 
 data TypeF a x = TupleF a [x]
                | BoxTupleF a (NonEmpty x)
@@ -214,14 +214,14 @@ data LambdaType a = Plain a
                   | ProofArrow a -- | @=/=>@
                   | ProofSpear a -- | @=/=>>@
                   | Full a String
-                  deriving (Show, Eq, Generic, NFData)
+                  deriving (Eq, Generic, NFData)
 
 data Name a = Unqualified String
             | Qualified a String String -- ^ A name can be qualified e.g. @$UN.unsafefn@
             | SpecialName a String -- ^ A name for builtin functions such as @$showtype@.
             | Functorial String String
             | FieldName a String String
-            deriving (Show, Eq, Generic, NFData)
+            deriving (Eq, Generic, NFData)
 
 -- | A data type for patterns.
 data Pattern a = PName (Name a) [Pattern a]
@@ -237,7 +237,7 @@ data Pattern a = PName (Name a) [Pattern a]
                | ExistentialPattern (Existential a) (Pattern a)
                | As a (Pattern a) (Pattern a)
                | BinPattern a (BinOp a) (Pattern a) (Pattern a) -- ^ For use with e.g. @::@.
-               deriving (Show, Eq, Generic, NFData)
+               deriving (Eq, Generic, NFData)
 
 data PatternF a x = PNameF (Name a) [x]
                   | PSumF String x
@@ -274,16 +274,16 @@ instance Recursive (Pattern a) where
 data Paired a b = Both a b
                 | First a
                 | Second b
-                deriving (Show, Eq, Generic, NFData)
+                deriving (Eq, Generic, NFData)
 
 data SortArg a = SortArg String (Sort a)
                | Anonymous (Sort a)
-    deriving (Show, Eq, Generic, NFData)
+    deriving (Eq, Generic, NFData)
 
 -- | An argument to a function.
 data Arg a = Arg (Paired String (Type a))
            | PrfArg [Arg a] (Arg a)
-           deriving (Show, Eq, Generic, NFData)
+           deriving (Eq, Generic, NFData)
 
 -- | A datatype for sorts.
 data Sort a = NamedSort { _sortName :: String }
@@ -294,7 +294,7 @@ data Sort a = NamedSort { _sortName :: String }
             | View a Addendum -- ^ @view@
             | TupleSort a (Sort a) (Sort a)
             | ArrowSort a (Sort a) (Sort a)
-            deriving (Show, Eq, Generic, NFData)
+            deriving (Eq, Generic, NFData)
 
 data SortF a x = NamedSortF String
                | T0pF Addendum
@@ -320,17 +320,17 @@ instance Recursive (Sort a) where
 
 -- | Wrapper for universal quantifiers (refinement types)
 data Universal a = Universal { bound :: [String], typeU :: Maybe (Sort a), prop :: [StaticExpression a] }
-    deriving (Show, Eq, Generic, NFData)
+    deriving (Eq, Generic, NFData)
 
 -- | Wrapper for existential quantifiers/types
 data Existential a = Existential { boundE :: [String], isOpen :: Bool, typeE :: Maybe (Sort a), propE :: Maybe (StaticExpression a) }
-    deriving (Show, Eq, Generic, NFData)
+    deriving (Eq, Generic, NFData)
 
 -- | Unary operators
 data UnOp a = Negate -- | @~@
             | Deref -- | @!@
             | SpecialOp a String
-    deriving (Show, Eq, Generic, NFData)
+    deriving (Eq, Generic, NFData)
 
 -- | Binary operators on expressions
 data BinOp a = Add
@@ -351,7 +351,7 @@ data BinOp a = Add
              | At
              | SpearOp -- ^ @->@
              | SpecialInfix a String
-             deriving (Show, Eq, Generic, NFData)
+             deriving (Eq, Generic, NFData)
 
 pattern Con :: a -> BinOp a
 pattern Con l = SpecialInfix l "::"
@@ -374,7 +374,7 @@ data StaticExpression a = StaticVal (Name a)
                         | ProofLinearLambda a (LambdaType a) (Pattern a) (StaticExpression a)
                         | WhereStaExp (StaticExpression a) (ATS a)
                         | SParens (StaticExpression a)
-                        deriving (Show, Eq, Generic, NFData)
+                        deriving (Eq, Generic, NFData)
 
 data StaticExpressionF a x = StaticValF (Name a)
                            | StaticBinaryF (BinOp a) x x
@@ -498,7 +498,7 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                   | ParenExpr a (Expression a)
                   | CommentExpr String (Expression a)
                   | MacroVar a String
-                  deriving (Show, Eq, Generic, NFData)
+                  deriving (Eq, Generic, NFData)
 
 data ExpressionF a x = LetF a (ATS a) (Maybe x)
                      | VoidLiteralF a
@@ -652,7 +652,7 @@ data Implementation a = Implement { pos            :: a
                                   , iArgs          :: Args a -- ^ Arguments
                                   , _iExpression   :: Either (StaticExpression a) (Expression a) -- ^ Expression (or static expression) holding the function body.
                                   }
-    deriving (Show, Eq, Generic, NFData)
+    deriving (Eq, Generic, NFData)
 
 -- | A function declaration accounting for all keywords ATS uses to
 -- define them.
@@ -664,7 +664,7 @@ data Function a = Fun { _preF :: PreFunction Expression a }
                 | PrFn { _preStaF :: PreFunction StaticExpression a }
                 | Praxi { _preStaF :: PreFunction StaticExpression a }
                 | CastFn { _preF :: PreFunction Expression a }
-                deriving (Show, Eq, Generic, NFData)
+                deriving (Eq, Generic, NFData)
 
 -- | A type for stack-allocated functions. See
 -- [here](http://ats-lang.sourceforge.net/DOCUMENT/ATS2TUTORIAL/HTML/c1267.html)
@@ -674,7 +674,7 @@ data StackFunction a = StackF { stSig        :: String
                               , stReturnType :: Type a
                               , stExpression :: Expression a
                               }
-                              deriving (Show, Eq, Generic, NFData)
+                              deriving (Eq, Generic, NFData)
 
 data PreFunction ek a = PreF { fname         :: Name a -- ^ Function name
                              , sig           :: Maybe String -- ^ e.g. <> or \<!wrt>
@@ -685,7 +685,7 @@ data PreFunction ek a = PreF { fname         :: Name a -- ^ Function name
                              , termetric     :: Maybe (StaticExpression a) -- ^ Optional termination metric
                              , _expression   :: Maybe (ek a) -- ^ Expression holding the actual function body (not present in static templates)
                              }
-                             deriving (Show, Eq, Generic, NFData)
+                             deriving (Eq, Generic, NFData)
 
 -- FIXME left vs. right shouldn't be treated the same
 instance (Eq a) => Ord (Fixity a) where

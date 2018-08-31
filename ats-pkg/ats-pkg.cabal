@@ -169,7 +169,7 @@ executable atspkg
         ghc-options: -eventlog -with-rtsopts=-l
     
     if flag(profile)
-        ghc-options: -with-rtsopts=-h
+        ghc-options: -with-rtsopts=-h -with-rtsopts=-p
     
     if flag(development)
         ghc-options: -Werror

@@ -46,6 +46,11 @@ ci: install
     tomlcheck --file ats-format/.atsfmt.toml
     hlint ats-pkg language-ats ats-format shake-cabal shake-c
 
+profile:
+    @cabal new-build all -p --enable-profiling
+    @cp $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) ~/.local/bin
+    @cp -f $(fd 'atspkg$' -t x -IH dist-newstyle | tail -n1) ~/.local/bin
+
 install:
     @cabal new-build all
     @cp ats-format/man/atsfmt.1 ~/.local/share/man/man1

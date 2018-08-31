@@ -147,4 +147,4 @@ getCabalDepsV v p = do
     benchFiles <- h (dirgeBench benchSrc)
     foreignFiles <- h (dirgeForeign foreignSrc)
 
-    pure (vers, extraSrc ++ norms ++ exeFiles ++ subFiles ++ testFiles ++ benchFiles ++ foreignFiles)
+    pure (vers, p : extraSrc ++ norms ++ exeFiles ++ subFiles ++ testFiles ++ benchFiles ++ foreignFiles)

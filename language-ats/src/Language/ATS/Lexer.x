@@ -329,7 +329,7 @@ tok f (p,_,_,s) len = f p (take len s)
 data Addendum = None
               | Plus
               | Minus
-              deriving (Eq, Show, Generic, NFData)
+              deriving (Eq, Generic, NFData)
 
 -- TODO ideally we'd handle this as an internal error later in the parser.
 get_staload (Keyword _ (KwStaload b)) = b
@@ -423,7 +423,7 @@ data Keyword = KwFun
              | KwMacdef
              | KwDatasort
              | KwException
-             deriving (Eq, Show, Generic, NFData)
+             deriving (Eq, Generic, NFData)
 
 data Token = Identifier AlexPosn String
            | SpecialIdentifier AlexPosn String
@@ -452,7 +452,7 @@ data Token = Identifier AlexPosn String
            | SpecialBracket AlexPosn
            | FixityTok AlexPosn String
            | End
-           deriving (Eq, Show, Generic, NFData)
+           deriving (Eq, Generic, NFData)
 
 instance Pretty Addendum where
     pretty Plus = "+"
