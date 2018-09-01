@@ -1,4 +1,8 @@
-# language-ats 
+# language-ats
+
+## 1.7.0.4
+
+  * Allow `datatype`, `datavtype`, and `dataview` to work with `and`.
 
 ## 1.7.0.3
 
@@ -7,22 +11,22 @@
 ## 1.7.0.2
 
 Bug fixes:
-  
+
   * Support `llam@` keyword
 
 Enhancements:
-  
-  * Use `recursion` library to incur fewer dependencies 
+
+  * Use `recursion` library to incur fewer dependencies
 
 ## 1.7.0.0
 
 Bug Fixes:
-  
+
   * Now accepts proof-level lambdas.
   * Include all test data
 
 Breaking Changes:
-  
+
   * `PrVar` and `PrVal` now take a `StaticExpression`
   * `PrFun`, `PrFn`, and `Praxi` now take a `StaticExpression`
   * Add a rewrite phase for `StaticExpression`s

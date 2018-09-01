@@ -394,6 +394,10 @@ isVal PrVar{}   = True
 isVal AndDecl{} = True
 isVal _         = False
 
+-- isTypeDef :: Declaration a -> Bool
+-- isTypeDef ViewTypeDef{} = True
+-- isTypeDef TypeDef{} = True
+
 notDefine :: String -> Bool
 notDefine = not . ("#define" `isPrefixOf`)
 
@@ -592,6 +596,9 @@ instance Eq a => Pretty (Declaration a) where
     pretty (AbsViewType _ s as Nothing)     = "absvtype" <+> text s <> prettySortArgs as
     pretty (AbsViewType _ s as (Just t))    = "absvtype" <+> text s <> prettySortArgs as <+> "=" <+> pretty t
     pretty (SumViewType s as ls)            = "datavtype" <+> text s <> prettySortArgs as <+> "=" <$> prettyLeaf (toList ls)
+    pretty (AndD d (SumViewType s as ls))   = pretty d <$> "and" <+> text s <> prettySortArgs as <+> "=" <$> prettyLeaf (toList ls)
+    pretty (AndD d (SumType s as ls))       = pretty d <$> "and" <+> text s <> prettySortArgs as <+> "=" <$> prettyLeaf (toList ls)
+    pretty (AndD d (DataView _ s as ls))    = pretty d <$> "and" <+> text s <> prettySortArgs as <+> "=" <$> prettyLeaf (toList ls)
     pretty (DataView _ s as ls)             = "dataview" <+> text s <> prettySortArgs as <+> "=" <$> prettyLeaf (toList ls)
     pretty (SumType s as ls)                = "datatype" <+> text s <> prettySortArgs as <+> "=" <$> prettyLeaf (toList ls)
     pretty (DataSort _ s ls)                = "datasort" <+> text s <+> "=" <$> prettyDSL (toList ls)

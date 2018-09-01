@@ -265,7 +265,7 @@ optional(p) : p { Just $1 }
 ATS : Declarations { ATS (reverse $1) }
 
 -- | Parse declarations in a list
-Declarations : { [] } 
+Declarations : { [] }
              | Declarations Declaration { $2 : $1 }
              | Declarations FunDecl { $2 ++ $1 }
              | Declarations ValDecl { $2 ++ $1 }
@@ -495,7 +495,7 @@ PreExpression : identifier lsqbracket PreExpression rsqbracket { Index $2 (Unqua
               | let ATS in Expression end { Let $1 $2 (Just $4) }
               | let ATS in Expression vbar {% left $ Expected $5 "end" "|" }
               | let ATS fun {% left $ Expected $3 "in" "fun" }
-              | let ATS plainArrow {% left $ Expected $3 "in" "=>" } 
+              | let ATS plainArrow {% left $ Expected $3 "in" "=>" }
               | lambda Pattern LambdaArrow Expression { Lambda $1 $3 $2 $4 }
               | llambda Pattern LambdaArrow Expression { LinearLambda $1 $3 $2 $4 }
               | addrAt PreExpression { AddrAt $1 $2 }
@@ -580,7 +580,7 @@ Implicits : lspecial TypeIn rbracket { [toList $2] }
           | Implicits doubleBrackets { [] : $1 }
           | lbracket TypeIn rbracket { [toList $2] }
           | Implicits lspecial TypeIn rbracket { toList $3 : $1 }
-          
+
 MaybeImplicit : Implicits { $1 }
               | { [] }
 
@@ -807,15 +807,20 @@ SortArgs : parens(SortArg) { Just $1 }
          | doubleParens { Just [] }
          | { Nothing }
 
-SumDecl : datatype IdentifierOr SortArgs eq Leaves { SumType $2 $3 $5 }
+AndViewtype : datavtype IdentifierOr SortArgs eq Leaves { SumViewType $2 $3 $5 }
+            | datavtype IdentifierOr SortArgs eq lineComment Leaves { SumViewType $2 $3 $6 }
+            | datavtype lineComment IdentifierOr SortArgs eq Leaves { SumViewType $3 $4 $6 }
+            | datavtype lineComment IdentifierOr SortArgs eq lineComment Leaves { SumViewType $3 $4 $7 }
+            | AndViewtype and IdentifierOr SortArgs eq Leaves { AndD $1 (SumViewType $3 $4 $6) }
+
+AndView : dataview IdentifierOr SortArgs eq Leaves { DataView $1 $2 $3 $5 }
+        | dataview IdentifierOr SortArgs eq lineComment Leaves { DataView $1 $2 $3 $6 }
+        | AndView and IdentifierOr SortArgs eq Leaves { AndD $1 (DataView $2 $3 $4 $6) }
+
+AndType : datatype IdentifierOr SortArgs eq Leaves { SumType $2 $3 $5 }
         | datatype lineComment IdentifierOr SortArgs eq Leaves { SumType $3 $4 $6 }
         | datatype lineComment IdentifierOr SortArgs eq lineComment Leaves { SumType $3 $4 $7 }
-        | datavtype IdentifierOr SortArgs eq Leaves { SumViewType $2 $3 $5 }
-        | datavtype IdentifierOr SortArgs eq lineComment Leaves { SumViewType $2 $3 $6 }
-        | datavtype lineComment IdentifierOr SortArgs eq Leaves { SumViewType $3 $4 $6 }
-        | datavtype lineComment IdentifierOr SortArgs eq lineComment Leaves { SumViewType $3 $4 $7 }
-        | dataview IdentifierOr SortArgs eq Leaves { DataView $1 $2 $3 $5 }
-        | dataview IdentifierOr SortArgs eq lineComment Leaves { DataView $1 $2 $3 $6 }
+        | AndType and IdentifierOr SortArgs eq Leaves { AndD $1 (SumType $3 $4 $6) }
 
 -- | Parse a declaration defining a type
 TypeDecl : typedef IdentifierOr SortArgs eq Type MaybeAnnot { TypeDef $1 $2 $3 $5 $6 }
@@ -831,7 +836,9 @@ TypeDecl : typedef IdentifierOr SortArgs eq Type MaybeAnnot { TypeDef $1 $2 $3 $
          | absprop IdentifierOr parens(Args) { AbsProp $1 $2 $3 }
          | AndSort { $1 }
          | AndStadef { $1 }
-         | SumDecl { $1 }
+         | AndViewtype { $1 }
+         | AndView { $1 }
+         | AndType { $1 }
          | extern typedef {% left $ Expected $2 "external declaration" "typedef" }
          | vtypedef IdentifierOr SortArgs eq vbar {% left $ Expected $5 "Viewtype" "|" }
          | typedef IdentifierOr SortArgs eq vbar {% left $ Expected $5 "Type" "|" }
@@ -997,10 +1004,10 @@ data ATSError = Expected AlexPosn String String
               | Unknown Token
               | LexError String
               | Exhausted
-              deriving (Generic, NFData)
+              deriving (Eq, Show, Generic, NFData)
 
 unmatched :: AlexPosn -> String -> Doc
-unmatched l chr = "unmatched" <+> squotes (text chr) <+> "at" <+> pretty l <> linebreak 
+unmatched l chr = "unmatched" <+> squotes (text chr) <+> "at" <+> pretty l <> linebreak
 
 -- ors = bear
 bear :: Bool -> [Doc] -> Doc
@@ -1014,7 +1021,7 @@ instance Pretty ATSError where
 
 preErr (OneOf p ss s) = pretty p <> linebreak <> (indent 2 $ "Unexpected" <+> squotes (text s) <> ", expected one of" <+> bear False (fmap (squotes . text) ss)) <> linebreak
 preErr (Expected p s1 s2) = pretty p <> linebreak <> (indent 2 $ "Unexpected" <+> squotes (text s2) <> ", expected:" <+> squotes (text s1)) <> linebreak
-preErr (Unknown (Special l ")")) = unmatched l ")" 
+preErr (Unknown (Special l ")")) = unmatched l ")"
 preErr (Unknown (Special l "}")) = unmatched l "}"
 preErr (Unknown (Special l ">")) = unmatched l ">"
 preErr (Unknown t) = "unexpected token" <+> squotes (pretty t) <+> "at" <+> pretty (token_posn t) <> linebreak
@@ -1025,7 +1032,7 @@ left :: ATSError -> ParseSt b
 left = lift . Left
 
 parseError :: [Token] -> ParseSt a
-parseError [] = left Exhausted 
+parseError [] = left Exhausted
 parseError x = left . Unknown . head $ x
 
 }

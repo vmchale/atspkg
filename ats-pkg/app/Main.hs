@@ -50,6 +50,7 @@ data Command = Install { _archTarget :: Maybe String
                     }
              | Fetch { _url       :: String
                      , _atspkgArg :: Maybe String
+                     , _verbosity :: Int
                      }
              | Nuke
              | Upgrade
@@ -210,14 +211,15 @@ fetch = Fetch <$>
     (metavar "URL"
     <> help "URL pointing to a tarball containing the package to be installed.")
     <*> pkgArgs
+    <*> verbosity
 
-fetchPkg :: Maybe String -> String -> IO ()
-fetchPkg mStr pkg = withSystemTempDirectory "atspkg" $ \p -> do
+fetchPkg :: Maybe String -> String -> Int -> IO ()
+fetchPkg mStr pkg v = withSystemTempDirectory "atspkg" $ \p -> do
     let (dirName, url') = (p, pkg) & each %~ TL.pack
     buildHelper True (ATSDependency mempty dirName url' undefined undefined mempty mempty mempty mempty)
     ps <- getSubdirs p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
-    let setup = [buildAll 0 mStr Nothing (Just pkgDir)]
+    let setup = [buildAll v mStr Nothing (Just pkgDir)]
     withCurrentDirectory (takeDirectory pkgDir) (mkPkg mStr False False False setup ["install"] Nothing 0)
     stopGlobalPool
 
@@ -236,7 +238,7 @@ run (Check p b)                        = void $ ($ Version [0,1,0]) <$> checkPkg
 run (CheckSet p b)                     = void $ checkPkgSet p b
 run Upgrade                            = upgradeBin "vmchale" "atspkg"
 run Nuke                               = cleanAll
-run (Fetch u mArg)                     = fetchPkg mArg u
+run (Fetch u mArg v)                   = fetchPkg mArg u v
 run Clean                              = mkPkg Nothing False True False mempty ["clean"] Nothing 0
 run (Build rs mArg tgt rba v lint tim) = runHelper rba lint tim rs mArg tgt v
 run (Test ts mArg rba v lint tim)      = runHelper rba lint tim ("test" : ts) mArg Nothing v

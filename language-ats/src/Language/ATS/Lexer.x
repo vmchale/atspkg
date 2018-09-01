@@ -147,7 +147,7 @@ tokens :-
     <0> "//".*                   { tok (\p s -> alex $ CommentLex p s) }
     <0> @c_block                 { tok (\p s -> alex $ CBlockLex p s) }
     <0> "#define".*              { tok (\p s -> alex $ MacroBlock p s) }
-    <0> @if_block                { tok (\p s -> alex $ MacroBlock p s) }      
+    <0> @if_block                { tok (\p s -> alex $ MacroBlock p s) }
 
     -- keywords
     <0> fun                      { tok (\p _ -> alex $ Keyword p KwFun) }
@@ -329,7 +329,7 @@ tok f (p,_,_,s) len = f p (take len s)
 data Addendum = None
               | Plus
               | Minus
-              deriving (Eq, Generic, NFData)
+              deriving (Show, Eq, Generic, NFData)
 
 -- TODO ideally we'd handle this as an internal error later in the parser.
 get_staload (Keyword _ (KwStaload b)) = b
@@ -423,7 +423,7 @@ data Keyword = KwFun
              | KwMacdef
              | KwDatasort
              | KwException
-             deriving (Eq, Generic, NFData)
+             deriving (Show, Eq, Generic, NFData)
 
 data Token = Identifier AlexPosn String
            | SpecialIdentifier AlexPosn String
@@ -452,7 +452,7 @@ data Token = Identifier AlexPosn String
            | SpecialBracket AlexPosn
            | FixityTok AlexPosn String
            | End
-           deriving (Eq, Generic, NFData)
+           deriving (Show, Eq, Generic, NFData)
 
 instance Pretty Addendum where
     pretty Plus = "+"
