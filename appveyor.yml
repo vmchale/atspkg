@@ -12,7 +12,7 @@ test_script:
 - cabal update
 - cabal new-build all
 - ps: Get-ChildItem . -name -recurse atspkg.exe
-- ps: Copy-Item c:\\stack\\.stack-work\\install\\81831b05\\bin\\atspkg.exe atspkg-x86_64-pc-windows.exe
+- ps: Copy-Item dist-newstyle\build\x86_64-windows\ghc-8.4.3\ats-pkg-3.2.1.11\x\atspkg\opt\build\atspkg\atspkg.exe atspkg-x86_64-pc-windows.exe
 - ps: Push-AppveyorArtifact atspkg-x86_64-pc-windows.exe
 
 deploy:
