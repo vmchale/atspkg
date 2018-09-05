@@ -18,6 +18,7 @@ import           System.Directory             (doesFileExist)
 import           System.Exit                  (exitFailure)
 import           System.IO                    (hPutStr, stderr)
 import           System.Process               (readCreateProcess, shell)
+import           Text.Megaparsec              (errorBundlePretty)
 import           Text.PrettyPrint.ANSI.Leijen (pretty)
 import           Text.Toml
 
@@ -99,7 +100,7 @@ parseToml p = do
             w <- asInt =<< HM.lookup "width" x
             cf <- asBool =<< HM.lookup "clang-format" x
             pure (r, w, cf)
-        Left e  -> printFail $ parseErrorPretty e
+        Left e  -> printFail $ errorBundlePretty e
 
 printCustom :: Eq a => ATS a -> IO String
 printCustom ats = do

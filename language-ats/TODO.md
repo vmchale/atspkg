@@ -15,6 +15,7 @@
 - [ ] Parse `fix` keyword correctly.
 - [ ] Lambdas in static functions
 - [ ] Handle `extern prval {A:prop}{B:prop} EMPTY_FUNCTOR {n:nat} : BASE_FUNCTOR_PROP(A, FUNCTOR_PROP(A, n))` correctly
+- [ ] Handle curried args to functions
 # Deficiencies
 - [ ] Error messages
   - [ ] Add test suite for messages

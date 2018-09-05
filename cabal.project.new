@@ -35,5 +35,6 @@ allow-newer:
     template-haskell
     stm
     Cabal
+    megaparsec
 
 max-backjumps: 120000
