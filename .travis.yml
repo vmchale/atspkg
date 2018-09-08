@@ -72,7 +72,7 @@ script:
 - echo $BINPATH2
 - echo $BINPATH3
 - mv $BINPATH1 atspkg-$TARGET
-- mv $BINPATH2 atsfmt-$TARGET
+# - mv $BINPATH2 atsfmt-$TARGET
 - mv $BINPATH3 hs2ats-$TARGET
 - strip atspkg-$TARGET
 # - strip atsfmt-$TARGET
