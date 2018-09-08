@@ -28,7 +28,7 @@ debian:
 poly:
     @poly -e data
 
-dhall-check:
+chall-check:
     atspkg check-set ats-pkg/pkgs/pkg-set.dhall
     cat ats-pkg/dhall/atslib.dhall | dhall
     cat ats-pkg/dhall/config.dhall | dhall
@@ -51,11 +51,11 @@ profile:
     @cp $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) ~/.local/bin
     @cp -f $(fd 'atspkg$' -t x -IH dist-newstyle | tail -n1) ~/.local/bin
 
+#    @strip $(fd 'atsfmt$' -IH dist-newstyle | tail -n1)
+#    @cp ats-format/man/atsfmt.1 ~/.local/share/man/man1
+#    @cp $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) ~/.local/bin
 install:
     @cabal new-build all
-    @cp ats-format/man/atsfmt.1 ~/.local/share/man/man1
-    @strip $(fd 'atsfmt$' -IH dist-newstyle | tail -n1)
-    @cp $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) ~/.local/bin
     @cp -f $(fd 'atspkg$' -t x -IH dist-newstyle | tail -n1) ~/.local/bin
 
 size:

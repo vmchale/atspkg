@@ -6,8 +6,10 @@ module Development.Shake.ATS.Rules ( atsLex
                                    , genLinks
                                    ) where
 
+import           Control.Arrow                  (second)
 import           Control.Monad
 import           Data.Foldable
+import           Data.List                      (isSuffixOf)
 import           Data.Semigroup                 (Semigroup (..))
 import qualified Data.Text.Lazy                 as TL
 import           Development.Shake              hiding (doesDirectoryExist)
@@ -61,7 +63,8 @@ cabalForeign (GHC _ suff) (ForeignCabal cbp' cf' obf') = do
         libName = takeBaseName cf
 
     obf %> \out -> do
-        (v, trDeps) <- liftIO $ getCabalDeps cf
+        let isHaskell path = not (".cabal" `isSuffixOf` path)
+        (v, trDeps) <- liftIO $ second (filter isHaskell) <$> getCabalDeps cf
 
         ghcV' <- quietly ghcVersion
         let ghcV = maybe ghcV' (drop 1) suff
@@ -80,7 +83,7 @@ cabalForeign (GHC _ suff) (ForeignCabal cbp' cf' obf') = do
 
         let hdr = dropExtension obj ++ "_stub.h"
         liftIO $ copyFile hdr (takeDirectory out </> takeFileName hdr)
-cabalForeign _ _ = mempty -- FXIME error here?
+cabalForeign _ _ = error "CCompiler must be GHC"
 
 -- | Build a @.lats@ file using @atslex@.
 atsLex :: FilePath -- ^ Filepath of @.lats@ file
