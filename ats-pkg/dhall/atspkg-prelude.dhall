@@ -68,6 +68,7 @@ let Debian =
   , manpage : Optional Text
   , binaries : List Text
   , libraries : List Text
+  , headers : List Text
   }
 in
 
@@ -229,6 +230,8 @@ let debian =
   , binaries = []
     : List Text
   , libraries = []
+    : List Text
+  , headers = []
     : List Text
   }
 in

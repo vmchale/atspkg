@@ -1,5 +1,9 @@
 # language-ats
 
+## 1.7.0.5
+
+  * Prettier errors when parsing records
+
 ## 1.7.0.4
 
   * Allow `datatype`, `datavtype`, and `dataview` to work with `and`.

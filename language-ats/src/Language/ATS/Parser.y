@@ -617,6 +617,7 @@ Name : identifier { Unqualified (to_string $1) }
 RecordVal : IdentifierOr eq Expression { ($1, $3) :| [] }
           | RecordVal comma IdentifierOr eq Expression { ($3, $5) :| toList $1 }
           | IdentifierOr eq comma {% left $ Expected $3 "Expression" "," }
+          | identifierSpace {% left $ Expected (token_posn $1) "Record field assignment" (to_string $1) }
 
 -- | Parse a list of types in a record
 Records : IdentifierOr eq Type { ($1, $3) :| [] }

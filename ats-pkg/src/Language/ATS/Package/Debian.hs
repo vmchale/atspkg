@@ -25,6 +25,7 @@ data Debian = Debian { package     :: Text
                      , manpage     :: Maybe Text
                      , binaries    :: [Text]
                      , libraries   :: [Text]
+                     , headers     :: [Text]
                      }
                      deriving (Generic, Binary, Interpret)
 
@@ -45,17 +46,21 @@ debRules :: Debian -> Rules ()
 debRules deb =
     unpack (target deb) %> \out -> do
 
-        need (unpack <$> binaries deb)
+        traverse_ need [ unpack <$> binaries deb
+                       , unpack <$> libraries deb
+                       , unpack <$> headers deb
+                       ]
 
         let packDir = unpack (package deb)
-            makeRel = (("target/" ++ packDir ++ "/") ++)
+            makeRel = (("target" </> packDir) </>)
             debianDir = makeRel "/DEBIAN"
             binDir = makeRel "/usr/local/bin"
             libDir = makeRel "/usr/local/lib"
             manDir = makeRel "/usr/local/share/man/man1"
+            includeDir = makeRel "/usr/local/include"
 
         traverse_ (liftIO . createDirectoryIfMissing True)
-            [ binDir, debianDir, manDir ]
+            [ binDir, debianDir, manDir, includeDir ]
 
         fold $ do
             mp <- manpage deb
@@ -63,8 +68,9 @@ debRules deb =
                 need [unpack mp] *>
                 copyFile' (unpack mp) (manDir ++ "/" ++ takeFileName (unpack mp))
 
-        zipWithM_ copyFile' (unpack <$> binaries deb) (((binDir ++ "/") ++) . unpack <$> binaries deb)
-        zipWithM_ copyFile' (unpack <$> libraries deb) (((libDir ++ "/") ++) . unpack <$> libraries deb)
+        zipWithM_ copyFile' (unpack <$> binaries deb) ((binDir </>) . unpack <$> binaries deb)
+        zipWithM_ copyFile' (unpack <$> libraries deb) ((libDir </>) . unpack <$> libraries deb)
+        zipWithM_ copyFile' (unpack <$> headers deb) ((includeDir </>) . unpack <$> headers deb)
 
         writeFileChanged (debianDir ++ "/control") (control deb)
 
