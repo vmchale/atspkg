@@ -3,7 +3,8 @@
 ## 3.3.2.0
 
   * Update `Debian` type and adjust prelude accordingly
-  * Allow debian packages built to include header files and libraries.
+  * Allow Debian packages built to include header files and libraries.
+  * Bug fixes related to Debian packaging.
 
 ## 3.2.1.8
 
