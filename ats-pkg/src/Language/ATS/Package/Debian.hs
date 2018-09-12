@@ -63,8 +63,6 @@ debRules deb =
             manDir = makeRel "usr/local/share/man/man1"
             includeDir = makeRel "usr/local/include"
 
-        liftIO $ print debianDir
-
         traverse_ (liftIO . createDirectoryIfMissing True)
             [ binDir, debianDir, manDir, includeDir ]
 

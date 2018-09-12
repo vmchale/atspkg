@@ -51,11 +51,11 @@ profile:
     @cp $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) ~/.local/bin
     @cp -f $(fd 'atspkg$' -t x -IH dist-newstyle | tail -n1) ~/.local/bin
 
+#    @strip $(fd 'atsfmt$' -IH dist-newstyle | tail -n1)
+#    @cp ats-format/man/atsfmt.1 ~/.local/share/man/man1
+#    @cp $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) ~/.local/bin
 install:
     @cabal new-build all
-    @strip $(fd 'atsfmt$' -IH dist-newstyle | tail -n1)
-    @cp ats-format/man/atsfmt.1 ~/.local/share/man/man1
-    @cp $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) ~/.local/bin
     @cp -f $(fd 'atspkg$' -t x -IH dist-newstyle | tail -n1) ~/.local/bin
 
 size:
