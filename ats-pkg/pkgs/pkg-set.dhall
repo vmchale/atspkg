@@ -39,6 +39,9 @@ let unistring =
     makeGnuPkg { version = x, name = "unistring" }
 in
 
+-- http://phash.org/releases/pHash-0.9.6.tar.gz
+-- http://cimg.eu/files/CImg_latest.zip
+-- https://ffmpeg.org/releases/ffmpeg-4.0.2.tar.bz2
 let fastArithmetic = https://hackage.haskell.org/package/fast-arithmetic/src/pkg.dhall
 in
 
