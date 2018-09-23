@@ -28,7 +28,7 @@ debian:
 poly:
     @poly -e data
 
-chall-check:
+dhall-check:
     atspkg check-set ats-pkg/pkgs/pkg-set.dhall
     cat ats-pkg/dhall/atslib.dhall | dhall
     cat ats-pkg/dhall/config.dhall | dhall

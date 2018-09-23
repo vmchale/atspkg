@@ -6,6 +6,7 @@
 
 module Main where
 
+import           Data.Function         ((&))
 import           Language.ATS.Generate
 import           Options.Generic
 
@@ -17,4 +18,5 @@ data Program = Program { src    :: FilePath <?> "Haskell source file"
 main :: IO ()
 main = do
     x <- getRecord "Generate ATS types for Haskell source code" :: IO Program
-    genATSTypes (unHelpful . src $ x) (unHelpful . target $ x) (unHelpful . cpphs $ x)
+    let go = (x &) . (unHelpful .)
+    genATSTypes (go src) (go target) (go cpphs)

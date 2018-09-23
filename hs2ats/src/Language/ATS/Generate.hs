@@ -179,7 +179,7 @@ process p = fmap (unlines . drop 1 . lines) . runCpphs defaultCpphsOptions p
 
 genATSTypes :: FilePath -- ^ Haskell source file
             -> FilePath -- ^ @.sats@ file to be generated
-            -> Bool -- ^ Whether to use pre-process the Haskell source (use this if you use @{#- LANGUAGE CPP #-}@ anywhere)
+            -> Bool -- ^ Whether to use pre-process the Haskell source (use this if you use @{\#- LANGUAGE CPP \#-}@ anywhere)
             -> IO ()
 genATSTypes p p' withCPP = do
     let proc = bool pure (process p) withCPP
