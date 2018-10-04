@@ -15,10 +15,10 @@ import qualified Data.Text.Lazy                 as TL
 import           Development.Shake              hiding (doesDirectoryExist)
 import           Development.Shake.ATS.Generate
 import           Development.Shake.ATS.Type     hiding (ATSTarget (..))
-import           Development.Shake.C
-import           Development.Shake.Cabal        hiding (GHC)
+import           Development.Shake.Cabal
 import           Development.Shake.FilePath
 import           Development.Shake.Version
+import           Language.ATS
 import           Language.ATS.Generate
 import           System.Directory
 
@@ -38,7 +38,7 @@ genLinks dats link =
     link %> \out -> liftIO $ do
         contents <- readFile dats
         let proc = generateLinks contents
-        writeFile out (either undefined id proc) -- FIXME better error
+        either printErr (flip writeFile out) proc
 
 -- | Get subdirectories recursively.
 getSubdirs :: FilePath -> IO [FilePath]
@@ -53,7 +53,7 @@ getSubdirs p = do
 
 -- | These rules take a @.cabal@ file and the @.o@ file to be produced from
 -- them, building the @.o@ file.
-cabalForeign :: CCompiler -> ForeignCabal -> Rules () -- TODO HsCompiler?
+cabalForeign :: HsCompiler -> ForeignCabal -> Rules ()
 cabalForeign (GHC _ suff) (ForeignCabal cbp' cf' obf') = do
 
     let cf = TL.unpack cf'
@@ -83,7 +83,7 @@ cabalForeign (GHC _ suff) (ForeignCabal cbp' cf' obf') = do
 
         let hdr = dropExtension obj ++ "_stub.h"
         liftIO $ copyFile hdr (takeDirectory out </> takeFileName hdr)
-cabalForeign _ _ = error "CCompiler must be GHC"
+cabalForeign _ _ = error "HsCompiler must be GHC"
 
 -- | Build a @.lats@ file using @atslex@.
 atsLex :: FilePath -- ^ Filepath of @.lats@ file

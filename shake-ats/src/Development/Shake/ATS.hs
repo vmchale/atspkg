@@ -43,7 +43,9 @@ import           Development.Shake                 hiding (doesFileExist, getEnv
 import           Development.Shake.ATS.Environment
 import           Development.Shake.ATS.Rules
 import           Development.Shake.ATS.Type
-import           Development.Shake.C
+import           Development.Shake.C               hiding (GHC)
+import qualified Development.Shake.C               as C
+import           Development.Shake.Cabal
 import           Development.Shake.FilePath
 import           Development.Shake.Version
 import           Language.ATS
@@ -140,7 +142,7 @@ patsEnv cfg path = EchoStderr False :
 atsToC :: FilePath -> FilePath
 atsToC = (-<.> "c") . ((".atspkg" </> "c") </>)
 
-ghcV :: CCompiler -> [ForeignCabal] -> Action String
+ghcV :: HsCompiler -> [ForeignCabal] -> Action String
 ghcV (GHC _ suff) hsLibs' = maybe def' (fmap (drop 1)) (pure <$> suff) where
     def' = case hsLibs' of
         [] -> pure undefined
@@ -157,11 +159,12 @@ hsAts (ATSGen x y z) = genATS x y z
 satsGen :: HATSGen -> Rules ()
 satsGen (HATSGen x y) = genLinks x y
 
--- /.atspkg/contrib/atscntrb-hx-libgmp
+ccToHsc :: CCompiler -> HsCompiler
+ccToHsc (C.GHC pref suff) = GHC pref suff
+ccToHsc _                 = GHC Nothing Nothing
 
 -- | Rules for generating binaries or libraries from ATS code. This is very
--- general; use 'defaultATSTarget' for sensible defaults that can be modified
--- with the provided lenses.
+-- general; use 'defaultATSTarget' for sensible defaults.
 atsBin :: ATSTarget -> Rules ()
 atsBin ATSTarget{..} = do
 
@@ -169,7 +172,7 @@ atsBin ATSTarget{..} = do
 
     traverse_ hsAts _genTargets
 
-    traverse_ (cabalForeign (_cc _toolConfig)) _hsLibs
+    traverse_ (cabalForeign (ccToHsc $ _cc _toolConfig)) _hsLibs
 
     let cTargets = atsToC <$> _src
 
@@ -196,7 +199,7 @@ atsBin ATSTarget{..} = do
 
         need (h' cTargets)
 
-        ghcV' <- ghcV (_cc _toolConfig) _hsLibs
+        ghcV' <- ghcV (ccToHsc $ _cc _toolConfig) _hsLibs
 
         cconfig'' <- cconfig _toolConfig _libs _gc (makeCFlags _cFlags _hsLibs ghcV' _gc)
 

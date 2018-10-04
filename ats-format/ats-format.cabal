@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: ats-format
-version: 0.2.0.29
+version: 0.2.0.30
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2017-2018 Vanessa McHale
@@ -15,6 +15,7 @@ extra-source-files:
     man/atsfmt.1
     .atsfmt.toml
 extra-doc-files: README.md
+                 CHANGELOG.md
 
 source-repository head
     type: darcs

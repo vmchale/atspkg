@@ -27,6 +27,7 @@
 - ignore: {name: Functor law, within: [Language.ATS.PrettyPrint]}
 - ignore: {name: Evaluate, within: [Language.ATS.Generate]}
 - ignore: {name: Use foldr}
+- ignore: {name: Use section}
 
 - fixity: infixr 8 .*
 - fixity: infixr 3 ***

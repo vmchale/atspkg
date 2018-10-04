@@ -22,7 +22,11 @@ import           Text.Megaparsec              (errorBundlePretty)
 import           Text.PrettyPrint.ANSI.Leijen (pretty)
 import           Text.Toml
 
-data Program = Program { _path :: Maybe FilePath, _inplace :: Bool, _noConfig :: Bool, _defaultConfig :: Bool }
+data Program = Program { _path          :: Maybe FilePath
+                       , _inplace       :: Bool
+                       , _noConfig      :: Bool
+                       , _defaultConfig :: Bool
+                       }
 
 takeBlock :: String -> (String, String)
 takeBlock ('%':'}':ys) = ("", ('%':) . ('}':) $ ys)
@@ -61,7 +65,7 @@ file = Program
         <> help "Generate default configuration file in the current directory")
 
 versionInfo :: Parser (a -> a)
-versionInfo = infoOption ("madlang version: " ++ showVersion version) (short 'V' <> long "version" <> help "Show version")
+versionInfo = infoOption ("atsfmt version: " ++ showVersion version) (short 'V' <> long "version" <> help "Show version")
 
 wrapper :: ParserInfo Program
 wrapper = info (helper <*> versionInfo <*> file)
@@ -91,11 +95,14 @@ asBool (VBoolean True)  = Just True
 asBool (VBoolean False) = Just False
 asBool _                = Nothing
 
+defaults :: (Float, Int, Bool)
+defaults = (0.6, 120, False)
+
 parseToml :: String -> IO (Float, Int, Bool)
 parseToml p = do
     f <- TIO.readFile p
     case parseTomlDoc p f of
-        Right x -> pure . fromMaybe (0.6, 120, False) $ do
+        Right x -> pure . fromMaybe defaults $ do
             r <- asFloat =<< HM.lookup "ribbon" x
             w <- asInt =<< HM.lookup "width" x
             cf <- asBool =<< HM.lookup "clang-format" x
@@ -135,4 +142,4 @@ pick (Program (Just p) False nc _)  = (genErr nc . parse) =<< readFile p
 pick (Program Nothing _ nc False)   = (genErr nc . parse) =<< getContents
 pick (Program Nothing _ _ True)     = defaultConfig ".atsfmt.toml"
 pick (Program (Just p) True True _) = inplace p (fmap ((<> "\n") . printATS) . fancyError . parse)
-pick (Program (Just p) True _ _)    = inplace p ((fmap (<> "\n") . printCustom <=< fancyError) . parse)
+pick (Program (Just p) True _ _)    = inplace p (fmap (<> "\n") . printCustom <=< fancyError . parse)

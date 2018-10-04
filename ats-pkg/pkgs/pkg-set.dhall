@@ -109,7 +109,7 @@ let pkgset =
   , gmp [1,0,1]
   , atomicOps [7,6,4]
   , gc [7,6,6]
-  , fastArithmetic [0,6,0,7]
+  , fastArithmetic [0,6,1,1]
   , unistring [0,9,10]
   , atsIncludes [0,3,11]
   , curl [7,60,0]

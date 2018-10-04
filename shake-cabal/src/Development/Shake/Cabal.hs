@@ -32,16 +32,19 @@ import           System.Directory                       (doesFileExist)
 import           System.FilePath                        (pathSeparator)
 import           System.Info                            (arch, os)
 
-data HsCompiler = GHC { _suff :: Maybe String -- ^ Compiler version
+data HsCompiler = GHC { _pref :: Maybe String -- ^ Target architecture
+                      , _suff :: Maybe String -- ^ Compiler version
                       }
                 | GHCJS { _suff :: Maybe String -- ^ Compiler version
                         }
 
 hsCompiler :: HsCompiler -> String
-hsCompiler (GHC Nothing)    = "ghc"
-hsCompiler (GHC (Just v))   = "ghc-" ++ v
-hsCompiler (GHCJS Nothing)  = "ghcjs"
-hsCompiler (GHCJS (Just v)) = "ghcjs-" ++ v
+hsCompiler (GHC Nothing Nothing)       = "ghc"
+hsCompiler (GHC Nothing (Just v))      = "ghc-" ++ v
+hsCompiler (GHC (Just arch') (Just v)) = arch' ++ "-ghc-" ++ v
+hsCompiler (GHC (Just arch') Nothing)  = arch' ++ "-ghc"
+hsCompiler (GHCJS Nothing)             = "ghcjs"
+hsCompiler (GHCJS (Just v))            = "ghcjs-" ++ v
 
 -- | E.g. @x86_64-linux@
 platform :: String
