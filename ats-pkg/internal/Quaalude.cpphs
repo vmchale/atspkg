@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# LANGUAGE FlexibleContexts #-}
 
 #ifdef MIN_VERSION_containers
@@ -207,13 +206,6 @@ makeExe = case os of
 
 hex :: Int -> String
 hex = flip showHex mempty
-
-instance Semigroup a => Semigroup (Action a) where
-    (<>) a b = (<>) <$> a <*> b
-
-instance (Semigroup a, Monoid a) => Monoid (Action a) where
-    mempty = pure mempty
-    mappend = (<>)
 
 -- | Same as "Text.PrettyPrint.ANSI.Leijen"'s @<$>@, but doesn't clash with the
 -- prelude.

@@ -9,6 +9,8 @@ packages: language-ats
 
 documentation: true
 
+allow-boot-library-installs: true
+
 constraints:
   -- ats-format +development -static,
   ats-pkg +development -eventlog -profile,
