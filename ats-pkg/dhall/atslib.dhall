@@ -1,7 +1,7 @@
 {- Dhall prelude imports -}
-let map = http://hackage.haskell.org/package/dhall/src/Prelude/List/map
+let map =  http://hackage.haskell.org/package/dhall/src/Prelude/List/map
 in
-let concat = http://hackage.haskell.org/package/dhall/src/Prelude/List/concat
+let concat = https://raw.githubusercontent.com/dhall-lang/Prelude/master/List/concat
 in
 
 {- ATSPackage parts -}
