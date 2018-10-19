@@ -7,8 +7,8 @@ cache:
 
 before_test:
 - choco install 7zip
-- choco install ghc
-- choco install cabal-8.4.4
+- choco install ghc-8.4.4
+- choco install cabal
 
 test_script:
 - refreshenv
