@@ -7,13 +7,13 @@ cache:
 
 before_test:
 - choco install 7zip
-- choco install ghc-8.4.4
+- choco install ghc
 - choco install cabal
 
 test_script:
 - refreshenv
 - cabal update
-- cabal new-build all -w ghc-8.4.4
+- cabal new-build all
 - ps: $directory = Get-ChildItem . -name -recurse atspkg.exe
 - ps: Copy-Item $directory atspkg-x86_64-pc-windows.exe
 - ps: Push-AppveyorArtifact atspkg-x86_64-pc-windows.exe
