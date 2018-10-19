@@ -13,7 +13,7 @@ before_test:
 test_script:
 - refreshenv
 - cabal update
-- cabal new-build all
+- cabal new-build all -w ghc-8.4.4
 - ps: $directory = Get-ChildItem . -name -recurse atspkg.exe
 - ps: Copy-Item $directory atspkg-x86_64-pc-windows.exe
 - ps: Push-AppveyorArtifact atspkg-x86_64-pc-windows.exe
