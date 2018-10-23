@@ -1,6 +1,6 @@
 # ats-pkg
 
-## 3.2.2.1
+## 3.2.2.4
 
   * Fix `dhall/atslib.dhall` file that is embedded into the binary
 
