@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.2.2.1
+
+  * Fix `dhall/atslib.dhall` file that is embedded into the binary
+
 ## 3.3.2.0
 
   * Update `Debian` type and adjust prelude accordingly
