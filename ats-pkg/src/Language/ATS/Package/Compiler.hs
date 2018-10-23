@@ -37,6 +37,8 @@ packageCompiler directory = do
     bytes <- fmap Tar.write . Tar.pack directory $ fmap (drop $ length (directory :: String) + 1) files
     BS.writeFile (directory ++ ".tar.gz") (compress bytes)
 
+-- TODO:
+-- http://ats-lang.sourceforge.net/IMPLEMENT/Postiats/ATS2-Postiats-0.3.12.tgz ?
 pkgUrl :: Version -> String
 pkgUrl v = "https://github.com/vmchale/atspkg/releases/download/compiler/ATS2-Postiats-" ++ show v ++ ".tar.gz"
 

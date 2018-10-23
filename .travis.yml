@@ -16,7 +16,7 @@ addons:
 matrix:
   include:
 
-  - env: TARGET=x86_64-unknown-linux GHC=8.4.3
+  - env: TARGET=x86_64-unknown-linux GHC=8.4.4
     addons:
       apt:
         update: true
@@ -37,7 +37,7 @@ matrix:
         - cabal-install-2.2
 
   # OS X
-  - env: TARGET=x86_64-apple-darwin GHC=8.4.3
+  - env: TARGET=x86_64-apple-darwin GHC=8.4.4
     os: osx
 
 before_install:
