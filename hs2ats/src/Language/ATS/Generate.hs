@@ -46,8 +46,8 @@ qnameToString _                    = unsupported "qnameToString"
 -- should we allow user-defined string map?
 stringTypeConv :: String -> ErrM String
 stringTypeConv "Integer" = Right "Intinf"
-stringTypeConv "String"  = Right "string"
-stringTypeConv "CString" = Right "string"
+stringTypeConv "String"  = Right "Strptr1"
+stringTypeConv "CString" = Right "Strptr1"
 stringTypeConv "Word"    = Right "uint"
 stringTypeConv "CUInt"   = Right "uint"
 stringTypeConv "Int"     = Right "int"
