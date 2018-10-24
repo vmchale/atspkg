@@ -35,7 +35,7 @@ dhall-check:
     cat ats-pkg/dhall/atspkg-prelude.dhall | dhall
 
 ci: install
-    @cabal new-test all -w ghc-8.4.3
+    @cabal new-test all
     shellcheck -e SC2016 bash/install.sh
     shellcheck bash/upload
     yamllint .stylish-haskell.yaml
@@ -47,7 +47,7 @@ ci: install
     hlint ats-pkg language-ats ats-format shake-cabal shake-c
 
 profile:
-    @cabal new-build all -p --enable-profiling -w ghc-8.4.3
+    @cabal new-build all -p --enable-profiling
     @cp $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) ~/.local/bin
     @cp -f $(fd 'atspkg$' -t x -IH dist-newstyle | tail -n1) ~/.local/bin
 
@@ -55,7 +55,7 @@ profile:
 #    @cp ats-format/man/atsfmt.1 ~/.local/share/man/man1
 #    @cp $(fd 'atsfmt$' -IH dist-newstyle | tail -n1) ~/.local/bin
 install:
-    @cabal new-build all -w ghc-8.4.4
+    @cabal new-build all
     @cp -f $(fd 'atspkg$' -t x -IH dist-newstyle | tail -n1) ~/.local/bin
 
 size:
