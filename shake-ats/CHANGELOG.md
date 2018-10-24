@@ -1,5 +1,9 @@
 # shake-ats
 
+## 1.10.1.0
+
+  * `genATS` no longer takes `cpphs` parameter
+
 ## 1.10.0.0
 
   * Make `cabalForeign` take a `HsCompiler` instead of a `CCompiler`.

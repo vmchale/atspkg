@@ -10,7 +10,6 @@ module Language.ATS.Generate
     ) where
 
 import           Control.Arrow
-import           Data.Bool                    (bool)
 import           Data.Char                    (toUpper)
 import           Data.Either                  (lefts, rights)
 import           Data.Foldable
@@ -20,7 +19,6 @@ import           Language.ATS                 as ATS
 import           Language.ATS.Generate.Error
 import           Language.Haskell.Exts
 import           Language.Haskell.Exts.Syntax as HS
-import           Language.Preprocessor.Cpphs  (defaultCpphsOptions, runCpphs)
 import           Lens.Micro                   (over, _head)
 import           Text.Casing                  (quietSnake)
 
@@ -174,15 +172,10 @@ generateATS file hsSrc = modulePrint <$> case parseModuleWithMode extends hsSrc 
     ParseOk x            -> Right x
     ParseFailed loc' msg -> syntaxError (loc' { srcFilename = file }) msg
 
-process :: FilePath -> String -> IO String
-process p = fmap (unlines . drop 1 . lines) . runCpphs defaultCpphsOptions p
-
 genATSTypes :: FilePath -- ^ Haskell source file
             -> FilePath -- ^ @.sats@ file to be generated
-            -> Bool -- ^ Whether to use pre-process the Haskell source (use this if you use @{\#- LANGUAGE CPP \#-}@ anywhere)
             -> IO ()
-genATSTypes p p' withCPP = do
-    let proc = bool pure (process p) withCPP
-    contents <- proc =<< readFile p
+genATSTypes p p' = do
+    contents <- readFile p
     let warnDo (x, es) = traverse_ displayErr es *> writeFile p' x
     either displayErr warnDo (generateATS p contents)

@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.2.3.0
+
+  * Update to not use `cpphs`
+
 ## 3.2.2.4
 
   * Fix `dhall/atslib.dhall` file that is embedded into the binary

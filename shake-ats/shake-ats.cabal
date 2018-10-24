@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: shake-ats
-version: 1.10.0.1
+version: 1.10.1.0
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -41,7 +41,7 @@ library
         base >=4.9 && <5,
         language-ats -any,
         shake-ext >=3.0.0.0,
-        hs2ats >=0.2.0.1,
+        hs2ats >=0.4.0.0,
         directory -any,
         microlens -any,
         text -any,
@@ -50,9 +50,9 @@ library
         binary -any,
         shake-cabal -any,
         shake-c >=0.4.0.0
-    
+
     if flag(development)
         ghc-options: -Werror
-    
+
     if impl(ghc >=8.0)
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates

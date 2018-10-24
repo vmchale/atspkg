@@ -15,7 +15,7 @@ manufacturer = case os of
 
 targetArch :: String
 targetArch = g [arch, manufacturer, os]
-    where g = mconcat . intersperse "-"
+    where g = fold . intersperse "-"
 
 atspkgPath :: IO String
 atspkgPath = do

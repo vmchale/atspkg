@@ -1,10 +1,5 @@
+{-# LANGUAGE CPP              #-}
 {-# LANGUAGE FlexibleContexts #-}
-
-#ifdef MIN_VERSION_containers
-#if MIN_VERSION_containers(0,6,0)
-#define HAVE_containers
-#endif
-#endif
 
 module Quaalude ( hex
                 , bool
@@ -143,9 +138,7 @@ import           Data.Binary
 import           Data.Bool                    (bool)
 import           Data.ByteString.Lazy         (ByteString)
 import qualified Data.ByteString.Lazy         as BSL
-#ifdef HAVE_containers
 import           Data.Containers.ListUtils    (nubOrd)
-#endif
 import           Data.Foldable                (fold, traverse_)
 import           Data.Functor                 (($>))
 #if !MIN_VERSION_base(4,11,0)
@@ -187,13 +180,8 @@ makeExecutable :: FilePath -> IO ()
 makeExecutable = flip setFileMode ownerModes
 #endif
 
-#ifdef HAVE_containers
 nubSpecial :: (Ord a) => [[a]] -> [[a]]
 nubSpecial = fmap pure . nubOrd . join
-#else
-nubSpecial :: (Eq a) => [[a]] -> [[a]]
-nubSpecial = fmap pure . nub . join
-#endif
 
 makeExe :: String
 makeExe = case os of

@@ -358,7 +358,7 @@ pkgToAction mStr setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf 
           unpackLinks (t, t') = HATSGen (unpack t) (unpack t')
 
           unpackTgt :: TargetPair -> ATSGen
-          unpackTgt (TargetPair t t' b) = ATSGen (unpack t) (unpack t') b
+          unpackTgt (TargetPair t t' _) = ATSGen (unpack t) (unpack t')
 
           specialDeps = ".atspkg" </> "deps" ++ maybe "" ("-" <>) tgt
           flags = ".atspkg" </> "flags"

@@ -16,6 +16,16 @@ addons:
 matrix:
   include:
 
+  - env: TARGET=x86_64-unknown-linux GHC=8.6.1
+    addons:
+      apt:
+        update: true
+        sources:
+        - hvr-ghc
+        packages:
+        - ghc-8.6.1
+        - cabal-install-2.4
+
   - env: TARGET=x86_64-unknown-linux GHC=8.4.4
     addons:
       apt:
@@ -23,7 +33,7 @@ matrix:
         sources:
         - hvr-ghc
         packages:
-        - ghc-8.4.3
+        - ghc-8.4.4
         - cabal-install-2.2
 
   - env: TARGET=x86_64-unknown-linux GHC=8.2.2

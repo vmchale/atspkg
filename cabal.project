@@ -7,9 +7,12 @@ packages: language-ats
         , shake-cabal
         , shake-c
 
-documentation: true
+-- documentation: true
 
 allow-boot-library-installs: true
+
+allow-newer:
+    parallel-io:containers
 
 constraints:
   -- ats-format +development -static,

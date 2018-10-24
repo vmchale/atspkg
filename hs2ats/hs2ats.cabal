@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: hs2ats
-version: 0.3.0.4
+version: 0.4.0.0
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
@@ -41,12 +41,11 @@ library
         microlens -any,
         ansi-wl-pprint -any,
         composition-prelude -any,
-        deepseq -any,
-        cpphs -any
-    
+        deepseq -any
+
     if flag(development)
         ghc-options: -Werror
-    
+
     if impl(ghc >=8.0)
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
 
@@ -61,10 +60,10 @@ executable hs2ats
         base -any,
         optparse-generic -any,
         hs2ats -any
-    
+
     if flag(development)
         ghc-options: -Werror
-    
+
     if impl(ghc >=8.0)
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
 
@@ -80,10 +79,10 @@ test-suite hs2ats-test
         hspec -any,
         hspec-dirstream -any,
         system-filepath -any
-    
+
     if flag(development)
         ghc-options: -Werror
-    
+
     if impl(ghc >=8.0)
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
 
@@ -97,9 +96,9 @@ benchmark hs2ats-bench
         base -any,
         hs2ats -any,
         criterion -any
-    
+
     if flag(development)
         ghc-options: -Werror
-    
+
     if impl(ghc >=8.0)
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates

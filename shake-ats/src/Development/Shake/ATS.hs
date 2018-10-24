@@ -154,7 +154,7 @@ doLib Executable = pure mempty
 doLib _          = id
 
 hsAts :: ATSGen -> Rules ()
-hsAts (ATSGen x y z) = genATS x y z
+hsAts (ATSGen x y) = genATS x y
 
 satsGen :: HATSGen -> Rules ()
 satsGen (HATSGen x y) = genLinks x y

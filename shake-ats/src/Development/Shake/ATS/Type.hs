@@ -72,7 +72,6 @@ data HATSGen = HATSGen { satsFile :: FilePath -- ^ @.sats@ file containing type 
 
 data ATSGen = ATSGen { _hsFile    :: FilePath -- ^ Haskell file containing types
                      , _atsTarget :: FilePath -- ^ ATS file to be generated
-                     , _cpphs     :: Bool -- ^ Whether to use the C preprocessor on the Haskell code
                      } deriving (Generic, Binary)
 
 -- TODO split off haskell-related types and leave it more general??

@@ -2,4 +2,5 @@ language-ats/test/data/* linguist-vendored
 hs2ats/test/data/* linguist-vendored
 *.y linguist-language=Happy
 *.x linguist-language=Alex
+*.hspphs linguist-language=Haskell
 *.cpphs linguist-language=Haskell
