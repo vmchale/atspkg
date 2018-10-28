@@ -107,7 +107,7 @@ let pkgset =
   , intinf [1,0,8]
   , threadkit [1,0,3]
   , gmp [1,0,1]
-  , atomicOps [7,6,4]
+  , atomicOps [7,6,6]
   , gc [8,0,0]
   , fastArithmetic [0,6,2,0]
   , unistring [0,9,10]
