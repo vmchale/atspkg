@@ -163,8 +163,7 @@ ccToHsc :: CCompiler -> HsCompiler
 ccToHsc (C.GHC pref suff) = GHC pref suff
 ccToHsc _                 = GHC Nothing Nothing
 
--- | Rules for generating binaries or libraries from ATS code. This is very
--- general; use 'defaultATSTarget' for sensible defaults.
+-- | Rules for generating binaries or libraries from ATS code.
 atsBin :: ATSTarget -> Rules ()
 atsBin ATSTarget{..} = do
 

@@ -7,7 +7,7 @@ packages: language-ats
         , shake-cabal
         , shake-c
 
--- documentation: true
+documentation: true
 
 allow-boot-library-installs: true
 
