@@ -49,6 +49,7 @@ library
     exposed-modules:
         Language.ATS.Package
         Distribution.ATS
+    build-tools: cpphs -any
     hs-source-dirs: src
     other-modules:
         Paths_ats_pkg
