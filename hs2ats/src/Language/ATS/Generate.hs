@@ -10,7 +10,6 @@ module Language.ATS.Generate
     ) where
 
 import           Control.Arrow
-import           Data.Bool                    (bool)
 import           Data.Char                    (toUpper)
 import           Data.Either                  (lefts, rights)
 import           Data.Foldable
@@ -183,7 +182,9 @@ genATSTypes :: FilePath -- ^ Haskell source file
             -> Bool -- ^ Whether to use pre-process the Haskell source (use this if you use @{\#- LANGUAGE CPP \#-}@ anywhere)
             -> IO ()
 genATSTypes p p' withCPP = do
-    let proc = bool pure (process p) withCPP
+    let proc = if withCPP
+        then process p
+        else pure
     contents <- proc =<< readFile p
     let warnDo (x, es) = traverse_ displayErr es *> writeFile p' x
     either displayErr warnDo (generateATS p contents)
