@@ -47,7 +47,7 @@ matrix:
         - cabal-install-2.2
 
   # OS X
-  - env: TARGET=x86_64-apple-darwin GHC=8.4.4
+  - env: TARGET=x86_64-apple-darwin GHC=8.6.1
     os: osx
 
 before_install:
@@ -101,7 +101,6 @@ deploy:
   - hs2ats-$TARGET
   on:
     tags: true
-    env: GHC=8.4.3
   provider: releases
   skip_cleanup: true
 
