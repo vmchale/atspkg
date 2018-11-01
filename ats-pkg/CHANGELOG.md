@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.2.4.0
+
+  * Update to use `cpphs` again
+
 ## 3.2.3.0
 
   * Update to not use `cpphs`

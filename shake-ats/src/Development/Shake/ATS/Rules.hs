@@ -26,11 +26,12 @@ import           System.Directory
 -- the equivalent types.
 genATS :: FilePath -- ^ Haskell source
        -> FilePattern -- ^ @.sats@ file to generate
+       -> Bool -- ^ Whether to call cpphs preprocessor
        -> Rules ()
-genATS src' target =
+genATS src' target cpphs' =
     target %> \out -> liftIO $ do
         createDirectoryIfMissing True (takeDirectory out)
-        genATSTypes src' out
+        genATSTypes src' out cpphs'
 
 genLinks :: FilePath -> FilePath -> Rules ()
 genLinks dats link =

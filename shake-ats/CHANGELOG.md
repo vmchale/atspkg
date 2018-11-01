@@ -1,5 +1,9 @@
 # shake-ats
 
+## 1.10.2.0
+
+  * `genATS` takes `cpphs` parameter again
+
 ## 1.10.1.0
 
   * `genATS` no longer takes `cpphs` parameter

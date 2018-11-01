@@ -12,10 +12,11 @@ import           Options.Generic
 
 data Program = Program { src    :: FilePath <?> "Haskell source file"
                        , target :: FilePath <?> "ATS target"
+                       , cpphs  :: Bool <?> "Use cpphs as a preprocessor"
                        } deriving (Generic, ParseRecord)
 
 main :: IO ()
 main = do
     x <- getRecord "Generate ATS types for Haskell source code" :: IO Program
     let go = (x &) . (unHelpful .)
-    genATSTypes (go src) (go target)
+    genATSTypes (go src) (go target) (go cpphs)
