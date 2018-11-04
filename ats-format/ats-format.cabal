@@ -27,6 +27,12 @@ custom-setup
                    cli-setup >=0.1.0.2,
                    filepath -any
 
+flag profile
+    description:
+        Enable profiling
+    default: False
+    manual: True
+
 flag static
     description:
         Make static binaries
@@ -59,6 +65,9 @@ executable atsfmt
         process -any,
         file-embed -any
     
+    if flag(profile)
+        ghc-options: -rtsopts -with-rtsopts=-h
+
     if flag(development)
         ghc-options: -Werror
     
