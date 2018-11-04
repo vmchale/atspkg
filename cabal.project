@@ -12,8 +12,8 @@ packages: language-ats
 allow-boot-library-installs: true
 
 constraints:
-  ats-format +development -static +profile,
-  ats-pkg +development -eventlog +profile,
+  ats-format +development -static -profile,
+  ats-pkg +development -eventlog -profile,
   shake-ext +development, 
   language-ats +development,
   shake-ats +development,
