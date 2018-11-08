@@ -7,6 +7,7 @@
 - [ ] Post-process Haskell documentation to link to ATS source?
 - [ ] Possibly pass `--disable-threads` to configure?
 - [ ] Detect `make` vs. `gmake` for BSDs
+- [ ] Name cross-compiled libraries appropriately
 # Libraries
 - [ ] `shake-ats` should allow builds with `patscc` some other way
 - [ ] Set target triple in `shake-ext`?
