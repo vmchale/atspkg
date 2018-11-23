@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.2.4.2
+
+  * Update `.dhall` files
+
 ## 3.2.4.0
 
   * Update to use `cpphs` again
