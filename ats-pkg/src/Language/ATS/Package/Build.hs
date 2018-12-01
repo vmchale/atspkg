@@ -303,8 +303,6 @@ pkgToAction mStr setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf 
 
         let cdps = if (f bs || f ts) && ("gc" `notElem` (fst <$> cds)) then ("gc", noConstr) : cds else cds where f = any gcBin
 
-        liftIO $ print cdps
-
         mkUserConfig
 
         newFlag <- shouldWrite tgt flags
