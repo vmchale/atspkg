@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.2.4.3
+
+  * Fix bug where `gc` version could not be constrained
+
 ## 3.2.4.2
 
   * Update `.dhall` files
