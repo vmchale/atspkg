@@ -1,6 +1,6 @@
 # ats-pkg
 
-## 3.2.4.3
+## 3.2.4.4
 
   * Fix bug where `gc` version could not be constrained
   * Slightly improved behavior around C package versioning (allow package
