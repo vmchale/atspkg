@@ -2,6 +2,7 @@
 let prelude = http://hackage.haskell.org/package/ats-pkg/src/dhall/atspkg-prelude.dhall
 in
 
+-- https://github.com/facebook/zstd
 {- Packages -}
 let makeGnuPkg =
   λ(rec : { version : List Natural, name: Text}) →
@@ -109,6 +110,7 @@ let pkgset =
   , gmp [1,0,1]
   , atomicOps [7,6,6]
   , gc [8,0,0]
+  , gc [7,6,8]
   , fastArithmetic [0,6,4,2]
   , unistring [0,9,10]
   , atsIncludes [0,3,11]
