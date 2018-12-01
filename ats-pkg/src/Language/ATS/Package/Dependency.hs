@@ -89,8 +89,8 @@ setup :: Verbosity
       -> CCompiler -- ^ C compiler to use
       -> ATSDependency -- ^ ATSDependency itself
       -> IO ()
-setup v' cc' (ATSDependency lib' dirName' _ _ _ _ _ _ _) = do
-    lib'' <- (</> unpack lib') <$> cpkgHome cc'
+setup v' cc' (ATSDependency lib' dirName' _ _ v _ _ _ _) = do
+    lib'' <- (<> "-" <> show v) .  (</> unpack lib') <$> cpkgHome cc'
     b <- doesFileExist lib''
     unless b $ do
         clibSetup v' cc' (unpack lib') (unpack dirName')

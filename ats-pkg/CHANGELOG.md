@@ -3,6 +3,7 @@
 ## 3.2.4.3
 
   * Fix bug where `gc` version could not be constrained
+  * Slightly improved behavior around C package versioning
 
 ## 3.2.4.2
 
