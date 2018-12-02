@@ -118,7 +118,7 @@ let pkgset =
   , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall [0,3,3]
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,8]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,2]
-  , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall [0,1,7]
+  , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall [0,1,8]
   , https://raw.githubusercontent.com/vmchale/either/master/pkg.dhall [0,2,2]
   , https://raw.githubusercontent.com/vmchale/ats-linecount/master/pkg.dhall [0,2,5]
   , https://raw.githubusercontent.com/vmchale/specats/master/pkg.dhall [0,2,3]
