@@ -116,7 +116,7 @@ mkManpage mStr = do
         _      -> pure ()
 
 parens :: String -> String
-parens s = mconcat [ "(", s, ")" ]
+parens s = fold [ "(", s, ")" ]
 
 cfgFile :: FilePath
 cfgFile = ".atspkg" </> "config"
@@ -210,7 +210,7 @@ mkPkg mStr rba lint tim setup rs tgt v = do
     cpus <- getNumCapabilities
     let opt = options rba lint tim cpus v $ pkgToTargets cfg tgt rs
     shake opt $
-        mconcat
+        sequence_
             [ want (pkgToTargets cfg tgt rs)
             , mkClean
             , pkgToAction mStr setup rs tgt cfg
@@ -241,8 +241,8 @@ setTargets rs bins mt = when (null rs) $
         Nothing  -> want bins
 
 bits :: Maybe String -> Maybe String -> [String] -> Rules ()
-bits mStr tgt rs = mconcat $ sequence [ mkManpage, mkInstall tgt, mkConfig ] mStr <>
-    bisequence' [ mkRun, mkTest, mkValgrind ] mStr rs
+bits mStr tgt rs = sequence_ (sequence [ mkManpage, mkInstall tgt, mkConfig ] mStr) <>
+    biaxe [ mkRun, mkTest, mkValgrind ] mStr rs
 
 pkgToTargets :: Pkg -> Maybe String -> [FilePath] -> [FilePath]
 pkgToTargets ~Pkg{..} tgt [] = (toTgt tgt . target <$> bin) <> (unpack . libTarget <$> libraries) <> (unpack . cTarget <$> atsSource)

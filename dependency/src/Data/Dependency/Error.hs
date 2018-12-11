@@ -7,6 +7,7 @@ module Data.Dependency.Error ( ResolveError (..)
                              ) where
 
 import           Control.DeepSeq
+import           Data.Foldable                (fold)
 import           GHC.Generics                 (Generic)
 import           Text.PrettyPrint.ANSI.Leijen
 
@@ -22,5 +23,5 @@ data ResolveError = InternalError
 instance Pretty ResolveError where
     pretty InternalError = red "Error:" <+> "the" <+> squotes "dependency" <+> "package enountered an internal error. Please report this as a bug:\n" <> hang 2 "https://hub.darcs.net/vmchale/ats/issues"
     pretty (NotPresent s) = red "Error:" <+> "the package" <+> squotes (text s) <+> "could not be found.\n"
-    pretty (Conflicts ss s) = red "Error:" <+> "the package" <+> squotes (text s) <+> "conflicts with already in-scope packages: " <+> mconcat (punctuate ", " (fmap (squotes . text) ss))
+    pretty (Conflicts ss s) = red "Error:" <+> "the package" <+> squotes (text s) <+> "conflicts with already in-scope packages: " <+> fold (punctuate ", " (fmap (squotes . text) ss))
     pretty (CircularDependencies s s') = red "Error:" <+> "package" <+> squotes (text s) <+> "and package" <+> squotes (text s') <+> "form a cycle of dependencies"

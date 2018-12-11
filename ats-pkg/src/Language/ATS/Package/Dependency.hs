@@ -66,7 +66,7 @@ fetchDeps v cc' mStr setup' deps cdeps atsBld cfgPath als b' =
 
         let tagBuild str bld =
                 unless (null bld) $
-                    putStrLn (mconcat ["Building ", str, " dependencies..."]) *>
+                    putStrLn (fold ["Building ", str, " dependencies..."]) *>
                     sequence_ bld -- FIXME parallel'
 
         zipWithM_ tagBuild [ "C", "ATS" ] [ cBuild, atsBuild ]

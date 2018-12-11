@@ -132,9 +132,7 @@ cToLib :: CCompiler
        -> CConfig
        -> Rules ()
 cToLib cc sources lib cfg =
-    mconcat [ mconcat objRules
-            , staticLibR cc (g sources) lib cfg
-            ]
+    sequence_ ( staticLibR cc (g sources) lib cfg : objRules)
     where objRules = objectFileR cc cfg <$> g sources <*> pure lib
           g = fmap (-<.> "o")
 

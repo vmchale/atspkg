@@ -17,7 +17,7 @@ import           Control.Monad
 import           Data.Dependency.Error
 import           Data.Dependency.Sort
 import           Data.Dependency.Type
-import           Data.Foldable         (toList)
+import           Data.Foldable         (fold, toList)
 import           Data.List             (groupBy)
 import qualified Data.Map              as M
 import qualified Data.Set              as S
@@ -74,7 +74,7 @@ saturateDeps' :: PackageSet Dependency -> Dependency -> DepM (S.Set Dependency)
 saturateDeps' (PackageSet ps) dep = S.fromList <$> list
     where list = (:) dep <$> (traverse (lookupSet Nothing (crunch ps)) =<< deps)
           deps = sequence [ lookupMap lib ps | lib <- fst <$> _libDependencies dep ]
-          crunch = mconcat . fmap toList . toList
+          crunch = fold . fmap toList . toList
 
 -- | Dependency resolution is guided by the following:
 --
