@@ -1,3 +1,5 @@
+# Upstream
+- [ ] Investigate segfault in `atspkg setup`?
 # Features
 - [ ] `fetching...` should include version number.
 - [ ] shell completions should list targets (?)
@@ -22,6 +24,7 @@
   cross-compilation.
 - [ ] `triple` should be a configuration option
 - [ ] Make cross builds work for `Distribution.ATS`
+- [ ] Make `dpkg` stuff pass `lintian`
 # Generalizations
 - [ ] Make a `generic-package` library for `.a`, `.so`, and binary builds.
 # Bugs

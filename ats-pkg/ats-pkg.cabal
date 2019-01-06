@@ -3,10 +3,10 @@ name:               ats-pkg
 version:            3.2.4.4
 license:            BSD3
 license-file:       LICENSE
-copyright:          Copyright: (c) 2018 Vanessa McHale
+copyright:          Copyright: (c) 2018-2019 Vanessa McHale
 maintainer:         vamchale@gmail.com
 author:             Vanessa McHale
-tested-with:        ghc ==8.4.4 ghc ==8.2.2 ghc ==8.6.1
+tested-with:        ghc ==8.4.4 ghc ==8.2.2 ghc ==8.6.3
 bug-reports:        https://github.com/vmchale/atspkg/issues
 synopsis:           A build tool for ATS
 description:        A collection of scripts to simplify building ATS projects.

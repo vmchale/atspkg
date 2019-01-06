@@ -262,23 +262,29 @@ alt(p,q) : p { $1 }
 optional(p) : p { Just $1 }
             | { Nothing }
 
-ATS : Declarations { ATS (reverse $1) }
+ATS :: { ATS AlexPosn }
+    : Declarations { ATS (reverse $1) }
 
 -- | Parse declarations in a list
-Declarations : { [] }
+Declarations :: { [Declaration AlexPosn] }
+             : { [] }
              | Declarations Declaration { $2 : $1 }
              | Declarations FunDecl { $2 ++ $1 }
              | Declarations ValDecl { $2 ++ $1 }
              | Declarations local ATS in ATS end { Local $2 $3 $5 : $1 }
 
-TypeIn : comma_sep(Type) { $1 }
+TypeIn :: { NonEmpty (Type AlexPosn) }
+       : comma_sep(Type) { $1 }
 
-ExprType : StaticExpression { ConcreteType $1 }
+ExprType :: { Type AlexPosn }
+         : StaticExpression { ConcreteType $1 }
 
-TypeInExpr : comma_sep(alt(Type,ExprType)) { toList $1 }
+TypeInExpr :: { [Type AlexPosn] }
+           : comma_sep(alt(Type,ExprType)) { toList $1 }
 
 -- | Parse a type
-Type : Name parens(TypeInExpr) { Dependent $1 $2 }
+Type :: { Type AlexPosn }
+     : Name parens(TypeInExpr) { Dependent $1 $2 }
      | Name doubleParens { Dependent $1 [] }
      | identifierSpace parens(TypeInExpr) { Dependent (Unqualified $ to_string $1) $2 }
      | identifierSpace { Named (Unqualified $ to_string $1) }
@@ -314,7 +320,8 @@ Type : Name parens(TypeInExpr) { Dependent $1 $2 }
      | Type identifierSpace {% left $ Expected (token_posn $2) "," (to_string $2) }
 
 -- | A comma-separated list of arguments
-Args : Arg { [$1] }
+Args :: { [Arg AlexPosn] }
+     : Arg { [$1] }
      | Args comma Arg { $3 : $1 }
      | Args vbar Arg { [ PrfArg $1 $3 ] }
      | lineComment { [] }
@@ -322,16 +329,19 @@ Args : Arg { [$1] }
      | Args Comment { $1 }
      | { [] }
 
-TypeArg : IdentifierOr { Arg (First $1) }
+TypeArg :: { Arg AlexPosn }
+        : IdentifierOr { Arg (First $1) }
         | IdentifierOr colon Type { Arg (Both $1 $3) }
         | Type { Arg (Second $1) }
         | exclamation IdentifierOr colon {% left $ OneOf $3 [",", ")"] ":" }
 
-Arg : TypeArg { $1 }
+Arg :: { Arg AlexPosn }
+    : TypeArg { $1 }
     | StaticExpression { Arg (Second (ConcreteType $1)) } -- TODO: have some sort of state showing bound variables that we can use to disambiguate types vs. static expressions?
 
 -- | Parse a literal
-Literal : uintLit { UintLit $1 }
+Literal :: { Expression AlexPosn }
+        : uintLit { UintLit $1 }
         | intLit { IntLit $1 }
         | hexLit { HexLit $1 }
         | floatLit { FloatLit $1 }
@@ -340,10 +350,12 @@ Literal : uintLit { UintLit $1 }
         | doubleParens { VoidLiteral $1 }
 
 -- | Parse a list of comma-separated patterns
-PatternIn : comma_sep(Pattern) { reverse (toList $1) }
+PatternIn :: { [Pattern AlexPosn] }
+          : comma_sep(Pattern) { reverse (toList $1) }
 
 -- | Parse a pattern match
-Pattern : Name { PName $1 [] }
+Pattern :: { Pattern AlexPosn }
+        : Name { PName $1 [] }
         | identifierSpace { PName (Unqualified $ to_string $1) [] }
         | identifier doubleParens { PName (Unqualified (to_string $1 ++ "()")) [] }
         | tilde Pattern { Free $2 }
@@ -371,23 +383,30 @@ case_pattern(pat,expr)
     | pat CaseArrow expr { [($1, $2, $3)] }
     | case_pattern(pat, expr) vbar pat CaseArrow expr { ($3, $4, $5) : $1 }
 
-Case : case_pattern(Pattern, Expression) { $1 }
+Case :: { [(Pattern AlexPosn, LambdaType AlexPosn, Expression AlexPosn)] }
+     : case_pattern(Pattern, Expression) { $1 }
 
-StaticCase : case_pattern(Pattern, StaticExpression) { $1 }
+StaticCase :: { [(Pattern AlexPosn, LambdaType AlexPosn, StaticExpression AlexPosn)] }
+           : case_pattern(Pattern, StaticExpression) { $1 }
 
-IfCase : case_pattern(Expression, Expression) { $1 }
+IfCase :: { [(Expression AlexPosn, LambdaType AlexPosn, Expression AlexPosn)] }
+       : case_pattern(Expression, Expression) { $1 }
 
-ExpressionPrf : ExpressionIn { (Nothing, $1) }
+ExpressionPrf :: { (Maybe [Expression AlexPosn], [Expression AlexPosn]) }
+              : ExpressionIn { (Nothing, $1) }
               | ExpressionIn vbar ExpressionIn { (Just $1, $3) }
 
 -- | A list of comma-separated expressions
-ExpressionIn : comma_sep(Expression) { toList $1 }
+ExpressionIn :: { [Expression AlexPosn] }
+             : comma_sep(Expression) { toList $1 }
 
-Tuple : PreExpression comma PreExpression { $3 :| [$1] }
+Tuple :: { NonEmpty (Expression AlexPosn) }
+      : PreExpression comma PreExpression { $3 :| [$1] }
       | Tuple comma PreExpression { $3 :| toList $1 }
 
 -- | Parse an arrow in a case statement
-CaseArrow : plainArrow { Plain $1 }
+CaseArrow :: { LambdaType AlexPosn }
+          : plainArrow { Plain $1 }
           | spear { Spear $1 }
           | proofArrow { ProofArrow $1 }
           | proofSpear { ProofSpear $1 }
@@ -396,7 +415,8 @@ CaseArrow : plainArrow { Plain $1 }
           | minus {% left $ Expected $1 "Arrow" "-" }
           | CaseArrow vbar {% left $ Expected $2 "Expression" "|" }
 
-LambdaArrow : plainArrow { Plain $1 }
+LambdaArrow :: { LambdaType AlexPosn }
+            : plainArrow { Plain $1 }
             | cloref1Arrow { Full $1 "cloref1" } -- FIXME this is a bad heuristic
             | cloptr1Arrow { Full $1 "cloptr1" }
             | lincloptr1Arrow { Full $1 "lincloptr1" }
@@ -408,7 +428,8 @@ LambdaArrow : plainArrow { Plain $1 }
             | closeParen {% left $ Expected $1 "Arrow" ")" }
 
 -- | Expression or named call to an expression
-Expression : identifierSpace PreExpression { Call (Unqualified $ to_string $1) [] [] Nothing [$2] }
+Expression :: { Expression AlexPosn }
+           : identifierSpace PreExpression { Call (Unqualified $ to_string $1) [] [] Nothing [$2] }
            | PreExpression { $1 }
            | openParen comma_sep(PreExpression) vbar PreExpression closeParen { ProofExpr $1 $2 $4 }
            | Expression semicolon Expression { Precede $1 $3 }
@@ -419,13 +440,15 @@ Expression : identifierSpace PreExpression { Call (Unqualified $ to_string $1) [
            | begin Expression extern {% left $ Expected $3 "end" "extern" }
            | Expression prfTransform underscore {% left $ Expected $2 "Rest of expression or declaration" ">>" }
 
-TypeArgs : braces(alt(Type,ExprType)) { [[$1]] }
+TypeArgs :: { [[Type AlexPosn]] }
+         : braces(alt(Type,ExprType)) { [[$1]] }
          | braces(TypeInExpr) { [$1] }
          | TypeArgs braces(alt(Type,ExprType)) { [$2] : $1 }
          | braces(doubleDot) { [[ ImplicitType $1 ]] } -- FIXME only valid on function calls
          | TypeArgs braces(TypeInExpr) { [$2] ++ $1 }
 
-Call : Name doubleParens { Call $1 [] [] Nothing [] }
+Call :: { Expression AlexPosn }
+     : Name doubleParens { Call $1 [] [] Nothing [] }
      | Name parens(ExpressionPrf) { Call $1 [] [] (fst $2) (snd $2) }
      | identifierSpace parens(ExpressionPrf) { Call (Unqualified $ to_string $1) [] [] (fst $2) (snd $2) }
      | Name TypeArgs parens(ExpressionPrf) { Call $1 [] $2 (fst $3) (snd $3) }
@@ -439,14 +462,17 @@ Call : Name doubleParens { Call $1 [] [] Nothing [] }
      | Name openParen ExpressionPrf end {% left $ Expected $4 ")" "end"}
      | Name openParen ExpressionPrf else {% left $ Expected $4 ")" "else"}
 
-StaticArgs : comma_sep(StaticExpression) { reverse (toList $1) }
+StaticArgs :: { [StaticExpression AlexPosn] }
+           : comma_sep(StaticExpression) { reverse (toList $1) }
 
-StaticDecls : StaticDeclaration { [$1] }
+StaticDecls :: { [Declaration AlexPosn] }
+            : StaticDeclaration { [$1] }
             | StaticDecls StaticDeclaration { $2 : $1 }
             | StaticDecls FunDecl { $2 ++ $1 }
             | FunDecl StaticDecls { $1 ++ $2 }
 
-StaticExpression : Name { StaticVal $1 }
+StaticExpression :: { StaticExpression AlexPosn }
+                 : Name { StaticVal $1 }
                  | StaticExpression BinOp StaticExpression { StaticBinary $2 $1 $3 }
                  | intLit { StaticInt $1 }
                  | hexLit { StaticHex $1 }
@@ -476,7 +502,8 @@ StaticExpression : Name { StaticVal $1 }
                  | StaticExpression where braces(ATS) { WhereStaExp $1 $3 }
 
 -- | Parse an expression that can be called without parentheses
-PreExpression : identifier lsqbracket PreExpression rsqbracket { Index $2 (Unqualified $ to_string $1) $3 }
+PreExpression :: { Expression AlexPosn }
+              : identifier lsqbracket PreExpression rsqbracket { Index $2 (Unqualified $ to_string $1) $3 }
               | Literal { $1 }
               | Call { $1 }
               | openParen Tuple closeParen { TupleEx $1 $2 }
@@ -535,11 +562,13 @@ PreExpression : identifier lsqbracket PreExpression rsqbracket { Index $2 (Unqua
               | begin Expression implement {% left $ Expected $3 "end" "implement" }
 
 -- | Parse a termetric
-Termetric : openTermetric StaticExpression closeTermetric { ($1, $2) }
+Termetric :: { (AlexPosn, StaticExpression AlexPosn) }
+          : openTermetric StaticExpression closeTermetric { ($1, $2) }
           | underscore {% left $ Expected $1 "_" "Termination metric" }
           | dollar {% left $ Expected $1 "$" "Termination metric" }
 
-Sort : t0pPlain { T0p None }
+Sort :: { Sort AlexPosn }
+     : t0pPlain { T0p None }
      | t0pCo { T0p Plus }
      | vt0pPlain { Vt0p None }
      | vt0pCo { Vt0p Plus }
@@ -554,34 +583,40 @@ Sort : t0pPlain { T0p None }
      | IdentifierOr { NamedSort $1 }
      | IdentifierOr plus { NamedSort ($1 <> "+") }
 
-QuantifierArgs : comma_sep(IdentifierOr) { reverse (toList $1) }
+QuantifierArgs :: { [String] }
+               : comma_sep(IdentifierOr) { reverse (toList $1) }
                | { [] }
 
 -- FIXME handle [l:addr;n:int]
-Existential : lsqbracket QuantifierArgs colon Sort vbar StaticExpression rsqbracket { Existential $2 False (Just $4) (Just $6) }
+Existential :: { Existential AlexPosn }
+            : lsqbracket QuantifierArgs colon Sort vbar StaticExpression rsqbracket { Existential $2 False (Just $4) (Just $6) }
             | lsqbracket QuantifierArgs colon Sort rsqbracket { Existential $2 False (Just $4) Nothing }
             | openExistential QuantifierArgs colon Sort rsqbracket { Existential $2 True (Just $4) Nothing }
             | openExistential QuantifierArgs colon Sort vbar StaticExpression rsqbracket { Existential $2 True (Just $4) (Just $6) }
             | sqbrackets(StaticExpression) { Existential mempty False Nothing (Just $1) }
 
-Predicates : { [] }
+Predicates :: { [StaticExpression AlexPosn] }
+           : { [] }
            | StaticExpression { [$1] }
            | Predicates semicolon StaticExpression { $3 : $1 }
 
 -- | Parse a universal quantifier on a type
-Universal : lbrace QuantifierArgs rbrace { Universal $2 Nothing [] }
+Universal :: { Universal AlexPosn }
+          : lbrace QuantifierArgs rbrace { Universal $2 Nothing [] }
           | lbrace QuantifierArgs vbar Predicates rbrace { Universal $2 Nothing $4 }
           | lbrace QuantifierArgs colon Sort rbrace { Universal $2 (Just $4) [] }
           | lbrace QuantifierArgs colon Sort vbar Predicates rbrace { Universal $2 (Just $4) $6 }
 
-Implicits : lspecial TypeIn rbracket { [toList $2] }
+Implicits :: { [[Type AlexPosn]] }
+          : lspecial TypeIn rbracket { [toList $2] }
           | Implicits lspecial TypeIn rbracket { toList $3 : $1 }
           | doubleBrackets { [[]] }
           | Implicits doubleBrackets { [] : $1 }
           | lbracket TypeIn rbracket { [toList $2] }
           | Implicits lspecial TypeIn rbracket { toList $3 : $1 }
 
-MaybeImplicit : Implicits { $1 }
+MaybeImplicit :: { [[Type AlexPosn]] }
+              : Implicits { $1 }
               | { [] }
 
 comment_after(p) : p { $1 }
@@ -589,18 +624,22 @@ comment_after(p) : p { $1 }
                  | p lineComment { $1 }
 
 -- | Parse the details of an implementation
-Implementation : comment_after(Universals) FunName MaybeImplicit Universals FunArgs eq Expression { Implement $6 $1 $3 $4 $2 $5 (Right $7) }
+Implementation :: { Implementation AlexPosn }
+               : comment_after(Universals) FunName MaybeImplicit Universals FunArgs eq Expression { Implement $6 $1 $3 $4 $2 $5 (Right $7) }
 
-StaticImplementation : Universals FunName MaybeImplicit Universals FunArgs eq StaticExpression { Implement $6 $1 $3 $4 $2 $5 (Left $7) }
+StaticImplementation :: { Implementation AlexPosn }
+                     : Universals FunName MaybeImplicit Universals FunArgs eq StaticExpression { Implement $6 $1 $3 $4 $2 $5 (Left $7) }
 
 -- | Parse a function name
-FunName : IdentifierOr { Unqualified $1 }
+FunName :: { Name AlexPosn }
+        : IdentifierOr { Unqualified $1 }
         | identifier dollar identifier { Functorial (to_string $1) (to_string $3) }
         | dollar identifier dot IdentifierOr { Qualified $1 (to_string $2) $4 }
         | FunName lineComment { $1 }
 
 -- | Parse a general name
-Name : identifier { Unqualified (to_string $1) }
+Name :: { Name AlexPosn }
+     : identifier { Unqualified (to_string $1) }
      | underscore { Unqualified "_" }
      | foldAt { Unqualified "fold@" }
      | identifier dollar IdentifierOr { Unqualified (to_string $1 ++ ('$' : $3)) }
@@ -614,52 +653,64 @@ Name : identifier { Unqualified (to_string $1) }
      | dollar {% left $ Expected $1 "Name" "$" }
 
 -- | Parse a list of values in a record
-RecordVal : IdentifierOr eq Expression { ($1, $3) :| [] }
+RecordVal :: { NonEmpty (String, Expression AlexPosn) }
+          : IdentifierOr eq Expression { ($1, $3) :| [] }
           | RecordVal comma IdentifierOr eq Expression { ($3, $5) :| toList $1 }
           | IdentifierOr eq comma {% left $ Expected $3 "Expression" "," }
           | identifierSpace {% left $ Expected (token_posn $1) "Record field assignment" (to_string $1) }
 
 -- | Parse a list of types in a record
-Records : IdentifierOr eq Type { ($1, $3) :| [] }
+Records :: { NonEmpty (String, Type AlexPosn) }
+        : IdentifierOr eq Type { ($1, $3) :| [] }
         | Records comma IdentifierOr eq Type { ($3, $5) :| toList $1 }
 
-IdentifiersIn : comma_sep(IdentifierOr) { toList $1 }
+IdentifiersIn :: { [String] }
+              : comma_sep(IdentifierOr) { toList $1 }
 
-OfType : { Nothing }
+OfType :: { Maybe (Type AlexPosn) }
+       : { Nothing }
        | of Type { Just $2 }
 
-StaticExpressionsIn : comma_sep(StaticExpression) { toList $1 }
+StaticExpressionsIn :: { [StaticExpression AlexPosn] }
+                    : comma_sep(StaticExpression) { toList $1 }
 
 -- | Parse a constructor for a sum type
-SumLeaf : vbar Universals identifier { Leaf $2 (to_string $3) [] Nothing }
+SumLeaf :: { Leaf AlexPosn }
+        : vbar Universals identifier { Leaf $2 (to_string $3) [] Nothing }
         | vbar Universals identifierSpace of Type { Leaf $2 (to_string $3) [] (Just $5) }
         | vbar Universals IdentifierOr openParen StaticExpressionsIn closeParen OfType { Leaf $2 $3 $5 $7 } -- FIXME could also be e.g. '0' (static expression)
 
 -- | Parse all constructors of a sum type
-Leaves : SumLeaf { $1 :| [] }
+Leaves :: { NonEmpty (Leaf AlexPosn) }
+       : SumLeaf { $1 :| [] }
        | Leaves SumLeaf { $2 :| toList $1 }
        | Universals identifierSpace of Type { Leaf $1 (to_string $2) [] (Just $4) :| [] }
        | Universals identifier { Leaf $1 (to_string $2) [] Nothing :| [] }
        | Universals identifier openParen StaticExpressionsIn closeParen OfType { Leaf $1 (to_string $2) $4 $6 :| [] }
        | dollar {% left $ Expected $1 "|" "$" }
 
-PreUniversals : { [] }
+PreUniversals :: { [Universal AlexPosn] }
+              : { [] }
               | doubleBraces { [] }
               | PreUniversals Universal { $2 : $1 }
 
-Universals : PreUniversals { reverse $1 }
+Universals :: { [Universal AlexPosn] }
+           : PreUniversals { reverse $1 }
 
 -- | Optionally parse a termetric
-OptTermetric : { Nothing }
+OptTermetric :: { Maybe (StaticExpression AlexPosn) }
+             : { Nothing }
              | Termetric { Just (snd $1) }
 
 -- | Parse a unary operator
+UnOp :: { UnOp AlexPosn }
 UnOp : tilde { Negate }
      | exclamation { Deref }
      | customOperator { SpecialOp (token_posn $1) (to_string $1) }
 
 -- | Parse a binary operator
-BinOp : plus { Add }
+BinOp :: { BinOp AlexPosn }
+      : plus { Add }
       | minus { Sub }
       | div { Div }
       | mult { Mult }
@@ -682,7 +733,8 @@ BinOp : plus { Add }
       | backslash identifierSpace { SpecialInfix $1 ('\\' : to_string $2) }
 
 -- | Optionally parse a function body
-OptExpression : { Nothing }
+OptExpression :: { Maybe (Expression AlexPosn) }
+              : { Nothing }
               | eq Expression { Just $2 }
               | let {% left $ Expected $1 "=" "let" }
               | ifcase {% left $ Expected $1 "=" "ifcase" }
@@ -691,17 +743,20 @@ OptExpression : { Nothing }
               | eq lineComment fun {% left $ Expected $3 "Expression" "=" }
               | lbrace {% left $ Expected $1 "Expression" "{" }
 
-OptStaticExpression : { Nothing }
+OptStaticExpression :: { Maybe (StaticExpression AlexPosn) }
+                    : { Nothing }
                     | eq StaticExpression { Just $2 }
 
 -- | Parse a constructor for a 'dataprop'
-DataPropLeaf : vbar Universals Expression { DataPropLeaf $2 $3 Nothing }
+DataPropLeaf :: { DataPropLeaf AlexPosn }
+             : vbar Universals Expression { DataPropLeaf $2 $3 Nothing }
              | Universals Expression { DataPropLeaf $1 $2 Nothing }
              | vbar Universals Expression of Expression { DataPropLeaf $2 $3 (Just $5) }
              | Universals Expression of Expression { DataPropLeaf $1 $2 (Just $4) }
 
 -- | Parse several constructors for a 'dataprop'
-DataPropLeaves : DataPropLeaf { [$1] }
+DataPropLeaves :: { [DataPropLeaf AlexPosn] }
+               : DataPropLeaf { [$1] }
                | DataPropLeaves DataPropLeaf { $2 : $1 }
                | lineComment { [] }
                | DataPropLeaves lineComment { $1 }
@@ -716,10 +771,12 @@ DataPropLeaves : DataPropLeaf { [$1] }
                | prfTransform {% left $ Expected $1 "Constructor" ">>" }
                | maybeProof {% left $ Expected $1 "Constructor" "?" }
 
-Signature : signature { $1 }
+Signature :: { String }
+          : signature { $1 }
           | colon { "" }
 
-OptType : Signature Type { Just ($1, $2) }
+OptType :: { Maybe (String, Type AlexPosn) }
+        : Signature Type { Just ($1, $2) }
         | { Nothing }
 
 -- | Parse a type signature and optional function body
@@ -738,33 +795,41 @@ preFunction(p)
     | llambda {% left $ Expected $1 "Function signature" "llam" }
     | lsqbracket {% left $ Expected $1 "Function signature" "[" }
 
-PreStaFunction : preFunction(OptStaticExpression) { $1 }
+PreStaFunction :: { PreFunction StaticExpression AlexPosn } 
+               : preFunction(OptStaticExpression) { $1 }
 
-PreFunction : preFunction(OptExpression) { $1 }
+PreFunction :: { PreFunction Expression AlexPosn } 
+            : preFunction(OptExpression) { $1 }
 
 -- | Parse affiliated `sortdef`s
-AndSort : AndSort and IdentifierOr eq Sort { AndD $1 (SortDef $2 $3 (Left $5)) }
+AndSort :: { Declaration AlexPosn }
+        : AndSort and IdentifierOr eq Sort { AndD $1 (SortDef $2 $3 (Left $5)) }
         | sortdef IdentifierOr eq Sort { SortDef $1 $2 (Left $4) }
         | sortdef IdentifierOr eq Universal { SortDef $1 $2 (Right $4) }
 
-StaticDef : eq Type { Right (Nothing, $2) }
+StaticDef :: { Either (StaticExpression AlexPosn, Maybe (Sort AlexPosn)) (Maybe (Type AlexPosn), Type AlexPosn) }
+          : eq Type { Right (Nothing, $2) }
           | eq StaticExpression MaybeAnnot { Left ($2, $3) }
           | colon Type eq StaticExpression { Right (Just $2, ConcreteType $4) } -- FIXME wrong wrong bad!!
 
-MaybeAnnot : colon Sort { Just $2 }
+MaybeAnnot :: { Maybe (Sort AlexPosn) }
+           : colon Sort { Just $2 }
            | { Nothing }
 
-AndStadef : stadef IdentifierOr SortArgs StaticDef { Stadef $2 $3 $4 }
+AndStadef :: { Declaration AlexPosn }
+          : stadef IdentifierOr SortArgs StaticDef { Stadef $2 $3 $4 }
           | stadef IdentifierOr lineComment SortArgs StaticDef { Stadef $2 $4 $5 }
           | stadef Operator SortArgs StaticDef { Stadef $2 $3 $4 }
           | AndStadef and IdentifierOr SortArgs StaticDef { AndD $1 (Stadef $3 $4 $5) }
           | AndStadef and Operator SortArgs StaticDef { AndD $1 (Stadef $3 $4 $5) }
 
-StafunDecl : prfun PreStaFunction { Func $1 (PrFun $2) }
+StafunDecl :: { Declaration AlexPosn } 
+           : prfun PreStaFunction { Func $1 (PrFun $2) }
            | prfn PreStaFunction { Func $1 (PrFn $2) }
 
 -- | Function declaration
-FunDecl : fun PreFunction { [ Func $1 (Fun $2) ] }
+FunDecl :: { [Declaration AlexPosn] }
+        : fun PreFunction { [ Func $1 (Fun $2) ] }
         | fnx PreFunction { [ Func $1 (Fnx $2) ] }
         | castfn PreFunction { [ Func $1 (CastFn $2) ] }
         | fn PreFunction identifier {% left $ Expected (token_posn $3) "=" (to_string $3) }
@@ -785,18 +850,22 @@ FunDecl : fun PreFunction { [ Func $1 (Fun $2) ] }
         | extern identifier {% left $ OneOf (token_posn $2) ["fun", "fn", "prfun", "prfun", "praxi", "castfn", "fnx", "val", "typedef", "vtypedef"] (to_string $2) }
         | extern extern {% left $ OneOf $2 ["fun", "fn", "prfun", "prfun", "praxi", "castfn", "fnx", "val", "typedef", "vtypedef"] "extern" }
 
-IdentifierOr : identifier { to_string $1 }
+IdentifierOr :: { String }
+             : identifier { to_string $1 }
              | identifierSpace { to_string $1 }
              | identifier dollar IdentifierOr { to_string $1 ++ ('$' : $3) }
 
-MaybeType : eq Type { Just $2 }
+MaybeType :: { Maybe (Type AlexPosn) }
+          : eq Type { Just $2 }
           | { Nothing }
 
-FunArgs : { Nothing }
+FunArgs :: { Maybe [Arg AlexPosn] }
+        : { Nothing }
         | openParen Args closeParen { Just $2 }
         | doubleParens { Just [] }
 
-SortArg : IdentifierOr colon Sort { [ SortArg $1 $3 ] }
+SortArg :: { [SortArg AlexPosn] }
+        : IdentifierOr colon Sort { [ SortArg $1 $3 ] }
         | SortArg comma IdentifierOr colon Sort { SortArg $3 $5 : $1 }
         | SortArg comma IdentifierOr { Anonymous (NamedSort $3) : $1 }
         | SortArg comma Sort { Anonymous $3 : $1 }
@@ -804,26 +873,31 @@ SortArg : IdentifierOr colon Sort { [ SortArg $1 $3 ] }
         | Sort { [Anonymous $1] }
         | SortArg Comment { $1 }
 
-SortArgs : parens(SortArg) { Just $1 }
+SortArgs :: { Maybe [SortArg AlexPosn] }
+         : parens(SortArg) { Just $1 }
          | doubleParens { Just [] }
          | { Nothing }
 
-AndViewtype : datavtype IdentifierOr SortArgs eq Leaves { SumViewType $2 $3 $5 }
+AndViewtype :: { Declaration AlexPosn }
+            : datavtype IdentifierOr SortArgs eq Leaves { SumViewType $2 $3 $5 }
             | datavtype IdentifierOr SortArgs eq lineComment Leaves { SumViewType $2 $3 $6 }
             | datavtype lineComment IdentifierOr SortArgs eq Leaves { SumViewType $3 $4 $6 }
             | datavtype lineComment IdentifierOr SortArgs eq lineComment Leaves { SumViewType $3 $4 $7 }
             | AndViewtype and IdentifierOr SortArgs eq Leaves { AndD $1 (SumViewType $3 $4 $6) }
 
-AndView : dataview IdentifierOr SortArgs eq Leaves { DataView $1 $2 $3 $5 }
+AndView :: { Declaration AlexPosn }
+        : dataview IdentifierOr SortArgs eq Leaves { DataView $1 $2 $3 $5 }
         | dataview IdentifierOr SortArgs eq lineComment Leaves { DataView $1 $2 $3 $6 }
         | AndView and IdentifierOr SortArgs eq Leaves { AndD $1 (DataView $2 $3 $4 $6) }
 
-AndType : datatype IdentifierOr SortArgs eq Leaves { SumType $2 $3 $5 }
+AndType :: { Declaration AlexPosn }
+        : datatype IdentifierOr SortArgs eq Leaves { SumType $2 $3 $5 }
         | datatype lineComment IdentifierOr SortArgs eq Leaves { SumType $3 $4 $6 }
         | datatype lineComment IdentifierOr SortArgs eq lineComment Leaves { SumType $3 $4 $7 }
         | AndType and IdentifierOr SortArgs eq Leaves { AndD $1 (SumType $3 $4 $6) }
 
 -- | Parse a declaration defining a type
+TypeDecl :: { Declaration AlexPosn }
 TypeDecl : typedef IdentifierOr SortArgs eq Type MaybeAnnot { TypeDef $1 $2 $3 $5 $6 }
          | vtypedef IdentifierOr SortArgs eq Type { ViewTypeDef $1 $2 $3 $5 }
          | extern vtypedef string SortArgs eq Type { Extern $1 $ ViewTypeDef $2 $3 $4 $6 }
@@ -848,15 +922,18 @@ TypeDecl : typedef IdentifierOr SortArgs eq Type MaybeAnnot { TypeDef $1 $2 $3 $
          | dataview IdentifierOr SortArgs vbar {% left $ Expected $4 "=" "|" }
          | dataprop IdentifierOr SortArgs vbar {% left $ Expected $4 "=" "|" }
 
-EitherInt : intLit { Left $1 }
+EitherInt :: { Fix }
+          : intLit { Left $1 }
           | parens(Operator) { Right $1 }
 
-Fixity : infixr EitherInt { RightFix $1 $2 }
+Fixity :: { Fixity AlexPosn }
+       : infixr EitherInt { RightFix $1 $2 }
        | infixl EitherInt { LeftFix $1 $2 }
        | prefix EitherInt { Pre $1 $2 }
        | postfix EitherInt { Post $1 $2 }
 
-Operator : identifierSpace { to_string $1 }
+Operator :: { String }
+         : identifierSpace { to_string $1 }
          | customOperator { to_string $1 }
          | mutateArrow { "->" }
          | exclamation { "!" }
@@ -880,19 +957,23 @@ Operator : identifierSpace { to_string $1 }
          | backslash identifierSpace { '\\' : to_string $2 }
          | Operator Comment { $1 }
 
-Operators : Operator { [$1] }
+Operators :: { [String] }
+          : Operator { [$1] }
           | Operators Operator { $2 : $1 }
           | Operators identifier { to_string $2 : $1 }
 
-StackFunction : parens(Args) Signature Type plainArrow Expression { StackF $2 $1 $3 $5 }
+StackFunction :: { StackFunction AlexPosn }
+              : parens(Args) Signature Type plainArrow Expression { StackF $2 $1 $3 $5 }
 
-ValDecl : val Pattern colon Type eq PreExpression { [ Val (get_addendum $1) (Just $4) $2 $6 ] }
+ValDecl :: { [Declaration AlexPosn] }
+        : val Pattern colon Type eq PreExpression { [ Val (get_addendum $1) (Just $4) $2 $6 ] }
         | val Pattern eq Expression { [ Val (get_addendum $1) Nothing $2 $4 ] }
         | ValDecl and Pattern eq Expression { AndDecl Nothing $3 $5 : $1 }
         | extern ValDecl { over _head (Extern $1) $2 }
         | val Pattern eq colon {% left $ Expected $4 "Expression" ":" }
 
-StaticDeclaration : prval Pattern eq StaticExpression { PrVal $2 (Just $4) Nothing } -- FIXME: prval should use static expressions as well.
+StaticDeclaration :: { Declaration AlexPosn }
+                  : prval Pattern eq StaticExpression { PrVal $2 (Just $4) Nothing } -- FIXME: prval should use static expressions as well.
                   | prval Pattern colon Type { PrVal $2 Nothing (Just $4) }
                   | prval Pattern colon Type eq StaticExpression { PrVal $2 (Just $6) (Just $4) }
                   | prvar Pattern eq StaticExpression { PrVar $2 (Just $4) Nothing }
@@ -903,33 +984,41 @@ StaticDeclaration : prval Pattern eq StaticExpression { PrVal $2 (Just $4) Nothi
                   | StafunDecl { $1 }
                   | extern StaticDeclaration { Extern $1 $2 }
 
-DataSortLeaf : vbar Universals Sort { DataSortLeaf $2 $3 Nothing }
+DataSortLeaf :: { DataSortLeaf AlexPosn }
+             : vbar Universals Sort { DataSortLeaf $2 $3 Nothing }
              | vbar Universals Sort of Sort { DataSortLeaf $2 $3 (Just $5) }
              | DataSortLeaf Comment { $1 }
 
-DataSortLeaves : DataSortLeaf { $1 :| [] }
+DataSortLeaves :: { NonEmpty (DataSortLeaf AlexPosn) }
+               : DataSortLeaf { $1 :| [] }
                | DataSortLeaves DataSortLeaf { $2 :| toList $1 }
 
-CommentContents : commentContents { Comment $1 }
+CommentContents :: { Declaration AlexPosn }
+                : commentContents { Comment $1 }
                 | CommentContents commentContents { over comment (<> $2) $1 }
 
-Comment : beginComment CommentContents endComment { over comment ((<> "*)") . ("(*" <>)) $2 }
+Comment :: { Declaration AlexPosn }
+        : beginComment CommentContents endComment { over comment ((<> "*)") . ("(*" <>)) $2 }
 
-Names : Name { [$1] }
+Names :: { [Name AlexPosn] }
+      : Name { [$1] }
       | identifierSpace { [Unqualified $ to_string $1] }
       | customOperator { [Unqualified $ to_string $1] }
       | Names Name { $2 : $1 }
       | Names identifierSpace { Unqualified (to_string $2) : $1 }
       | Names customOperator { Unqualified (to_string $2) : $1 }
 
-Load : staload { (True, $1) }
+Load :: { (Bool, Token) }
+     : staload { (True, $1) }
      | dynload { (False, $1) }
 
-MacroArgs : doubleParens { Just [] }
+MacroArgs :: { Maybe [String] }
+          : doubleParens { Just [] }
           | parens(IdentifiersIn) { Just $1 }
           | { Nothing }
 
 -- | Parse a declaration
+Declaration :: { Declaration AlexPosn }
 Declaration : include string { Include $2 }
             | define { Define $1 }
             | extvar string eq Expression { ExtVar $1 $2 $4 }

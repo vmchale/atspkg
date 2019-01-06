@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/vmchale/atspkg.svg?branch=master)](https://travis-ci.org/vmchale/atspkg)
 [![Windows build status](https://ci.appveyor.com/api/projects/status/github/vmchale/atspkg?svg=true)](https://ci.appveyor.com/project/vmchale/atspkg)
+[![Hackage CI](https://matrix.hackage.haskell.org/api/v2/packages/ats-pkg/badge)](https://matrix.hackage.haskell.org/package/ats-pkg)
 [![Hackage](https://img.shields.io/hackage/v/ats-pkg.svg)](http://hackage.haskell.org/package/ats-pkg)
 [![Dependencies of latest version on Hackage](https://img.shields.io/hackage-deps/v/ats-pkg.svg)](https://hackage.haskell.org/package/ats-pkg)
 

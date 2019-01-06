@@ -116,4 +116,4 @@ https://hub.darcs.net/vmchale/ats/issues (for issues in supporting libraries).
 
 # COPYRIGHT
 
-Copyright 2018. Vanessa McHale. All Rights Reserved.
+Copyright 2018-2019. Vanessa McHale. All Rights Reserved.

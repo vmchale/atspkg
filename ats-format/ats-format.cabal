@@ -10,7 +10,7 @@ synopsis: A source-code formatter for ATS
 description:
     An opinionated source-code formatter for [ATS](http://www.ats-lang.org/).
 category: Parser, Language, ATS, Development
-build-type: Simple
+build-type: Custom
 extra-source-files:
     man/atsfmt.1
     .atsfmt.toml
