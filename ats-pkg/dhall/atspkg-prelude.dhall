@@ -200,7 +200,7 @@ let default
     , man = ([] : Optional Text)
     , completions = ([] : Optional Text)
     , version = [0,3,11]
-    , compiler = [0,3,11]
+    , compiler = [0,3,12]
     , dependencies = []
       : List LibDep
     , clib = []
