@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.2.4.5
+
+  * Bump Dhall libraries for new default compiler
+
 ## 3.2.4.4
 
   * Fix bug where `gc` version could not be constrained
