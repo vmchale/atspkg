@@ -1,9 +1,5 @@
 # shake-ats
 
-## 1.10.2.1
-
-  * Bugfix for latest `cabal-install`
-
 ## 1.10.2.0
 
   * `genATS` takes `cpphs` parameter again
