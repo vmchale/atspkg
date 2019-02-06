@@ -6,6 +6,7 @@ license-file: LICENSE
 copyright: Copyright: (c) 2018 Vanessa McHale
 maintainer: vamchale@gmail.com
 author: Vanessa McHale
+tested-with: ghc ==8.4.4 ghc ==8.2.2 ghc ==8.6.3
 homepage: https://github.com/vmchale/shake-ats#readme
 synopsis: Utilities for building ATS projects with shake
 description:
