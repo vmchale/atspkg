@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.2.4.6
+
+  * Bump Dhall libraries again
+
 ## 3.2.4.5
 
   * Bump Dhall libraries for new default compiler
