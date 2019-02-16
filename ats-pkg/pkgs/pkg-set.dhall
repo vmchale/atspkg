@@ -51,6 +51,11 @@ let gmp =
     prelude.makeNpmPkg { x = x, name = "atscntrb-hx-libgmp", unpackDir = "atscntrb-hx-libgmp" }
 in
 
+let parcomb =
+  λ(x : List Natural) →
+    prelude.makeNpmPkg { x = x, name = "atscntrb-hx-parcomb", unpackDir = "atscntrb-hx-parcomb" }
+in
+
 let atomicOps =
   λ(v : List Natural) →
     prelude.dep ⫽
@@ -115,6 +120,7 @@ let pkgset =
   , unistring [0,9,10]
   , atsIncludes [0,3,12]
   , curl [7,60,0]
+  , parcomb [1,0,7]
   , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall [0,3,3]
   , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall [0,4,8]
   , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall [0,4,3]
