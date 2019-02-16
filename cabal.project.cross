@@ -33,8 +33,3 @@ source-repository-package
   type: git
   location: https://github.com/corsis/clock
   tag: ef60bd51a3587a173adf565c33bf2886df6e3842
-
-source-repository-package
-  type: git
-  location: https://github.com/vmchale/heaps
-  tag: 1d5eee4abccbe666bc31a83e22932d4d2befbc01
