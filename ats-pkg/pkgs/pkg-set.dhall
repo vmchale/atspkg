@@ -119,6 +119,7 @@ let pkgset =
   , fastArithmetic [0,6,4,2]
   , unistring [0,9,10]
   , atsIncludes [0,3,12]
+  , atsIncludes [0,3,13]
   , curl [7,60,0]
   , parcomb [1,0,7]
   , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall [0,3,3]
