@@ -5,7 +5,7 @@
   * Use `libarchive` instead of `tar`
   * Change URL for compilers
   * Remove hidden `pack` command
-  * Remove `packageCompiler` functionality
+  * Remove `packageCompiler` function
 
 ## 3.2.4.6
 
