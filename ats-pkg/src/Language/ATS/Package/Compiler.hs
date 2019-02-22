@@ -28,7 +28,6 @@ compilerDir :: Version -> IO FilePath
 compilerDir v = makeAbsolute =<< dir
     where dir = getAppUserDataDirectory ("atspkg" </> show v)
 
--- TODO:
 pkgUrl :: Version -> String
 pkgUrl v = "http://ats-lang.sourceforge.net/IMPLEMENT/Postiats/ATS2-Postiats-" ++ show v ++ ".tgz"
 
