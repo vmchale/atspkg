@@ -81,8 +81,8 @@ library
         bzlib -any,
         Cabal >=2.2.0.0,
         lzma -any,
-        tar -any,
         zlib -any,
+        libarchive,
         http-client-tls -any,
         text -any,
         process -any,
@@ -97,7 +97,6 @@ library
         zip-archive -any,
         ansi-wl-pprint -any,
         dependency >=1.2.0.0,
-        filemanip -any,
         quaalude -any
 
     if flag(development)

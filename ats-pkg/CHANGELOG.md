@@ -1,5 +1,12 @@
 # ats-pkg
 
+## 3.2.5.0
+
+  * Use `libarchive` instead of `tar`
+  * Change URL for compilers
+  * Remove hidden `pack` command
+  * Remove `packageCompiler` functionality
+
 ## 3.2.4.6
 
   * Bump Dhall libraries again

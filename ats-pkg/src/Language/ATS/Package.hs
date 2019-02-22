@@ -6,8 +6,6 @@ module Language.ATS.Package ( buildAll
                             -- * Ecosystem functionality
                             , displayList
                             , atspkgVersion
-                            -- * Functions involving the compiler
-                            , packageCompiler
                             -- * Types
                             , Version (..)
                             , Pkg (..)

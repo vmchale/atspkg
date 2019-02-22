@@ -99,7 +99,7 @@ ccFromString s
 ccFromString _ = Other "cc"
 
 -- ALSO consider using Haskell -> C -> ICC ??
--- TODO ICC??
+-- TODO TCC
 -- | A data type representing the C compiler to be used.
 data CCompiler = GCC { _prefix  :: Maybe String -- ^ Usually the target triple
                      , _postfix :: Maybe String -- ^ The compiler version

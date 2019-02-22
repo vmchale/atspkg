@@ -12,6 +12,7 @@ addons:
     - libgmp3-dev
     - xz-utils
     - liblzma-dev
+    - libarchive-dev
     - bzip2
 matrix:
   include:
@@ -57,6 +58,7 @@ before_install:
     brew install lzlib
     brew install xz
     brew install bzip2
+    brew install libarchive
     brew install cabal-install
     cabal new-update
   else
