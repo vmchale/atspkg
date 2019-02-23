@@ -431,6 +431,7 @@ LambdaArrow :: { LambdaType AlexPosn }
 Expression :: { Expression AlexPosn }
            : identifierSpace PreExpression { Call (Unqualified $ to_string $1) [] [] Nothing [$2] }
            | PreExpression { $1 }
+           | openParen PreExpression comma PreExpression vbar PreExpression closeParen { ProofExpr $1 ($2 :| [$4]) $6 }
            | openParen comma_sep(PreExpression) vbar PreExpression closeParen { ProofExpr $1 $2 $4 }
            | Expression semicolon Expression { Precede $1 $3 }
            | Expression semicolon { $1 }

@@ -1,5 +1,9 @@
 # language-ats
 
+## 1.7.0.6
+
+  * Fix bug by introducing immorality
+
 ## 1.7.0.5
 
   * Faster build times
