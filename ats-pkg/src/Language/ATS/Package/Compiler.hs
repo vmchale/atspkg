@@ -29,7 +29,7 @@ compilerDir v = makeAbsolute =<< dir
     where dir = getAppUserDataDirectory ("atspkg" </> show v)
 
 pkgUrl :: Version -> String
-pkgUrl v = "http://ats-lang.sourceforge.net/IMPLEMENT/Postiats/ATS2-Postiats-" ++ show v ++ ".tgz"
+pkgUrl v = "https://github.com/vmchale/atspkg/releases/download/compiler/ATS2-Postiats-" ++ show v ++ ".tar.gz"
 
 withCompiler :: String -> Version -> IO ()
 withCompiler s v = putStrLn $ s ++ " compiler v" ++ show v ++ "..."
