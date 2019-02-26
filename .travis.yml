@@ -63,6 +63,7 @@ before_install:
     brew install bzip2
     brew install libarchive
     brew install cabal-install
+    export PKG_CONFIG_PATH="/usr/local/opt/libarchive/lib/pkgconfig"
     cabal new-update
   else
     export PATH=/opt/ghc/bin:$PATH
@@ -76,7 +77,6 @@ script:
 - |
   if [ `uname` = "Darwin" ]
   then
-    brew install libarchive
     export BINPATH1="$(find dist-newstyle/ -name atspkg -perm 755 | tail -n1)"
     export BINPATH2="$(find dist-newstyle/ -name atsfmt -perm 755 | tail -n1)"
     export BINPATH3="$(find dist-newstyle/ -name hs2ats -perm 755 | tail -n1)"
