@@ -54,7 +54,7 @@ library
     build-depends:
         base >=4.9 && <5,
         array -any,
-        recursion >=1.0.0.0,
+        recursion >=2.2.3.0,
         microlens -any,
         deepseq -any,
         ansi-wl-pprint >=0.6.8,
