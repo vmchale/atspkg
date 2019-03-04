@@ -115,6 +115,7 @@ let pkgset =
   , gmp [1,0,1]
   , atomicOps [7,6,10]
   , gc [8,0,4]
+  , gc [7,6,8]
   , gc [7,6,12]
   , fastArithmetic [0,6,4,2]
   , unistring [0,9,10]
