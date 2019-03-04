@@ -114,6 +114,7 @@ let pkgset =
   , threadkit [1,0,3]
   , gmp [1,0,1]
   , atomicOps [7,6,10]
+  , atomicOps [7,6,8]
   , gc [8,0,4]
   , gc [7,6,8]
   , gc [7,6,12]
