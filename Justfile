@@ -16,7 +16,7 @@ clean:
     rm -rf tags ats-pkg/docs/manual.out
 
 diff FILE:
-    @diff <(atsfmt language-ats/test/data/{{ FILE }} -o) language-ats/test/data/$(echo {{ FILE }} | sed 's/\(dats\|hats\|sats\)/out/') | ac -s
+    @diff <(cabal new-run atsfmt -- language-ats/test/data/{{ FILE }} -o) language-ats/test/data/$(echo {{ FILE }} | sed 's/\(dats\|hats\|sats\)/out/') | perl -pe 's/\e\[?.*?[\@-~]//g'
 
 manpages:
     pandoc ats-format/man/MANPAGE.md -s -t man -o ats-format/man/atsfmt.1
