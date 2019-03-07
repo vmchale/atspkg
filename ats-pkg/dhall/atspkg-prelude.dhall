@@ -181,7 +181,7 @@ let staticLib =
   lib ⫽ { static = True }
 in
 
-let Solver = constructors < PatsSolve : {} | Z3 : {} | Ignore : {} >
+let Solver = < PatsSolve : {} | Z3 : {} | Ignore : {} >
 in
 
 let solver = Solver.PatsSolve {=}
@@ -301,18 +301,15 @@ in
 let atsProject = "target"
 in
 
-let CCConstructors = constructors CCompiler
+let gcc = CCompiler.GCC {=}
 in
-
-let gcc = CCConstructors.GCC {=}
+let clang = CCompiler.Clang {=}
 in
-let clang = CCConstructors.Clang {=}
+let compCert = CCompiler.CompCert {=}
 in
-let compCert = CCConstructors.CompCert {=}
+let icc = CCompiler.ICC {=}
 in
-let icc = CCConstructors.ICC {=}
-in
-let cc = CCConstructors.CC {=}
+let cc = CCompiler.CC {=}
 in
 
 let printCompiler =

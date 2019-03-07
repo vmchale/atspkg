@@ -17,7 +17,8 @@ constraints:
   dependency +development,
   hs2ats +development,
   shake-cabal +development,
-  shake-c +development
+  shake-c +development,
+  heaps >=0.3.6.1
 
 executable-stripping: true
 
