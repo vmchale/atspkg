@@ -1,6 +1,6 @@
 cabal-version: 2.0
 name: ats-pkg
-version: 3.2.4.6
+version: 3.2.5.3
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018-2019 Vanessa McHale
@@ -81,8 +81,8 @@ library
         bzlib -any,
         Cabal >=2.2.0.0,
         lzma -any,
-        tar -any,
         zlib -any,
+        libarchive -any,
         http-client-tls -any,
         text -any,
         process -any,
@@ -97,7 +97,6 @@ library
         zip-archive -any,
         ansi-wl-pprint -any,
         dependency >=1.2.0.0,
-        filemanip -any,
         quaalude -any
 
     if flag(development)

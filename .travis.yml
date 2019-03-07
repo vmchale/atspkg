@@ -12,6 +12,7 @@ addons:
     - libgmp3-dev
     - xz-utils
     - liblzma-dev
+    - libarchive-dev
     - bzip2
 matrix:
   include:
@@ -25,6 +26,7 @@ matrix:
         packages:
         - ghc-8.6.1
         - cabal-install-2.4
+        - libarchive-dev
 
   - env: TARGET=x86_64-unknown-linux GHC=8.4.4
     addons:
@@ -35,6 +37,7 @@ matrix:
         packages:
         - ghc-8.4.4
         - cabal-install-2.2
+        - libarchive-dev
 
   - env: TARGET=x86_64-unknown-linux GHC=8.2.2
     addons:
@@ -45,6 +48,7 @@ matrix:
         packages:
         - ghc-8.2.2
         - cabal-install-2.2
+        - libarchive-dev
 
   # OS X
   - env: TARGET=x86_64-apple-darwin GHC=8.6.1
@@ -57,7 +61,9 @@ before_install:
     brew install lzlib
     brew install xz
     brew install bzip2
+    brew install libarchive
     brew install cabal-install
+    export PKG_CONFIG_PATH="/usr/local/opt/libarchive/lib/pkgconfig"
     cabal new-update
   else
     export PATH=/opt/ghc/bin:$PATH
@@ -66,6 +72,7 @@ before_install:
 
 script:
 - curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s ats-format ats-pkg dependency hs2ats language-ats shake-ats
+- cabal new-update
 - travis_wait 40 cabal new-build all
 - |
   if [ `uname` = "Darwin" ]
