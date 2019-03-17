@@ -203,6 +203,7 @@ atsBin ATSTarget{..} = do
         cconfig'' <- cconfig _toolConfig _libs _gc (makeCFlags _cFlags _hsLibs ghcV' _gc)
 
         unit $ g _tgtType (_cc _toolConfig) (h' cTargets) _binTarget cconfig''
+        -- TODO: use oracle?
         bool (pure ()) (stripA _binTarget (_cc _toolConfig)) _strip
 
 -- | Generate C code from ATS code.
