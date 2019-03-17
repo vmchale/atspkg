@@ -54,7 +54,7 @@ getSubdirs p = do
 -- | These rules take a @.cabal@ file and the @.o@ file to be produced from
 -- them, building the @.o@ file.
 cabalForeign :: HsCompiler -> ForeignCabal -> Rules ()
-cabalForeign (GHC _ suff) (ForeignCabal cbp' cf' obf') = do
+cabalForeign hsc@GHC{} (ForeignCabal cbp' cf' obf') = do
 
     let cf = TL.unpack cf'
         cbp = maybe cf TL.unpack cbp'
@@ -62,12 +62,14 @@ cabalForeign (GHC _ suff) (ForeignCabal cbp' cf' obf') = do
         obfDir = takeDirectory (obf -<.> "hs")
         libName = takeBaseName cf
 
+    hcOracle <- hsOracle
+
     obf %> \out -> do
         let isHaskell path = not (".cabal" `isSuffixOf` path)
         (v, trDeps) <- liftIO $ second (filter isHaskell) <$> getCabalDeps cf
 
         ghcV' <- quietly ghcVersion
-        let ghcV = maybe ghcV' (drop 1) suff
+        ghcV <- maybe ghcV' (drop 1) . _suff <$> hcOracle hsc
 
         need (cf : fmap ((obfDir <> [pathSeparator]) <>) trDeps)
         command_ [Cwd obfDir] "cabal" ["new-build", "all", "-w", "ghc-" ++ ghcV]

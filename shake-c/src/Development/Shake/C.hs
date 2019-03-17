@@ -132,6 +132,8 @@ type instance RuleResult CCompiler = CCompiler
 type instance RuleResult CConfig = CConfig
 
 -- | Use this for tracking e.g. 'CCompiler' or 'CConfig'
+--
+-- @since 0.4.1.0
 idOracle :: (RuleResult q ~ a, q ~ a, ShakeValue q) => Rules (q -> Action a)
 idOracle = addOracle pure
 
