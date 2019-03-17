@@ -1,5 +1,7 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric  #-}
+{-# LANGUAGE DeriveAnyClass     #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric      #-}
+{-# LANGUAGE TypeFamilies       #-}
 
 -- | This module provides functions for easy C builds of binaries, static
 -- libraries, and dynamic libraries.
@@ -13,6 +15,8 @@ module Development.Shake.C ( -- * Types
                            , dynLibR
                            , cBin
                            , cToLib
+                           -- * Oracles
+                           , idOracle
                            -- * Actions
                            , pkgConfig
                            , binaryA
@@ -111,7 +115,7 @@ data CCompiler = GCC { _prefix  :: Maybe String -- ^ Usually the target triple
                | CompCert
                | ICC
                | Other String
-               deriving (Generic, Binary)
+               deriving (Generic, Binary, Show, Typeable, Eq, Hashable, NFData)
 
 mapFlags :: String -> ([String] -> [String])
 mapFlags s = fmap (s ++)
@@ -122,7 +126,14 @@ data CConfig = CConfig { includes   :: [String] -- ^ Directories to be included.
                        , extras     :: [String] -- ^ Extra flags to be passed to the compiler
                        , staticLink :: Bool -- ^ Whether to link against static versions of libraries
                        }
-             deriving (Generic, Binary)
+             deriving (Generic, Binary, Show, Typeable, Eq, Hashable, NFData)
+
+type instance RuleResult CCompiler = CCompiler
+type instance RuleResult CConfig = CConfig
+
+-- | Use this for tracking e.g. 'CCompiler' or 'CConfig'
+idOracle :: (RuleResult q ~ a, q ~ a, ShakeValue q) => Rules (q -> Action a)
+idOracle = addOracle pure
 
 -- | Rules for making a static library from C source files. Unlike 'staticLibR',
 -- this also creates rules for creating object files.
@@ -177,10 +188,14 @@ dynLibR :: CCompiler
         -> FilePattern -- ^ Shared object file to be generated.
         -> CConfig
         -> Rules ()
-dynLibR cc objFiles shLib cfg =
-    shLib %> \out ->
-        need objFiles *>
-        command [EchoStderr False] (ccToString cc) ("-shared" : "-o" : out : objFiles ++ cconfigToArgs cfg)
+dynLibR cc objFiles shLib cfg = do
+    ccOracle <- idOracle
+    cconfOracle <- idOracle
+    shLib %> \out -> do
+        need objFiles
+        cc' <- ccOracle cc
+        cfg' <- cconfOracle cfg
+        command [EchoStderr False] (ccToString cc') ("-shared" : "-o" : out : objFiles ++ cconfigToArgs cfg')
 
 -- | These rules build an object file from a C source file.
 objectFileR :: CCompiler
@@ -188,10 +203,14 @@ objectFileR :: CCompiler
             -> FilePath -- ^ C source file
             -> FilePattern -- ^ Object file output
             -> Rules ()
-objectFileR cc cfg srcFile objFile =
-    objFile %> \out ->
-        need [srcFile] *>
-        command [EchoStderr False] (ccToString cc) (srcFile : "-c" : "-fPIC" : "-o" : out : cconfigToArgs cfg)
+objectFileR cc cfg srcFile objFile = do
+    ccOracle <- idOracle
+    cconfOracle <- idOracle
+    objFile %> \out -> do
+        need [srcFile]
+        cc' <- ccOracle cc
+        cfg' <- cconfOracle cfg
+        command [EchoStderr False] (ccToString cc') (srcFile : "-c" : "-fPIC" : "-o" : out : cconfigToArgs cfg')
 
 sharedLibA :: CmdResult r
            => CCompiler
@@ -218,13 +237,23 @@ sharedLibR :: CCompiler
            -> FilePattern -- ^ File pattern for shared library outputs
            -> CConfig
            -> Rules ()
-sharedLibR cc objFiles shrLib cfg =
-    shrLib %> \out -> sharedLibA cc objFiles out cfg
+sharedLibR cc objFiles shrLib cfg = do
+    ccOracle <- idOracle
+    cconfOracle <- idOracle
+    shrLib %> \out -> do
+        cc' <- ccOracle cc
+        cfg' <- cconfOracle cfg
+        sharedLibA cc' objFiles out cfg'
 
 staticLibR :: CCompiler
            -> [FilePath] -- ^ Object files to be linked
            -> FilePattern -- ^ File pattern for static library outputs
            -> CConfig
            -> Rules ()
-staticLibR ar objFiles stalib cfg =
-    stalib %> \out -> staticLibA ar objFiles out cfg
+staticLibR ar objFiles stalib cfg = do
+    ccOracle <- idOracle
+    cconfOracle <- idOracle
+    stalib %> \out -> do
+        ar' <- ccOracle ar
+        cfg' <- cconfOracle cfg
+        staticLibA ar' objFiles out cfg'
