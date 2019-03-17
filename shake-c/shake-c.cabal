@@ -3,7 +3,7 @@ name: shake-c
 version: 0.4.1.0
 license: BSD3
 license-file: LICENSE
-copyright: Copyright: (c) 2018 Vanessa McHale
+copyright: Copyright: (c) 2018-2019 Vanessa McHale
 maintainer: vanessa.mchale@iohk.io
 author: Vanessa McHale
 bug-reports: https://hub.darcs.net/vmchale/ats/issues

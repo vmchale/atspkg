@@ -2,6 +2,9 @@ module Development.Shake.Cabal ( getCabalDeps
                                , getCabalDepsV
                                , getCabalDepsA
                                , shakeVerbosityToCabalVerbosity
+                               -- * Oracles
+                               , hsOracle
+                               , cabalOracle
                                -- * Types
                                , HsCompiler (..)
                                -- * Helper functions
@@ -19,6 +22,7 @@ import           Data.Foldable                          (fold, toList)
 import           Data.Maybe                             (catMaybes)
 import           Development.Shake                      hiding (doesFileExist)
 import qualified Development.Shake                      as Shake
+import           Development.Shake.Cabal.Oracles
 import           Distribution.ModuleName
 import           Distribution.PackageDescription
 import           Distribution.PackageDescription.Parsec
@@ -31,12 +35,6 @@ import           Distribution.Version
 import           System.Directory                       (doesFileExist)
 import           System.FilePath                        (pathSeparator)
 import           System.Info                            (arch, os)
-
-data HsCompiler = GHC { _pref :: Maybe String -- ^ Target architecture
-                      , _suff :: Maybe String -- ^ Compiler version
-                      }
-                | GHCJS { _suff :: Maybe String -- ^ Compiler version
-                        }
 
 hsCompiler :: HsCompiler -> String
 hsCompiler (GHC Nothing Nothing)       = "ghc"
