@@ -74,7 +74,7 @@ in
 
 let script =
   λ(x : {dir : Text, target : Optional Text}) →
-    { configure = [ "./configure --prefix=${x.dir}" ] : Optional Text, build = "make -j4", install = "make install" } : Script
+    { configure = [ "./configure --prefix=${x.dir}" ] : Optional Text, build = "make -j6", install = "make install" } : Script
 in
 
 let src =
