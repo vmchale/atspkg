@@ -26,13 +26,15 @@ libatsCfg = $(embedStringFile ("dhall" </> "atslib.dhall"))
 
 compilerDir :: Version -> IO FilePath
 compilerDir v = makeAbsolute =<< dir
-    where dir = getAppUserDataDirectory ("atspkg" </> vs </> "ATS2-Postiats-" ++ vs)
+    where dir = getAppUserDataDirectory ("atspkg" </> vs </> "ATS2-Postiats-" ++ gmp ++ vs)
           vs = show v
+          gmp = if v >= Version [0,3,13] then "gmp-" else ""
 
 pkgUrl :: Version -> String
 pkgUrl v =
     let vs = show v
-        in "https://cytranet.dl.sourceforge.net/project/ats2-lang/ats2-lang/ats2-postiats-" ++ vs ++ "/ATS2-Postiats-" ++ vs ++ ".tgz"
+        gmp = if v >= Version [0,3,13] then "gmp-" else ""
+        in "https://cytranet.dl.sourceforge.net/project/ats2-lang/ats2-lang/ats2-postiats-" ++ vs ++ "/ATS2-Postiats-" ++ gmp ++ vs ++ ".tgz"
 
 withCompiler :: String -> Version -> IO ()
 withCompiler s v = putStrLn $ s ++ " compiler v" ++ show v ++ "..."
