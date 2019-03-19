@@ -1,5 +1,9 @@
 # shake-cabal
 
+## 0.2.2.0
+
+  * Export `CabalVersion` so `cabalOracle` is usable
+
 ## 0.2.1.0
 
   * Add `hsOracle` and `cabalOracle`

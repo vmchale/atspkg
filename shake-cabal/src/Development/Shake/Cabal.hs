@@ -7,6 +7,8 @@ module Development.Shake.Cabal ( getCabalDeps
                                , cabalOracle
                                -- * Types
                                , HsCompiler (..)
+                               -- * Oracle dummy types
+                               , CabalVersion (..)
                                -- * Helper functions
                                , platform
                                , hsCompiler

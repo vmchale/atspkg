@@ -8,6 +8,7 @@
 module Development.Shake.Cabal.Oracles ( hsOracle
                                        , cabalOracle
                                        , HsCompiler (..)
+                                       , CabalVersion (..)
                                        ) where
 
 import           Control.DeepSeq   (NFData)
