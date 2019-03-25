@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.2.5.11
+
+  * Set UTF8 encoding in all cases
+
 ## 3.2.5.10
 
   * Use better URL

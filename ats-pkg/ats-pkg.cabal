@@ -1,6 +1,6 @@
 cabal-version: 2.0
 name: ats-pkg
-version: 3.2.5.10
+version: 3.2.5.11
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018-2019 Vanessa McHale

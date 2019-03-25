@@ -9,6 +9,7 @@ import           Data.Version                         hiding (Version (..))
 import           Development.Shake.ATS
 import           Development.Shake.FilePath
 import           Distribution.CommandLine
+import           GHC.IO.Encoding                      (setLocaleEncoding)
 import           Language.ATS.Package
 import           Language.ATS.Package.Dhall
 import           Language.ATS.Package.Upgrade
@@ -16,6 +17,7 @@ import           Lens.Micro
 import           Options.Applicative
 import           Paths_ats_pkg
 import           Quaalude                             hiding (command, pack)
+import           System.IO                            (utf8)
 import           System.IO.Temp                       (withSystemTempDirectory)
 
 -- TODO command to list available packages.
@@ -210,7 +212,8 @@ fetchPkg mStr pkg v = withSystemTempDirectory "atspkg" $ \p -> do
     stopGlobalPool
 
 main :: IO ()
-main = execParser wrapper >>= run
+main = setLocaleEncoding utf8 *>
+    execParser wrapper >>= run
 
 runHelper :: Bool -> Bool -> Bool -> [String] -> Maybe String -> Maybe String -> Int -> IO ()
 runHelper rba lint tim rs mStr tgt v = g . bool x y . (&& isNothing tgt) =<< check mStr Nothing
