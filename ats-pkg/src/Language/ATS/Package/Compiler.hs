@@ -4,15 +4,18 @@
 -- | This module contains functions for installing the @patscc@ compiler. It
 -- also includes functions for building @libatslib@.
 module Language.ATS.Package.Compiler
-    ( fetchCompiler
+    ( packageCompiler
+    , fetchCompiler
     , setupCompiler
     , cleanAll
     -- * Types
     , SetupScript
     ) where
 
-import qualified Codec.Archive           as Archive
-import           Codec.Compression.GZip  (decompress)
+import           System.FilePath.Find    (find)
+-- import qualified Codec.Archive           as Archive
+import qualified Codec.Archive.Tar       as Tar
+import           Codec.Compression.GZip  (compress, decompress)
 import           Control.Monad
 import qualified Data.ByteString.Lazy    as BS
 import           Data.Dependency
@@ -37,6 +40,13 @@ pkgUrl v =
         -- gmp = if v >= Version [0,3,13] then "gmp-" else ""
         -- in "https://cytranet.dl.sourceforge.net/project/ats2-lang/ats2-lang/ats2-postiats-" ++ vs ++ "/ATS2-Postiats-" ++ gmp ++ vs ++ ".tgz"
 
+-- | Make a tarball from a directory containing the compiler.
+packageCompiler :: FilePath -> IO ()
+packageCompiler directory = do
+    files <- find (pure True) (pure True) directory
+    bytes <- fmap Tar.write . Tar.pack directory $ fmap (drop $ length (directory :: String) + 1) files
+    BS.writeFile (directory ++ ".tar.gz") (compress bytes)
+
 withCompiler :: String -> Version -> IO ()
 withCompiler s v = putStrLn $ s ++ " compiler v" ++ show v ++ "..."
 
@@ -54,7 +64,8 @@ fetchCompiler v = do
         response <- responseBody <$> httpLbs (initialRequest { method = "GET" }) manager
 
         withCompiler "Unpacking" v
-        Archive.unpackToDir cd (BS.toStrict $ decompress response)
+        Tar.unpack cd . Tar.read . decompress $ response
+        -- Archive.unpackToDir cd (BS.toStrict $ decompress response)
 
 make :: Verbosity -> Version -> FilePath -> IO ()
 make v' v cd =

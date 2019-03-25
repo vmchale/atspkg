@@ -42,6 +42,7 @@ data Command = Install { _archTarget :: Maybe String
                      , _prof       :: Bool
                      }
              | Clean
+             | Pack { _target :: String }
              | Test { _targets    :: [String]
                     , _atspkgArg  :: Maybe String
                     , _rebuildAll :: Bool
@@ -70,8 +71,8 @@ data Command = Install { _archTarget :: Maybe String
              | List
              | Setup
 
-command' :: Parser Command
-command' = hsubparser
+userCmd :: Parser Command
+userCmd = hsubparser
     (command "install" (info install (progDesc "Install all binaries to $HOME/.local/bin"))
     <> command "clean" (info (pure Clean) (progDesc "Clean current project directory"))
     <> command "remote" (info fetch (progDesc "Fetch and install a binary package"))
@@ -86,6 +87,19 @@ command' = hsubparser
     <> command "list" (info (pure List) (progDesc "List available packages"))
     <> command "setup" (info (pure Setup) (progDesc "Install manpages and shell completions."))
     )
+
+command' :: Parser Command
+command' = userCmd <|> internalCmd
+
+internalCmd :: Parser Command
+internalCmd = subparser
+    (internal
+    <> command "pack" (info pack (progDesc "Make a tarball for distributing the compiler"))
+    )
+
+pack :: Parser Command
+pack = Pack
+    <$> targetP mempty id "package"
 
 install :: Parser Command
 install = Install
@@ -234,6 +248,7 @@ run (Test ts mArg rba v lint tim)      = runHelper rba lint tim ("test" : ts) mA
 run (Run ts mArg rba v lint tim)       = runHelper rba lint tim ("run" : ts) mArg Nothing v
 run (Install tgt mArg)                 = runHelper False True False ["install"] mArg tgt 0
 run (Valgrind ts mArg)                 = runHelper False True False ("valgrind" : ts) mArg Nothing 0
+run (Pack dir')                        = packageCompiler dir'
 run Setup                              = installActions
 
 installActions :: IO ()

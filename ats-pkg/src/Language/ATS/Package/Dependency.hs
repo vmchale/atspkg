@@ -7,7 +7,8 @@ module Language.ATS.Package.Dependency ( -- * Functions
                                        , SetupScript
                                        ) where
 
-import           Codec.Archive                        as Archive
+-- import           Codec.Archive                        as Archive
+import qualified Codec.Archive.Tar                    as Tar
 import           Codec.Archive.Zip                    (ZipOption (..), extractFilesFromArchive, toArchive)
 import qualified Codec.Compression.BZip               as Bzip
 import qualified Codec.Compression.GZip               as Gzip
@@ -107,7 +108,8 @@ getCompressor s
 tarResponse :: Text -> FilePath -> ByteString -> IO ()
 tarResponse url' dirName response = do
     compress <- getCompressor url'
-    let f = Archive.unpackToDir dirName . BSL.toStrict . compress
+    -- let f = Archive.unpackToDir dirName . BSL.toStrict . compress
+    let f = Tar.unpack dirName . Tar.read . compress
     f response
 
 zipResponse :: FilePath -> ByteString -> IO ()
