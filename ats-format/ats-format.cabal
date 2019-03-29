@@ -63,7 +63,7 @@ executable atsfmt
         directory -any,
         unordered-containers -any,
         process -any,
-        file-embed -any
+        file-embed >=0.0.9
     
     if flag(profile)
         ghc-options: -rtsopts -with-rtsopts=-h

@@ -76,7 +76,7 @@ library
         base >=4.10 && <5,
         http-client -any,
         bytestring -any,
-        file-embed -any,
+        file-embed >=0.0.9,
         shake -any,
         bzlib -any,
         Cabal >=2.2.0.0,

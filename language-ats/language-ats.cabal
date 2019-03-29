@@ -55,7 +55,7 @@ library
         base >=4.9 && <5,
         array -any,
         recursion >=2.2.3.0,
-        microlens -any,
+        microlens >=0.3.0.0,
         deepseq -any,
         ansi-wl-pprint >=0.6.8,
         composition-prelude -any,
