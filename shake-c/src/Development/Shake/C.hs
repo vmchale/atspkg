@@ -1,11 +1,13 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric  #-}
+{-# LANGUAGE DeriveAnyClass     #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric      #-}
+{-# LANGUAGE TypeFamilies       #-}
 
 -- | This module provides functions for easy C builds of binaries, static
 -- libraries, and dynamic libraries.
 module Development.Shake.C ( -- * Types
                              CConfig (..)
-                           , CCompiler (..) -- (ICC, GCC, Clang, GHC, Other, GCCStd, GHCStd, CompCert)
+                           , CCompiler (..)
                            -- * Rules
                            , staticLibR
                            , sharedLibR
@@ -13,6 +15,8 @@ module Development.Shake.C ( -- * Types
                            , dynLibR
                            , cBin
                            , cToLib
+                           -- * Oracles
+                           , idOracle
                            -- * Actions
                            , pkgConfig
                            , binaryA
@@ -111,7 +115,7 @@ data CCompiler = GCC { _prefix  :: Maybe String -- ^ Usually the target triple
                | CompCert
                | ICC
                | Other String
-               deriving (Generic, Binary)
+               deriving (Generic, Binary, Show, Typeable, Eq, Hashable, NFData)
 
 mapFlags :: String -> ([String] -> [String])
 mapFlags s = fmap (s ++)
@@ -122,7 +126,16 @@ data CConfig = CConfig { includes   :: [String] -- ^ Directories to be included.
                        , extras     :: [String] -- ^ Extra flags to be passed to the compiler
                        , staticLink :: Bool -- ^ Whether to link against static versions of libraries
                        }
-             deriving (Generic, Binary)
+             deriving (Generic, Binary, Show, Typeable, Eq, Hashable, NFData)
+
+type instance RuleResult CCompiler = CCompiler
+type instance RuleResult CConfig = CConfig
+
+-- | Use this for tracking e.g. 'CCompiler' or 'CConfig'
+--
+-- @since 0.4.1.0
+idOracle :: (RuleResult q ~ a, q ~ a, ShakeValue q) => Rules (q -> Action a)
+idOracle = addOracle pure
 
 -- | Rules for making a static library from C source files. Unlike 'staticLibR',
 -- this also creates rules for creating object files.
@@ -178,8 +191,8 @@ dynLibR :: CCompiler
         -> CConfig
         -> Rules ()
 dynLibR cc objFiles shLib cfg =
-    shLib %> \out ->
-        need objFiles *>
+    shLib %> \out -> do
+        need objFiles
         command [EchoStderr False] (ccToString cc) ("-shared" : "-o" : out : objFiles ++ cconfigToArgs cfg)
 
 -- | These rules build an object file from a C source file.
@@ -189,8 +202,8 @@ objectFileR :: CCompiler
             -> FilePattern -- ^ Object file output
             -> Rules ()
 objectFileR cc cfg srcFile objFile =
-    objFile %> \out ->
-        need [srcFile] *>
+    objFile %> \out -> do
+        need [srcFile]
         command [EchoStderr False] (ccToString cc) (srcFile : "-c" : "-fPIC" : "-o" : out : cconfigToArgs cfg)
 
 sharedLibA :: CmdResult r
@@ -219,7 +232,8 @@ sharedLibR :: CCompiler
            -> CConfig
            -> Rules ()
 sharedLibR cc objFiles shrLib cfg =
-    shrLib %> \out -> sharedLibA cc objFiles out cfg
+    shrLib %> \out ->
+        sharedLibA cc objFiles out cfg
 
 staticLibR :: CCompiler
            -> [FilePath] -- ^ Object files to be linked
@@ -227,4 +241,5 @@ staticLibR :: CCompiler
            -> CConfig
            -> Rules ()
 staticLibR ar objFiles stalib cfg =
-    stalib %> \out -> staticLibA ar objFiles out cfg
+    stalib %> \out ->
+        staticLibA ar objFiles out cfg

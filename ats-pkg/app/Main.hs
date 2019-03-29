@@ -9,6 +9,7 @@ import           Data.Version                         hiding (Version (..))
 import           Development.Shake.ATS
 import           Development.Shake.FilePath
 import           Distribution.CommandLine
+import           GHC.IO.Encoding                      (setLocaleEncoding)
 import           Language.ATS.Package
 import           Language.ATS.Package.Dhall
 import           Language.ATS.Package.Upgrade
@@ -16,6 +17,7 @@ import           Lens.Micro
 import           Options.Applicative
 import           Paths_ats_pkg
 import           Quaalude                             hiding (command, pack)
+import           System.IO                            (utf8)
 import           System.IO.Temp                       (withSystemTempDirectory)
 
 -- TODO command to list available packages.
@@ -40,6 +42,7 @@ data Command = Install { _archTarget :: Maybe String
                      , _prof       :: Bool
                      }
              | Clean
+             | Pack { _target :: String }
              | Test { _targets    :: [String]
                     , _atspkgArg  :: Maybe String
                     , _rebuildAll :: Bool
@@ -68,8 +71,8 @@ data Command = Install { _archTarget :: Maybe String
              | List
              | Setup
 
-command' :: Parser Command
-command' = hsubparser
+userCmd :: Parser Command
+userCmd = hsubparser
     (command "install" (info install (progDesc "Install all binaries to $HOME/.local/bin"))
     <> command "clean" (info (pure Clean) (progDesc "Clean current project directory"))
     <> command "remote" (info fetch (progDesc "Fetch and install a binary package"))
@@ -84,6 +87,19 @@ command' = hsubparser
     <> command "list" (info (pure List) (progDesc "List available packages"))
     <> command "setup" (info (pure Setup) (progDesc "Install manpages and shell completions."))
     )
+
+command' :: Parser Command
+command' = userCmd <|> internalCmd
+
+internalCmd :: Parser Command
+internalCmd = subparser
+    (internal
+    <> command "pack" (info pack (progDesc "Make a tarball for distributing the compiler"))
+    )
+
+pack :: Parser Command
+pack = Pack
+    <$> targetP mempty id "package"
 
 install :: Parser Command
 install = Install
@@ -210,7 +226,8 @@ fetchPkg mStr pkg v = withSystemTempDirectory "atspkg" $ \p -> do
     stopGlobalPool
 
 main :: IO ()
-main = execParser wrapper >>= run
+main = setLocaleEncoding utf8 *>
+    execParser wrapper >>= run
 
 runHelper :: Bool -> Bool -> Bool -> [String] -> Maybe String -> Maybe String -> Int -> IO ()
 runHelper rba lint tim rs mStr tgt v = g . bool x y . (&& isNothing tgt) =<< check mStr Nothing
@@ -231,6 +248,7 @@ run (Test ts mArg rba v lint tim)      = runHelper rba lint tim ("test" : ts) mA
 run (Run ts mArg rba v lint tim)       = runHelper rba lint tim ("run" : ts) mArg Nothing v
 run (Install tgt mArg)                 = runHelper False True False ["install"] mArg tgt 0
 run (Valgrind ts mArg)                 = runHelper False True False ("valgrind" : ts) mArg Nothing 0
+run (Pack dir')                        = packageCompiler dir'
 run Setup                              = installActions
 
 installActions :: IO ()

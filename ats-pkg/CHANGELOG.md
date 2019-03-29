@@ -1,6 +1,18 @@
 # ats-pkg
 
-## 3.2.5.3
+## 3.2.6.12
+
+  * Use old Dhall prelude
+
+## 3.2.5.11
+
+  * Set UTF8 encoding in all cases
+
+## 3.2.5.10
+
+  * Use better URL
+
+## 3.2.5.6
 
   * Use `libarchive` instead of `tar`
   * Change URL for compilers

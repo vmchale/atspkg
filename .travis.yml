@@ -96,6 +96,8 @@ script:
 - strip hs2ats-$TARGET
 - du -h atspkg-$TARGET
 - cd ats-pkg/test/data/hello-world
+- ../../../../atspkg-$TARGET clean
+- ../../../../atspkg-$TARGET nuke
 - ../../../../atspkg-$TARGET run -vv
 - cd -
 

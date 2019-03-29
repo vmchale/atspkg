@@ -1,5 +1,5 @@
 {- Dhall prelude functions -}
-let concatMapSep = https://raw.githubusercontent.com/dhall-lang/dhall-lang/master/Prelude/Text/concatMapSep
+let concatMapSep = https://raw.githubusercontent.com/dhall-lang/dhall-lang/0a7f596d03b3ea760a96a8e03935f4baa64274e1/Prelude/Text/concatMapSep
 in
 let map = https://raw.githubusercontent.com/dhall-lang/dhall-lang/master/Prelude/List/map
 in
@@ -74,7 +74,7 @@ in
 
 let script =
   λ(x : {dir : Text, target : Optional Text}) →
-    { configure = [ "./configure --prefix=${x.dir}" ] : Optional Text, build = "make -j4", install = "make install" } : Script
+    { configure = [ "./configure --prefix=${x.dir}" ] : Optional Text, build = "make -j6", install = "make install" } : Script
 in
 
 let src =
