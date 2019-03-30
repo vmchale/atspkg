@@ -35,7 +35,7 @@ library
     ghc-options: -Wall
     build-depends:
         base >=4.7 && <5,
-        haskell-src-exts -any,
+        haskell-src-exts >=1.18.0,
         language-ats >=1.5.0.0,
         casing -any,
         microlens -any,
