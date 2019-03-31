@@ -521,7 +521,7 @@ prettyArgsU :: (Pretty a, Foldable f, Functor f) => Doc -> Doc -> f a -> Doc
 prettyArgsU = prettyArgs' ","
 
 prettyArgs' :: (Pretty a, Functor f, Foldable f) => Doc -> Doc -> Doc -> f a -> Doc
-prettyArgs' = fmap pretty -.*** prettyArgsG'
+prettyArgs' = fmap pretty .@@@ prettyArgsG'
 
 prettyArgs :: (Pretty a, Foldable f, Functor f) => f a -> Doc
 prettyArgs = prettyArgs' ", " "(" ")"
