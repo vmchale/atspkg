@@ -1,5 +1,9 @@
 # language-ats
 
+## 1.7.1.1
+
+  * Bugfix in how `val`s were handled
+
 ## 1.7.1.0
 
   * Fix a bug in how `val`s were handled in `SATS` files

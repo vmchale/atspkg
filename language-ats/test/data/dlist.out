@@ -6,4 +6,4 @@ fn to_list {a:t@ype} (dlist(a)) : List0(a)
 
 fn singleton {a:t@ype} (a) : dlist(a)
 
-val empty{a:t@ype}: dlist(a) = 
+val empty{a:t@ype}: dlist(a)

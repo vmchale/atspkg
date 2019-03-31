@@ -614,7 +614,8 @@ instance Eq a => Pretty (Declaration a) where
     pretty (PrVar p (Just e) (Just t))      = "prvar" <+> pretty p <+> ":" <+> pretty t <+> "=" <+> pretty e
     pretty PrVar{}                          = undefined
     pretty (AndDecl t p e)                  = "and" <+> pretty p <> valSig t <+> "=" <+> pretty e
-    pretty (Val a t p e)                    = "val" <> pretty a <+> pretty p <> valSig t <+> "=" <+> pretty e
+    pretty (Val a t p (Just e))             = "val" <> pretty a <+> pretty p <> valSig t <+> "=" <+> pretty e
+    pretty (Val a t p Nothing)              = "val" <> pretty a <+> pretty p <> valSig t
     pretty (Var t p Nothing (Just e))       = "var" <+> pretty p <> valSig t <+> "with" <+> pretty e
     pretty (Var t p (Just e) Nothing)       = "var" <+> pretty p <> valSig t <+> "=" <+> pretty e
     pretty (Var t p Nothing Nothing)        = "var" <+> pretty p <> valSig t
