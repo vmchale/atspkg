@@ -25,7 +25,7 @@ exprLenses st = thread . fmap (exprLens st)
 
 rewriteDecl :: Eq a => FixityState a -> Declaration a -> Declaration a
 rewriteDecl st (Extern l d) = Extern l (rewriteDecl st d)
-rewriteDecl st x@Val{} = exprLens st valExpression x
+rewriteDecl st x@Val{} = exprLens st (valExpression._Just) x
 rewriteDecl st x@Var{} = exprLenses st [varExpr1._Just, varExpr2._Just] x
 rewriteDecl st x@PrVal{} = exprStaLens st (prValExpr._Just) x
 rewriteDecl st x@PrVar{} = exprStaLens st (prValExpr._Just) x

@@ -83,7 +83,7 @@ type Args a = Maybe [Arg a]
 data Declaration a = Func { pos :: a, _fun :: Function a }
                    | Impl { implArgs :: Args a, _impl :: Implementation a } -- TODO do something better for implicit universals
                    | ProofImpl { implArgs :: Args a, _impl :: Implementation a }
-                   | Val { add :: Addendum, valT :: Maybe (Type a), valPat :: Pattern a, _valExpression :: Expression a }
+                   | Val { add :: Addendum, valT :: Maybe (Type a), valPat :: Maybe (Pattern a), _valExpression :: Maybe (Expression a) }
                    | StaVal [Universal a] String (Type a)
                    | PrVal { prvalPat :: Pattern a, _prValExpr :: Maybe (StaticExpression a), prValType :: Maybe (Type a) }
                    | PrVar { prvarPat :: Pattern a, _prVarExpr :: Maybe (StaticExpression a), prVarType :: Maybe (Type a) }
@@ -209,7 +209,7 @@ data Pattern a = PName (Name a) [Pattern a]
                | TuplePattern [Pattern a]
                | BoxTuplePattern a [Pattern a]
                | AtPattern a (Pattern a)
-               | UniversalPattern a String [Universal a] (Pattern a)
+               | UniversalPattern a String [Universal a] (Maybe (Pattern a))
                | ExistentialPattern (Existential a) (Pattern a)
                | As a (Pattern a) (Pattern a)
                | BinPattern a (BinOp a) (Pattern a) (Pattern a) -- ^ For use with e.g. @::@.
@@ -224,7 +224,7 @@ data PatternF a x = PNameF (Name a) [x]
                   | TuplePatternF [x]
                   | BoxTuplePatternF a [x]
                   | AtPatternF a x
-                  | UniversalPatternF a String [Universal a] x
+                  | UniversalPatternF a String [Universal a] (Maybe x)
                   | ExistentialPatternF (Existential a) x
                   | AsF a x x
                   | BinPatternF a (BinOp a) x x

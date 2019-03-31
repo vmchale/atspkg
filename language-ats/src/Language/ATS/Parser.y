@@ -368,8 +368,8 @@ Pattern :: { Pattern AlexPosn }
         | Literal { PLiteral $1 }
         | Pattern when Expression { Guarded $2 $3 $1 }
         | at Pattern { AtPattern $1 $2 }
-        | identifier Universals Pattern { UniversalPattern (token_posn $1) (to_string $1) $2 $3 }
-        | identifierSpace Universals Pattern { UniversalPattern (token_posn $1) (to_string $1) $2 $3 }
+        | identifier Universals optional(Pattern) { UniversalPattern (token_posn $1) (to_string $1) $2 $3 }
+        | identifierSpace Universals optional(Pattern) { UniversalPattern (token_posn $1) (to_string $1) $2 $3 }
         | Pattern customOperator Pattern { BinPattern (token_posn $2) (SpecialInfix (token_posn $2) (to_string $2)) $1 $3 }
         | Pattern as Pattern { As $2 $1 $3 }
         | Existential Pattern { ExistentialPattern $1 $2 }
@@ -967,8 +967,9 @@ StackFunction :: { StackFunction AlexPosn }
               : parens(Args) Signature Type plainArrow Expression { StackF $2 $1 $3 $5 }
 
 ValDecl :: { [Declaration AlexPosn] }
-        : val Pattern colon Type eq PreExpression { [ Val (get_addendum $1) (Just $4) $2 $6 ] }
-        | val Pattern eq Expression { [ Val (get_addendum $1) Nothing $2 $4 ] }
+        : val Pattern colon Type eq PreExpression { [ Val (get_addendum $1) (Just $4) (Just $2) (Just $6) ] }
+        | val Pattern eq Expression { [ Val (get_addendum $1) Nothing (Just $2) (Just $4) ] }
+        | val Pattern colon Type { [ Val (get_addendum $1) (Just $4) (Just $2) Nothing ] }
         | ValDecl and Pattern eq Expression { AndDecl Nothing $3 $5 : $1 }
         | extern ValDecl { over _head (Extern $1) $2 }
         | val Pattern eq colon {% left $ Expected $4 "Expression" ":" }

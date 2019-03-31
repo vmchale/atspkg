@@ -64,7 +64,7 @@ impl f (Impl x y)      = Impl x <$> f y
 impl f (ProofImpl x y) = ProofImpl x <$> f y
 impl _ x               = pure x
 
-valExpression :: Traversal' (Declaration a) (Expression a)
+valExpression :: Traversal' (Declaration a) (Maybe (Expression a))
 valExpression f (Val a v p e) = Val a v p <$> f e
 valExpression _ x             = pure x
 

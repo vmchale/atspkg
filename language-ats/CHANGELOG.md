@@ -1,5 +1,9 @@
 # language-ats
 
+## 1.7.1.0
+
+  * Fix a bug in how `val`s were handled in `SATS` files
+
 ## 1.7.0.6
 
   * Fix bug by introducing immorality
