@@ -39,17 +39,6 @@ matrix:
         - cabal-install-2.2
         - libarchive-dev
 
-  - env: TARGET=x86_64-unknown-linux GHC=8.2.2
-    addons:
-      apt:
-        update: true
-        sources:
-        - hvr-ghc
-        packages:
-        - ghc-8.2.2
-        - cabal-install-2.2
-        - libarchive-dev
-
   # OS X
   - env: TARGET=x86_64-apple-darwin GHC=8.6.4
     os: osx
