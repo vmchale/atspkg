@@ -11,6 +11,16 @@ is not fully working, but the configuration format is now stable.
 
 `atspkg` works quite well as a build system, and acceptably well as a package manager.
 
+- [Features & Non-Features](#features-&-non-features)
+  - [Example](#example)
+- [Installation](#installation)
+  - [Script](#script)
+  - [Source](#source)
+- [Quick Start](#quick-start)
+- [Examples](#examples)
+- [Global Configuration](#global-configuration)
+
+
 ## Features & Non-Features
 
 Things that `atspkg` will do for you:
