@@ -15,6 +15,8 @@ module Development.Shake.C ( -- * Types
                            , dynLibR
                            , cBin
                            , cToLib
+                           , preprocessA
+                           , preprocessR
                            -- * Oracles
                            , idOracle
                            -- * Actions
@@ -149,6 +151,16 @@ cToLib cc sources lib cfg =
     where objRules = objectFileR cc cfg <$> g sources <*> pure lib
           g = fmap (-<.> "o")
 
+-- | Rules for preprocessing a C source file.
+--
+-- @since 0.4.3.0
+preprocessR :: CCompiler
+            -> FilePath -- ^ C source file
+            -> FilePattern -- ^ Preprocessed file output
+            -> CConfig
+            -> Rules ()
+preprocessR cc source proc cfg = proc %> \out -> preprocessA cc source out cfg
+
 -- | Rules for generating a binary from C source files. Can have at most have
 -- one @main@ function.
 cBin :: CCompiler
@@ -165,6 +177,17 @@ stripA :: CmdResult r
        -> CCompiler -- ^ C compiler
        -> Action r
 stripA out cc = command mempty (stripToString cc) [out]
+
+-- | @since 0.4.3.0
+preprocessA :: CmdResult r
+            => CCompiler
+            -> FilePath -- ^ Source file
+            -> FilePath -- ^ Preprocessed output
+            -> CConfig
+            -> Action r
+preprocessA cc source out cfg =
+    need [source] *>
+    (command [EchoStderr False] (ccToString cc) . (("-E" : "-o" : out : [source]) ++) . cconfigToArgs) cfg
 
 -- | This action builds an executable.
 binaryA :: CmdResult r

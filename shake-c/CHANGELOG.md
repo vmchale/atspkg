@@ -1,5 +1,9 @@
 # shake-c
 
+## 0.4.3.0
+
+  * Add `preprocessA` and `preprocessR`
+
 ## 0.4.2.0
 
   * Do not use oracles; they cause problems
