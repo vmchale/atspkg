@@ -73,6 +73,7 @@ ccToString (Other s)      = s
 ccToString (GCC pre suff) = mkQualified pre suff "gcc"
 ccToString (GHC pre suff) = mkQualified pre suff "ghc"
 ccToString CompCert       = "ccomp"
+ccToString TCC            = "tcc"
 
 stripToString :: CCompiler -> String
 stripToString (GCC pre _) = mkQualified pre Nothing "strip"
@@ -97,6 +98,7 @@ ccFromString "gcc" = GCC Nothing Nothing
 ccFromString "ccomp" = CompCert
 ccFromString "clang" = Clang
 ccFromString "ghc" = GHC Nothing Nothing
+ccFromString "tcc" = TCC
 ccFromString s
     | "gcc" `isSuffixOf` s = GCC (Just (reverse . drop 3 . reverse $ s)) Nothing
     | "ghc" `isSuffixOf` s = GHC (Just (reverse . drop 3 . reverse $ s)) Nothing
@@ -116,6 +118,7 @@ data CCompiler = GCC { _prefix  :: Maybe String -- ^ Usually the target triple
                      }
                | CompCert
                | ICC
+               | TCC
                | Other String
                deriving (Generic, Binary, Show, Typeable, Eq, Hashable, NFData)
 

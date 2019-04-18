@@ -3,6 +3,7 @@
 ## 0.4.3.0
 
   * Add `preprocessA` and `preprocessR`
+  * Add `TCC` constructor for `CCompiler` data type
 
 ## 0.4.2.0
 
