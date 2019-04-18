@@ -97,8 +97,11 @@ library
         ansi-wl-pprint -any,
         dependency >=1.2.0.0,
         quaalude -any,
-        tar -any,
-        filemanip -any
+        archive-sig -any,
+        filemanip -any,
+        archive-tar
+
+    mixins: archive-tar (Archive.Tar as Archive)
 
     if flag(development)
         ghc-options: -Werror

@@ -12,9 +12,7 @@ module Language.ATS.Package.Compiler
     , SetupScript
     ) where
 
-import           System.FilePath.Find    (find)
--- import qualified Codec.Archive           as Archive
-import qualified Codec.Archive.Tar       as Tar
+import qualified Archive
 import           Codec.Compression.GZip  (compress, decompress)
 import           Control.Monad
 import qualified Data.ByteString.Lazy    as BS
@@ -23,6 +21,7 @@ import           Data.FileEmbed
 import           Network.HTTP.Client     hiding (decompress)
 import           Network.HTTP.Client.TLS (tlsManagerSettings)
 import           Quaalude
+import           System.FilePath.Find    (find)
 
 libatsCfg :: String
 libatsCfg = $(embedStringFile ("dhall" </> "atslib.dhall"))
@@ -64,8 +63,7 @@ fetchCompiler v = do
         response <- responseBody <$> httpLbs (initialRequest { method = "GET" }) manager
 
         withCompiler "Unpacking" v
-        Tar.unpack cd . Tar.read . decompress $ response
-        -- Archive.unpackToDir cd (BS.toStrict $ decompress response)
+        Archive.unpackToDir cd (decompress response)
 
 make :: Verbosity -> Version -> FilePath -> IO ()
 make v' v cd =
