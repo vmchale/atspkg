@@ -1,5 +1,9 @@
 # language-ats
 
+## 1.7.1.2
+
+  * Add `cross` flag to cabal file
+
 ## 1.7.1.1
 
   * Bugfix in how `val`s were handled
