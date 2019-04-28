@@ -51,6 +51,7 @@ let atslib =
           ]
         , cflags = [ "-fPIC" ]
         , compiler = compilerVersion
+        , version = libVersion
         }
 in
 

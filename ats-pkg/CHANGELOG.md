@@ -1,6 +1,10 @@
 # ats-pkg
 
-## 3.2.6.12
+## 3.2.5.13
+
+  * Use new compiler in `atslib.dhall`
+
+## 3.2.5.12
 
   * Use old Dhall prelude
 
