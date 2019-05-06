@@ -7,9 +7,13 @@ packages: language-ats
         , shake-cabal
         , shake-c
 
+allow-newer:
+  base
+  template-haskell
+
 -- documentation: true
 
-allow-boot-library-installs: true
+-- allow-boot-library-installs: true
 
 constraints:
   ats-format +development -static -profile,
