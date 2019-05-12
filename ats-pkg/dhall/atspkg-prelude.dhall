@@ -74,7 +74,7 @@ in
 
 let script =
   λ(x : {dir : Text, target : Optional Text}) →
-    { configure = [ "./configure --prefix=${x.dir}" ] : Optional Text, build = "make -j6", install = "make install" } : Script
+    { configure = Some "./configure --prefix=${x.dir}", build = "make -j6", install = "make install" } : Script
 in
 
 let src =
@@ -104,25 +104,22 @@ let showVersion =
   λ(x : List Natural) → concatMapSep "." Natural Natural/show x
 in
 
-let none = [] : Optional (List Natural)
+let none = None (List Natural)
 in
 let plainDeps = λ(x : Text) → { _1 = x, _2 = { lower = none, upper = none } }
 in
 
 let eqDeps = λ(x : { name : Text, version : List Natural }) →
     { _1 = x.name
-    , _2 = { lower = [ x.version ]
-             : Optional (List Natural)
-           , upper = [ x.version ]
-             : Optional (List Natural)
+    , _2 = { lower = Some x.version
+           , upper = Some x.version
            }
     }
 in
 
 let lowerDeps = λ(x : { name : Text, version : List Natural }) →
     { _1 = x.name
-    , _2 = { lower = [ x.version ]
-             : Optional (List Natural)
+    , _2 = { lower = Some x.version
            , upper = none
            }
     }
@@ -131,8 +128,7 @@ in
 let upperDeps = λ(x : { name : Text, version : List Natural }) →
     { _1 = x.name
     , _2 = { lower = none
-           , upper = [ x.version ]
-             : Optional (List Natural)
+           , upper = Some x.version
            }
     }
 in
@@ -196,8 +192,8 @@ let default
       : List Bin
     , libraries = []
       : List Lib
-    , man = ([] : Optional Text)
-    , completions = ([] : Optional Text)
+    , man = None Text
+    , completions = None Text
     , version = [0,3,13]
     , compiler = [0,3,13]
     , dependencies = []
@@ -214,8 +210,7 @@ let default
       : List Src
     , dynLink = True
     , extSolve = solver
-    , debPkg = []
-      : Optional Debian
+    , debPkg = None Debian
     , atsLib = True
     }
 in
@@ -224,8 +219,7 @@ let debian =
   λ(project : Text) →
   { package = project
   , target = "target/${project}.deb"
-  , manpage = []
-    : Optional Text
+  , manpage = None Text
   , binaries = []
     : List Text
   , libraries = []
@@ -290,7 +284,7 @@ in
 
 let mkDeb =
   λ(deb : Debian) →
-    [ deb ] : Optional Debian
+    Some deb
 in
 
 let noPrelude =
