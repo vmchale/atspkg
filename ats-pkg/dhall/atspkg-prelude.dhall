@@ -270,7 +270,7 @@ in
 let makePkgDescr =
   λ(x : { x : List Natural, name : Text, githubUsername : Text, description : Text }) →
     makePkg { x = x.x, name = x.name, githubUsername = x.githubUsername }
-      ⫽ { description = [ x.description ] : Optional Text }
+      ⫽ { description = Some (x.description) }
 in
 
 let cabalDir = "dist-newstyle/lib"
