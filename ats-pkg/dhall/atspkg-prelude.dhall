@@ -150,8 +150,7 @@ let dep =
     : List LibDep
   , libCDeps = []
     : List LibDep
-  , description = None
-    : Optional Text
+  , description = None Text
   , script = []
     : List Text
   }
