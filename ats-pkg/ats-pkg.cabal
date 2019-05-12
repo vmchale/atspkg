@@ -118,7 +118,7 @@ library quaalude
         directory >=1.2.3.0,
         filepath -any,
         microlens -any,
-        dhall <1.22.0,
+        dhall >=1.23.0,
         ansi-wl-pprint -any,
         shake >=0.17,
         bytestring -any,
