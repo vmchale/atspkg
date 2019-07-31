@@ -73,4 +73,4 @@ https://github.com/vmchale/ats-vim
 
 # COPYRIGHT
 
-Copyright 2017-2018. Vanessa McHale. All Rights Reserved.
+Copyright 2017-2019. Vanessa McHale. All Rights Reserved.

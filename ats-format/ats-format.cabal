@@ -3,7 +3,7 @@ name: ats-format
 version: 0.2.0.30
 license: BSD3
 license-file: LICENSE
-copyright: Copyright: (c) 2017-2018 Vanessa McHale
+copyright: Copyright: (c) 2017-2019 Vanessa McHale
 maintainer: vamchale@gmail.com
 author: Vanessa McHale
 synopsis: A source-code formatter for ATS
