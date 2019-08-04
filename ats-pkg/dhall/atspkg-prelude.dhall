@@ -1,7 +1,7 @@
 {- Dhall prelude functions -}
-let concatMapSep = https://raw.githubusercontent.com/dhall-lang/dhall-lang/0a7f596d03b3ea760a96a8e03935f4baa64274e1/Prelude/Text/concatMapSep
+let concatMapSep = https://raw.githubusercontent.com/dhall-lang/dhall-lang/9f259cd68870b912fbf2f2a08cd63dc3ccba9dc3/Prelude/Text/concatMapSep
 in
-let map = https://raw.githubusercontent.com/dhall-lang/dhall-lang/master/Prelude/List/map
+let map = https://raw.githubusercontent.com/dhall-lang/dhall-lang/9f259cd68870b912fbf2f2a08cd63dc3ccba9dc3/Prelude/List/map
 in
 
 {- Types for export and supporting functions -}
