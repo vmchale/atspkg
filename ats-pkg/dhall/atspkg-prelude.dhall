@@ -1,7 +1,7 @@
 {- Dhall prelude functions -}
-let concatMapSep = https://raw.githubusercontent.com/dhall-lang/dhall-lang/0a7f596d03b3ea760a96a8e03935f4baa64274e1/Prelude/Text/concatMapSep
+let concatMapSep = https://raw.githubusercontent.com/dhall-lang/dhall-lang/9f259cd68870b912fbf2f2a08cd63dc3ccba9dc3/Prelude/Text/concatMapSep
 in
-let map = https://raw.githubusercontent.com/dhall-lang/dhall-lang/master/Prelude/List/map
+let map = https://raw.githubusercontent.com/dhall-lang/dhall-lang/9f259cd68870b912fbf2f2a08cd63dc3ccba9dc3/Prelude/List/map
 in
 
 {- Types for export and supporting functions -}
@@ -20,7 +20,7 @@ in
 let TargetPair = { hs : Text, ats : Text, cpphs : Bool }
 in
 
-let CCompiler = < CompCert : {} | Clang : {} | GCC : {} | ICC : {} | CC : {} >
+let CCompiler = < CompCert | Clang | GCC | ICC | CC >
 in
 
 let Bin =
@@ -176,13 +176,13 @@ let staticLib =
   lib ⫽ { static = True }
 in
 
-let Solver = < PatsSolve : {} | Z3 : {} | Ignore : {} >
+let Solver = < PatsSolve | Z3 | Ignore >
 in
 
-let solver = Solver.PatsSolve {=}
+let solver = Solver.PatsSolve
 in
 
-let ignore = Solver.Ignore {=}
+let ignore = Solver.Ignore
 in
 
 let default
@@ -294,35 +294,35 @@ in
 let atsProject = "target"
 in
 
-let gcc = CCompiler.GCC {=}
+let gcc = CCompiler.GCC
 in
-let clang = CCompiler.Clang {=}
+let clang = CCompiler.Clang
 in
-let compCert = CCompiler.CompCert {=}
+let compCert = CCompiler.CompCert
 in
-let icc = CCompiler.ICC {=}
+let icc = CCompiler.ICC
 in
-let cc = CCompiler.CC {=}
+let cc = CCompiler.CC
 in
 
 let printCompiler =
     λ(cc : CCompiler) →
-        merge { CompCert = λ(_ : {}) → "ccomp"
-              , Clang = λ(_ : {}) → "clang"
-              , GCC = λ(_ : {}) → "gcc"
-              , ICC = λ(_ : {}) → "icc"
-              , CC = λ(_ : {}) → "cc"
+        merge { CompCert = "ccomp"
+              , Clang = "clang"
+              , GCC = "gcc"
+              , ICC = "icc"
+              , CC = "cc"
               }
               cc
 in
 
 let ccFlags =
     λ(cc : CCompiler) →
-        merge { CompCert = λ(_ : {}) → [ "-O2", "-fstruct-passing" ]
-              , Clang = λ(_ : {}) → [ "-O2", "-mtune=native", "-flto" ]
-              , GCC = λ(_ : {}) → [ "-O2", "-mtune=native", "-flto" ]
-              , ICC = λ(_ : {}) → [ "-O2", "-mtune=native", "-flto", "-D__PURE_INTEL_C99_HEADERS__" ]
-              , CC = λ(_ : {}) → [ "-O2" ]
+        merge { CompCert = [ "-O2", "-fstruct-passing" ]
+              , Clang = [ "-O2", "-mtune=native", "-flto" ]
+              , GCC = [ "-O2", "-mtune=native", "-flto" ]
+              , ICC = [ "-O2", "-mtune=native", "-flto", "-D__PURE_INTEL_C99_HEADERS__" ]
+              , CC = [ "-O2" ]
               }
               cc
 in
