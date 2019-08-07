@@ -46,6 +46,9 @@ debRules :: Debian -> Rules ()
 debRules deb =
     unpack (target deb) %> \out -> do
 
+        let binPerms = 0o755
+            manPerms = 0o0644
+
         let binaries' = unpack <$> binaries deb
             libraries' = unpack <$> libraries deb
             headers' = unpack <$> headers deb
@@ -58,18 +61,20 @@ debRules deb =
         let packDir = unpack (package deb)
             makeRel = (("target" </> packDir) </>)
             debianDir = makeRel "DEBIAN"
-            binDir = makeRel "usr/local/bin"
-            libDir = makeRel "usr/local/lib"
-            manDir = makeRel "usr/local/share/man/man1"
-            includeDir = makeRel "usr/local/include"
+            binDir = makeRel "usr/bin"
+            libDir = makeRel "usr/lib"
+            manDir = makeRel "usr/share/man/man1"
+            includeDir = makeRel "usr/include"
+            docDir = makeRel ("usr/share/doc" </> packDir)
 
         traverse_ (liftIO . createDirectoryIfMissing True)
-            [ binDir, debianDir, manDir, includeDir ]
+            [ binDir, debianDir, manDir, includeDir, docDir ]
 
         fold $ do
             mp <- manpage deb
             pure $
                 need [unpack mp] *>
+                setFileMode mp manPerms
                 copyFile' (unpack mp) (manDir ++ "/" ++ takeFileName (unpack mp))
 
         let moveFiles files dir = zipWithM_ copyFile' files ((dir </>) . takeFileName <$> files)
