@@ -112,7 +112,7 @@ mkManpage mStr = do
     c <- getConfig mStr Nothing
     b <- pandoc
     case man c of
-        Just _ -> bool (pure ()) manpages b
+        Just _ -> when b manpages
         _      -> pure ()
 
 parens :: String -> String
