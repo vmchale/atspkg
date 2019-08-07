@@ -12,10 +12,12 @@ module Language.ATS.Package.Debian ( debRules
 
 import           Data.Dependency            (Version (..))
 import           Data.List                  (intercalate)
+import qualified Data.Text.Lazy             as TL
 import           Development.Shake          hiding ((*>))
 import           Development.Shake.FilePath
 import           Dhall                      hiding (Text)
 import           Quaalude
+import           System.PosixCompat.Files   (setFileMode)
 
 data Debian = Debian { package     :: Text
                      , version     :: Version
@@ -67,14 +69,20 @@ debRules deb =
             includeDir = makeRel "usr/include"
             docDir = makeRel ("usr/share/doc" </> packDir)
 
-        traverse_ (liftIO . createDirectoryIfMissing True)
-            [ binDir, debianDir, manDir, includeDir, docDir ]
+        traverse_ (\fp -> liftIO $ setFileMode fp binPerms)
+            binaries'
+
+        let dirs = [ binDir, debianDir, manDir, includeDir, docDir ]
+
+        traverse_ (liftIO . createDirectoryIfMissing True) dirs
+
+        traverse_ (\fp -> liftIO $ setFileMode fp binPerms) dirs
 
         fold $ do
             mp <- manpage deb
             pure $
                 need [unpack mp] *>
-                setFileMode mp manPerms
+                liftIO (setFileMode (TL.unpack mp) manPerms) *>
                 copyFile' (unpack mp) (manDir ++ "/" ++ takeFileName (unpack mp))
 
         let moveFiles files dir = zipWithM_ copyFile' files ((dir </>) . takeFileName <$> files)
