@@ -4,9 +4,9 @@ version: 0.2.1.1
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018-2019 Vanessa McHale
-maintainer: vanessa.mchale@iohk.io
+maintainer: vamchale@gmail.com
 author: Vanessa McHale
-bug-reports: https://hub.darcs.net/vmchale/ats/issues
+bug-reports: https://github.com/vmchale/atspkg/issues
 synopsis: Shake library for use with cabal
 description:
     A library for using [shake](http://hackage.haskell.org/package/shake) alongside [cabal](https://www.haskell.org/cabal/).
@@ -16,8 +16,9 @@ extra-doc-files: README.md
                  CHANGELOG.md
 
 source-repository head
-    type: darcs
-    location: https://hub.darcs.net/vmchale/ats
+    type: git
+    location: git@github.com:vmchale/atspkg.git
+    subdir: shake-cabal
 
 flag development
     description:
