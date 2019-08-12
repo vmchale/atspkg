@@ -49,7 +49,7 @@ import           Development.Shake.Cabal
 import           Development.Shake.FilePath
 import           Development.Shake.Version
 import           Language.ATS
-import           System.Directory                  (copyFile, createDirectoryIfMissing, doesFileExist)
+import           System.Directory                  (createDirectoryIfMissing, doesFileExist)
 import           System.Environment                (getEnv)
 import           System.Exit                       (ExitCode (ExitSuccess))
 
@@ -96,7 +96,7 @@ copySources :: ATSToolConfig -> [FilePath] -> Action ()
 copySources ATSToolConfig{..} sources =
     forM_ sources $ \dep -> do
         liftIO $ createDirectoryIfMissing True (_patsHome </> takeDirectory dep)
-        liftIO $ copyFile dep (_patsHome </> dep)
+        copyFile' dep (_patsHome </> dep)
 
 makeCFlags :: [String] -- ^ Inputs
            -> [ForeignCabal] -- ^ Haskell libraries

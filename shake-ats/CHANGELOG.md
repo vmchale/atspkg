@@ -1,5 +1,9 @@
 # shake-ats
 
+## 1.10.2.2
+
+  * `genLinks` calls `traced` for better profiling
+
 ## 1.10.2.1
 
   * Use oracle to track `HsCompiler` in rules

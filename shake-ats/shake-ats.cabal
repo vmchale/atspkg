@@ -1,13 +1,12 @@
 cabal-version: 1.18
 name: shake-ats
-version: 1.10.2.1
+version: 1.10.2.2
 license: BSD3
 license-file: LICENSE
-copyright: Copyright: (c) 2018 Vanessa McHale
+copyright: Copyright: (c) 2018-2019 Vanessa McHale
 maintainer: vamchale@gmail.com
 author: Vanessa McHale
-tested-with: ghc ==8.4.4 ghc ==8.2.2 ghc ==8.6.3
-homepage: https://github.com/vmchale/shake-ats#readme
+tested-with: ghc ==8.4.4 ghc ==8.6.5
 synopsis: Utilities for building ATS projects with shake
 description:
     Various helper functions for building [ATS](http://www.ats-lang.org/) with the [shake](http://shakebuild.com/) library
@@ -17,8 +16,9 @@ extra-doc-files: README.md
                  CHANGELOG.md
 
 source-repository head
-    type: darcs
-    location: https://hub.darcs.net/vmchale/ats
+    type: git
+    location: git@github.com:vmchale/atspkg.git
+    subdir: shake-ats
 
 flag development
     description:
