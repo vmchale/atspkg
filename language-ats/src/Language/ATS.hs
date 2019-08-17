@@ -61,6 +61,7 @@ module Language.ATS ( -- * Functions for working with syntax
                     , typeCallArgs
                     ) where
 
+import           Control.Composition          ((-$))
 import           Control.Monad
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.State
@@ -108,7 +109,7 @@ stripComments = filter nc
 -- | Parse with some fixity declarations already in scope.
 parseWithCtx :: FixityState AlexPosn -> ([Token] -> [Token]) -> String -> Either ATSError (ATS AlexPosn)
 parseWithCtx st p = stateParse <=< lex'
-    where withSt = flip runStateT st
+    where withSt = runStateT -$ st
           lex' = lexErr . fmap p . lexATS
           stateParse = fmap rewriteATS' . withSt . parseATS
 

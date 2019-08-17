@@ -176,7 +176,7 @@ makeExecutable :: FilePath -> IO ()
 makeExecutable = pure mempty
 #else
 makeExecutable :: FilePath -> IO ()
-makeExecutable = flip setFileMode ownerModes
+makeExecutable = setFileMode -$ ownerModes
 #endif
 
 nubSpecial :: (Ord a) => [[a]] -> [[a]]
@@ -192,7 +192,7 @@ makeExe = case os of
     _           -> "make"
 
 hex :: Int -> String
-hex = flip showHex mempty
+hex = showHex -$ mempty
 
 -- | Same as "Text.PrettyPrint.ANSI.Leijen"'s @<$>@, but doesn't clash with the
 -- prelude.
