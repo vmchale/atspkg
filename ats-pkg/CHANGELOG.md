@@ -1,5 +1,10 @@
 # ats-pkg
 
+## 3.2.6.0
+
+  * Add `license` and `changelog` field to `Debian` type
+  * `lintian` doesn't object to debianizations anymore
+
 ## 3.2.5.14
 
   * Update for new Dhall library

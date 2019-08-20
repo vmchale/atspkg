@@ -69,6 +69,8 @@ let Debian =
   , binaries : List Text
   , libraries : List Text
   , headers : List Text
+  , license : Optional Text
+  , changelog : Optional Text
   }
 in
 
@@ -226,6 +228,8 @@ let debian =
     : List Text
   , headers = []
     : List Text
+  , license = None Text
+  , changelog = None Text
   }
 in
 

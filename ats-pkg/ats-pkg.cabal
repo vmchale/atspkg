@@ -1,6 +1,6 @@
 cabal-version: 2.0
 name: ats-pkg
-version: 3.2.5.18
+version: 3.2.6.0
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018-2019 Vanessa McHale
@@ -26,18 +26,7 @@ extra-doc-files: README.md
 source-repository head
     type: git
     location: git@github.com:vmchale/atspkg.git
-
-flag profile
-    description:
-        Enable profiling
-    default: False
-    manual: True
-
-flag eventlog
-    description:
-        Enable event logging
-    default: False
-    manual: True
+    subdir: ats-pkg
 
 flag development
     description:
@@ -98,7 +87,8 @@ library
         dependency >=1.2.0.0,
         quaalude -any,
         tar -any,
-        filemanip -any
+        filemanip -any,
+        unix-compat -any
 
     if flag(development)
         ghc-options: -Werror
@@ -165,12 +155,6 @@ executable atspkg
         shake -any,
         cli-setup -any,
         quaalude -any
-
-    if flag(eventlog)
-        ghc-options: -eventlog -with-rtsopts=-l
-
-    if flag(profile)
-        ghc-options: -with-rtsopts=-h -with-rtsopts=-p
 
     if flag(development)
         ghc-options: -Werror

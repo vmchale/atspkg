@@ -29,9 +29,11 @@ data Debian = Debian { package     :: Text
                      , binaries    :: [Text]
                      , libraries   :: [Text]
                      , headers     :: [Text]
-                     -- , license     :: Maybe Text
-                     -- , changelog   :: Maybe Text
+                     , license     :: Maybe Text
+                     , changelog   :: Maybe Text
                      }
+                     -- TODO: section https://www.debian.org/doc/debian-policy/ch-archive.html#s-subsections
+                     -- TODO: priority https://www.debian.org/doc/debian-policy/ch-archive.html#s-priorities
                      deriving (Generic, Binary, Interpret)
 
 deriving newtype instance Interpret Version
