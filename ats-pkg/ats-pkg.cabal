@@ -1,12 +1,12 @@
 cabal-version: 2.0
 name: ats-pkg
-version: 3.2.5.12
+version: 3.2.5.18
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018-2019 Vanessa McHale
 maintainer: vamchale@gmail.com
 author: Vanessa McHale
-tested-with: ghc ==8.4.4 ghc ==8.2.2 ghc ==8.6.4
+tested-with: ghc ==8.4.4 ghc ==8.6.5
 bug-reports: https://github.com/vmchale/atspkg/issues
 synopsis: A build tool for ATS
 description:
@@ -121,7 +121,7 @@ library quaalude
         directory >=1.2.3.0,
         filepath -any,
         microlens -any,
-        dhall -any,
+        dhall >=1.23.0,
         ansi-wl-pprint -any,
         shake >=0.17,
         bytestring -any,

@@ -7,6 +7,7 @@
 -- causes previously valid code to not typecheck... ok
 module Development.Shake.Cabal.Oracles ( hsOracle
                                        , cabalOracle
+                                       , CabalOracle
                                        , HsCompiler (..)
                                        , CabalVersion (..)
                                        ) where
@@ -18,6 +19,8 @@ import           Data.Typeable     (Typeable)
 import           Development.Shake
 import           GHC.Generics      (Generic)
 
+type CabalOracle = CabalVersion -> Action String
+
 -- | Use this for tracking 'HsCompiler'
 --
 -- @since 0.2.1.0
@@ -27,7 +30,7 @@ hsOracle = addOracle pure
 -- | Use this to track the version of cabal globally available
 --
 -- @since 0.2.1.0
-cabalOracle :: Rules (CabalVersion -> Action String)
+cabalOracle :: Rules CabalOracle
 cabalOracle = addOracle $ \CabalVersion -> do
     (Stdout out) <- command [] "cabal" [ "--numeric-version"]
     pure out

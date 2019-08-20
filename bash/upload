@@ -3,6 +3,9 @@
 version="$(grep -P -o '\d+\.\d+\.\d+\.\d+' "ats-pkg/ats-pkg.cabal" | head -n1)"
 token=$(cat "$HOME"/.git-token)
 
+# TODO: static release
+# /opt/ghc/bin/cabal-3.0 new-build -w ghc-8.4.4 --enable-executable-static
+
 github-release release -s "$token" -u vmchale -r atspkg -t "$version"
 github-release upload --replace -s "$token" -u vmchale -r atspkg -n atspkg.1 -f ats-pkg/man/atspkg.1 -t "$version"
 github-release upload --replace -s "$token" -u vmchale -r atspkg -n atsfmt.1 -f ats-format/man/atsfmt.1 -t "$version"

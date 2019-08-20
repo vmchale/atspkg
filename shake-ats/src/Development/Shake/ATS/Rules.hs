@@ -35,7 +35,7 @@ genATS src' target cpphs' =
 
 genLinks :: FilePath -> FilePath -> Rules ()
 genLinks dats link =
-    link %> \out -> liftIO $ do
+    link %> \out -> traced "genLinks" $ do
         contents <- readFile dats
         let proc = generateLinks contents
         either printErr (flip writeFile out) proc
@@ -81,10 +81,10 @@ cabalForeign hsc@GHC{} (ForeignCabal cbp' cf' obf') = do
 
         dir <- filter endsBuild <$> liftIO (getSubdirs pkgDir)
         let obj = head dir </> takeFileName obf
-        liftIO $ copyFile obj out
+        copyFile' obj out
 
         let hdr = dropExtension obj ++ "_stub.h"
-        liftIO $ copyFile hdr (takeDirectory out </> takeFileName hdr)
+        copyFile' hdr (takeDirectory out </> takeFileName hdr)
 cabalForeign _ _ = error "HsCompiler must be GHC"
 
 -- | Build a @.lats@ file using @atslex@.

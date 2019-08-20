@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: language-ats
-version: 1.7.1.1
+version: 1.7.1.2
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2018-2019 Vanessa McHale
@@ -27,6 +27,12 @@ source-repository head
     type: darcs
     location: https://hub.darcs.net/vmchale/ats
 
+flag cross
+    description:
+        Set this flag if cross-compiling
+    default: False
+    manual: True
+
 flag development
     description:
         Enable `-Werror`
@@ -36,7 +42,6 @@ flag development
 library
     exposed-modules:
         Language.ATS
-    build-tools: happy >=1.17.1, alex -any
     hs-source-dirs: src
     other-modules:
         Language.ATS.Lexer
@@ -61,6 +66,9 @@ library
         composition-prelude >=2.0.4.0,
         containers -any,
         transformers -any
+
+    if !flag(cross)
+        build-tools: happy >=1.17.1, alex -any
 
     if flag(development)
         ghc-options: -Werror

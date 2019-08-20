@@ -17,8 +17,7 @@ constraints:
   dependency +development,
   hs2ats +development,
   shake-cabal +development,
-  shake-c +development,
-  heaps >=0.3.6.1
+  shake-c +development
 
 executable-stripping: true
 
@@ -29,8 +28,3 @@ program-options
   alex-options: -g
 
 max-backjumps: 120000
-
-source-repository-package
-  type: git
-  location: https://github.com/corsis/clock
-  tag: ef60bd51a3587a173adf565c33bf2886df6e3842

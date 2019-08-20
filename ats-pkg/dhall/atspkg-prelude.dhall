@@ -1,7 +1,7 @@
 {- Dhall prelude functions -}
-let concatMapSep = https://raw.githubusercontent.com/dhall-lang/dhall-lang/0a7f596d03b3ea760a96a8e03935f4baa64274e1/Prelude/Text/concatMapSep
+let concatMapSep = https://raw.githubusercontent.com/dhall-lang/dhall-lang/9f259cd68870b912fbf2f2a08cd63dc3ccba9dc3/Prelude/Text/concatMapSep
 in
-let map = https://raw.githubusercontent.com/dhall-lang/dhall-lang/master/Prelude/List/map
+let map = https://raw.githubusercontent.com/dhall-lang/dhall-lang/9f259cd68870b912fbf2f2a08cd63dc3ccba9dc3/Prelude/List/map
 in
 
 {- Types for export and supporting functions -}
@@ -20,7 +20,7 @@ in
 let TargetPair = { hs : Text, ats : Text, cpphs : Bool }
 in
 
-let CCompiler = < CompCert : {} | Clang : {} | GCC : {} | ICC : {} | CC : {} >
+let CCompiler = < CompCert | Clang | GCC | ICC | CC >
 in
 
 let Bin =
@@ -74,7 +74,7 @@ in
 
 let script =
   λ(x : {dir : Text, target : Optional Text}) →
-    { configure = [ "./configure --prefix=${x.dir}" ] : Optional Text, build = "make -j6", install = "make install" } : Script
+    { configure = Some "./configure --prefix=${x.dir}", build = "make -j6", install = "make install" } : Script
 in
 
 let src =
@@ -104,25 +104,22 @@ let showVersion =
   λ(x : List Natural) → concatMapSep "." Natural Natural/show x
 in
 
-let none = [] : Optional (List Natural)
+let none = None (List Natural)
 in
 let plainDeps = λ(x : Text) → { _1 = x, _2 = { lower = none, upper = none } }
 in
 
 let eqDeps = λ(x : { name : Text, version : List Natural }) →
     { _1 = x.name
-    , _2 = { lower = [ x.version ]
-             : Optional (List Natural)
-           , upper = [ x.version ]
-             : Optional (List Natural)
+    , _2 = { lower = Some x.version
+           , upper = Some x.version
            }
     }
 in
 
 let lowerDeps = λ(x : { name : Text, version : List Natural }) →
     { _1 = x.name
-    , _2 = { lower = [ x.version ]
-             : Optional (List Natural)
+    , _2 = { lower = Some x.version
            , upper = none
            }
     }
@@ -131,8 +128,7 @@ in
 let upperDeps = λ(x : { name : Text, version : List Natural }) →
     { _1 = x.name
     , _2 = { lower = none
-           , upper = [ x.version ]
-             : Optional (List Natural)
+           , upper = Some x.version
            }
     }
 in
@@ -150,8 +146,7 @@ let dep =
     : List LibDep
   , libCDeps = []
     : List LibDep
-  , description = []
-    : Optional Text
+  , description = None Text
   , script = []
     : List Text
   }
@@ -181,13 +176,13 @@ let staticLib =
   lib ⫽ { static = True }
 in
 
-let Solver = < PatsSolve : {} | Z3 : {} | Ignore : {} >
+let Solver = < PatsSolve | Z3 | Ignore >
 in
 
-let solver = Solver.PatsSolve {=}
+let solver = Solver.PatsSolve
 in
 
-let ignore = Solver.Ignore {=}
+let ignore = Solver.Ignore
 in
 
 let default
@@ -197,10 +192,10 @@ let default
       : List Bin
     , libraries = []
       : List Lib
-    , man = ([] : Optional Text)
-    , completions = ([] : Optional Text)
-    , version = [0,3,11]
-    , compiler = [0,3,12]
+    , man = None Text
+    , completions = None Text
+    , version = [0,3,13]
+    , compiler = [0,3,13]
     , dependencies = []
       : List LibDep
     , clib = []
@@ -215,8 +210,7 @@ let default
       : List Src
     , dynLink = True
     , extSolve = solver
-    , debPkg = []
-      : Optional Debian
+    , debPkg = None Debian
     , atsLib = True
     }
 in
@@ -225,8 +219,7 @@ let debian =
   λ(project : Text) →
   { package = project
   , target = "target/${project}.deb"
-  , manpage = []
-    : Optional Text
+  , manpage = None Text
   , binaries = []
     : List Text
   , libraries = []
@@ -270,7 +263,7 @@ in
 let makePkgDescr =
   λ(x : { x : List Natural, name : Text, githubUsername : Text, description : Text }) →
     makePkg { x = x.x, name = x.name, githubUsername = x.githubUsername }
-      ⫽ { description = [ x.description ] : Optional Text }
+      ⫽ { description = Some (x.description) }
 in
 
 let cabalDir = "dist-newstyle/lib"
@@ -291,7 +284,7 @@ in
 
 let mkDeb =
   λ(deb : Debian) →
-    [ deb ] : Optional Debian
+    Some deb
 in
 
 let noPrelude =
@@ -301,35 +294,35 @@ in
 let atsProject = "target"
 in
 
-let gcc = CCompiler.GCC {=}
+let gcc = CCompiler.GCC
 in
-let clang = CCompiler.Clang {=}
+let clang = CCompiler.Clang
 in
-let compCert = CCompiler.CompCert {=}
+let compCert = CCompiler.CompCert
 in
-let icc = CCompiler.ICC {=}
+let icc = CCompiler.ICC
 in
-let cc = CCompiler.CC {=}
+let cc = CCompiler.CC
 in
 
 let printCompiler =
     λ(cc : CCompiler) →
-        merge { CompCert = λ(_ : {}) → "ccomp"
-              , Clang = λ(_ : {}) → "clang"
-              , GCC = λ(_ : {}) → "gcc"
-              , ICC = λ(_ : {}) → "icc"
-              , CC = λ(_ : {}) → "cc"
+        merge { CompCert = "ccomp"
+              , Clang = "clang"
+              , GCC = "gcc"
+              , ICC = "icc"
+              , CC = "cc"
               }
               cc
 in
 
 let ccFlags =
     λ(cc : CCompiler) →
-        merge { CompCert = λ(_ : {}) → [ "-O2", "-fstruct-passing" ]
-              , Clang = λ(_ : {}) → [ "-O2", "-mtune=native", "-flto" ]
-              , GCC = λ(_ : {}) → [ "-O2", "-mtune=native", "-flto" ]
-              , ICC = λ(_ : {}) → [ "-O2", "-mtune=native", "-flto", "-D__PURE_INTEL_C99_HEADERS__" ]
-              , CC = λ(_ : {}) → [ "-O2" ]
+        merge { CompCert = [ "-O2", "-fstruct-passing" ]
+              , Clang = [ "-O2", "-mtune=native", "-flto" ]
+              , GCC = [ "-O2", "-mtune=native", "-flto" ]
+              , ICC = [ "-O2", "-mtune=native", "-flto", "-D__PURE_INTEL_C99_HEADERS__" ]
+              , CC = [ "-O2" ]
               }
               cc
 in
