@@ -20,7 +20,6 @@ module Quaalude ( hex
                 , isPrefixOf
                 , isSuffixOf
                 , on
-                , both
                 , (***)
                 , (&&&)
                 , (<=<)
@@ -153,7 +152,7 @@ import           Debug.Trace                  (traceShow, traceShowId)
 import           Development.Shake            hiding (doesFileExist, getEnv)
 import           Development.Shake.FilePath
 import           Dhall                        hiding (Text, bool)
-import           Lens.Micro                   hiding (both)
+import           Lens.Micro
 import           Lens.Micro.Extras
 import           Network.HTTP.Client
 import           Network.HTTP.Client.TLS      (tlsManagerSettings)
