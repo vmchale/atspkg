@@ -1,45 +1,45 @@
-cabal-version: 2.0
-name: ats-pkg
-version: 3.2.6.0
-license: BSD3
-license-file: LICENSE
-copyright: Copyright: (c) 2018-2019 Vanessa McHale
-maintainer: vamchale@gmail.com
-author: Vanessa McHale
-tested-with: ghc ==8.4.4 ghc ==8.6.5
-bug-reports: https://github.com/vmchale/atspkg/issues
-synopsis: A build tool for ATS
-description:
-    A collection of scripts to simplify building ATS projects.
-category: Development, ATS
-build-type: Simple
-data-files:
-    man/atspkg.1
+cabal-version:      2.0
+name:               ats-pkg
+version:            3.2.6.0
+license:            BSD3
+license-file:       LICENSE
+copyright:          Copyright: (c) 2018-2019 Vanessa McHale
+maintainer:         vamchale@gmail.com
+author:             Vanessa McHale
+tested-with:        ghc ==8.4.4 ghc ==8.6.5
+bug-reports:        https://github.com/vmchale/atspkg/issues
+synopsis:           A build tool for ATS
+description:        A collection of scripts to simplify building ATS projects.
+category:           Development, ATS
+build-type:         Simple
+data-files:         man/atspkg.1
 extra-source-files:
     dhall/config.dhall
     dhall/atslib.dhall
     dhall/atspkg-prelude.dhall
-extra-doc-files: README.md
-                 docs/manual.tex
-                 CHANGELOG.md
+
+extra-doc-files:
+    README.md
+    docs/manual.tex
+    CHANGELOG.md
 
 source-repository head
-    type: git
+    type:     git
     location: git@github.com:vmchale/atspkg.git
-    subdir: ats-pkg
+    subdir:   ats-pkg
 
 flag development
-    description:
-        Enable `-Werror`
-    default: False
-    manual: True
+    description: Enable `-Werror`
+    default:     False
+    manual:      True
 
 library
     exposed-modules:
         Language.ATS.Package
         Distribution.ATS
+
     build-tool-depends: cpphs:cpphs -any
-    hs-source-dirs: src
+    hs-source-dirs:     src
     other-modules:
         Paths_ats_pkg
         Distribution.ATS.Build
@@ -53,14 +53,17 @@ library
         Language.ATS.Package.Type
         Language.ATS.Package.Debian
         Distribution.ATS.Version
-    autogen-modules:
-        Paths_ats_pkg
-    default-language: Haskell2010
-    other-extensions: OverloadedStrings GeneralizedNewtypeDeriving
-                      DeriveAnyClass DeriveGeneric TemplateHaskell RecordWildCards
-                      TupleSections StandaloneDeriving DerivingStrategies
-    ghc-options: -Wall -Wincomplete-uni-patterns
-                 -Wincomplete-record-updates
+
+    autogen-modules:    Paths_ats_pkg
+    default-language:   Haskell2010
+    other-extensions:
+        OverloadedStrings GeneralizedNewtypeDeriving DeriveAnyClass
+        DeriveGeneric TemplateHaskell RecordWildCards TupleSections
+        StandaloneDeriving DerivingStrategies
+
+    ghc-options:
+        -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates
+
     build-depends:
         base >=4.10 && <5,
         http-client -any,
@@ -94,11 +97,9 @@ library
         ghc-options: -Werror
 
 library quaalude
-    exposed-modules:
-        Quaalude
-    hs-source-dirs: internal
-    other-modules:
-        System.Process.Ext
+    exposed-modules:  Quaalude
+    hs-source-dirs:   internal
+    other-modules:    System.Process.Ext
     default-language: Haskell2010
     build-depends:
         base -any,
@@ -116,32 +117,34 @@ library quaalude
         text -any,
         mtl -any,
         containers >=0.6
-    if !impl(ghc >= 8.4)
-      build-depends: dhall >=1.23.0 && dhall < 1.25.0
+
+    if !impl(ghc >=8.4)
+        build-depends: dhall >=1.23.0 && <1.25.0
+
     else
-      build-depends: dhall >=1.23.0
+        build-depends: dhall >=1.23.0
 
     if flag(development)
         cpp-options: -DDEBUG
 
     if !os(windows)
-        build-depends:
-            unix -any
+        build-depends: unix -any
 
 executable atspkg
-    main-is: Main.hs
-    hs-source-dirs: app
+    main-is:          Main.hs
+    hs-source-dirs:   app
     other-modules:
         Paths_ats_pkg
         Language.ATS.Package.Dhall
         Language.ATS.Package.Upgrade
-    autogen-modules:
-        Paths_ats_pkg
+
+    autogen-modules:  Paths_ats_pkg
     default-language: Haskell2010
     other-extensions: OverloadedStrings
-    ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall
-                 -with-rtsopts=-I0 -Wincomplete-uni-patterns
-                 -Wincomplete-record-updates
+    ghc-options:
+        -threaded -rtsopts -with-rtsopts=-N -Wall -with-rtsopts=-I0
+        -Wincomplete-uni-patterns -Wincomplete-record-updates
+
     build-depends:
         base >=4.10,
         ats-pkg -any,
