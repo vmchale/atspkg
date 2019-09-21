@@ -108,7 +108,6 @@ library quaalude
         directory >=1.2.3.0,
         filepath -any,
         microlens -any,
-        dhall >=1.23.0,
         ansi-wl-pprint -any,
         shake >=0.17,
         bytestring -any,
@@ -117,6 +116,10 @@ library quaalude
         text -any,
         mtl -any,
         containers >=0.6
+    if !impl(ghc >= 8.4)
+      build-depends: dhall >=1.23.0 && dhall < 1.25.0
+    else
+      build-depends: dhall >=1.23.0
 
     if flag(development)
         cpp-options: -DDEBUG
