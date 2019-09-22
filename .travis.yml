@@ -17,7 +17,7 @@ addons:
 matrix:
   include:
 
-  - env: TARGET=x86_64-unknown-linux GHC=8.6.4
+  - env: TARGET=x86_64-unknown-linux GHC=8.6.5
     addons:
       apt:
         update: true
@@ -25,7 +25,7 @@ matrix:
         - hvr-ghc
         packages:
         - ghc-8.6.4
-        - cabal-install-2.4
+        - cabal-install-3.0
         - libarchive-dev
 
   - env: TARGET=x86_64-unknown-linux GHC=8.4.4
@@ -36,11 +36,11 @@ matrix:
         - hvr-ghc
         packages:
         - ghc-8.4.4
-        - cabal-install-2.2
+        - cabal-install-3.0
         - libarchive-dev
 
   # OS X
-  - env: TARGET=x86_64-apple-darwin GHC=8.6.4
+  - env: TARGET=x86_64-apple-darwin GHC=8.6.5
     os: osx
 
 before_install:
@@ -51,18 +51,19 @@ before_install:
     brew install xz
     brew install bzip2
     brew install libarchive
+    brew install ghc@8.6
     brew install cabal-install
     export PKG_CONFIG_PATH="/usr/local/opt/libarchive/lib/pkgconfig"
-    cabal new-update
+    cabal update
   else
     export PATH=/opt/ghc/bin:$PATH
-    cabal new-update
+    cabal update
   fi
 
 script:
 - curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s ats-format ats-pkg dependency hs2ats language-ats shake-ats
-- cabal new-update
-- travis_wait 40 cabal new-build all
+- cabal update
+- travis_wait 40 cabal build all
 - |
   if [ `uname` = "Darwin" ]
   then
