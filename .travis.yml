@@ -24,7 +24,7 @@ matrix:
         sources:
         - hvr-ghc
         packages:
-        - ghc-8.6.4
+        - ghc-8.6.5
         - cabal-install-3.0
         - libarchive-dev
 
@@ -63,7 +63,7 @@ before_install:
 script:
 - curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s ats-format ats-pkg dependency hs2ats language-ats shake-ats
 - cabal update
-- travis_wait 40 cabal build all -w ghc-8.6.5
+- travis_wait 40 cabal build all
 - |
   if [ `uname` = "Darwin" ]
   then
