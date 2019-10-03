@@ -1,8 +1,4 @@
 ---
-- functions:
-  - {name: unsafePerformIO, within: []}
-  - {name: undefined, within: []}
-
 - ignore: {name: Avoid lambda, within: [Language.ATS.Types.Lens]}
 - ignore: {name: Use <$>, within: [Language.ATS.PrettyPrint]}
 - ignore: {name: Unused LANGUAGE pragma, within: [Language.ATS.PrettyPrint]}
