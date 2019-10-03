@@ -1,33 +1,13 @@
 ---
 - functions:
   - {name: unsafePerformIO, within: []}
-  - {name: error, within: [Development.Shake.ATS, Language.ATS.Generate, Development.Shake.Linters, Language.C.Dependency, Development.Shake.ATS.Rules]}
-  - {name: undefined, within: [Language.ATS.PrettyPrint, Main, Language.ATS.Package.Dependency, Language.ATS.Generate, Language.ATS.Package.Build, Development.Shake.ATS, Language.ATS.Rewrite, Development.Shake.ATS.Generate, Development.Shake.ATS.Rules]}
-  - {name: fromJust, within: [Language.ATS.Generate]}
-  - {name: foldl, within: []}
-
-- error: {lhs: "hylo embed", rhs: "ana", name: "Use anamorphism"}
-- error: {lhs: "hylo f project", rhs: "cata f", name: "Use catamorphism"}
-- error: {lhs: "do { x <- y ; pure (f x) }", rhs: "f =<< y", name: "Avoid do-notation"}
-- error: {lhs: "concat", rhs: "join", name: "Generalize concat"}
-- error: {lhs: "concatMap", rhs: "(=<<)", name: "Generalize concatMap"}
-- error: {lhs: "f >> pure ()", rhs: "void f", name: "Use void"}
-- error: {lhs: "over _1 f x", rhs: "first f x", name: "Use arrows"}
-- error: {lhs: "over _2 f x", rhs: "second f x", name: "Use arrows"}
-- error: {lhs: "bool x x p", rhs: "x", name: "Avoid bool"}
-- error: {lhs: "const", rhs: "pure", name: "Use pure"}
-- error: {lhs: "mapM", rhs: "traverse"}
-- error: {lhs: "mapM_", rhs: "traverse_"}
-- error: {lhs: "if p then x else pure ()", rhs: "when p x"}
-- error: {lhs: "if p then pure () else x", rhs: "when (not p) x"}
+  - {name: undefined, within: []}
 
 - ignore: {name: Avoid lambda, within: [Language.ATS.Types.Lens]}
 - ignore: {name: Use <$>, within: [Language.ATS.PrettyPrint]}
 - ignore: {name: Unused LANGUAGE pragma, within: [Language.ATS.PrettyPrint]}
 - ignore: {name: Functor law, within: [Language.ATS.PrettyPrint]}
 - ignore: {name: Evaluate, within: [Language.ATS.Generate]}
-- ignore: {name: Use foldr}
-- ignore: {name: Use section}
 
 - fixity: infixr 8 .*
 - fixity: infixr 3 ***
