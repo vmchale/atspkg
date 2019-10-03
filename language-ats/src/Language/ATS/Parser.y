@@ -981,9 +981,9 @@ ValDecl :: { [Declaration AlexPosn] }
         | val Pattern eq colon {% left $ Expected $4 "Expression" ":" }
 
 StaticDeclaration :: { Declaration AlexPosn }
-                  : prval Pattern eq StaticExpression { PrVal $2 (Just $4) Nothing } -- FIXME: prval should use static expressions as well.
-                  | prval Pattern colon Type { PrVal $2 Nothing (Just $4) }
-                  | prval Pattern colon Type eq StaticExpression { PrVal $2 (Just $6) (Just $4) }
+                  : prval Universals Pattern eq StaticExpression { PrVal $2 $3 (Just $5) Nothing } -- FIXME: prval should use static expressions as well.
+                  | prval Universals Pattern colon Type { PrVal $2 $3 Nothing (Just $5) }
+                  | prval Universals Pattern colon Type eq StaticExpression { PrVal $2 $3 (Just $7) (Just $5) }
                   | prvar Pattern eq StaticExpression { PrVar $2 (Just $4) Nothing }
                   | prvar Pattern colon Type { PrVar $2 Nothing (Just $4) }
                   | prvar Pattern colon Type eq StaticExpression { PrVar $2 (Just $6) (Just $4) }
