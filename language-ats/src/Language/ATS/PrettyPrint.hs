@@ -216,22 +216,22 @@ patternHelper ps = mconcat (punctuate ", " ps)
 
 instance Eq a => Pretty (Pattern a) where
     pretty = cata a where
-        a (PSumF s x)                  = string s <+> x
-        a (PLiteralF e)                = pretty e
-        a (PNameF s [])                = pretty s
-        a (PNameF s [x])               = pretty s <> parens x
-        a (PNameF s ps)                = pretty s <> parens (patternHelper ps)
-        a (FreeF p)                    = "~" <> p
-        a (GuardedF _ e p)             = p <+> "when" <+> pretty e
-        a (ProofF _ p p')              = parens (patternHelper p <+> "|" <+> patternHelper p')
-        a (TuplePatternF ps)           = parens (patternHelper ps)
-        a (BoxTuplePatternF _ ps)      = "'(" <> patternHelper ps <> ")"
-        a (AtPatternF _ p)             = "@" <> p
+        a (PSumF s x)                         = string s <+> x
+        a (PLiteralF e)                       = pretty e
+        a (PNameF s [])                       = pretty s
+        a (PNameF s [x])                      = pretty s <> parens x
+        a (PNameF s ps)                       = pretty s <> parens (patternHelper ps)
+        a (FreeF p)                           = "~" <> p
+        a (GuardedF _ e p)                    = p <+> "when" <+> pretty e
+        a (ProofF _ p p')                     = parens (patternHelper p <+> "|" <+> patternHelper p')
+        a (TuplePatternF ps)                  = parens (patternHelper ps)
+        a (BoxTuplePatternF _ ps)             = "'(" <> patternHelper ps <> ")"
+        a (AtPatternF _ p)                    = "@" <> p
         a (UniversalPatternF _ n us (Just p)) = text n <> prettyArgsU "" "" us <> p
-        a (UniversalPatternF _ n us Nothing) = text n <> prettyArgsU "" "" us
-        a (ExistentialPatternF e p)    = pretty e <> p
-        a (AsF _ p p')                 = p <+> "as" <+> p'
-        a (BinPatternF _ op p p')      = p <+> pretty op <+> p'
+        a (UniversalPatternF _ n us Nothing)  = text n <> prettyArgsU "" "" us
+        a (ExistentialPatternF e p)           = pretty e <> p
+        a (AsF _ p p')                        = p <+> "as" <+> p'
+        a (BinPatternF _ op p p')             = p <+> pretty op <+> p'
 
 argHelper :: Eq a => (Doc -> Doc -> Doc) -> Arg a -> Doc
 argHelper _ (Arg (First s))   = pretty s
@@ -353,10 +353,10 @@ withHashtag _    = lbracket
 
 instance Eq a => Pretty (Existential a) where
     pretty (Existential [] b (Just st) (Just e')) = withHashtag b <> pretty st <> pretty e' <> rbracket
-    pretty (Existential [] b Nothing (Just e')) = withHashtag b <> pretty e' <> rbracket
-    pretty (Existential [e] b (Just st) Nothing) = withHashtag b <> text e <> ":" <> pretty st <> rbracket
-    pretty (Existential bs b st Nothing) = withHashtag b <+> mconcat (punctuate ", " (fmap pretty bs)) <> gan st <+> rbracket
-    pretty (Existential bs b st (Just e)) = withHashtag b <+> mconcat (punctuate ", " (fmap pretty bs)) <> gan st <> "|" <+> pretty e <+> rbracket
+    pretty (Existential [] b Nothing (Just e'))   = withHashtag b <> pretty e' <> rbracket
+    pretty (Existential [e] b (Just st) Nothing)  = withHashtag b <> text e <> ":" <> pretty st <> rbracket
+    pretty (Existential bs b st Nothing)          = withHashtag b <+> mconcat (punctuate ", " (fmap pretty bs)) <> gan st <+> rbracket
+    pretty (Existential bs b st (Just e))         = withHashtag b <+> mconcat (punctuate ", " (fmap pretty bs)) <> gan st <> "|" <+> pretty e <+> rbracket
 
 instance Eq a => Pretty (Universal a) where
     pretty (Universal [x] Nothing []) = lbrace <> text x <> rbrace
@@ -551,8 +551,12 @@ prettySig = prettySigG space space
 prettyTermetric :: Pretty a => a -> Doc
 prettyTermetric t = softline <> ".<" <> pretty t <> ">." <> softline
 
-prettyMTermetric :: Pretty a => Maybe a -> Doc
-prettyMTermetric = maybe mempty prettyTermetric
+prettyETermetric :: Pretty a => Maybe a -> Doc
+prettyETermetric Nothing  = softline <> ".<>." <> softline
+prettyETermetric (Just t) = softline <> ".<" <> pretty t <> ">." <> softline
+
+prettyMTermetric :: Pretty a => Maybe (Maybe a) -> Doc
+prettyMTermetric = maybe mempty prettyETermetric
 
 -- FIXME figure out a nicer algorithm for when/how to split lines.
 instance (Eq a, Pretty (ek a)) => Pretty (PreFunction ek a) where

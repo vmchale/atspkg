@@ -15,6 +15,7 @@ import Control.DeepSeq (NFData)
 import qualified Data.Map as M
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
+import Data.Bifunctor (second)
 import Data.Char (toLower)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Foldable (toList)
@@ -167,6 +168,7 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     neq { Operator $$ "!=" }
     openTermetric { Operator $$ ".<" }
     closeTermetric { Operator $$ ">." }
+    emptyTermetric { Operator $$ ".<>." }
     mutateArrow { FuncType $$ "->" }
     mutateEq { Operator $$ ":=" }
     lbracket { Special $$ "<" }
@@ -536,9 +538,9 @@ PreExpression :: { Expression AlexPosn }
               | braces(ATS) { Actions $1 }
               | while parens(PreExpression) PreExpression { While $1 $2 $3 }
               | for parens(PreExpression) PreExpression { For $1 $2 $3 }
-              | whileStar Universals Termetric parens(Args) plainArrow Expression Expression { WhileStar $1 $2 (snd $3) $4 $6 $7 Nothing }
-              | whileStar Universals Termetric parens(Args) colon openParen Args closeParen plainArrow Expression Expression { WhileStar $1 $2 (snd $3) $4 $10 $11 (Just $7) }
-              | forStar Universals Termetric parens(Args) plainArrow Expression Expression { ForStar $1 $2 (snd $3) $4 $6 $7 }
+              | whileStar Universals PreTermetric parens(Args) plainArrow Expression Expression { WhileStar $1 $2 (snd $3) $4 $6 $7 Nothing }
+              | whileStar Universals PreTermetric parens(Args) colon openParen Args closeParen plainArrow Expression Expression { WhileStar $1 $2 (snd $3) $4 $10 $11 (Just $7) }
+              | forStar Universals PreTermetric parens(Args) plainArrow Expression Expression { ForStar $1 $2 (snd $3) $4 $6 $7 }
               | lineComment PreExpression { CommentExpr (to_string $1) $2 }
               | comma parens(identifier) { MacroVar $1 (to_string $2) }
               | PreExpression where braces(ATS) { WhereExp $1 $3 }
@@ -563,10 +565,14 @@ PreExpression :: { Expression AlexPosn }
               | begin Expression implement {% left $ Expected $3 "end" "implement" }
 
 -- | Parse a termetric
-Termetric :: { (AlexPosn, StaticExpression AlexPosn) }
-          : openTermetric StaticExpression closeTermetric { ($1, $2) }
-          | underscore {% left $ Expected $1 "_" "Termination metric" }
-          | dollar {% left $ Expected $1 "$" "Termination metric" }
+PreTermetric :: { (AlexPosn, (StaticExpression AlexPosn)) }
+             : openTermetric StaticExpression closeTermetric { ($1, $2) }
+             | underscore {% left $ Expected $1 "_" "Termination metric" }
+             | dollar {% left $ Expected $1 "$" "Termination metric" }
+
+Termetric :: { (AlexPosn, Maybe (StaticExpression AlexPosn)) }
+          : PreTermetric { second Just $1 }
+          | emptyTermetric { ($1, Nothing) }
 
 Sort :: { Sort AlexPosn }
      : t0pPlain { T0p None }
@@ -699,7 +705,7 @@ Universals :: { [Universal AlexPosn] }
            : PreUniversals { reverse $1 }
 
 -- | Optionally parse a termetric
-OptTermetric :: { Maybe (StaticExpression AlexPosn) }
+OptTermetric :: { Maybe (Maybe (StaticExpression AlexPosn)) }
              : { Nothing }
              | Termetric { Just (snd $1) }
 

@@ -499,7 +499,7 @@ data PreFunction ek a = PreF { fname         :: Name a -- ^ Function name
                              , universals    :: [Universal a] -- ^ (Universal a) quantifiers/refinement type
                              , args          :: Args a -- ^ Actual function arguments
                              , returnType    :: Maybe (Type a) -- ^ Return type
-                             , termetric     :: Maybe (StaticExpression a) -- ^ Optional termination metric
+                             , termetric     :: Maybe (Maybe (StaticExpression a)) -- ^ Optional termination metric, which may be empty
                              , _expression   :: Maybe (ek a) -- ^ Expression holding the actual function body (not present in static templates)
                              }
                              deriving (Show, Eq, Generic, NFData)

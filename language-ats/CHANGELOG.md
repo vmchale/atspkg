@@ -1,5 +1,9 @@
 # language-ats
 
+## 1.7.2.0
+
+  * Update `termetric` field type to allow empty termetrics
+
 ## 1.7.1.2
 
   * Add `cross` flag to cabal file
