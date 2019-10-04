@@ -609,9 +609,9 @@ instance Eq a => Pretty (Declaration a) where
     pretty (DataSort _ s ls)                = "datasort" <+> text s <+> "=" <$> prettyDSL (toList ls)
     pretty (Impl as i)                      = "implement" <+> prettyArgsNil as <> pretty i
     pretty (ProofImpl as i)                 = "primplmnt" <+> prettyArgsNil as <> pretty i
-    pretty (PrVal p (Just e) Nothing)       = "prval" <+> pretty p <+> "=" <+> pretty e
-    pretty (PrVal p Nothing (Just t))       = "prval" <+> pretty p <+> ":" <+> pretty t
-    pretty (PrVal p (Just e) (Just t))      = "prval" <+> pretty p <+> ":" <+> pretty t <+> "=" <+> pretty e
+    pretty (PrVal us p (Just e) Nothing)    = "prval" <> prettyUsNil us <> pretty p <+> "=" <+> pretty e
+    pretty (PrVal us p Nothing (Just t))    = "prval" <> prettyUsNil us <> pretty p <+> ":" <+> pretty t
+    pretty (PrVal us p (Just e) (Just t))   = "prval" <> prettyUsNil us <> pretty p <+> ":" <+> pretty t <+> "=" <+> pretty e
     pretty PrVal{}                          = undefined
     pretty (PrVar p (Just e) Nothing)       = "prvar" <+> pretty p <+> "=" <+> pretty e
     pretty (PrVar p Nothing (Just t))       = "prvar" <+> pretty p <+> ":" <+> pretty t
