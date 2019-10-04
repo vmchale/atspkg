@@ -55,7 +55,6 @@ import           Control.Recursion  hiding (Fix (..))
 import           Data.Function      (on)
 import           Data.List.NonEmpty (NonEmpty)
 import qualified Data.Map           as M
-import           Data.Semigroup     (Semigroup)
 import           GHC.Generics       (Generic)
 import           Language.ATS.Lexer (Addendum (..))
 
