@@ -1071,7 +1071,7 @@ Declaration : include string { Include $2 }
             | absimpl Name SortArgs eq Type { AbsImpl $1 $2 $3 $5 }
             | tkindef IdentifierOr eq string { TKind $1 (Unqualified $2) $4 }
             | TypeDecl { $1 }
-            | symintr Names { SymIntr $1 $2 }
+            | symintr Names { SymIntr $1 (reverse $2) }
             | stacst IdentifierOr colon Type OptStaticExpression { Stacst $1 (Unqualified $2) $4 $5 }
             | propdef IdentifierOr openParen Args closeParen eq Type { PropDef $1 $2 (Just $4) $7 }
             | exception identifierSpace of doubleParens { Exception (to_string $2) (Tuple $4 mempty) }

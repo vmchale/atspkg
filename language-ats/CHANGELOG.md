@@ -1,5 +1,9 @@
 # language-ats
 
+## 1.7.3.1
+
+  * Fix bug in parse order for `symintr` declarations
+
 ## 1.7.3.0
 
   * Update `PrVal` to include a field for universal quantifiers
