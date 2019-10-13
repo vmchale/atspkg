@@ -1,6 +1,6 @@
 cabal-version: 1.18
 name: ats-format
-version: 0.2.0.30
+version: 0.2.0.31
 license: BSD3
 license-file: LICENSE
 copyright: Copyright: (c) 2017-2019 Vanessa McHale
@@ -27,17 +27,6 @@ custom-setup
                    cli-setup >=0.1.0.2,
                    filepath -any
 
-flag profile
-    description:
-        Enable profiling
-    default: False
-    manual: True
-
-flag static
-    description:
-        Make static binaries
-    default: False
-
 flag development
     description:
         Enable `-Werror`
@@ -54,7 +43,7 @@ executable atsfmt
     ghc-options: -Wall
     build-depends:
         base >=4.9 && <5,
-        language-ats >=0.1.1.10,
+        language-ats >=1.7.4.0,
         optparse-applicative -any,
         htoml-megaparsec >=2.1.0.0,
         megaparsec >=7.0.0,
@@ -65,14 +54,8 @@ executable atsfmt
         process -any,
         file-embed >=0.0.9
     
-    if flag(profile)
-        ghc-options: -rtsopts -with-rtsopts=-h
-
     if flag(development)
         ghc-options: -Werror
     
     if impl(ghc >=8.0)
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
-    
-    if flag(static)
-        ghc-options: -static -optc-static -optl-static

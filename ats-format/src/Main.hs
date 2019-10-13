@@ -65,7 +65,7 @@ file = Program
         <> help "Generate default configuration file in the current directory")
 
 versionInfo :: Parser (a -> a)
-versionInfo = infoOption ("atsfmt version: " ++ showVersion version) (short 'V' <> long "version" <> help "Show version")
+versionInfo = infoOption ("atsfmt version: " ++ showVersion version ++ "\nlanguage-ats version: " ++ showVersion languageATSVersion) (short 'V' <> long "version" <> help "Show version")
 
 wrapper :: ParserInfo Program
 wrapper = info (helper <*> versionInfo <*> file)
