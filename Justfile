@@ -8,7 +8,7 @@ darcs:
 
 
 approve FILE:
-    @cabal new-run atsfmt -- language-ats/test/data/{{ FILE }} -o > language-ats/test/data/$(echo {{ FILE }} | sed 's/\(dats\|hats\|sats\)/out/')
+    @cabal run atsfmt -w ghc-8.6.5 -- language-ats/test/data/{{ FILE }} -o > language-ats/test/data/$(echo {{ FILE }} | sed 's/\(dats\|hats\|sats\)/out/')
     sed -i '$d' language-ats/test/data/$(echo {{ FILE }} | sed 's/\(dats\|hats\|sats\)/out/')
 
 clean:

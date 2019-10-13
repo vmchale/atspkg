@@ -162,7 +162,7 @@ executable atspkg
         shake -any,
         cli-setup -any,
         quaalude -any,
-        dhall >= 1.26.1
+        dhall >=1.26.1
 
     if flag(development)
         ghc-options: -Werror
