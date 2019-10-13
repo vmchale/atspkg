@@ -59,12 +59,15 @@ module Language.ATS ( -- * Functions for working with syntax
                     , constructorUniversals
                     , typeCall
                     , typeCallArgs
+                    -- * Misecellany
+                    , languageATSVersion
                     ) where
 
 import           Control.Composition          ((-$))
 import           Control.Monad
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.State
+import           Data.Version (Version)
 import           GHC.IO.Handle.FD             (stderr)
 import           Language.ATS.Lexer
 import           Language.ATS.Parser
@@ -73,7 +76,12 @@ import           Language.ATS.Rewrite
 import           Language.ATS.Types
 import           Language.ATS.Types.Lens
 import           Lens.Micro
+import           Paths_language_ats (version)
 import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
+
+-- | @since 1.7.4.0
+languageATSVersion :: Version
+languageATSVersion = version
 
 rewriteATS' :: Eq a => (ATS a, FixityState a) -> ATS a
 rewriteATS' (ATS ds, st) = ATS (rewriteDecl st <$> ds)

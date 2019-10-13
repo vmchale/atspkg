@@ -1,5 +1,9 @@
 # language-ats
 
+## 1.7.4.0
+
+  * Add `languageATSVersion`
+
 ## 1.7.3.1
 
   * Fix bug in parse order for `symintr` declarations

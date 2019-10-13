@@ -1,6 +1,6 @@
 cabal-version:   1.18
 name:            language-ats
-version:         1.7.3.1
+version:         1.7.4.0
 license:         BSD3
 license-file:    LICENSE
 copyright:       Copyright: (c) 2018-2019 Vanessa McHale
@@ -50,6 +50,7 @@ library
         Language.ATS.Types
         Language.ATS.Types.Lens
         Language.ATS.Rewrite
+        Paths_language_ats
 
     default-language: Haskell2010
     other-extensions:
