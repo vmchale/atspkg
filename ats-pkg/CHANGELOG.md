@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.2.6.1
+
+  * Display `language-ats` version when `--version` flag is passed
+
 ## 3.2.6.0
 
   * Add `license` and `changelog` field to `Debian` type

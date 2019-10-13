@@ -8,8 +8,10 @@ import qualified Data.Text.Lazy                       as TL
 import           Data.Version                         hiding (Version (..))
 import           Development.Shake.ATS
 import           Development.Shake.FilePath
+import           Dhall.Version                        (dhallVersionString)
 import           Distribution.CommandLine
 import           GHC.IO.Encoding                      (setLocaleEncoding)
+import           Language.ATS                         (languageATSVersion)
 import           Language.ATS.Package
 import           Language.ATS.Package.Dhall
 import           Language.ATS.Package.Upgrade
@@ -28,7 +30,7 @@ wrapper = info (helper <*> versionInfo <*> command')
     <> header "atspkg - a build tool for ATS\nsee 'man atspkg' for more detailed help")
 
 versionInfo :: Parser (a -> a)
-versionInfo = infoOption ("atspkg version: " ++ showVersion atspkgVersion) (short 'V' <> long "version" <> help "Show version")
+versionInfo = infoOption ("atspkg version: " ++ showVersion atspkgVersion ++ "\nlanguage-ats version: " ++ showVersion languageATSVersion ++ "\ndhall version: " ++ dhallVersionString) (short 'V' <> long "version" <> help "Show version")
 
 data Command = Install { _archTarget :: Maybe String
                        , _atspkgArg  :: Maybe String

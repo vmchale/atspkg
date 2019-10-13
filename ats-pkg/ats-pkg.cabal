@@ -1,6 +1,6 @@
 cabal-version:      2.0
 name:               ats-pkg
-version:            3.2.6.0
+version:            3.2.6.1
 license:            BSD3
 license-file:       LICENSE
 copyright:          Copyright: (c) 2018-2019 Vanessa McHale
@@ -149,6 +149,7 @@ executable atspkg
         base >=4.10,
         ats-pkg -any,
         optparse-applicative -any,
+        language-ats >=1.7.4.0,
         shake-ats -any,
         microlens -any,
         temporary -any,
@@ -160,7 +161,8 @@ executable atspkg
         bytestring -any,
         shake -any,
         cli-setup -any,
-        quaalude -any
+        quaalude -any,
+        dhall >= 1.26.1
 
     if flag(development)
         ghc-options: -Werror
