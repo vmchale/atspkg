@@ -239,7 +239,6 @@ fun lazy_vt_free {a:vt0p}(lazyval : lazy_vt(a)) :<!wrt> void =
 
 //
 overload ~ with lazy_vt_free of 0
-
 overload free with lazy_vt_free of 0
 
 //
@@ -327,7 +326,6 @@ castfn vcopyenv_vt_decode {vt:vt0p} (x : vcopyenv_vt(vt)) :
 
 //
 overload decode with vcopyenv_v_decode
-
 overload decode with vcopyenv_vt_decode
 
 //
@@ -638,7 +636,6 @@ fun argv_set_at {n:int}(argv : !argv(n), i : natLt(n), x : string)
 
 //
 overload [] with argv_get_at
-
 overload [] with argv_set_at
 
 //
@@ -663,7 +660,6 @@ fun main_argc_argv_0 { n : int | n >= 1 }( argc : int(n)
 
 //
 overload main0 with main_void_0
-
 overload main0 with main_argc_argv_0
 
 //
@@ -688,9 +684,7 @@ fun main_argc_argv_envp_int { n : int | n >= 1 }( argc : int(n)
 
 //
 overload main with main_void_int
-
 overload main with main_argc_argv_int
-
 overload main with main_argc_argv_envp_int
 
 //
@@ -729,7 +723,6 @@ fun assert_bool1 {b:bool}(x : bool(b)) :<!exn> [b] void =
 
 //
 overload assert with assert_bool0 of 0
-
 overload assert with assert_bool1 of 10
 
 //
@@ -743,7 +736,6 @@ fun assertexn_bool1 {b:bool} (x : bool(b)) :<!exn> [b] void
 symintr assertexn
 
 overload assertexn with assertexn_bool0 of 0
-
 overload assertexn with assertexn_bool1 of 10
 
 //
@@ -760,7 +752,6 @@ fun assert_errmsg_bool1 {b:bool}(x : bool(b), msg : string) :<!exn>
 symintr assert_errmsg
 
 overload assert_errmsg with assert_errmsg_bool0 of 0
-
 overload assert_errmsg with assert_errmsg_bool1 of 10
 
 //
@@ -780,7 +771,6 @@ fun assert_errmsg2_bool1 {b:bool}( x : bool(b)
 symintr assert_errmsg2
 
 overload assert_errmsg2 with assert_errmsg2_bool0 of 0
-
 overload assert_errmsg2 with assert_errmsg2_bool1 of 10
 
 //

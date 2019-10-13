@@ -182,7 +182,6 @@ fun fileref_putc_char(out : FILEref, c : char) : void =
 symintr fileref_putc
 
 overload fileref_putc with fileref_putc_int
-
 overload fileref_putc with fileref_putc_char
 
 //

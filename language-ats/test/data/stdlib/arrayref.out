@@ -158,7 +158,6 @@ symintr arrayref_get_at
 
 //
 overload arrayref_get_at with arrayref_get_at_gint of 0
-
 overload arrayref_get_at with arrayref_get_at_guint of 0
 
 //
@@ -178,7 +177,6 @@ symintr arrayref_set_at
 
 //
 overload arrayref_set_at with arrayref_set_at_gint of 0
-
 overload arrayref_set_at with arrayref_set_at_guint of 0
 
 //
@@ -196,7 +194,6 @@ symintr arrayref_exch_at
 
 //
 overload arrayref_exch_at with arrayref_exch_at_gint of 0
-
 overload arrayref_exch_at with arrayref_exch_at_guint of 0
 
 //
@@ -435,7 +432,6 @@ fun {a:t0p}{tk:tk} arrszref_get_at_guint ( A : arrszref(a)
 symintr arrszref_get_at
 
 overload arrszref_get_at with arrszref_get_at_gint of 0
-
 overload arrszref_get_at with arrszref_get_at_guint of 0
 
 //
@@ -461,7 +457,6 @@ symintr arrszref_set_at
 
 //
 overload arrszref_set_at with arrszref_set_at_gint of 0
-
 overload arrszref_set_at with arrszref_set_at_guint of 0
 
 //
@@ -491,7 +486,6 @@ symintr arrszref_exch_at
 
 //
 overload arrszref_exch_at with arrszref_exch_at_gint of 0
-
 overload arrszref_exch_at with arrszref_exch_at_guint of 0
 
 (* ****** ****** *)
@@ -541,40 +535,29 @@ fun {a:t0p} streamize_arrayref_elt {n:int} ( A : arrayref(a, n)
 (* ****** ****** *)
 //
 overload [] with arrayref_get_at_gint of 0
-
 overload [] with arrayref_set_at_gint of 0
-
 overload [] with arrszref_get_at_gint of 0
-
 overload [] with arrszref_set_at_gint of 0
 
 //
 overload [] with arrayref_get_at_guint of 0
-
 overload [] with arrayref_set_at_guint of 0
-
 overload [] with arrszref_get_at_guint of 0
-
 overload [] with arrszref_set_at_guint of 0
 
 //
 (* ****** ****** *)
 overload .head with arrayref_head
-
 overload .tail with arrayref_tail
 
 (* ****** ****** *)
 overload size with arrszref_get_size
-
 overload .size with arrszref_get_size
 
 (* ****** ****** *)
 overload fprint with fprint_arrayref
-
 overload fprint with fprint_arrayref_sep
-
 overload fprint with fprint_arrszref
-
 overload fprint with fprint_arrszref_sep
 
 (* ****** ****** *)

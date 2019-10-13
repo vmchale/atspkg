@@ -1,5 +1,9 @@
 # language-ats
 
+## 1.7.4.1
+
+  * Improve pretty-printer
+
 ## 1.7.4.0
 
   * Add `languageATSVersion`

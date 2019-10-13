@@ -99,7 +99,6 @@ overload fprint with fprint_option_vt
 //
 (* ****** ****** *)
 overload iseqz with option_vt_is_none
-
 overload isneqz with option_vt_is_some
 
 (* ****** ****** *)

@@ -395,6 +395,11 @@ isVal PrVar{}   = True
 isVal AndDecl{} = True
 isVal _         = False
 
+isOverload :: Declaration a -> Bool
+isOverload OverloadOp{} = True
+isOverload OverloadIdent{} = True
+isOverload _ = False
+
 -- isTypeDef :: Declaration a -> Bool
 -- isTypeDef ViewTypeDef{} = True
 -- isTypeDef TypeDef{} = True
@@ -405,10 +410,12 @@ notDefine = not . ("#define" `isPrefixOf`)
 glue :: Declaration a -> Declaration a -> Bool
 glue x y
     | isVal x && isVal y = True
+    | isOverload x && isOverload y = True
 glue Stadef{} Stadef{}             = True
 glue Load{} Load{}                 = True
 glue Define{} Define{}             = True
 glue Include{} Include{}           = True
+glue FixityDecl{} FixityDecl{}     = True
 glue ViewTypeDef{} ViewTypeDef{}   = True
 glue AbsViewType{} AbsViewType{}   = True
 glue AbsType{} AbsType{}           = True

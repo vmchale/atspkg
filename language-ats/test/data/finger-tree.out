@@ -18,7 +18,6 @@ datatype finger_tree(a: t@ype+) =
 symintr <| |>
 
 infixr 5 <|
-
 infixl 5 |>
 
 fun lcons {a:t@ype+} (a, finger_tree(a)) : finger_tree(a)
@@ -26,5 +25,4 @@ fun lcons {a:t@ype+} (a, finger_tree(a)) : finger_tree(a)
 fun rcons {a:t@ype+} (finger_tree(a), a) : finger_tree(a)
 
 overload <| with lcons
-
 overload |> with rcons

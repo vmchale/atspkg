@@ -158,14 +158,12 @@ fun {a:t0p}{tk:tk} array_get_at_guint {n:int} ( A : &RD(@[INV(a)][n])
 
 //
 overload [] with array_get_at_gint of 0
-
 overload [] with array_get_at_guint of 0
 
 //
 symintr array_get_at
 
 overload array_get_at with array_get_at_gint of 0
-
 overload array_get_at with array_get_at_guint of 0
 
 //
@@ -184,14 +182,12 @@ fun {a:t0p}{tk:tk} array_set_at_guint {n:int} ( A : &(@[INV(a)][n])
 
 //
 overload [] with array_set_at_gint of 0
-
 overload [] with array_set_at_guint of 0
 
 //
 symintr array_set_at
 
 overload array_set_at with array_set_at_gint of 0
-
 overload array_set_at with array_set_at_guint of 0
 
 //
@@ -209,7 +205,6 @@ fun {a:vt0p}{tk:tk} array_exch_at_guint {n:int} ( A : &(@[INV(a)][n])
 symintr array_exch_at
 
 overload array_exch_at with array_exch_at_gint of 0
-
 overload array_exch_at with array_exch_at_guint of 0
 
 (* ****** ****** *)
@@ -272,7 +267,6 @@ fun {a:vt0p} fprint_array_size {n:int} ( out : FILEref
 symintr fprint_array
 
 overload fprint_array with fprint_array_int
-
 overload fprint_array with fprint_array_size
 
 //
@@ -286,7 +280,6 @@ fun {a:vt0p} fprint_array_sep {n:int} ( out : FILEref
 //
 (* ****** ****** *)
 overload fprint with fprint_array
-
 overload fprint with fprint_array_sep
 
 (* ****** ****** *)

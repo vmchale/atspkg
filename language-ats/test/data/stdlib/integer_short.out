@@ -95,9 +95,7 @@ fun fprint_sint : fprint_type(sint) =
   "mac#%"
 
 overload print with print_sint
-
 overload prerr with prerr_sint
-
 overload fprint with fprint_sint
 
 fun print_usint(usint) : void =
@@ -110,9 +108,7 @@ fun fprint_usint : fprint_type(usint) =
   "mac#%"
 
 overload print with print_usint
-
 overload prerr with prerr_usint
-
 overload fprint with fprint_usint
 
 //
