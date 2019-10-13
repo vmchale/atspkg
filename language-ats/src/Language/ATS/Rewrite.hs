@@ -7,7 +7,6 @@ module Language.ATS.Rewrite ( rewriteDecl
 
 import           Control.Composition
 import           Control.Recursion
-import           Data.Function           (on)
 import qualified Data.Map                as M
 import           Data.Maybe              (isJust)
 import           Language.ATS.Types

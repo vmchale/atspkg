@@ -1130,7 +1130,7 @@ left :: ATSError -> ParseSt b
 left = lift . Left
 
 parseError :: [Token] -> ParseSt a
-parseError [] = left Exhausted
-parseError x = left . Unknown . head $ x
+parseError []    = left Exhausted
+parseError (x:_) = left $ Unknown x
 
 }
