@@ -1,38 +1,40 @@
-cabal-version: 1.18
-name: hs2ats
-version: 0.5.0.1
-license: BSD3
-license-file: LICENSE
-copyright: Copyright: (c) 2018-2019 Vanessa McHale
-maintainer: vamchale@gmail.com
-author: Vanessa McHale
-synopsis: Create ATS types from Haskell types
+cabal-version:      1.18
+name:               hs2ats
+version:            0.5.0.1
+license:            BSD3
+license-file:       LICENSE
+copyright:          Copyright: (c) 2018-2019 Vanessa McHale
+maintainer:         vamchale@gmail.com
+author:             Vanessa McHale
+synopsis:           Create ATS types from Haskell types
 description:
     This package enables scanning Haskell source files for data types and then generating [ATS](http://www.ats-lang.org/) types from them.
-category: Language, Haskell, ATS
-build-type: Simple
+
+category:           Language, Haskell, ATS
+build-type:         Simple
 extra-source-files:
     test/data/*.hs
     test/data/*.out
-extra-doc-files: CHANGELOG.md
-                 README.md
+
+extra-doc-files:
+    CHANGELOG.md
+    README.md
 
 flag development
-    description:
-        Enable `-Werror`
-    default: False
-    manual: True
+    description: Enable `-Werror`
+    default:     False
+    manual:      True
 
 library
-    exposed-modules:
-        Language.ATS.Generate
-    hs-source-dirs: src
-    other-modules:
-        Language.ATS.Generate.Error
+    exposed-modules:  Language.ATS.Generate
+    hs-source-dirs:   src
+    other-modules:    Language.ATS.Generate.Error
     default-language: Haskell2010
-    other-extensions: DeriveAnyClass DeriveGeneric OverloadedStrings
-                      StandaloneDeriving PatternSynonyms
-    ghc-options: -Wall
+    other-extensions:
+        DeriveAnyClass DeriveGeneric OverloadedStrings StandaloneDeriving
+        PatternSynonyms
+
+    ghc-options:      -Wall
     build-depends:
         base >=4.7 && <5,
         haskell-src-exts >=1.18.0,
@@ -50,12 +52,14 @@ library
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
 
 executable hs2ats
-    main-is: Main.hs
-    hs-source-dirs: app
+    main-is:          Main.hs
+    hs-source-dirs:   app
     default-language: Haskell2010
-    other-extensions: DataKinds DeriveAnyClass DeriveGeneric
-                      OverloadedStrings TypeOperators
-    ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall
+    other-extensions:
+        DataKinds DeriveAnyClass DeriveGeneric OverloadedStrings
+        TypeOperators
+
+    ghc-options:      -threaded -rtsopts -with-rtsopts=-N -Wall
     build-depends:
         base -any,
         optparse-generic -any,
@@ -68,11 +72,11 @@ executable hs2ats
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
 
 test-suite hs2ats-test
-    type: exitcode-stdio-1.0
-    main-is: Spec.hs
-    hs-source-dirs: test
+    type:             exitcode-stdio-1.0
+    main-is:          Spec.hs
+    hs-source-dirs:   test
     default-language: Haskell2010
-    ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall
+    ghc-options:      -threaded -rtsopts -with-rtsopts=-N -Wall
     build-depends:
         base -any,
         hs2ats -any,
@@ -87,11 +91,11 @@ test-suite hs2ats-test
         ghc-options: -Wincomplete-uni-patterns -Wincomplete-record-updates
 
 benchmark hs2ats-bench
-    type: exitcode-stdio-1.0
-    main-is: Bench.hs
-    hs-source-dirs: bench
+    type:             exitcode-stdio-1.0
+    main-is:          Bench.hs
+    hs-source-dirs:   bench
     default-language: Haskell2010
-    ghc-options: -Wall
+    ghc-options:      -Wall
     build-depends:
         base -any,
         hs2ats -any,
