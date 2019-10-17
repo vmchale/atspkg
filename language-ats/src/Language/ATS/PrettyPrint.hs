@@ -278,14 +278,18 @@ instance Eq a => Pretty (StaticExpression a) where
         a (StaticHexF h)               = text h
         a StaticVoidF{}                = "()"
         a (SifF e e' e'')              = "sif" <+> e <+> "then" <$> indent 2 e' <$> "else" <$> indent 2 e''
-        a (SCallF n [] [] ["()"])      = pretty n <> "()"
-        a (SCallF n [] us ["()"])      = pretty n <> prettyTypes us <> "()"
-        a (SCallF n [] [] cs)          = pretty n <> parens (mconcat (punctuate "," . fmap pretty $ cs))
-        a (SCallF n [] us cs)          = pretty n <> prettyTypes us <> parens (mconcat (punctuate "," . fmap pretty $ cs))
-        a (SCallF n is [] ["()"])      = pretty n <> prettyImplicits is <> "()"
-        a (SCallF n is us ["()"])      = pretty n <> prettyImplicits is <> prettyTypes us <> "()"
-        a (SCallF n is [] cs)          = pretty n <> prettyImplicits is <> parens (mconcat (punctuate "," . fmap pretty $ cs))
-        a (SCallF n is us cs)          = pretty n <> prettyImplicits is <> prettyTypes us <> parens (mconcat (punctuate "," . fmap pretty $ cs))
+        a (SCallF n [] [] ["()"] Nothing)      = pretty n <> "()"
+        a (SCallF n [] us ["()"] Nothing)      = pretty n <> prettyTypes us <> "()"
+        a (SCallF n [] [] cs Nothing)          = pretty n <> parens (mconcat (punctuate "," . fmap pretty $ cs))
+        a (SCallF n [] us cs Nothing)          = pretty n <> prettyTypes us <> parens (commaTight cs)
+        a (SCallF n is [] ["()"] Nothing)      = pretty n <> prettyImplicits is <> "()"
+        a (SCallF n is us ["()"] Nothing)      = pretty n <> prettyImplicits is <> prettyTypes us <> "()"
+        a (SCallF n is [] cs Nothing)          = pretty n <> prettyImplicits is <> parens (commaTight cs)
+        a (SCallF n is us cs Nothing)          = pretty n <> prettyImplicits is <> prettyTypes us <> parens (commaTight cs)
+        a (SCallF n [] [] cs (Just ds))        = pretty n <> parens (commaTight cs <+> "|" <+> commaTightDyn ds)
+        a (SCallF n [] us cs (Just ds))        = pretty n <> prettyTypes us <> parens (commaTight cs <+> "|" <+> commaTightDyn ds)
+        a (SCallF n is [] cs (Just ds))        = pretty n <> prettyImplicits is <> parens (commaTight cs <+> "|" <+> commaTightDyn ds)
+        a (SCallF n is us cs (Just ds))        = pretty n <> prettyImplicits is <> prettyTypes us <> parens (commaTight cs <+> "|" <+> commaTightDyn ds)
         a (SPrecedeF e e')             = e <> ";" <+> e'
         a (SPrecedeListF es)           = lineAlt (prettyArgsList "; " "(" ")" es) ("(" <> mconcat (punctuate " ; " es) <> ")")
         a (SParensF e)                 = parens e
@@ -299,6 +303,12 @@ instance Eq a => Pretty (StaticExpression a) where
         a (ProofLambdaF _ lt p e)       = prettyLam "lam" p lt e
         a (ProofLinearLambdaF _ lt p e) = prettyLam "llam" p lt e
         a (WhereStaExpF e ds) = prettyWhere e ds
+
+        commaTight :: [Doc] -> Doc
+        commaTight = mconcat . punctuate ","
+
+        commaTightDyn :: Pretty b => [b] -> Doc
+        commaTightDyn = commaTight . fmap pretty
 
 instance Eq a => Pretty (Sort a) where
     pretty = cata a where
@@ -396,9 +406,9 @@ isVal AndDecl{} = True
 isVal _         = False
 
 isOverload :: Declaration a -> Bool
-isOverload OverloadOp{} = True
+isOverload OverloadOp{}    = True
 isOverload OverloadIdent{} = True
-isOverload _ = False
+isOverload _               = False
 
 -- isTypeDef :: Declaration a -> Bool
 -- isTypeDef ViewTypeDef{} = True

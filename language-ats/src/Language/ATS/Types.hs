@@ -314,7 +314,7 @@ data StaticExpression a = StaticVal (Name a)
                         | SPrecedeList { _sExprs :: [StaticExpression a] }
                         | StaticVoid a
                         | Sif { scond :: StaticExpression a, whenTrue :: StaticExpression a, selseExpr :: StaticExpression a } -- Static if (for proofs)
-                        | SCall (Name a) [[Type a]] [[Type a]] [StaticExpression a]
+                        | SCall (Name a) [[Type a]] [[Type a]] [StaticExpression a] (Maybe [Expression a])
                         | SUnary (UnOp a) (StaticExpression a)
                         | SLet a [Declaration a] (Maybe (StaticExpression a))
                         | SCase Addendum (StaticExpression a) [(Pattern a, LambdaType a, StaticExpression a)]
@@ -334,7 +334,7 @@ data StaticExpressionF a x = StaticValF (Name a)
                            | SPrecedeListF [x]
                            | StaticVoidF a
                            | SifF x x x
-                           | SCallF (Name a) [[Type a]] [[Type a]] [x]
+                           | SCallF (Name a) [[Type a]] [[Type a]] [x] (Maybe [Expression a])
                            | SUnaryF (UnOp a) x
                            | SLetF a [Declaration a] (Maybe x)
                            | SCaseF Addendum x [(Pattern a, LambdaType a, x)]

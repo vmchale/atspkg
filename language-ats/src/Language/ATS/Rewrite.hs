@@ -86,7 +86,7 @@ compareFixity st = (== GT) .* on compare (getFixity st)
 
 rewriteStaATS :: Eq a => FixityState a -> StaticExpression a -> StaticExpression a
 rewriteStaATS st = cata a where
-    a (SCallF n is ts [StaticVoid{}]) = SCall n is ts []
+    a (SCallF n is ts [StaticVoid{}] dyn) = SCall n is ts [] dyn
     a (StaticBinaryF op (StaticBinary op' e e') e'')
         | compareFixity st op op'  = StaticBinary op e (StaticBinary op' e' e'')
     a (WhereStaExpF se (ATS ds))   = WhereStaExp se (ATS (rewriteDecl st <$> ds))

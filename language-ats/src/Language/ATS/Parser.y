@@ -465,8 +465,9 @@ Call :: { Expression AlexPosn }
      | Name openParen ExpressionPrf end {% left $ Expected $4 ")" "end"}
      | Name openParen ExpressionPrf else {% left $ Expected $4 ")" "else"}
 
-StaticArgs :: { [StaticExpression AlexPosn] }
-           : comma_sep(StaticExpression) { reverse (toList $1) }
+StaticArgs :: { ([StaticExpression AlexPosn], Maybe [Expression AlexPosn]) }
+           : comma_sep(StaticExpression) { (reverse (toList $1), Nothing) }
+           | comma_sep(StaticExpression) vbar comma_sep(Expression) { (reverse (toList $1), Just $ reverse (toList $3)) }
 
 StaticDecls :: { [Declaration AlexPosn] }
             : StaticDeclaration { [$1] }
@@ -483,15 +484,15 @@ StaticExpression :: { StaticExpression AlexPosn }
                  | doubleParens { StaticVoid $1 } -- TODO: static tuple?
                  | sif StaticExpression then StaticExpression else StaticExpression { Sif $2 $4 $6 }
                  | identifierSpace { StaticVal (Unqualified $ to_string $1) }
-                 | identifierSpace StaticExpression { SCall (Unqualified $ to_string $1) [] [] [$2] }
-                 | Name parens(StaticArgs) { SCall $1 [] [] $2 }
-                 | Name Implicits parens(StaticArgs) { SCall $1 $2 [] $3 }
-                 | Name TypeArgs parens(StaticArgs) { SCall $1 [] $2 $3 }
-                 | Name TypeArgs doubleParens { SCall $1 [] $2 [] }
-                 | Name doubleParens { SCall $1 [] [] [] }
-                 | identifierSpace TypeArgs parens(StaticArgs) { SCall (Unqualified $ to_string $1) [] $2 $3 }
-                 | identifierSpace parens(StaticArgs) { SCall (Unqualified $ to_string $1) [] [] $2 }
-                 | identifierSpace doubleParens { SCall (Unqualified $ to_string $1) [] [] [] } -- TODO: this causes an ambiguity because we might have SCall void instead!
+                 | identifierSpace StaticExpression { SCall (Unqualified $ to_string $1) [] [] [$2] Nothing }
+                 | Name parens(StaticArgs) { SCall $1 [] [] (fst $2) (snd $2) }
+                 | Name Implicits parens(StaticArgs) { SCall $1 $2 [] (fst $3) (snd $3) }
+                 | Name TypeArgs parens(StaticArgs) { SCall $1 [] $2 (fst $3) (snd $3) }
+                 | Name TypeArgs doubleParens { SCall $1 [] $2 [] Nothing }
+                 | Name doubleParens { SCall $1 [] [] [] Nothing }
+                 | identifierSpace TypeArgs parens(StaticArgs) { SCall (Unqualified $ to_string $1) [] $2 (fst $3) (snd $3) }
+                 | identifierSpace parens(StaticArgs) { SCall (Unqualified $ to_string $1) [] [] (fst $2) (snd $2) }
+                 | identifierSpace doubleParens { SCall (Unqualified $ to_string $1) [] [] [] Nothing } -- TODO: this causes an ambiguity because we might have SCall void instead!
                  | StaticExpression semicolon StaticExpression { SPrecede $1 $3 }
                  | UnOp StaticExpression { SUnary $1 $2 }
                  | let StaticDecls comment_after(in) end { SLet $1 (reverse $2) Nothing }
