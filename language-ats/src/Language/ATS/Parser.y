@@ -931,7 +931,7 @@ TypeDecl : typedef IdentifierOr SortArgs eq Type MaybeAnnot { TypeDef $1 $2 $3 $
          | dataprop IdentifierOr SortArgs vbar {% left $ Expected $4 "=" "|" }
 
 EitherInt :: { Fix }
-          : intLit { Left $1 }
+          : intLit { Left (fromIntegral $1) }
           | parens(Operator) { Right $1 }
 
 Fixity :: { Fixity AlexPosn }
@@ -1058,13 +1058,13 @@ Declaration : include string { Include $2 }
             | overload doubleSqBrackets with IdentifierOr { OverloadIdent $1 "[]" (Unqualified $4) Nothing }
             | overload BinOp with Name { OverloadOp $1 $2 $4 Nothing }
             | overload BinOp with customOperator { OverloadOp $1 $2 (Unqualified $ to_string $4) Nothing }
-            | overload BinOp with identifierSpace of intLit { OverloadOp $1 $2 (Unqualified $ to_string $4) (Just $6) }
+            | overload BinOp with identifierSpace of intLit { OverloadOp $1 $2 (Unqualified $ to_string $4) (Just $ fromIntegral $6) }
             | overload identifierSpace with Name { OverloadIdent $1 (to_string $2) $4 Nothing }
             | overload identifierSpace with identifierSpace { OverloadIdent $1 (to_string $2) (Unqualified $ to_string $4) Nothing }
-            | overload identifierSpace with identifierSpace of intLit { OverloadIdent $1 (to_string $2) (Unqualified $ to_string $4) (Just $6) }
+            | overload identifierSpace with identifierSpace of intLit { OverloadIdent $1 (to_string $2) (Unqualified $ to_string $4) (Just $ fromIntegral $6) }
             | overload tilde with identifier { OverloadIdent $1 "~" (Unqualified $ to_string $4) Nothing } -- FIXME figure out a general solution.
-            | overload tilde with identifierSpace of intLit { OverloadIdent $1 "~" (Unqualified $ to_string $4) (Just $6) }
-            | overload doubleSqBrackets with identifierSpace of intLit { OverloadIdent $1 "[]" (Unqualified $ to_string $4) (Just $6) }
+            | overload tilde with identifierSpace of intLit { OverloadIdent $1 "~" (Unqualified $ to_string $4) (Just $ fromIntegral $6) }
+            | overload doubleSqBrackets with identifierSpace of intLit { OverloadIdent $1 "[]" (Unqualified $ to_string $4) (Just $ fromIntegral $6) }
             | overload dot identifierSpace with Name { OverloadIdent $1 ('.' : (to_string $3)) $5 Nothing }
             | assume identifierSpace SortArgs eq Type { Assume (Unqualified (to_string $2)) $3 $5 }
             | assume Name SortArgs eq Type { Assume $2 $3 $5 }

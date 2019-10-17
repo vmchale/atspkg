@@ -56,6 +56,7 @@ import           Data.Function      (on)
 import           Data.List.NonEmpty (NonEmpty)
 import qualified Data.Map           as M
 import           GHC.Generics       (Generic)
+import           GHC.Natural        (Natural)
 import           Language.ATS.Lexer (Addendum (..))
 
 type Fix = Either Int String
@@ -308,7 +309,7 @@ pattern Con l = SpecialInfix l "::"
 
 data StaticExpression a = StaticVal (Name a)
                         | StaticBinary (BinOp a) (StaticExpression a) (StaticExpression a)
-                        | StaticInt Int
+                        | StaticInt Integer
                         | StaticHex String
                         | SPrecede (StaticExpression a) (StaticExpression a)
                         | SPrecedeList { _sExprs :: [StaticExpression a] }
@@ -328,7 +329,7 @@ data StaticExpression a = StaticVal (Name a)
 
 data StaticExpressionF a x = StaticValF (Name a)
                            | StaticBinaryF (BinOp a) x x
-                           | StaticIntF Int
+                           | StaticIntF Integer
                            | StaticHexF String
                            | SPrecedeF x x
                            | SPrecedeListF [x]
@@ -363,9 +364,9 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                        , whenTrue :: Expression a -- ^ Expression to be returned when true
                        , elseExpr :: Maybe (Expression a) -- ^ Expression to be returned when false
                        }
-                  | UintLit Word -- ^ E.g. @1000u@
+                  | UintLit Natural -- ^ E.g. @1000u@
                   | FloatLit Float
-                  | IntLit Int
+                  | IntLit Integer
                   | HexLit String
                   | UnderscoreLit a
                   | Lambda a (LambdaType a) (Pattern a) (Expression a) -- TODO: Fix
@@ -416,9 +417,9 @@ data ExpressionF a x = LetF a (ATS a) (Maybe x)
                      | NamedValF (Name a)
                      | ListLiteralF a String (Type a) [x]
                      | IfF x x (Maybe x)
-                     | UintLitF Word
+                     | UintLitF Natural
                      | FloatLitF Float
-                     | IntLitF Int
+                     | IntLitF Integer
                      | HexLitF String
                      | UnderscoreLitF a
                      | LambdaF a (LambdaType a) (Pattern a) x

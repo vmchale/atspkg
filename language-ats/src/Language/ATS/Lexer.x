@@ -23,6 +23,7 @@ import Data.Char (chr)
 import Data.Bool (bool)
 import Control.DeepSeq (NFData)
 import GHC.Generics (Generic)
+import GHC.Natural (Natural)
 import Text.PrettyPrint.ANSI.Leijen hiding (line, bool, column, (<$>))
 
 }
@@ -428,7 +429,7 @@ data Keyword = KwFun
 data Token = Identifier AlexPosn String
            | SpecialIdentifier AlexPosn String
            | Keyword AlexPosn Keyword
-           | IntTok AlexPosn Int
+           | IntTok AlexPosn Integer
            | HexIntTok AlexPosn String
            | FloatTok AlexPosn Float
            | CharTok AlexPosn Char
@@ -444,7 +445,7 @@ data Token = Identifier AlexPosn String
            | CommentEnd AlexPosn
            | CommentContents AlexPosn String
            | MacroBlock AlexPosn String
-           | UintTok AlexPosn Word
+           | UintTok AlexPosn Natural
            | SignatureTok AlexPosn String
            | DoubleParenTok AlexPosn
            | DoubleBracesTok AlexPosn
@@ -571,7 +572,7 @@ instance Pretty Token where
     pretty CommentEnd{} = "*)"
     pretty (CommentContents _ s) = text s
     pretty (FuncType _ s) = text s
-    pretty (UintTok _ u) = pretty u
+    pretty (UintTok _ u) = pretty (fromIntegral u :: Integer)
     pretty (SignatureTok _ s) = ":" <> text s
     pretty (Operator _ s) = text s
     pretty (MacroBlock _ s) = "#"

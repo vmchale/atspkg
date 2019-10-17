@@ -1,5 +1,13 @@
 # language-ats
 
+## 1.7.6.0
+
+  * Use `Natural`/`Integer` for literals
+
+## 1.7.5.0
+
+  * Fix `StaticExpression` to allow calls with dynamic components
+
 ## 1.7.4.1
 
   * Improve pretty-printer

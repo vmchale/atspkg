@@ -132,7 +132,7 @@ instance Eq a => Pretty (Expression a) where
         a (LetF _ e e')          = flatAlt
             ("let" <$> indent 2 (pretty e) <$> endLet e')
             ("let" <+> pretty e <$> endLet e')
-        a (UintLitF u)                  = pretty u <> "u"
+        a (UintLitF u)                  = pretty (fromIntegral u :: Integer) <> "u"
         a (IntLitF i)                   = pretty i
         a (HexLitF hi)                  = "0x" <> text hi
         a (LambdaF _ lt p e)            = prettyLam "lam" p lt e
