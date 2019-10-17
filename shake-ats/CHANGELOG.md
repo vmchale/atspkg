@@ -1,5 +1,9 @@
 # shake-ats
 
+## 1.10.2.3
+
+  * `cleanATS` is now more precise
+
 ## 1.10.2.2
 
   * `genLinks` calls `traced` for better profiling
