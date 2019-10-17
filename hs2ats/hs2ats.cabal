@@ -40,7 +40,6 @@ library
         casing -any,
         microlens -any,
         ansi-wl-pprint -any,
-        composition-prelude -any,
         deepseq -any,
         cpphs -any
 
