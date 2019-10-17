@@ -396,9 +396,9 @@ isVal AndDecl{} = True
 isVal _         = False
 
 isOverload :: Declaration a -> Bool
-isOverload OverloadOp{} = True
+isOverload OverloadOp{}    = True
 isOverload OverloadIdent{} = True
-isOverload _ = False
+isOverload _               = False
 
 -- isTypeDef :: Declaration a -> Bool
 -- isTypeDef ViewTypeDef{} = True
