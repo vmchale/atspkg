@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.2.6.2
+
+  * Better `clean` command
+
 ## 3.2.6.1
 
   * Display `language-ats` version when `--version` flag is passed
