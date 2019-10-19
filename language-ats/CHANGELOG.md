@@ -1,5 +1,9 @@
 # language-ats
 
+## 1.7.6.1
+
+  * Bugfix in pretty-printer/lexer
+
 ## 1.7.6.0
 
   * Use `Natural`/`Integer` for literals

@@ -172,6 +172,7 @@ instance Eq a => Pretty (Expression a) where
         a (CharLitF '\n')              = "'\\n'"
         a (CharLitF '\t')              = "'\\t'"
         a (CharLitF '\0')              = "'\\0'"
+        a (CharLitF '\'')              = "'\\''"
         a (CharLitF c)                 = "'" <> char c <> "'"
         a (ProofExprF _ es e')         = "(" <> prettyProofExpr es <+> "|" <+> e' <> ")"
         a (TypeSignatureF e t)         = e <+> ":" <+> pretty t
