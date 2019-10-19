@@ -66,7 +66,7 @@ build v rs = bool (mkPkgEmpty [buildAll v Nothing Nothing Nothing]) (mkPkgEmpty 
 mkClean :: Rules ()
 mkClean = "clean" ~> do
     cleanHaskell
-    removeFilesAfter "." ["//*.1", "//*_dats.c", "//*_sats.c" "tags", "//*.a"]
+    removeFilesAfter "." ["//*.1", "//*_dats.c", "//*_sats.c", "tags", "//*.a"]
     removeFilesAfter "target" ["//*"]
     removeFilesAfter ".atspkg" ["//*"]
     removeFilesAfter "ats-deps" ["//*"]
