@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.2.6.4
+
+  * Upgrade to latest `dhall`
+
 ## 3.2.6.3
 
   * Better `clean` command

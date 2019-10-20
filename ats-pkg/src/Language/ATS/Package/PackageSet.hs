@@ -19,7 +19,7 @@ import           Language.ATS.Package.Type
 import           Quaalude
 
 newtype ATSPackageSet = ATSPackageSet { _atsPkgSet :: [ ATSDependency ] }
-    deriving (Interpret)
+    deriving (FromDhall)
 
 atsPkgSet :: Lens' ATSPackageSet [ATSDependency]
 atsPkgSet f s = fmap (\x -> s { _atsPkgSet = x }) (f (_atsPkgSet s))
