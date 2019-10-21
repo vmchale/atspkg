@@ -1,5 +1,9 @@
 # language-ats
 
+## 1.7.6.2
+
+  * Fix bug in handling of char literals
+
 ## 1.7.6.1
 
   * Bugfix in pretty-printer/lexer
