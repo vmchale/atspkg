@@ -1,5 +1,4 @@
 staload "libats/ML/SATS/string.sats"
-
 staload "SATS/file.sats"
 staload "SATS/pointer.sats"
 staload "SATS/size.sats"
@@ -47,18 +46,24 @@ implement parse_state_hs_tostring (st) =
     | post_hyphen() => "post_hyphen"
     | post_hyphen_regular() => "post_hyphen_regular"
 
-fn count_hs_for_loop { l : addr | l != null }{m:nat}{ n : nat | n <= m }( pf : !bytes_v(l, m) | p : ptr(l)
-                                                                        , parse_st : &parse_state_hs >> _
-                                                                        , bufsz : size_t(n)
-                                                                        ) : file =
+fn count_hs_for_loop
+{ l : addr | l != null }{m:nat}{ n : nat | n <= m }(pf : !bytes_v(l, m)
+                                                   | p : ptr(l), parse_st : &parse_state_hs >> _, bufsz : size_t(n)) :
+  file =
   let
     // TODO: generate or at least validate these functions
-    fn advance_char(c : char, st : &parse_state_hs >> _, file_st : &file >> _) : void =
+    fn advance_char( c : char
+                   , st : &parse_state_hs >> _
+                   , file_st : &file >> _
+                   ) : void =
       case- st of
         | regular() => 
           begin
             case+ c of
-              | '\n' => (free(st) ; file_st.lines := file_st.lines + 1 ; st := post_newline_whitespace)
+              | '\n' => ( free(st)
+                        ; file_st.lines := file_st.lines + 1
+                        ; st := post_newline_whitespace
+                        )
               | '\'' => (free(st) ; st := post_tick)
               | '"' => (free(st) ; st := in_string)
               | '\{' => (free(st) ; st := post_lbrace_regular)
@@ -85,8 +90,8 @@ fn count_file_hs(inp : !FILEptr1) : file =
     prval () = pfat := b0ytes2bytes_v(pfat)
     var init_st: parse_state_hs = post_newline_whitespace
     
-    fun loop { l : addr | l != null }(pf : !bytes_v(l, BUFSZ) | inp : !FILEptr1, st : &parse_state_hs >> _, p : ptr(l)) :
-      file =
+    fun loop { l : addr | l != null }(pf : !bytes_v(l, BUFSZ)
+                                     | inp : !FILEptr1, st : &parse_state_hs >> _, p : ptr(l)) : file =
       let
         var file_bytes = freadc(pf | inp, i2sz(BUFSZ), p)
         
