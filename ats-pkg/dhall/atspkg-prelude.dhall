@@ -192,6 +192,8 @@ let default
       : List Bin
     , test = []
       : List Bin
+    , bench = []
+      : List Bin
     , libraries = []
       : List Lib
     , man = None Text

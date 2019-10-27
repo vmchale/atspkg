@@ -101,6 +101,7 @@ data Lib = Lib { name      :: Text -- ^ Name of library being provided
 -- | Data type associated with @atspkg.dhall@ file.
 data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , test         :: [Bin] -- ^ List of test suites
+               , bench        :: [Bin] -- ^ List of benchmarks
                , libraries    :: [Lib] -- ^ List of libraries to be built
                , man          :: Maybe Text -- ^ Optional (markdown) manpages to be converted using @pandoc@.
                , completions  :: Maybe Text -- ^ Optional @compleat@ completions to be installed alongside package.

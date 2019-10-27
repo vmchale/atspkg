@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.3.0.0
+
+  * Add `bench` field to `Pkg` type
+
 ## 3.2.6.4
 
   * Upgrade to latest `dhall`

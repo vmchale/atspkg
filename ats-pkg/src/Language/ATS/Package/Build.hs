@@ -299,11 +299,11 @@ pkgToAction :: Maybe String -- ^ Optional extra expression to which we should ap
             -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
             -> Pkg -- ^ Package data type
             -> Rules ()
-pkgToAction mStr setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf af as dl slv deb al) =
+pkgToAction mStr setup rs tgt ~(Pkg bs ts bnchs lbs mt _ v v' ds cds bdeps ccLocal cf af as dl slv deb al) =
 
     unless (rs == ["clean"]) $ do
 
-        let cdps = if (f bs || f ts) && ("gc" `notElem` (fst <$> cds)) then ("gc", noConstr) : cds else cds where f = any gcBin
+        let cdps = if (f bs || f ts || f bnchs) && ("gc" `notElem` (fst <$> cds)) then ("gc", noConstr) : cds else cds where f = any gcBin
 
         mkUserConfig
 
@@ -333,7 +333,7 @@ pkgToAction mStr setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf 
 
         traverse_ (h ph) lbs
 
-        traverse_ (g ph) (bs ++ ts)
+        traverse_ (g ph) (bs ++ ts ++ bnchs)
 
         fold (debRules <$> deb)
 
