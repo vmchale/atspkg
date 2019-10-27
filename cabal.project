@@ -14,7 +14,6 @@ constraints:
   language-ats +development,
   shake-ats +development,
   ats-setup +development,
-  dependency +development,
   hs2ats +development,
   shake-cabal +development,
   shake-c +development
