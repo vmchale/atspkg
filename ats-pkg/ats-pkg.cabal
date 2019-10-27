@@ -1,6 +1,6 @@
 cabal-version:      2.0
 name:               ats-pkg
-version:            3.2.6.1
+version:            3.3.0.1
 license:            BSD3
 license-file:       LICENSE
 copyright:          Copyright: (c) 2018-2019 Vanessa McHale
@@ -119,10 +119,10 @@ library quaalude
         containers >=0.6
 
     if !impl(ghc >=8.4)
-        build-depends: dhall >=1.23.0 && <1.25.0
+        build-depends: dhall >=1.27.0 && <1.25.0
 
     else
-        build-depends: dhall >=1.23.0
+        build-depends: dhall >=1.27.0
 
     if flag(development)
         cpp-options: -DDEBUG
@@ -162,7 +162,7 @@ executable atspkg
         shake -any,
         cli-setup -any,
         quaalude -any,
-        dhall >=1.26.1
+        dhall >=1.27.0
 
     if flag(development)
         ghc-options: -Werror

@@ -1,42 +1,42 @@
-cabal-version: 1.18
-name: dependency
-version: 1.2.0.3
-license: BSD3
-license-file: LICENSE
-copyright: Copyright: (c) 2018 Vanessa McHale
-maintainer: vamchale@gmail.com
-author: Vanessa McHale
-synopsis: Dependency resolution for package management
+cabal-version:   1.18
+name:            dependency
+version:         1.2.0.3
+license:         BSD3
+license-file:    LICENSE
+copyright:       Copyright: (c) 2018 Vanessa McHale
+maintainer:      vamchale@gmail.com
+author:          Vanessa McHale
+synopsis:        Dependency resolution for package management
 description:
     A library for resolving dependencies; uses a topological sort to construct a build plan and then allows choice between all compatible plans.
-category: Development, Build
-build-type: Simple
-extra-doc-files: README.md
-                 CHANGELOG.md
+
+category:        Development, Build
+build-type:      Simple
+extra-doc-files:
+    README.md
+    CHANGELOG.md
 
 source-repository head
-    type: darcs
+    type:     darcs
     location: https://hub.darcs.net/vmchale/ats
 
-flag development
-    description:
-        Enable `-Werror`
-    default: False
-    manual: True
-
 library
-    exposed-modules:
-        Data.Dependency
-    hs-source-dirs: src
+    exposed-modules:  Data.Dependency
+    hs-source-dirs:   src
     other-modules:
         Data.Dependency.Type
         Data.Dependency.Error
         Data.Dependency.Sort
+
     default-language: Haskell2010
-    other-extensions: DeriveAnyClass DeriveGeneric OverloadedStrings
-                      DeriveFoldable DeriveFunctor TupleSections
-    ghc-options: -Wall -Wincomplete-uni-patterns
-                 -Wincomplete-record-updates -Wcompat
+    other-extensions:
+        DeriveAnyClass DeriveGeneric OverloadedStrings DeriveFoldable
+        DeriveFunctor TupleSections
+
+    ghc-options:
+        -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates
+        -Wcompat
+
     build-depends:
         base >=4.9 && <5,
         ansi-wl-pprint -any,
@@ -44,40 +44,35 @@ library
         microlens >=0.3.5.0,
         binary >=0.7.3.0,
         deepseq -any
-    
-    if (flag(development) && impl(ghc <8.4))
-        ghc-options: -Werror
 
 test-suite dependency-test
-    type: exitcode-stdio-1.0
-    main-is: Spec.hs
-    hs-source-dirs: test
+    type:             exitcode-stdio-1.0
+    main-is:          Spec.hs
+    hs-source-dirs:   test
     default-language: Haskell2010
     other-extensions: TupleSections
-    ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall
-                 -Wincomplete-uni-patterns -Wincomplete-record-updates -Wcompat
+    ghc-options:
+        -threaded -rtsopts -with-rtsopts=-N -Wall -Wincomplete-uni-patterns
+        -Wincomplete-record-updates -Wcompat
+
     build-depends:
         base -any,
         dependency -any,
         hspec -any,
         containers -any
-    
-    if flag(development)
-        ghc-options: -Werror
 
 benchmark dependency-bench
-    type: exitcode-stdio-1.0
-    main-is: Bench.hs
-    hs-source-dirs: bench
+    type:             exitcode-stdio-1.0
+    main-is:          Bench.hs
+    hs-source-dirs:   bench
     default-language: Haskell2010
     other-extensions: TupleSections
-    ghc-options: -Wall -Wincomplete-uni-patterns
-                 -Wincomplete-record-updates -Wcompat
+    ghc-options:
+        -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates
+        -Wcompat
+
     build-depends:
         base -any,
         dependency -any,
         containers -any,
         criterion -any
-    
-    if flag(development)
-        ghc-options: -Werror

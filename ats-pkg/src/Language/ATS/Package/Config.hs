@@ -16,7 +16,7 @@ data UserConfig = UserConfig { defaultPkgs    :: Text
                              , path           :: Maybe Text
                              , githubUsername :: Text
                              , filterErrors   :: Bool
-                             } deriving (Generic, Interpret, Binary)
+                             } deriving (Generic, FromDhall, Binary)
 
 cfgFile :: String
 cfgFile = $(embedStringFile ("dhall" </> "config.dhall"))

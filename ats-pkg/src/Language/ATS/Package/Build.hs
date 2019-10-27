@@ -66,7 +66,7 @@ build v rs = bool (mkPkgEmpty [buildAll v Nothing Nothing Nothing]) (mkPkgEmpty 
 mkClean :: Rules ()
 mkClean = "clean" ~> do
     cleanHaskell
-    removeFilesAfter "." ["//*.1", "//*.c", "tags", "//*.a"]
+    removeFilesAfter "." ["//*.1", "//*_dats.c", "//*_sats.c", "tags", "//*.a"]
     removeFilesAfter "target" ["//*"]
     removeFilesAfter ".atspkg" ["//*"]
     removeFilesAfter "ats-deps" ["//*"]
@@ -152,6 +152,9 @@ mkPhony mStr cmdStr f select rs =
 
 mkValgrind :: Maybe String -> [String] -> Rules ()
 mkValgrind mStr = mkPhony mStr "valgrind" ("valgrind " <>) bin
+
+mkBench :: Maybe String -> [String] -> Rules ()
+mkBench mStr = mkPhony mStr "bench" id bench
 
 mkTest :: Maybe String -> [String] -> Rules ()
 mkTest mStr = mkPhony mStr "test" id test
@@ -242,7 +245,7 @@ setTargets rs bins mt = when (null rs) $
 
 bits :: Maybe String -> Maybe String -> [String] -> Rules ()
 bits mStr tgt rs = sequence_ (sequence [ mkManpage, mkInstall tgt, mkConfig ] mStr) <>
-    biaxe [ mkRun, mkTest, mkValgrind ] mStr rs
+    biaxe [ mkRun, mkTest, mkBench, mkValgrind ] mStr rs
 
 pkgToTargets :: Pkg -> Maybe String -> [FilePath] -> [FilePath]
 pkgToTargets ~Pkg{..} tgt [] = (toTgt tgt . target <$> bin) <> (unpack . libTarget <$> libraries) <> (unpack . cTarget <$> atsSource)
@@ -299,11 +302,11 @@ pkgToAction :: Maybe String -- ^ Optional extra expression to which we should ap
             -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
             -> Pkg -- ^ Package data type
             -> Rules ()
-pkgToAction mStr setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf af as dl slv deb al) =
+pkgToAction mStr setup rs tgt ~(Pkg bs ts bnchs lbs mt _ v v' ds cds bdeps ccLocal cf af as dl slv deb al) =
 
     unless (rs == ["clean"]) $ do
 
-        let cdps = if (f bs || f ts) && ("gc" `notElem` (fst <$> cds)) then ("gc", noConstr) : cds else cds where f = any gcBin
+        let cdps = if (f bs || f ts || f bnchs) && ("gc" `notElem` (fst <$> cds)) then ("gc", noConstr) : cds else cds where f = any gcBin
 
         mkUserConfig
 
@@ -333,7 +336,7 @@ pkgToAction mStr setup rs tgt ~(Pkg bs ts lbs mt _ v v' ds cds bdeps ccLocal cf 
 
         traverse_ (h ph) lbs
 
-        traverse_ (g ph) (bs ++ ts)
+        traverse_ (g ph) (bs ++ ts ++ bnchs)
 
         fold (debRules <$> deb)
 

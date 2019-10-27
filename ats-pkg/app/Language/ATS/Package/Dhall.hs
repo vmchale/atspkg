@@ -13,7 +13,7 @@ checkPkg :: FilePath
          -> IO (Version -> ATSDependency)
 checkPkg = checkDhall
 
-checkDhall :: Interpret a
+checkDhall :: FromDhall a
            => FilePath
            -> Bool
            -> IO a

@@ -1,5 +1,21 @@
 # ats-pkg
 
+## 3.3.0.1
+
+  * Add `bench` subcommand to CLI
+
+## 3.3.0.0
+
+  * Add `bench` field to `Pkg` type
+
+## 3.2.6.4
+
+  * Upgrade to latest `dhall`
+
+## 3.2.6.3
+
+  * Better `clean` command
+
 ## 3.2.6.1
 
   * Display `language-ats` version when `--version` flag is passed

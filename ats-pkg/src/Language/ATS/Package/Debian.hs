@@ -34,9 +34,9 @@ data Debian = Debian { package     :: Text
                      }
                      -- TODO: section https://www.debian.org/doc/debian-policy/ch-archive.html#s-subsections
                      -- TODO: priority https://www.debian.org/doc/debian-policy/ch-archive.html#s-priorities
-                     deriving (Generic, Binary, Interpret)
+                     deriving (Generic, Binary, FromDhall)
 
-deriving newtype instance Interpret Version
+deriving newtype instance FromDhall Version
 
 control :: Debian -> String
 control Debian{..} = intercalate "\n"

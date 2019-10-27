@@ -40,7 +40,7 @@ $special = [\+\-\*\&\|\[\]\{\}\(\)\_\=\!\%\^\$\@\;\~\,\.\\\#\<\>\:\?]
 $alpha = [a-zA-Z]
 $terminal = $printable # $white
 $esc_char = \27
-@escape_ch = \\ ([nrt\'\\] | $octal+)
+@escape_ch = \\ ([nrt\'\\\{] | $octal+)
 @escape_str = \\ ([nrt\"\\] | $octal+)
 @char = ($terminal # [\\\']) | " " | @escape_ch | $esc_char
 @char_lit = \' @char \'
@@ -620,11 +620,13 @@ token_posn (HexIntTok p _) = p
 token_posn End = undefined
 
 toChar :: String -> Char
-toChar "'\\n'" = '\n'
-toChar "'\\t'" = '\t'
+toChar "'\\n'"  = '\n'
+toChar "'\\t'"  = '\t'
 toChar "'\\\\'" = '\\'
-toChar "'\\0'" = '\0'
-toChar x = x !! 1
+toChar "'\\0'"  = '\0'
+toChar "'\\''"  = '\''
+toChar "'\\{'"  = '{'
+toChar x        = x !! 1
 
 alexEOF :: Alex Token
 alexEOF = pure End

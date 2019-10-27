@@ -1,9 +1,8 @@
 ---
 - ignore: {name: Avoid lambda, within: [Language.ATS.Types.Lens]}
-- ignore: {name: Use <$>, within: [Language.ATS.PrettyPrint]}
 - ignore: {name: Unused LANGUAGE pragma, within: [Language.ATS.PrettyPrint]}
-- ignore: {name: Functor law, within: [Language.ATS.PrettyPrint]}
-- ignore: {name: Evaluate, within: [Language.ATS.Generate]}
+- ignore: {name: Use foldr, within: [Language.ATS.Generate]}
+- ignore: {name: Use section}
 
 - fixity: infixr 8 .*
 - fixity: infixr 3 ***
