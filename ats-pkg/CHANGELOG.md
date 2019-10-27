@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.3.0.1
+
+  * Add `bench` subcommand to CLI
+
 ## 3.3.0.0
 
   * Add `bench` field to `Pkg` type

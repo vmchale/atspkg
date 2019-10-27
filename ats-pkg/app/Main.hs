@@ -52,6 +52,13 @@ data Command = Install { _archTarget :: Maybe String
                     , _lint       :: Bool
                     , _prof       :: Bool
                     }
+             | Bench { _targets    :: [String]
+                     , _atspkgArg  :: Maybe String
+                     , _rebuildAll :: Bool
+                     , _verbosity  :: Int
+                     , _lint       :: Bool
+                     , _prof       :: Bool
+                     }
              | Fetch { _url       :: String
                      , _atspkgArg :: Maybe String
                      , _verbosity :: Int
@@ -80,6 +87,7 @@ userCmd = hsubparser
     <> command "remote" (info fetch (progDesc "Fetch and install a binary package"))
     <> command "build" (info build' (progDesc "Build current package targets"))
     <> command "test" (info test' (progDesc "Test current package"))
+    <> command "bench" (info bench' (progDesc "Benchmark current package"))
     <> command "nuke" (info (pure Nuke) (progDesc "Uninstall all globally installed libraries"))
     <> command "upgrade" (info (pure Upgrade) (progDesc "Upgrade to the latest version of atspkg"))
     <> command "valgrind" (info valgrind (progDesc "Run generated binaries through valgrind"))
@@ -133,6 +141,15 @@ dhallCompletions = ftypeCompletions "dhall"
 run' :: Parser Command
 run' = Run
     <$> targets "run"
+    <*> pkgArgs
+    <*> rebuild
+    <*> verbosity
+    <*> noLint
+    <*> profile
+
+bench' :: Parser Command
+bench' = Bench
+    <$> targets "bench"
     <*> pkgArgs
     <*> rebuild
     <*> verbosity
@@ -247,6 +264,7 @@ run (Fetch u mArg v)                   = fetchPkg mArg u v
 run Clean                              = mkPkg Nothing False True False mempty ["clean"] Nothing 0
 run (Build rs mArg tgt rba v lint tim) = runHelper rba lint tim rs mArg tgt v
 run (Test ts mArg rba v lint tim)      = runHelper rba lint tim ("test" : ts) mArg Nothing v
+run (Bench ts mArg rba v lint tim)     = runHelper rba lint tim ("bench" : ts) mArg Nothing v
 run (Run ts mArg rba v lint tim)       = runHelper rba lint tim ("run" : ts) mArg Nothing v
 run (Install tgt mArg)                 = runHelper False True False ["install"] mArg tgt 0
 run (Valgrind ts mArg)                 = runHelper False True False ("valgrind" : ts) mArg Nothing 0

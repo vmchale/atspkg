@@ -153,6 +153,9 @@ mkPhony mStr cmdStr f select rs =
 mkValgrind :: Maybe String -> [String] -> Rules ()
 mkValgrind mStr = mkPhony mStr "valgrind" ("valgrind " <>) bin
 
+mkBench :: Maybe String -> [String] -> Rules ()
+mkBench mStr = mkPhony mStr "bench" id bench
+
 mkTest :: Maybe String -> [String] -> Rules ()
 mkTest mStr = mkPhony mStr "test" id test
 
@@ -242,7 +245,7 @@ setTargets rs bins mt = when (null rs) $
 
 bits :: Maybe String -> Maybe String -> [String] -> Rules ()
 bits mStr tgt rs = sequence_ (sequence [ mkManpage, mkInstall tgt, mkConfig ] mStr) <>
-    biaxe [ mkRun, mkTest, mkValgrind ] mStr rs
+    biaxe [ mkRun, mkTest, mkBench, mkValgrind ] mStr rs
 
 pkgToTargets :: Pkg -> Maybe String -> [FilePath] -> [FilePath]
 pkgToTargets ~Pkg{..} tgt [] = (toTgt tgt . target <$> bin) <> (unpack . libTarget <$> libraries) <> (unpack . cTarget <$> atsSource)
