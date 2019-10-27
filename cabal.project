@@ -7,10 +7,6 @@ packages: language-ats
         , shake-cabal
         , shake-c
 
--- documentation: true
-
--- allow-boot-library-installs: true
-
 constraints:
   ats-format +development -static -profile,
   ats-pkg +development -eventlog -profile,
