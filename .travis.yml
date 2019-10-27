@@ -1,11 +1,11 @@
 ---
 sudo: false
 language: c
-cache:
-  directories:
-  - $HOME/.cabal
-  - $HOME/.ghc
-  - $HOME/.atspkg
+# cache:
+  # directories:
+  # - $HOME/.cabal
+  # - $HOME/.ghc
+  # - $HOME/.atspkg
 addons:
   apt:
     packages:
