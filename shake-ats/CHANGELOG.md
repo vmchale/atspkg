@@ -1,5 +1,9 @@
 # shake-ats
 
+## 1.10.3.0
+
+  * Don't copy files to `$PATSHOME`
+
 ## 1.10.2.2
 
   * `genLinks` calls `traced` for better profiling
