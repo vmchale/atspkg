@@ -415,6 +415,7 @@ CaseArrow :: { LambdaType AlexPosn }
           | minus {% left $ Expected $1 "Arrow" "-" }
           | eq {% left $ Expected $1 "Arrow" "=" }
           | minus {% left $ Expected $1 "Arrow" "-" }
+          | customOperator {% left $ Expected (token_posn $1) "Arrow" ((\(Operator _ s) -> s) $1) }
           | CaseArrow vbar {% left $ Expected $2 "Expression" "|" }
 
 LambdaArrow :: { LambdaType AlexPosn }
