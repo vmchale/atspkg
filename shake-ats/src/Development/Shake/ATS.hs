@@ -208,8 +208,7 @@ cgen :: ATSToolConfig
 cgen toolConfig' extras atsGens atsSrc cFiles =
     cFiles %> \out -> do
 
-        -- tell shake which files to track and copy them to the appropriate
-        -- directory
+        -- tell shake which files to track
         need extras
         sources <- transitiveDeps atsGens [atsSrc]
         need sources
