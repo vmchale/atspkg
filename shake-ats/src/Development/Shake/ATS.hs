@@ -49,7 +49,7 @@ import           Development.Shake.Cabal
 import           Development.Shake.FilePath
 import           Development.Shake.Version
 import           Language.ATS
-import           System.Directory                  (createDirectoryIfMissing, doesFileExist)
+import           System.Directory                  (doesFileExist)
 import           System.Environment                (getEnv)
 import           System.Exit                       (ExitCode (ExitSuccess))
 
@@ -89,14 +89,6 @@ withPF act = do
 gcFlag :: Bool -> String
 gcFlag False = "-DATS_MEMALLOC_LIBC"
 gcFlag True  = "-DATS_MEMALLOC_GCBDW"
-
--- Copy source files to the appropriate place. This is necessary because
--- @#include@s in ATS are weird.
-copySources :: ATSToolConfig -> [FilePath] -> Action ()
-copySources ATSToolConfig{..} sources =
-    forM_ sources $ \dep -> do
-        liftIO $ createDirectoryIfMissing True (_patsHome </> takeDirectory dep)
-        copyFile' dep (_patsHome </> dep)
 
 makeCFlags :: [String] -- ^ Inputs
            -> [ForeignCabal] -- ^ Haskell libraries
@@ -221,7 +213,6 @@ cgen toolConfig' extras atsGens atsSrc cFiles =
         need extras
         sources <- transitiveDeps atsGens [atsSrc]
         need sources
-        copySources toolConfig' sources
 
         atsCommand toolConfig' atsSrc out
 
