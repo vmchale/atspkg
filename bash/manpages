@@ -1,0 +1,4 @@
+#!/usr/bin/env bash 
+
+pandoc ats-format/man/MANPAGE.md -s -t man -o ats-format/man/atsfmt.1
+pandoc ats-pkg/man/MANPAGE.md -s -t man -o ats-pkg/man/atspkg.1
