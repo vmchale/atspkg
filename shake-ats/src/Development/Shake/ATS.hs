@@ -49,6 +49,7 @@ import           Development.Shake.Cabal
 import           Development.Shake.FilePath
 import           Development.Shake.Version
 import           Language.ATS
+import           Language.C.Dependency             (getIncludesStr)
 import           System.Directory                  (doesFileExist)
 import           System.Environment                (getEnv)
 import           System.Exit                       (ExitCode (ExitSuccess))
@@ -231,6 +232,15 @@ transitiveDeps gen ps = fmap fold $ forM ps $ \p -> if p `elem` gen then pure me
     let (ats, err) = (fromRight mempty &&& id) . parseM $ contents
     maybeError p err
     let dir = takeDirectory p
-    deps <- filterM (\f -> ((f `elem` gen) ||) <$> (liftIO . doesFileExist) f) $ fixDir dir . trim <$> getDependencies ats
+    let (atsDeps, cBlocks) = getDependenciesC ats
+    let preCDeps = cIncls cBlocks
+    cDeps <- foldMapA (getAll ["."]) preCDeps
+    deps <- filterM existsAndNotGen $ fixDir dir . trim <$> atsDeps
     deps' <- transitiveDeps gen deps
-    pure $ (p:deps) ++ deps'
+    pure $ (p:deps) ++ deps' ++ preCDeps ++ cDeps
+
+    where existsAndNotGen f = liftIO $
+            do { b <- doesFileExist f ; pure (f `elem` gen || b) }
+          cIncls cBlocks = concat $ fromRight [] $
+                traverse getIncludesStr cBlocks
+          foldMapA = (fmap fold .) . traverse

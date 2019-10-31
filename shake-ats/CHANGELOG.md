@@ -1,5 +1,9 @@
 # shake-ats
 
+## 1.10.4.0
+
+  * Track C dependencies as well.
+
 ## 1.10.3.0
 
   * Don't copy files to `$PATSHOME`
