@@ -1,5 +1,10 @@
 # language-ats
 
+## 1.7.7.0
+
+  * Improved parse errors
+  * Add `getDependenciesC`
+
 ## 1.7.6.2
 
   * Fix bug in handling of char literals
