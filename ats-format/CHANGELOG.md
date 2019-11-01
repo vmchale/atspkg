@@ -1,5 +1,10 @@
 # ats-format
 
+## 0.2.2.32
+
+  * Depend on [toml-parser](http://hackage.haskell.org/package/toml-parser) for
+    TOML parsing.
+
 ## 0.2.2.31
 
   * Remove `static` and `profiling` flags; use `--enable-executable-static` from
