@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.3.0.3
+
+  * Update manpages
+
 ## 3.3.0.1
 
   * Add `bench` subcommand to CLI
