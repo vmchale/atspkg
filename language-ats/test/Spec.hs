@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+-- vim: syntax=hspec
 
 import           Data.Foldable
 import qualified Filesystem.Path.CurrentOS as F
