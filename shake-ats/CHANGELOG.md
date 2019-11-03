@@ -1,5 +1,9 @@
 # shake-ats
 
+## 1.10.4.1
+
+  * Only track C dependencies that exist
+
 ## 1.10.4.0
 
   * Track C dependencies as well.

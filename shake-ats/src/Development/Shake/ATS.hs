@@ -233,8 +233,8 @@ transitiveDeps gen ps = fmap fold $ forM ps $ \p -> if p `elem` gen then pure me
     maybeError p err
     let dir = takeDirectory p
     let (atsDeps, cBlocks) = getDependenciesC ats
-    let preCDeps = cIncls cBlocks
-    cDeps <- foldMapA (getAll ["."]) preCDeps
+    preCDeps <- filterM doesFileExist' $ cIncls cBlocks
+    cDeps <- filterM doesFileExist' =<< foldMapA (getAll ["."]) preCDeps
     deps <- filterM existsAndNotGen $ fixDir dir . trim <$> atsDeps
     deps' <- transitiveDeps gen deps
     pure $ (p:deps) ++ deps' ++ preCDeps ++ cDeps
@@ -244,3 +244,4 @@ transitiveDeps gen ps = fmap fold $ forM ps $ \p -> if p `elem` gen then pure me
           cIncls cBlocks = concat $ fromRight [] $
                 traverse getIncludesStr cBlocks
           foldMapA = (fmap fold .) . traverse
+          doesFileExist' = liftIO . doesFileExist
