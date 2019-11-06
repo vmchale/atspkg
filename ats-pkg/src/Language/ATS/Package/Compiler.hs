@@ -93,6 +93,7 @@ install :: Verbosity
         -> IO ()
 install v' tgt' als v cd =
     withCompiler "Installing" v *>
+    makeExecutable (cd </> "install-sh") *>
     silentCreateProcess v' ((proc makeExe ["install"]) { cwd = Just cd }) *>
     maybe mempty (libInstall als cd) tgt'
 
