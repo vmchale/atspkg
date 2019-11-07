@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.3.0.4
+
+  * Fixes for Mac
+
 ## 3.3.0.3
 
   * Update manpages
