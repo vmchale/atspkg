@@ -28,7 +28,7 @@ custom-setup
     setup-depends:
         base -any,
         Cabal -any,
-        cli-setup >=0.1.0.2,
+        cli-setup >=0.2.1.0,
         filepath -any
 
 flag development
