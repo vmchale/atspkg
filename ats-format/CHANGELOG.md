@@ -1,5 +1,9 @@
 # ats-format
 
+## 0.2.2.33
+
+  * Use new `cli-setup` API
+
 ## 0.2.2.32
 
   * Depend on [toml-parser](http://hackage.haskell.org/package/toml-parser) for
