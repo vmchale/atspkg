@@ -6,10 +6,10 @@ import           Distribution.Simple
 import           System.FilePath
 
 main :: IO ()
-main = sequence_ [ setManpathBash
-                 , setManpathZsh
-                 , setManpathFish
-                 , writeManpages ("man" </> "atsfmt.1") "atsfmt.1"
+main = sequence_ [ writeManpages ("man" </> "atsfmt.1") "atsfmt.1"
                  , writeBashCompletions "atsfmt"
+                 , setManpathBash
+                 , setManpathFish
+                 , setManpathZsh
                  , defaultMain
                  ]
