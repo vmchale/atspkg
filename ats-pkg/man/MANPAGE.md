@@ -25,6 +25,8 @@ atspkg - a build tool for ATS
 
 **test** - Run all tests listed in atspkg.dhall
 
+**bench** - Rull all benchmarks listed in atspkg.dhall
+
 **clean** - Clean current project directory
 
 **nuke** - Remove all local files installed by **atspkg**

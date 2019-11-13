@@ -1,4 +1,5 @@
 {-# LANGUAGE TupleSections #-}
+-- vim: syntax=hspec
 
 import           Control.Arrow
 import           Data.Dependency

@@ -1,5 +1,17 @@
 # shake-ats
 
+## 1.10.4.1
+
+  * Only track C dependencies that exist
+
+## 1.10.4.0
+
+  * Track C dependencies as well.
+
+## 1.10.3.0
+
+  * Don't copy files to `$PATSHOME`
+
 ## 1.10.2.3
 
   * `cleanATS` is now more precise
