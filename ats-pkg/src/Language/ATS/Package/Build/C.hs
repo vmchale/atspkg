@@ -5,6 +5,7 @@ module Language.ATS.Package.Build.C ( clibSetup
 
 import           Development.Shake.ATS
 import           Development.Shake.C
+import qualified Development.Shake.Check as Check
 import           GHC.Conc
 import           Quaalude
 
@@ -54,7 +55,9 @@ cmake :: Verbosity -> FilePath -> Maybe FilePath -> String -> FilePath -> IO ()
 cmake _ _ Nothing _ _ = mempty
 cmake v prefixPath (Just cfgLists) _ _ = do
     let p = takeDirectory cfgLists
-    silentCreateProcess v ((proc "cmake" ["-DCMAKE_INSTALL_PREFIX:PATH=" ++ prefixPath, p]) { cwd = Just p })
+    cmakeB <- Check.cmake
+    when cmakeB $
+        silentCreateProcess v ((proc "cmake" ["-DCMAKE_INSTALL_PREFIX:PATH=" ++ prefixPath, p]) { cwd = Just p })
 
 configure :: Verbosity -> FilePath -> FilePath -> Maybe [(String, String)] -> String -> FilePath -> IO ()
 configure v prefixPath configurePath procEnv lib' p =

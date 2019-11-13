@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.3.0.5
+
+  * Only run `cmake` when it exists
+
 ## 3.3.0.4
 
   * Fixes for Mac
