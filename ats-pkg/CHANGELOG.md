@@ -1,5 +1,10 @@
 # ats-pkg
 
+## 3.3.0.6
+
+  * Only run `./autogen.sh` when installing the compiler if
+    `automake`/`autoconf` exist
+
 ## 3.3.0.5
 
   * Only run `cmake` when it exists

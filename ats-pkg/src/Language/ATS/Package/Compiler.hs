@@ -12,8 +12,8 @@ module Language.ATS.Package.Compiler
     , SetupScript
     ) where
 
+import qualified Development.Shake.Check as Check
 import           System.FilePath.Find    (find)
--- import qualified Codec.Archive           as Archive
 import qualified Codec.Archive.Tar       as Tar
 import           Codec.Compression.GZip  (compress, decompress)
 import           Control.Monad
@@ -103,9 +103,14 @@ configure v' configurePath v cd = do
     withCompiler "Configuring" v
 
     makeExecutable configurePath
-    makeExecutable (cd </> "autogen.sh")
 
-    silentCreateProcess v' ((proc (cd </> "autogen.sh") []) { cwd = Just cd })
+    autoconf <- Check.autoconf
+    print autoconf
+    automake <- Check.automake
+
+    when (autoconf && automake) $
+        makeExecutable (cd </> "autogen.sh") *>
+        silentCreateProcess v' ((proc (cd </> "autogen.sh") []) { cwd = Just cd })
 
     silentCreateProcess v' ((proc configurePath ["--prefix", cd]) { cwd = Just cd })
 
