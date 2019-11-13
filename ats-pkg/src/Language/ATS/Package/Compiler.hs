@@ -12,17 +12,17 @@ module Language.ATS.Package.Compiler
     , SetupScript
     ) where
 
-import qualified Development.Shake.Check as Check
-import           System.FilePath.Find    (find)
 import qualified Codec.Archive.Tar       as Tar
 import           Codec.Compression.GZip  (compress, decompress)
 import           Control.Monad
 import qualified Data.ByteString.Lazy    as BS
 import           Data.Dependency
 import           Data.FileEmbed
+import qualified Development.Shake.Check as Check
 import           Network.HTTP.Client     hiding (decompress)
 import           Network.HTTP.Client.TLS (tlsManagerSettings)
 import           Quaalude
+import           System.FilePath.Find    (find)
 
 libatsCfg :: String
 libatsCfg = $(embedStringFile ("dhall" </> "atslib.dhall"))
@@ -105,7 +105,6 @@ configure v' configurePath v cd = do
     makeExecutable configurePath
 
     autoconf <- Check.autoconf
-    print autoconf
     automake <- Check.automake
 
     when (autoconf && automake) $
