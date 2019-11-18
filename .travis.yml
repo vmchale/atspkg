@@ -52,6 +52,8 @@ before_install:
     brew install bzip2
     brew install libarchive
     brew install ghc@8.6
+    export PATH="/usr/local/opt/ghc@8.6/bin:$PATH"
+    export LDFLAGS="-L/usr/local/opt/ghc@8.6/lib"
     brew install cabal-install
     export PKG_CONFIG_PATH="/usr/local/opt/libarchive/lib/pkgconfig"
     cabal update
