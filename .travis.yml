@@ -63,7 +63,7 @@ before_install:
 script:
 - curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s ats-format ats-pkg dependency hs2ats language-ats shake-ats shake-c shake-cabal
 - cabal update
-- travis_wait 40 cabal build all -w ghc
+- travis_wait 40 cabal build all -w ghc-${GHC}
 - |
   if [ `uname` = "Darwin" ]
   then
