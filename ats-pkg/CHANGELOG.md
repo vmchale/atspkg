@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.4.0.0
+
+  * Add `--debug` flag to `test` and `build` subcommands
+
 ## 3.3.0.6
 
   * Only run `./autogen.sh` when installing the compiler if

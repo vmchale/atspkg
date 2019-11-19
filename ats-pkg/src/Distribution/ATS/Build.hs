@@ -20,7 +20,7 @@ atsPolyglotBuild =
 configureCabal :: IO LocalBuildInfo -> IO LocalBuildInfo
 configureCabal = (<*>) $ do
     -- TODO get host triple from Platform of LocalBuildInfo
-    build 1 mempty
+    build 1 False mempty
     libDir <- (<> [pathSeparator]) <$> getCurrentDirectory
     pure (modifyConf libDir)
 

@@ -83,6 +83,9 @@ argument a directory containing the unpacked compiler.
 **-d**, **-\-detailed**
 :   Enable detailed error messages when checking configuration files
 
+**-\-debug**
+:   Disable binary stripping and pass -g to the C compiler
+
 # CONFIGURATION
 
 **atspkg** is configured with Dhall, in an atspkg.dhall file. **atspkg** can be
