@@ -77,9 +77,6 @@ argument a directory containing the unpacked compiler.
 **-v**, **-\-verbose**
 :   Turn up the verbosity
 
-**-d**, **-\-detailed**
-:   Enable detailed error messages when checking configuration files
-
 **-\-debug**
 :   Disable binary stripping and pass -g to the C compiler
 
