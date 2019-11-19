@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.4.0.1
+
+  * Install manpages to `/usr/local/share/man/man1` on Mac
+
 ## 3.4.0.0
 
   * Add `--debug` flag to `test` and `build` subcommands

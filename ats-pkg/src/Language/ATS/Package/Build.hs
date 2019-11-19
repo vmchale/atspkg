@@ -29,6 +29,7 @@ import           Language.ATS.Package.Debian     hiding (libraries, target)
 import           Language.ATS.Package.Dependency
 import           Language.ATS.Package.Type
 import           Quaalude
+import           System.Info                     (os)
 
 check :: Maybe String -> Maybe FilePath -> IO Bool
 check mStr p = do
@@ -96,9 +97,9 @@ mkInstall tgt mStr =
         case man config of
             Just mt -> when pa $ do
                 let mt' = manTarget mt
-                    manDest = home </> ".local" </> "share" </> "man" </> "man1" </> takeFileName mt'
+                    manDestActual = manDest home mt'
                 need [mt']
-                copyFile' mt' manDest
+                copyFile' mt' manDestActual
             Nothing -> pure ()
         co <- compleat
         case completions config of
@@ -108,6 +109,13 @@ mkInstall tgt mStr =
                 need [com'] -- FIXME do this all in one step
                 copyFile' com' comDest
             Nothing -> pure ()
+
+manDest :: FilePath -> FilePath -> FilePath
+manDest home mt' =
+    case os of
+        "darwin" -> "/usr/local/share/man/man1" </> takeFileName mt'
+        "linux"  -> home </> ".local" </> "share" </> "man" </> "man1" </> takeFileName mt'
+        _        -> error "Don't know where to install manpages for your OS"
 
 mkManpage :: Maybe String -> Rules ()
 mkManpage mStr = do
