@@ -1,5 +1,9 @@
 # ats-format
 
+## 0.2.2.35
+
+  * Typo correction in manpages
+
 ## 0.2.2.34
 
   * Bugfix in new setup
