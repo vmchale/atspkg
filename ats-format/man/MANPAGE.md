@@ -15,7 +15,7 @@ atsfmt - a source code formatter for ATS
 
   cat file.dats | atsfmt
 
-  atsfmt --default-config
+  atsfmt -\-default-config
 
 # DESCRIPTION
 
