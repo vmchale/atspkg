@@ -358,7 +358,7 @@ pkgToAction mStr setup rs tgt dbg ~(Pkg bs ts bnchs lbs mt _ v v' ds cds bdeps c
           h ph (Lib _ s t ls _ hs' lnk atg extra sta) =
             atsBin (ATSTarget (dbgFlags (unpack <$> cf)) (atsToolConfig ph) False (unpack <$> ls) (unpack <$> s) hs' (unpackTgt <$> atg) (unpackLinks <$> lnk) (unpack t) (deps extra) (k sta) False)
 
-          dbgFlags = if dbg then ("-g":) else id
+          dbgFlags = if dbg then ("-g":) . ("-O0":) . filter (/="-O2") else id
 
           k False = SharedLibrary
           k True  = StaticLibrary

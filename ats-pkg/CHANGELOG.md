@@ -3,6 +3,7 @@
 ## 3.4.0.1
 
   * Install manpages to `/usr/local/share/man/man1` on Mac
+  * Disable optimizations when running `--debug`
 
 ## 3.4.0.0
 
