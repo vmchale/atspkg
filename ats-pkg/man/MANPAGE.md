@@ -110,8 +110,7 @@ pi git vmchale/ats-haskell weird-project
 # BUGS
 
 Please report any bugs you may come across to
-https://github.com/vmchale/atspkg/issues (for issues in atspkg proper) or
-https://hub.darcs.net/vmchale/ats/issues (for issues in supporting libraries).
+https://github.com/vmchale/atspkg/issues.
 
 # COPYRIGHT
 
