@@ -1,12 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell   #-}
 
 module Main where
 
 import           Control.Exception            (displayException)
 import           Control.Monad                (unless, (<=<))
 import           Data.Bifunctor               (first)
-import           Data.FileEmbed               (embedStringFile)
 import           Data.List                    (lookup)
 import           Data.Maybe                   (fromMaybe)
 import           Data.Monoid                  ((<>))
@@ -80,7 +78,10 @@ printFail :: String -> IO a
 printFail = pure exitFailure <=< hPutStr stderr
 
 defaultConfig :: FilePath -> IO ()
-defaultConfig = flip writeFile $(embedStringFile ".atsfmt.toml")
+defaultConfig = flip writeFile $
+    "ribbon = 0.6 # maximum ribbon fraction\n"
+    ++ "width = 120 # maximum width\n"
+    ++ "clang-format = false # call clang-format on inline code"
 
 asFloat :: Value -> Maybe Float
 asFloat (Double d) = Just (realToFrac d)

@@ -1,6 +1,6 @@
 cabal-version:      1.18
 name:               ats-format
-version:            0.2.0.35
+version:            0.2.0.36
 license:            BSD3
 license-file:       LICENSE
 copyright:          Copyright: (c) 2017-2019 Vanessa McHale
@@ -14,7 +14,6 @@ category:           Parser, Language, ATS, Development
 build-type:         Custom
 extra-source-files:
     man/atsfmt.1
-    .atsfmt.toml
 
 extra-doc-files:
     README.md
@@ -41,7 +40,7 @@ executable atsfmt
     hs-source-dirs:   src
     other-modules:    Paths_ats_format
     default-language: Haskell2010
-    other-extensions: OverloadedStrings TemplateHaskell
+    other-extensions: OverloadedStrings
     ghc-options:      -Wall
     build-depends:
         base >=4.9 && <5,
@@ -51,7 +50,6 @@ executable atsfmt
         ansi-wl-pprint -any,
         directory -any,
         process -any,
-        file-embed >=0.0.9,
         toml-parser -any
 
     if flag(development)
