@@ -12,9 +12,7 @@ description:
 
 category:           Parser, Language, ATS, Development
 build-type:         Custom
-extra-source-files:
-    man/atsfmt.1
-
+extra-source-files: man/atsfmt.1
 extra-doc-files:
     README.md
     CHANGELOG.md
