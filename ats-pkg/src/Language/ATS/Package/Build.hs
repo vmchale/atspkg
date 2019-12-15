@@ -173,10 +173,9 @@ mkRun :: Maybe String -> [String] -> Rules ()
 mkRun mStr = mkPhony mStr "run" id bin
 
 toVerbosity :: Int -> Verbosity
-toVerbosity 0 = Normal
-toVerbosity 1 = Loud
-toVerbosity 2 = Chatty
-toVerbosity 3 = Diagnostic
+toVerbosity 0 = Info
+toVerbosity 1 = Verbose
+toVerbosity 2 = Diagnostic
 toVerbosity _ = Diagnostic -- should be a warning
 
 options :: Bool -- ^ Whether to rebuild all targets

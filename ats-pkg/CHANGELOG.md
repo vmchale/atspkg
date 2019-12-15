@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.4.0.3
+
+  * Support shake 0.18.4
+
 ## 3.4.0.1
 
   * Install manpages to `/usr/local/share/man/man1` on Mac
