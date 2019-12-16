@@ -1,8 +1,9 @@
 # ats-pkg
 
-## 3.4.0.4
+## 3.4.0.5
 
   * Pin Dhall package; fix configuration caching
+  * More sensible verbosity across shake/atspkg
 
 ## 3.4.0.3
 
