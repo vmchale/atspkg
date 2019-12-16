@@ -2,7 +2,7 @@
 
 ## 3.4.0.5
 
-  * Pin Dhall package; fix configuration caching
+  * Pin Dhall package
   * More sensible verbosity across shake/atspkg
 
 ## 3.4.0.3
