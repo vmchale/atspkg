@@ -81,10 +81,10 @@ extract (CondNode d _ bs) = d : (g =<< bs)
 -- | Assign each shake @Verbosity@ level to a Cabal @Verbosity@ level.
 shakeVerbosityToCabalVerbosity :: Shake.Verbosity -> Distribution.Verbosity
 shakeVerbosityToCabalVerbosity Silent     = silent
-shakeVerbosityToCabalVerbosity Quiet      = normal
-shakeVerbosityToCabalVerbosity Normal     = normal
-shakeVerbosityToCabalVerbosity Loud       = verbose
-shakeVerbosityToCabalVerbosity Chatty     = verbose
+shakeVerbosityToCabalVerbosity Error      = normal
+shakeVerbosityToCabalVerbosity Warn       = normal
+shakeVerbosityToCabalVerbosity Info       = verbose
+shakeVerbosityToCabalVerbosity Verbose    = verbose
 shakeVerbosityToCabalVerbosity Diagnostic = deafening
 
 -- | Get cabal dependencies, respecting verbosity level given to

@@ -29,6 +29,7 @@ import           Language.ATS.Package.Debian     hiding (libraries, target)
 import           Language.ATS.Package.Dependency
 import           Language.ATS.Package.Type
 import           Quaalude
+import           System.Info                     (os)
 
 check :: Maybe String -> Maybe FilePath -> IO Bool
 check mStr p = do
@@ -50,17 +51,19 @@ buildAll v mStr tgt' p = on (*>) (=<< wants mStr p) fetchDef setupDef
 
 build' :: FilePath -- ^ Directory
        -> Maybe String -- ^ Target triple
+       -> Bool -- ^ Debug build?
        -> [String] -- ^ Targets
        -> IO ()
-build' dir tgt' rs = withCurrentDirectory dir (mkPkgEmpty mempty)
-    where mkPkgEmpty ts = mkPkg Nothing False True False ts rs tgt' 1
+build' dir tgt' dbg rs = withCurrentDirectory dir (mkPkgEmpty mempty)
+    where mkPkgEmpty ts = mkPkg Nothing False True False ts rs tgt' dbg 1
 
 -- | Build a set of targets
 build :: Int
+      -> Bool -- ^ Debug?
       -> [String] -- ^ Targets
       -> IO ()
-build v rs = bool (mkPkgEmpty [buildAll v Nothing Nothing Nothing]) (mkPkgEmpty mempty) =<< check Nothing Nothing
-    where mkPkgEmpty ts = mkPkg Nothing False True False ts rs Nothing 1
+build v dbg rs = bool (mkPkgEmpty [buildAll v Nothing Nothing Nothing]) (mkPkgEmpty mempty) =<< check Nothing Nothing
+    where mkPkgEmpty ts = mkPkg Nothing False True False ts rs Nothing dbg 1
 
 -- TODO clean generated ATS
 mkClean :: Rules ()
@@ -94,9 +97,9 @@ mkInstall tgt mStr =
         case man config of
             Just mt -> when pa $ do
                 let mt' = manTarget mt
-                    manDest = home </> ".local" </> "share" </> "man" </> "man1" </> takeFileName mt'
+                    manDestActual = manDest home mt'
                 need [mt']
-                copyFile' mt' manDest
+                copyFile' mt' manDestActual
             Nothing -> pure ()
         co <- compleat
         case completions config of
@@ -106,6 +109,13 @@ mkInstall tgt mStr =
                 need [com'] -- FIXME do this all in one step
                 copyFile' com' comDest
             Nothing -> pure ()
+
+manDest :: FilePath -> FilePath -> FilePath
+manDest home mt' =
+    case os of
+        "darwin" -> "/usr/local/share/man/man1" </> takeFileName mt'
+        "linux"  -> home </> ".local" </> "share" </> "man" </> "man1" </> takeFileName mt'
+        _        -> error "Don't know where to install manpages for your OS"
 
 mkManpage :: Maybe String -> Rules ()
 mkManpage mStr = do
@@ -163,10 +173,9 @@ mkRun :: Maybe String -> [String] -> Rules ()
 mkRun mStr = mkPhony mStr "run" id bin
 
 toVerbosity :: Int -> Verbosity
-toVerbosity 0 = Normal
-toVerbosity 1 = Loud
-toVerbosity 2 = Chatty
-toVerbosity 3 = Diagnostic
+toVerbosity 0 = Info
+toVerbosity 1 = Verbose
+toVerbosity 2 = Diagnostic
 toVerbosity _ = Diagnostic -- should be a warning
 
 options :: Bool -- ^ Whether to rebuild all targets
@@ -205,9 +214,10 @@ mkPkg :: Maybe String -- ^ Optional argument to @atspkg.dhall@
       -> [IO ()] -- ^ Setup
       -> [String] -- ^ Targets
       -> Maybe String -- ^ Target triple
+      -> Bool -- ^ Debug build?
       -> Int -- ^ Verbosity
       -> IO ()
-mkPkg mStr rba lint tim setup rs tgt v = do
+mkPkg mStr rba lint tim setup rs tgt dbg v = do
     cfg <- cleanConfig mStr rs
     setNumCapabilities =<< getNumProcessors
     cpus <- getNumCapabilities
@@ -216,7 +226,7 @@ mkPkg mStr rba lint tim setup rs tgt v = do
         sequence_
             [ want (pkgToTargets cfg tgt rs)
             , mkClean
-            , pkgToAction mStr setup rs tgt cfg
+            , pkgToAction mStr setup rs tgt dbg cfg
             ]
 
 mkConfig :: Maybe String -> Rules ()
@@ -266,7 +276,7 @@ atslibSetup tgt' lib' p = do
 
     let installDir = takeDirectory pkgPath
 
-    build' installDir tgt' ["install"]
+    build' installDir tgt' False ["install"]
 
 -- | The directory @~/.atspkg@
 pkgHome :: MonadIO m => CCompiler -> m String
@@ -300,9 +310,10 @@ pkgToAction :: Maybe String -- ^ Optional extra expression to which we should ap
             -> [IO ()] -- ^ Setup actions to be performed
             -> [String] -- ^ Targets
             -> Maybe String -- ^ Optional compiler triple (overrides 'ccompiler')
+            -> Bool -- ^ Debug build?
             -> Pkg -- ^ Package data type
             -> Rules ()
-pkgToAction mStr setup rs tgt ~(Pkg bs ts bnchs lbs mt _ v v' ds cds bdeps ccLocal cf af as dl slv deb al) =
+pkgToAction mStr setup rs tgt dbg ~(Pkg bs ts bnchs lbs mt _ v v' ds cds bdeps ccLocal cf af as dl slv deb al) =
 
     unless (rs == ["clean"]) $ do
 
@@ -341,10 +352,12 @@ pkgToAction mStr setup rs tgt ~(Pkg bs ts bnchs lbs mt _ v v' ds cds bdeps ccLoc
         fold (debRules <$> deb)
 
     where g ph (Bin s t ls hs' atg gc' extra) =
-            atsBin (ATSTarget (unpack <$> cf) (atsToolConfig ph) gc' (unpack <$> ls) [unpack s] hs' (unpackTgt <$> atg) mempty (toTgt tgt t) (deps extra) Executable True)
+            atsBin (ATSTarget (dbgFlags (unpack <$> cf)) (atsToolConfig ph) gc' (unpack <$> ls) [unpack s] hs' (unpackTgt <$> atg) mempty (toTgt tgt t) (deps extra) Executable (not dbg))
 
           h ph (Lib _ s t ls _ hs' lnk atg extra sta) =
-            atsBin (ATSTarget (unpack <$> cf) (atsToolConfig ph) False (unpack <$> ls) (unpack <$> s) hs' (unpackTgt <$> atg) (unpackLinks <$> lnk) (unpack t) (deps extra) (k sta) False)
+            atsBin (ATSTarget (dbgFlags (unpack <$> cf)) (atsToolConfig ph) False (unpack <$> ls) (unpack <$> s) hs' (unpackTgt <$> atg) (unpackLinks <$> lnk) (unpack t) (deps extra) (k sta) False)
+
+          dbgFlags = if dbg then ("-g":) . ("-O0":) . filter (/="-O2") else id
 
           k False = SharedLibrary
           k True  = StaticLibrary

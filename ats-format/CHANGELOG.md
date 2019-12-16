@@ -1,5 +1,13 @@
 # ats-format
 
+## 0.22.2.36
+
+  * Don't use `TemplateHaskell`
+
+## 0.2.2.35
+
+  * Typo correction in manpages
+
 ## 0.2.2.34
 
   * Bugfix in new setup

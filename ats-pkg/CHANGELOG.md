@@ -1,5 +1,18 @@
 # ats-pkg
 
+## 3.4.0.3
+
+  * Support shake 0.18.4
+
+## 3.4.0.1
+
+  * Install manpages to `/usr/local/share/man/man1` on Mac
+  * Disable optimizations when running `--debug`
+
+## 3.4.0.0
+
+  * Add `--debug` flag to `test` and `build` subcommands
+
 ## 3.3.0.6
 
   * Only run `./autogen.sh` when installing the compiler if

@@ -41,6 +41,7 @@ data Command = Install { _archTarget :: Maybe String
                      , _rebuildAll :: Bool
                      , _verbosity  :: Int
                      , _lint       :: Bool
+                     , _dbg        :: Bool
                      , _prof       :: Bool
                      }
              | Clean
@@ -50,6 +51,7 @@ data Command = Install { _archTarget :: Maybe String
                     , _rebuildAll :: Bool
                     , _verbosity  :: Int
                     , _lint       :: Bool
+                    , _dbg        :: Bool
                     , _prof       :: Bool
                     }
              | Bench { _targets    :: [String]
@@ -163,6 +165,7 @@ test' = Test
     <*> rebuild
     <*> verbosity
     <*> noLint
+    <*> debug
     <*> profile
 
 valgrind :: Parser Command
@@ -179,6 +182,11 @@ targetP completions' f s = f
     (metavar "TARGET"
     <> help ("Targets to " <> s)
     <> completions'))
+
+debug :: Parser Bool
+debug = switch
+    (long "debug"
+    <> help "Don't strip generated executables and pass -g to targets")
 
 profile :: Parser Bool
 profile = switch
@@ -217,6 +225,7 @@ build' = Build
     <*> rebuild
     <*> verbosity
     <*> noLint
+    <*> debug
     <*> profile
 
 noLint :: Parser Bool
@@ -241,35 +250,35 @@ fetchPkg mStr pkg v = withSystemTempDirectory "atspkg" $ \p -> do
     ps <- getSubdirs p
     pkgDir <- fromMaybe p <$> findFile (p:ps) "atspkg.dhall"
     let setup = [buildAll v mStr Nothing (Just pkgDir)]
-    withCurrentDirectory (takeDirectory pkgDir) (mkPkg mStr False False False setup ["install"] Nothing 0)
+    withCurrentDirectory (takeDirectory pkgDir) (mkPkg mStr False False False setup ["install"] Nothing False 0)
     stopGlobalPool
 
 main :: IO ()
 main = setLocaleEncoding utf8 *>
     execParser wrapper >>= run
 
-runHelper :: Bool -> Bool -> Bool -> [String] -> Maybe String -> Maybe String -> Int -> IO ()
-runHelper rba lint tim rs mStr tgt v = g . bool x y . (&& isNothing tgt) =<< check mStr Nothing
-    where g xs = mkPkg mStr rba lint tim xs rs tgt v *> stopGlobalPool
+runHelper :: Bool -> Bool -> Bool -> [String] -> Maybe String -> Maybe String -> Bool -> Int -> IO ()
+runHelper rba lint tim rs mStr tgt dbg v = g . bool x y . (&& isNothing tgt) =<< check mStr Nothing
+    where g xs = mkPkg mStr rba lint tim xs rs tgt dbg v *> stopGlobalPool
           y = mempty
           x = [buildAll v mStr tgt Nothing]
 
 run :: Command -> IO ()
 run List                               = displayList "https://raw.githubusercontent.com/vmchale/atspkg/baac3c7bdcb0d617fba43818dbb66da554092039/ats-pkg/pkgs/pkg-set.dhall sha256:a16dc6b6d4d803a90682ec4e105a568a3c57bea8369fab6befccb9e6d203c615"
-run (Check p b)                        = void $ ($ Version [0,1,0]) <$> checkPkg p b
-run (CheckSet p b)                     = void $ checkPkgSet p b
-run Upgrade                            = upgradeBin "vmchale" "atspkg"
-run Nuke                               = cleanAll
-run (Fetch u mArg v)                   = fetchPkg mArg u v
-run Clean                              = mkPkg Nothing False True False mempty ["clean"] Nothing 0
-run (Build rs mArg tgt rba v lint tim) = runHelper rba lint tim rs mArg tgt v
-run (Test ts mArg rba v lint tim)      = runHelper rba lint tim ("test" : ts) mArg Nothing v
-run (Bench ts mArg rba v lint tim)     = runHelper rba lint tim ("bench" : ts) mArg Nothing v
-run (Run ts mArg rba v lint tim)       = runHelper rba lint tim ("run" : ts) mArg Nothing v
-run (Install tgt mArg)                 = runHelper False True False ["install"] mArg tgt 0
-run (Valgrind ts mArg)                 = runHelper False True False ("valgrind" : ts) mArg Nothing 0
-run (Pack dir')                        = packageCompiler dir'
-run Setup                              = installActions
+run (Check p b)                            = void $ ($ Version [0,1,0]) <$> checkPkg p b
+run (CheckSet p b)                         = void $ checkPkgSet p b
+run Upgrade                                = upgradeBin "vmchale" "atspkg"
+run Nuke                                   = cleanAll
+run (Fetch u mArg v)                       = fetchPkg mArg u v
+run Clean                                  = mkPkg Nothing False True False mempty ["clean"] Nothing False 0
+run (Build rs mArg tgt rba v lint dbg tim) = runHelper rba lint tim rs mArg tgt dbg v
+run (Test ts mArg rba v lint  dbg tim)     = runHelper rba lint tim ("test" : ts) mArg Nothing dbg v
+run (Bench ts mArg rba v lint tim)         = runHelper rba lint tim ("bench" : ts) mArg Nothing False v
+run (Run ts mArg rba v lint tim)           = runHelper rba lint tim ("run" : ts) mArg Nothing False v
+run (Install tgt mArg)                     = runHelper False True False ["install"] mArg tgt False 0
+run (Valgrind ts mArg)                     = runHelper False True False ("valgrind" : ts) mArg Nothing False 0
+run (Pack dir')                            = packageCompiler dir'
+run Setup                                  = installActions
 
 installActions :: IO ()
 installActions = do

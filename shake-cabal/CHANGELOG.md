@@ -1,5 +1,9 @@
 # shake-cabal
 
+## 0.2.2.1
+
+  * Support `shake` 0.18.4
+
 ## 0.2.2.0
 
   * Export `CabalVersion` so `cabalOracle` is usable
