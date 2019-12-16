@@ -90,7 +90,7 @@ script:
 - cd ats-pkg/test/data/hello-world
 - ../../../../atspkg-$TARGET clean
 - ../../../../atspkg-$TARGET nuke
-- ../../../../atspkg-$TARGET run -vv
+- ../../../../atspkg-$TARGET run -vvv
 - cd -
 
 deploy:
