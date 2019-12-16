@@ -1,5 +1,3 @@
-# Upstream
-- [ ] Investigate segfault in `atspkg setup`?
 # Features
 - [ ] `fetching...` should include version number.
 - [ ] shell completions should list targets (?)
