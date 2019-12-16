@@ -10,7 +10,6 @@ module Language.ATS.Package.Build ( mkPkg
                                   , check
                                   ) where
 
-import qualified Data.ByteString                 as BS
 import qualified Data.ByteString.Lazy            as BSL
 import           Data.List                       (intercalate)
 import qualified Data.Text                       as T
@@ -128,9 +127,6 @@ mkManpage mStr = do
 parens :: String -> String
 parens s = fold [ "(", s, ")" ]
 
-cfgFile :: FilePath
-cfgFile = ".atspkg" </> "config"
-
 cfgArgs :: FilePath
 cfgArgs = ".atspkg" </> "args"
 
@@ -142,12 +138,8 @@ dhallFile = "atspkg.dhall"
 getConfig :: MonadIO m => Maybe String -> Maybe FilePath -> m Pkg
 getConfig mStr dir' = liftIO $ do
     d <- fromMaybe <$> fmap (</> dhallFile) getCurrentDirectory <*> pure dir'
-    b <- not <$> doesFileExist cfgFile
     let go = case mStr of { Just x -> (<> (" " <> parens x)) ; Nothing -> id }
-    b' <- shouldWrite mStr cfgArgs
-    if b || b'
-        then input auto (T.pack (go d))
-        else fmap (decode . BSL.fromStrict) . BS.readFile $ cfgFile
+    input auto (T.pack (go d))
 
 manTarget :: Text -> FilePath
 manTarget m = unpack m -<.> "1"
@@ -232,20 +224,9 @@ mkPkg mStr rba lint tim setup rs tgt dbg v = do
 mkConfig :: Maybe String -> Rules ()
 mkConfig mStr = do
 
-    shouldWrite' <- shouldWrite mStr cfgArgs
-
     cfgArgs %> \out -> do
         alwaysRerun
-        exists <- liftIO (doesFileExist out)
-        if not exists || shouldWrite'
-            then liftIO (BSL.writeFile out (encode mStr))
-            else mempty
-
-    cfgFile %> \out -> do
-        need [dhallFile, cfgArgs]
-        let go = case mStr of { Just x -> (<> (" " <> parens x)) ; Nothing -> id }
-        x <- liftIO $ input auto (T.pack (go "./atspkg.dhall"))
-        liftIO $ BSL.writeFile out (encode (x :: Pkg))
+        liftIO (BSL.writeFile out (encode mStr))
 
 setTargets :: [String] -> [FilePath] -> Maybe Text -> Rules ()
 setTargets rs bins mt = when (null rs) $
@@ -321,20 +302,15 @@ pkgToAction mStr setup rs tgt dbg ~(Pkg bs ts bnchs lbs mt _ v v' ds cds bdeps c
 
         mkUserConfig
 
-        newFlag <- shouldWrite tgt flags
-
         -- this is dumb but w/e
         flags %> \out -> do
             alwaysRerun
-            exists <- liftIO (doesFileExist out)
-            liftIO $ if not exists || newFlag
-                then BSL.writeFile out (encode tgt)
-                else mempty
+            liftIO $ BSL.writeFile out (encode tgt)
 
         -- TODO depend on tgt somehow?
         specialDeps %> \out -> do
             cfgBin' <- cfgBin
-            need [ cfgBin', flags, cfgFile ]
+            need [ cfgBin', flags, cfgArgs, dhallFile ]
             v'' <- getVerbosity
             liftIO $ fetchDeps v'' (ccFromString cc') mStr setup (first unpack <$> ds) (first unpack <$> cdps) (first unpack <$> bdeps) cfgBin' atslibSetup False *> writeFile out ""
 
@@ -367,10 +343,10 @@ pkgToAction mStr setup rs tgt dbg ~(Pkg bs ts bnchs lbs mt _ v v' ds cds bdeps c
           cDepsRules ph = unless (null as) $ do
               let targets = fmap (unpack . cTarget) as
                   sources = fmap (unpack . atsSrc) as
-              zipWithM_ (cgen (atsToolConfig ph) [specialDeps, cfgFile] (fmap (unpack . ats) . atsGen =<< as)) sources targets
+              zipWithM_ (cgen (atsToolConfig ph) [specialDeps, cfgArgs, dhallFile] (fmap (unpack . ats) . atsGen =<< as)) sources targets
 
           cc' = maybe (unpack ccLocal) (<> "-gcc") tgt
-          deps = (flags:) . (specialDeps:) . (cfgFile:) . fmap unpack
+          deps = (flags:) . (specialDeps:) . (cfgArgs:) . (dhallFile:) . fmap unpack
 
           unpackLinks :: (Text, Text) -> HATSGen
           unpackLinks (t, t') = HATSGen (unpack t) (unpack t')

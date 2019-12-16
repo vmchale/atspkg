@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.4.0.4
+
+  * Pin Dhall package; fix configuration caching
+
 ## 3.4.0.3
 
   * Support shake 0.18.4
