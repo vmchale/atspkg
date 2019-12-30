@@ -12,10 +12,18 @@ addons:
     - libgmp3-dev
     - xz-utils
     - liblzma-dev
-    - libarchive-dev
-    - bzip2
 matrix:
   include:
+
+  - env: TARGET=x86_64-unknown-linux GHC=8.8.1
+    addons:
+      apt:
+        update: true
+        sources:
+        - hvr-ghc
+        packages:
+        - ghc-8.8.1
+        - cabal-install-3.0
 
   - env: TARGET=x86_64-unknown-linux GHC=8.6.5
     addons:
@@ -26,7 +34,6 @@ matrix:
         packages:
         - ghc-8.6.5
         - cabal-install-3.0
-        - libarchive-dev
 
   - env: TARGET=x86_64-unknown-linux GHC=8.4.4
     addons:
@@ -37,7 +44,6 @@ matrix:
         packages:
         - ghc-8.4.4
         - cabal-install-3.0
-        - libarchive-dev
 
   # OS X
   - env: TARGET=x86_64-apple-darwin GHC=8.6.5
@@ -49,13 +55,10 @@ before_install:
   then
     brew install lzlib
     brew install xz
-    brew install bzip2
-    brew install libarchive
     brew install ghc@8.6
     export PATH="/usr/local/opt/ghc@8.6/bin:$PATH"
     export LDFLAGS="-L/usr/local/opt/ghc@8.6/lib"
     brew install cabal-install
-    export PKG_CONFIG_PATH="/usr/local/opt/libarchive/lib/pkgconfig"
     cabal update
   else
     export PATH=/opt/ghc/bin:$PATH
