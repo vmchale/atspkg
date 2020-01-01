@@ -20,7 +20,6 @@ import           Data.Dependency
 import           Data.FileEmbed
 import qualified Development.Shake.Check as Check
 import           Network.HTTP.Client     hiding (decompress)
-import           Network.HTTP.Client.TLS (tlsManagerSettings)
 import           Quaalude
 import           System.FilePath.Find    (find)
 

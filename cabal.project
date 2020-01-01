@@ -10,9 +10,9 @@ packages: language-ats
 constraints:
   ats-format +development -static -profile,
   ats-pkg +development -eventlog -profile,
-  shake-ext +development, 
+  shake-ext -development,
   language-ats +development,
-  shake-ats +development,
+  shake-ats -development,
   ats-setup +development,
   hs2ats +development,
   shake-cabal +development,

@@ -1,6 +1,6 @@
 cabal-version:      2.0
 name:               ats-pkg
-version:            3.4.0.3
+version:            3.4.0.6
 license:            BSD3
 license-file:       LICENSE
 copyright:          Copyright: (c) 2018-2019 Vanessa McHale
@@ -110,7 +110,7 @@ library quaalude
         filepath -any,
         microlens -any,
         ansi-wl-pprint -any,
-        shake >=0.17,
+        shake >=0.18.4,
         bytestring -any,
         composition-prelude >=1.3.0.3,
         binary -any,
