@@ -1,8 +1,13 @@
 # ats-pkg
 
-## 3.4.0.4
+## 3.4.0.8
 
   * Drop `.bz2` decompression; support GHC 8.8.1
+
+## 3.4.0.5
+
+  * Pin Dhall package
+  * More sensible verbosity flag
 
 ## 3.4.0.3
 
