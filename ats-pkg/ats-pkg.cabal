@@ -70,7 +70,6 @@ library
         bytestring -any,
         file-embed >=0.0.9,
         shake >=0.18.4,
-        bzlib -any,
         Cabal >=2.2.0.0,
         lzma -any,
         zlib -any,
