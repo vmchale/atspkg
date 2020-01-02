@@ -174,8 +174,10 @@ mkRun mStr = mkPhony mStr "run" id bin
 
 toVerbosity :: Int -> Verbosity
 toVerbosity 0 = Info
-toVerbosity 1 = Verbose
-toVerbosity 2 = Diagnostic
+toVerbosity 1 = Info
+toVerbosity 2 = Info
+toVerbosity 3 = Verbose
+toVerbosity 4 = Diagnostic
 toVerbosity _ = Diagnostic -- should be a warning
 
 options :: Bool -- ^ Whether to rebuild all targets
