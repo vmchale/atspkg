@@ -228,91 +228,91 @@ let emptySrc = [] : List Src
 
 let emptyBin = [] : List Bin
 
-in  let emptyLib = [] : List Lib
+let emptyLib = [] : List Lib
 
-    let mkDeb = λ(deb : Debian) → Some deb
+let mkDeb = λ(deb : Debian) → Some deb
 
-    let noPrelude =
-          [ "-D_ATS_CCOMP_PRELUDE_NONE_"
-          , "-D_ATS_CCOMP_EXCEPTION_NONE_"
-          , "-D_ATS_CCOMP_RUNTIME_NONE_"
-          ]
+let noPrelude =
+      [ "-D_ATS_CCOMP_PRELUDE_NONE_"
+      , "-D_ATS_CCOMP_EXCEPTION_NONE_"
+      , "-D_ATS_CCOMP_RUNTIME_NONE_"
+      ]
 
-    let atsProject = "target"
+let atsProject = "target"
 
-    let gcc = CCompiler.GCC
+let gcc = CCompiler.GCC
 
-    let clang = CCompiler.Clang
+let clang = CCompiler.Clang
 
-    let compCert = CCompiler.CompCert
+let compCert = CCompiler.CompCert
 
-    let icc = CCompiler.ICC
+let icc = CCompiler.ICC
 
-    let cc = CCompiler.CC
+let cc = CCompiler.CC
 
-    let printCompiler =
-            λ(cc : CCompiler)
-          → merge
-              { CompCert = "ccomp"
-              , Clang = "clang"
-              , GCC = "gcc"
-              , ICC = "icc"
-              , CC = "cc"
-              }
-              cc
+let printCompiler =
+        λ(cc : CCompiler)
+      → merge
+          { CompCert = "ccomp"
+          , Clang = "clang"
+          , GCC = "gcc"
+          , ICC = "icc"
+          , CC = "cc"
+          }
+          cc
 
-    let ccFlags =
-            λ(cc : CCompiler)
-          → merge
-              { CompCert = [ "-O2", "-fstruct-passing" ]
-              , Clang = [ "-O2", "-mtune=native", "-flto" ]
-              , GCC = [ "-O2", "-mtune=native", "-flto" ]
-              , ICC =
-                  [ "-O2"
-                  , "-mtune=native"
-                  , "-flto"
-                  , "-D__PURE_INTEL_C99_HEADERS__"
-                  ]
-              , CC = [ "-O2" ]
-              }
-              cc
+let ccFlags =
+        λ(cc : CCompiler)
+      → merge
+          { CompCert = [ "-O2", "-fstruct-passing" ]
+          , Clang = [ "-O2", "-mtune=native", "-flto" ]
+          , GCC = [ "-O2", "-mtune=native", "-flto" ]
+          , ICC =
+              [ "-O2"
+              , "-mtune=native"
+              , "-flto"
+              , "-D__PURE_INTEL_C99_HEADERS__"
+              ]
+          , CC = [ "-O2" ]
+          }
+          cc
 
-    let iccFlags = [ "-D__PURE_INTEL_C99_HEADERS__" ]
+let iccFlags = [ "-D__PURE_INTEL_C99_HEADERS__" ]
 
-    in  { mkDeb = mkDeb
-        , emptySrc = emptySrc
-        , emptyBin = emptyBin
-        , emptyLib = emptyLib
-        , showVersion = showVersion
-        , makePkg = makePkg
-        , bin = bin
-        , lib = lib
-        , dep = dep
-        , staticLib = staticLib
-        , default = default
-        , plainDeps = plainDeps
-        , lowerDeps = lowerDeps
-        , upperDeps = upperDeps
-        , eqDeps = eqDeps
-        , mapPlainDeps = mapPlainDeps
-        , src = src
-        , mapSrc = mapSrc
-        , makePkgDescr = makePkgDescr
-        , makeHsPkg = makeHsPkg
-        , makeNpmPkg = makeNpmPkg
-        , patsHome = patsHome
-        , cabalDir = cabalDir
-        , solver = solver
-        , ignore = ignore
-        , debian = debian
-        , noPrelude = noPrelude
-        , atsProject = atsProject
-        , gcc = gcc
-        , clang = clang
-        , compCert = compCert
-        , icc = icc
-        , cc = cc
-        , printCompiler = printCompiler
-        , ccFlags = ccFlags
-        , iccFlags = iccFlags
-        }
+in  { mkDeb = mkDeb
+    , emptySrc = emptySrc
+    , emptyBin = emptyBin
+    , emptyLib = emptyLib
+    , showVersion = showVersion
+    , makePkg = makePkg
+    , bin = bin
+    , lib = lib
+    , dep = dep
+    , staticLib = staticLib
+    , default = default
+    , plainDeps = plainDeps
+    , lowerDeps = lowerDeps
+    , upperDeps = upperDeps
+    , eqDeps = eqDeps
+    , mapPlainDeps = mapPlainDeps
+    , src = src
+    , mapSrc = mapSrc
+    , makePkgDescr = makePkgDescr
+    , makeHsPkg = makeHsPkg
+    , makeNpmPkg = makeNpmPkg
+    , patsHome = patsHome
+    , cabalDir = cabalDir
+    , solver = solver
+    , ignore = ignore
+    , debian = debian
+    , noPrelude = noPrelude
+    , atsProject = atsProject
+    , gcc = gcc
+    , clang = clang
+    , compCert = compCert
+    , icc = icc
+    , cc = cc
+    , printCompiler = printCompiler
+    , ccFlags = ccFlags
+    , iccFlags = iccFlags
+    }
