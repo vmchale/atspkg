@@ -50,9 +50,6 @@ before_install:
   then
     brew install lzlib
     brew install xz
-    brew install ghc@8.6
-    export PATH="/usr/local/opt/ghc@8.6/bin:$PATH"
-    export LDFLAGS="-L/usr/local/opt/ghc@8.6/lib"
     brew install cabal-install
     cabal update
   else
