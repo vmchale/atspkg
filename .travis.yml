@@ -41,7 +41,7 @@ matrix:
         - cabal-install-3.0
 
   # OS X
-  - env: TARGET=x86_64-apple-darwin GHC=8.6.5
+  - env: TARGET=x86_64-apple-darwin GHC=8.8.1
     os: osx
 
 before_install:
@@ -60,7 +60,7 @@ before_install:
 script:
 - curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s ats-format ats-pkg dependency hs2ats language-ats shake-ats shake-c shake-cabal
 - cabal update
-- travis_wait 40 cabal build all -w ghc-${GHC}
+- travis_wait 40 cabal build all
 - |
   if [ `uname` = "Darwin" ]
   then
