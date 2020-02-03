@@ -18,6 +18,7 @@ import           Data.Foldable                (toList)
 import           Data.List                    (isPrefixOf)
 import           Data.List.NonEmpty           (NonEmpty (..))
 import qualified Data.List.NonEmpty           as NE
+import           Data.These                   (These (..))
 import           Language.ATS.Types
 import           Lens.Micro
 import           Prelude                      hiding ((<$>))
@@ -236,10 +237,10 @@ instance Eq a => Pretty (Pattern a) where
         a (BinPatternF _ op p p')             = p <+> pretty op <+> p'
 
 argHelper :: Eq a => (Doc -> Doc -> Doc) -> Arg a -> Doc
-argHelper _ (Arg (First s))   = pretty s
-argHelper _ (Arg (Second t))  = pretty t
-argHelper op (Arg (Both s t)) = pretty s `op` colon `op` pretty t
-argHelper op (PrfArg a a')    = prettyArgs' ", " mempty mempty a </> "|" `op` pretty a'
+argHelper _ (Arg (This s))     = pretty s
+argHelper _ (Arg (That t))     = pretty t
+argHelper op (Arg (These s t)) = pretty s `op` colon `op` pretty t
+argHelper op (PrfArg a a')     = prettyArgs' ", " mempty mempty a </> "|" `op` pretty a'
 
 instance Eq a => Pretty (SortArg a) where
     pretty (SortArg n st) = text n <> ":" <+> pretty st

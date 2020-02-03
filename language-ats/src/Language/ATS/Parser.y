@@ -19,6 +19,7 @@ import Data.Bifunctor (second)
 import Data.Char (toLower)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Foldable (toList)
+import Data.These (These (..))
 import GHC.Generics (Generic)
 import Language.ATS.Types
 import Language.ATS.Types.Lens
@@ -332,14 +333,14 @@ Args :: { [Arg AlexPosn] }
      | { [] }
 
 TypeArg :: { Arg AlexPosn }
-        : IdentifierOr { Arg (First $1) }
-        | IdentifierOr colon Type { Arg (Both $1 $3) }
-        | Type { Arg (Second $1) }
+        : IdentifierOr { Arg (This $1) }
+        | IdentifierOr colon Type { Arg (These $1 $3) }
+        | Type { Arg (That $1) }
         | exclamation IdentifierOr colon {% left $ OneOf $3 [",", ")"] ":" }
 
 Arg :: { Arg AlexPosn }
     : TypeArg { $1 }
-    | StaticExpression { Arg (Second (ConcreteType $1)) } -- TODO: have some sort of state showing bound variables that we can use to disambiguate types vs. static expressions?
+    | StaticExpression { Arg (That (ConcreteType $1)) } -- TODO: have some sort of state showing bound variables that we can use to disambiguate types vs. static expressions?
 
 -- | Parse a literal
 Literal :: { Expression AlexPosn }

@@ -7,6 +7,9 @@ packages: language-ats
         , shake-cabal
         , shake-c
 
+allow-newer:
+  these-skinny:base
+
 constraints:
   ats-format -development -static -profile,
   ats-pkg +development -eventlog -profile,

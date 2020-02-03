@@ -69,7 +69,8 @@ library
         ansi-wl-pprint >=0.6.8,
         composition-prelude >=2.0.4.0,
         containers -any,
-        transformers -any
+        transformers -any,
+        these-skinny -any
 
     if !flag(cross)
         build-tools: happy >=1.17.1, alex -any

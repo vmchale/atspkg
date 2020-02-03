@@ -37,7 +37,6 @@ module Language.ATS ( -- * Functions for working with syntax
                     , PreFunction (..)
                     , StaticExpression (..)
                     , StackFunction (..)
-                    , Paired (..)
                     , Fixity (..)
                     , SortArg (..)
                     , Sort (..)
