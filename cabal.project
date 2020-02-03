@@ -19,7 +19,8 @@ constraints:
   ats-setup +development,
   hs2ats +development,
   shake-cabal +development,
-  shake-c +development
+  shake-c +development,
+  zlib +pkg-config
 
 executable-stripping: true
 
