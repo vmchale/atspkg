@@ -913,7 +913,7 @@ TypeDecl : typedef IdentifierOr SortArgs eq Type MaybeAnnot { TypeDef $1 $2 $3 $
          | extern vtypedef string SortArgs eq Type { Extern $1 $ ViewTypeDef $2 $3 $4 $6 }
          | abst0p IdentifierOr SortArgs MaybeType { AbsT0p $1 $2 $3 $4 }
          | viewdef IdentifierOr SortArgs eq Type { ViewDef $1 $2 $3 $5 }
-         | absvt0p IdentifierOr SortArgs eq Type { AbsVT0p $1 $2 $3 (Just $5) }
+         | absvt0p IdentifierOr SortArgs MaybeType { AbsVT0p $1 $2 $3 $4 }
          | absview IdentifierOr SortArgs MaybeType { AbsView $1 $2 $3 $4 }
          | abstype IdentifierOr SortArgs MaybeType { AbsType $1 $2 $3 $4 }
          | absvtype IdentifierOr SortArgs MaybeType { AbsViewType $1 $2 $3 $4 }

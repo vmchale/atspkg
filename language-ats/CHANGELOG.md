@@ -1,5 +1,9 @@
 # language-ats
 
+## 1.7.7.2
+
+  * Fix error when parsing `absvt@ype` declarations
+
 ## 1.7.7.1
 
   * Use `these-skinny`
