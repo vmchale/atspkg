@@ -38,8 +38,8 @@ compilerDir v = makeAbsolute =<< dir
 pkgUrl :: Version -> String
 pkgUrl v =
     let vs = show v
-        in "http://ats-lang.sourceforge.net/IMPLEMENT/Postiats/ATS2-Postiats-gmp-" ++ vs ++ ".tgz"
-        -- gmp = if v >= Version [0,3,13] then "gmp-" else ""
+        in "http://ats-lang.sourceforge.net/IMPLEMENT/Postiats/ATS2-Postiats-" ++ gmp ++ vs ++ ".tgz"
+            where gmp = if v >= Version [0,4,0] then "gmp-" else ""
         -- in "https://cytranet.dl.sourceforge.net/project/ats2-lang/ats2-lang/ats2-postiats-" ++ vs ++ "/ATS2-Postiats-" ++ gmp ++ vs ++ ".tgz"
 
 -- | Make a tarball from a directory containing the compiler.
