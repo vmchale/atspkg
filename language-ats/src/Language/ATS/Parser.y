@@ -19,6 +19,7 @@ import Data.Bifunctor (second)
 import Data.Char (toLower)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Foldable (toList)
+import Data.These (These (..))
 import GHC.Generics (Generic)
 import Language.ATS.Types
 import Language.ATS.Types.Lens
@@ -332,14 +333,14 @@ Args :: { [Arg AlexPosn] }
      | { [] }
 
 TypeArg :: { Arg AlexPosn }
-        : IdentifierOr { Arg (First $1) }
-        | IdentifierOr colon Type { Arg (Both $1 $3) }
-        | Type { Arg (Second $1) }
+        : IdentifierOr { Arg (This $1) }
+        | IdentifierOr colon Type { Arg (These $1 $3) }
+        | Type { Arg (That $1) }
         | exclamation IdentifierOr colon {% left $ OneOf $3 [",", ")"] ":" }
 
 Arg :: { Arg AlexPosn }
     : TypeArg { $1 }
-    | StaticExpression { Arg (Second (ConcreteType $1)) } -- TODO: have some sort of state showing bound variables that we can use to disambiguate types vs. static expressions?
+    | StaticExpression { Arg (That (ConcreteType $1)) } -- TODO: have some sort of state showing bound variables that we can use to disambiguate types vs. static expressions?
 
 -- | Parse a literal
 Literal :: { Expression AlexPosn }
@@ -912,7 +913,7 @@ TypeDecl : typedef IdentifierOr SortArgs eq Type MaybeAnnot { TypeDef $1 $2 $3 $
          | extern vtypedef string SortArgs eq Type { Extern $1 $ ViewTypeDef $2 $3 $4 $6 }
          | abst0p IdentifierOr SortArgs MaybeType { AbsT0p $1 $2 $3 $4 }
          | viewdef IdentifierOr SortArgs eq Type { ViewDef $1 $2 $3 $5 }
-         | absvt0p IdentifierOr SortArgs eq Type { AbsVT0p $1 $2 $3 (Just $5) }
+         | absvt0p IdentifierOr SortArgs MaybeType { AbsVT0p $1 $2 $3 $4 }
          | absview IdentifierOr SortArgs MaybeType { AbsView $1 $2 $3 $4 }
          | abstype IdentifierOr SortArgs MaybeType { AbsType $1 $2 $3 $4 }
          | absvtype IdentifierOr SortArgs MaybeType { AbsViewType $1 $2 $3 $4 }

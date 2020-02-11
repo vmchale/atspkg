@@ -34,7 +34,6 @@ module Language.ATS.Types
     , Addendum (..)
     , DataPropLeaf (..)
     , PreFunction (..)
-    , Paired (..)
     , Leaf (..)
     , StaticExpression (..)
     , StaticExpressionF (..)
@@ -55,6 +54,7 @@ import           Control.Recursion  hiding (Fix (..))
 import           Data.Function      (on)
 import           Data.List.NonEmpty (NonEmpty)
 import qualified Data.Map           as M
+import           Data.These         (These)
 import           GHC.Generics       (Generic)
 import           GHC.Natural        (Natural)
 import           Language.ATS.Lexer (Addendum (..))
@@ -232,17 +232,12 @@ data PatternF a x = PNameF (Name a) [x]
 
 type instance Base (Pattern a) = PatternF a
 
-data Paired a b = Both a b
-                | First a
-                | Second b
-                deriving (Show, Eq, Generic, NFData)
-
 data SortArg a = SortArg String (Sort a)
                | Anonymous (Sort a)
     deriving (Show, Eq, Generic, NFData)
 
 -- | An argument to a function.
-data Arg a = Arg (Paired String (Type a))
+data Arg a = Arg (These String (Type a))
            | PrfArg [Arg a] (Arg a)
            deriving (Show, Eq, Generic, NFData)
 
