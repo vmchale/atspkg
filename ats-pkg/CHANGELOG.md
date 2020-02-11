@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.5.0.0
+
+  * Remove `packageCompiler`
+
 ## 3.4.0.8
 
   * Drop `.bz2` decompression; support GHC 8.8.1
