@@ -286,7 +286,7 @@ pkgHome cc' = liftIO $ getAppUserDataDirectory ("atspkg" </> ccToDir cc')
 
 -- | The directory that will be @PATSHOME@.
 patsHomeAtsPkg :: MonadIO m => Version -> m String
-patsHomeAtsPkg v = fmap (</> vs) (pkgHome (GCC Nothing Nothing))
+patsHomeAtsPkg v = fmap (</> vs </> "ATS2-Postiats-" ++ vs) (pkgHome (GCC Nothing Nothing))
     where vs = show v
           -- gmp = if v >= Version [0,3,13] then "gmp-" else ""
 
