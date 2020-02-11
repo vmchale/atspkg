@@ -32,13 +32,13 @@ compilerUnpackDir v = makeAbsolute =<< dir
 
 compilerDir :: Version -> IO FilePath
 compilerDir v = makeAbsolute =<< dir
-    where dir = getAppUserDataDirectory ("atspkg" </> vs </> "ATS2-Postiats-" ++ vs)
+    where dir = getAppUserDataDirectory ("atspkg" </> vs </> "ATS2-Postiats-gmp-" ++ vs)
           vs = show v
 
 pkgUrl :: Version -> String
 pkgUrl v =
     let vs = show v
-        in "https://github.com/vmchale/atspkg/releases/download/compiler/ATS2-Postiats-" ++ vs ++ ".tar.gz"
+        in "http://ats-lang.sourceforge.net/IMPLEMENT/Postiats/ATS2-Postiats-gmp-" ++ vs ++ ".tgz"
         -- gmp = if v >= Version [0,3,13] then "gmp-" else ""
         -- in "https://cytranet.dl.sourceforge.net/project/ats2-lang/ats2-lang/ats2-postiats-" ++ vs ++ "/ATS2-Postiats-" ++ gmp ++ vs ++ ".tgz"
 
