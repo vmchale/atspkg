@@ -25,11 +25,15 @@ import           Quaalude
 libatsCfg :: String
 libatsCfg = $(embedStringFile ("dhall" </> "atslib.dhall"))
 
-compilerDir :: Version -> IO FilePath
-compilerDir v = makeAbsolute =<< dir
+compilerUnpackDir :: Version -> IO FilePath
+compilerUnpackDir v = makeAbsolute =<< dir
     where dir = getAppUserDataDirectory ("atspkg" </> vs)
           vs = show v
-          -- gmp = if v >= Version [0,3,13] then "gmp-" else ""
+
+compilerDir :: Version -> IO FilePath
+compilerDir v = makeAbsolute =<< dir
+    where dir = getAppUserDataDirectory ("atspkg" </> vs </> "ATS2-Postiats-" ++ vs)
+          vs = show v
 
 pkgUrl :: Version -> String
 pkgUrl v =
@@ -51,7 +55,7 @@ withCompiler s v = putStrLn $ s ++ " compiler v" ++ show v ++ "..."
 fetchCompiler :: Version -> IO ()
 fetchCompiler v = do
 
-    cd <- compilerDir v
+    cd <- compilerUnpackDir v
     needsSetup <- not <$> doesDirectoryExist cd
 
     when needsSetup $ do
