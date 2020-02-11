@@ -7,12 +7,12 @@ module Language.ATS.Package.Dependency ( -- * Functions
                                        , SetupScript
                                        ) where
 
--- import           Codec.Archive                        as Archive
-import qualified Codec.Archive.Tar                    as Tar
+import           Codec.Archive                        as Archive
 import           Codec.Archive.Zip                    (ZipOption (..), extractFilesFromArchive, toArchive)
 import qualified Codec.Compression.GZip               as Gzip
 import qualified Codec.Compression.Lzma               as Lzma
 import           Control.Concurrent.ParallelIO.Global
+import           Control.Exception                    (throw)
 import qualified Data.ByteString.Lazy                 as BSL
 import qualified Data.Text.Lazy                       as TL
 import           Development.Shake.ATS
@@ -106,8 +106,8 @@ getCompressor s
 tarResponse :: Text -> FilePath -> ByteString -> IO ()
 tarResponse url' dirName response = do
     compress <- getCompressor url'
-    -- let f = Archive.unpackToDir dirName . BSL.toStrict . compress
-    let f = Tar.unpack dirName . Tar.read . compress
+    let f = fmap (either throw id) . runArchiveM . Archive.unpackToDirLazy dirName . compress
+    -- let f = Tar.unpack dirName . Tar.read . compress
     f response
 
 zipResponse :: FilePath -> ByteString -> IO ()

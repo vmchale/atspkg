@@ -88,7 +88,7 @@ library
         ansi-wl-pprint -any,
         dependency >=1.2.0.0,
         quaalude -any,
-        tar -any,
+        libarchive >=2.2.1.0,
         filemanip -any,
         unix-compat -any
 

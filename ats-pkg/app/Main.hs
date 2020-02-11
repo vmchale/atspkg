@@ -45,7 +45,6 @@ data Command = Install { _archTarget :: Maybe String
                      , _prof       :: Bool
                      }
              | Clean
-             | Pack { _target :: String }
              | Test { _targets    :: [String]
                     , _atspkgArg  :: Maybe String
                     , _rebuildAll :: Bool
@@ -101,17 +100,7 @@ userCmd = hsubparser
     )
 
 command' :: Parser Command
-command' = userCmd <|> internalCmd
-
-internalCmd :: Parser Command
-internalCmd = subparser
-    (internal
-    <> command "pack" (info pack (progDesc "Make a tarball for distributing the compiler"))
-    )
-
-pack :: Parser Command
-pack = Pack
-    <$> targetP mempty id "package"
+command' = userCmd
 
 install :: Parser Command
 install = Install
@@ -277,7 +266,6 @@ run (Bench ts mArg rba v lint tim)         = runHelper rba lint tim ("bench" : t
 run (Run ts mArg rba v lint tim)           = runHelper rba lint tim ("run" : ts) mArg Nothing False v
 run (Install tgt mArg)                     = runHelper False True False ["install"] mArg tgt False 0
 run (Valgrind ts mArg)                     = runHelper False True False ("valgrind" : ts) mArg Nothing False 0
-run (Pack dir')                            = packageCompiler dir'
 run Setup                                  = installActions
 
 installActions :: IO ()
