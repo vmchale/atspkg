@@ -1,5 +1,5 @@
 ---
-sudo: false
+sudo: true
 language: c
 addons:
   apt:
@@ -52,6 +52,13 @@ before_install:
     brew install cabal-install
     cabal update
   else
+    wget https://www.libarchive.org/downloads/libarchive-3.4.2.tar.gz
+    tar xvf libarchive-3.4.2.tar.gz
+    cd libarchive-3.4.2
+    ./configure
+    make -j
+    sudo make install
+    cd ..
     export PATH=/opt/ghc/bin:$PATH
     cabal update
   fi
