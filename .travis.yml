@@ -50,18 +50,20 @@ before_install:
   then
     brew install xz
     brew install cabal-install
+    brew install wget
     cabal update
   else
-    wget https://www.libarchive.org/downloads/libarchive-3.4.2.tar.gz
-    tar xvf libarchive-3.4.2.tar.gz
-    cd libarchive-3.4.2
-    ./configure
-    make -j
-    sudo make install
-    cd ..
     export PATH=/opt/ghc/bin:$PATH
     cabal update
   fi
+- |
+  wget https://www.libarchive.org/downloads/libarchive-3.4.2.tar.gz
+  tar xvf libarchive-3.4.2.tar.gz
+  cd libarchive-3.4.2
+  ./configure
+  make -j
+  sudo make install
+  cd ..
 
 script:
 - curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s ats-format ats-pkg dependency hs2ats language-ats shake-ats shake-c shake-cabal
