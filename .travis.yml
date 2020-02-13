@@ -48,7 +48,6 @@ before_install:
 - |
   if [ `uname` = "Darwin" ]
   then
-    brew install lzlib
     brew install xz
     brew install cabal-install
     cabal update
