@@ -23,58 +23,58 @@ let atslib =
       → λ(libVersion : List Natural)
       →   prelude.default
         ⫽ { libraries =
-              [   prelude.staticLib
-                ⫽ { libTarget = "target/libatslib.a"
-                  , name = "atslib"
-                  , src =
-                      concat
-                        Text
-                        [ mapPre
-                            [ "bool"
-                            , "integer"
-                            , "basics"
-                            , "pointer"
-                            , "integer_long"
-                            , "integer_short"
-                            , "integer_size"
-                            , "char"
-                            , "float"
-                            , "string"
-                            , "strptr"
-                            , "integer_ptr"
-                            , "integer_fixed"
-                            , "filebas"
-                            ]
-                        , mapC
-                            [ "math"
-                            , "float"
-                            , "errno"
-                            , "fcntl"
-                            , "dirent"
-                            , "stdio"
-                            , "stdlib"
-                            , "string"
-                            , "strings"
-                            , "time"
-                            , "unistd"
-                            ]
-                        , mapML
-                            [ "list0"
-                            , "option0"
-                            , "array0"
-                            , "matrix0"
-                            , "string"
-                            , "strarr"
-                            , "gvalue"
-                            , "dynarray"
-                            , "hashtblref"
-                            , "filebas"
-                            , "filebas_dirent"
-                            ]
-                        ]
-                  , includes = [] : List Text
-                  }
-              ]
+            [   prelude.staticLib
+              ⫽ { libTarget = "target/libatslib.a"
+                , name = "atslib"
+                , src =
+                    concat
+                      Text
+                      [ mapPre
+                          [ "bool"
+                          , "integer"
+                          , "basics"
+                          , "pointer"
+                          , "integer_long"
+                          , "integer_short"
+                          , "integer_size"
+                          , "char"
+                          , "float"
+                          , "string"
+                          , "strptr"
+                          , "integer_ptr"
+                          , "integer_fixed"
+                          , "filebas"
+                          ]
+                      , mapC
+                          [ "math"
+                          , "float"
+                          , "errno"
+                          , "fcntl"
+                          , "dirent"
+                          , "stdio"
+                          , "stdlib"
+                          , "string"
+                          , "strings"
+                          , "time"
+                          , "unistd"
+                          ]
+                      , mapML
+                          [ "list0"
+                          , "option0"
+                          , "array0"
+                          , "matrix0"
+                          , "string"
+                          , "strarr"
+                          , "gvalue"
+                          , "dynarray"
+                          , "hashtblref"
+                          , "filebas"
+                          , "filebas_dirent"
+                          ]
+                      ]
+                , includes = [] : List Text
+                }
+            ]
           , cflags = [ "-fPIC" ]
           , compiler = compilerVersion
           , version = libVersion
