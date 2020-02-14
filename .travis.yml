@@ -56,6 +56,8 @@ before_install:
     export PATH=/opt/ghc/bin:$PATH
     cabal update
   fi
+
+script:
 - |
   wget https://www.libarchive.org/downloads/libarchive-3.4.2.tar.gz
   tar xvf libarchive-3.4.2.tar.gz
@@ -64,8 +66,6 @@ before_install:
   make -j
   sudo make install
   cd ..
-
-script:
 - curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s ats-format ats-pkg dependency hs2ats language-ats shake-ats shake-c shake-cabal
 - cabal update
 - travis_wait 40 cabal build all
