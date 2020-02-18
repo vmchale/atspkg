@@ -111,4 +111,4 @@ https://github.com/vmchale/atspkg/issues.
 
 # COPYRIGHT
 
-Copyright 2018-2019. Vanessa McHale. All Rights Reserved.
+Copyright 2018-2020. Vanessa McHale. All Rights Reserved.

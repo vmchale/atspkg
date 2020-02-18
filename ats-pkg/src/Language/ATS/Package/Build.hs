@@ -34,7 +34,8 @@ import           System.Info                     (os)
 check :: Maybe String -> Maybe FilePath -> IO Bool
 check mStr p = do
     v <- wants mStr p
-    doesFileExist =<< getAppUserDataDirectory ("atspkg" </> show v </> "bin" </> "patscc")
+    let vs = show v
+    doesFileExist =<< getAppUserDataDirectory ("atspkg" </> vs </> "ATS2-Postiats-gmp-" ++ vs </> "bin" </> "patscc")
 
 wants :: Maybe String -> Maybe FilePath -> IO Version
 wants mStr p = compiler <$> getConfig mStr p

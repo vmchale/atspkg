@@ -3,7 +3,7 @@ name:               ats-pkg
 version:            3.5.0.0
 license:            BSD3
 license-file:       LICENSE
-copyright:          Copyright: (c) 2018-2019 Vanessa McHale
+copyright:          Copyright: (c) 2018-2020 Vanessa McHale
 maintainer:         vamchale@gmail.com
 author:             Vanessa McHale
 tested-with:        ghc ==8.4.4 ghc ==8.6.5 ghc ==8.8.2
