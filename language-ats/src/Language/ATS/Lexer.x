@@ -53,7 +53,8 @@ $br = [\<\>]
 
 -- Floats
 @decimals = $digit+
-@float = @decimals \. @decimals ("f" | "")
+@float = @decimals \. @decimals "f"
+@double = @decimals \. @decimals
 
 -- Strings
 @string = \" ($printable # [\"\\] | @escape_str | $esc_char | \\ \n | \n)* \"
@@ -281,7 +282,8 @@ tokens :-
     <0> @integer                 { tok (\p s -> alex $ IntTok p (read s)) } -- FIXME shouldn't fail silenty on overflow
     <0> "0x" $hex+               { tok (\p s -> alex $ HexIntTok p (drop 2 s)) }
     <0> "0x" $hex+ u             { tok (\p s -> alex $ HexUintTok p (drop 2 (init s))) }
-    <0> @float                   { tok (\p s -> alex $ FloatTok p (read s)) }
+    <0> @float                   { tok (\p s -> alex $ FloatTok p (read (init s))) }
+    <0> @double                  { tok (\p s -> alex $ DoubleTok p (read s)) }
     <0> @char_lit                { tok (\p s -> alex $ CharTok p (toChar s)) }
     <0> @string                  { tok (\p s -> alex $ StringTok p s) }
 
@@ -434,6 +436,7 @@ data Token = Identifier AlexPosn String
            | HexIntTok AlexPosn String
            | HexUintTok AlexPosn String
            | FloatTok AlexPosn Float
+           | DoubleTok AlexPosn Double
            | CharTok AlexPosn Char
            | StringTok AlexPosn String
            | Special AlexPosn String
@@ -565,6 +568,7 @@ instance Pretty Token where
     pretty (HexIntTok _ hi) = "0x" <> text hi
     pretty (HexUintTok _ hi) = "0x" <> text hi <> "u"
     pretty (FloatTok _ x) = pretty x
+    pretty (DoubleTok _ x) = pretty x
     pretty (CharTok _ c) = squotes (pretty c)
     pretty (StringTok _ s) = text s
     pretty (Special _ s) = text s
@@ -600,6 +604,7 @@ token_posn (IdentifierSpace p _) = p
 token_posn (Keyword p _) = p
 token_posn (IntTok p _) = p
 token_posn (FloatTok p _) = p
+token_posn (DoubleTok p _) = p
 token_posn (StringTok p _) = p
 token_posn (Special p _) = p
 token_posn (CBlockLex p _) = p

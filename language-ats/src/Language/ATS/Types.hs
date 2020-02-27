@@ -361,6 +361,7 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                        }
                   | UintLit Natural -- ^ E.g. @1000u@
                   | FloatLit Float
+                  | DoubleLit Double
                   | IntLit Integer
                   | HexLit String
                   | HexUintLit String
@@ -415,6 +416,7 @@ data ExpressionF a x = LetF a (ATS a) (Maybe x)
                      | IfF x x (Maybe x)
                      | UintLitF Natural
                      | FloatLitF Float
+                     | DoubleLitF Double
                      | IntLitF Integer
                      | HexLitF String
                      | HexUintLitF String

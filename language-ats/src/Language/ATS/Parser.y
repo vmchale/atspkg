@@ -153,6 +153,7 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     hexLit { HexIntTok _ $$ }
     hexULit { HexUintTok _ $$ }
     floatLit { FloatTok _ $$ }
+    doubleLit { DoubleTok _ $$ }
     specialIdentifier { $$@SpecialIdentifier{} }
     foldAt { Identifier $$ "fold@" }
     identifier { $$@Identifier{} }
@@ -350,6 +351,7 @@ Literal :: { Expression AlexPosn }
         | hexLit { HexLit $1 }
         | hexULit { HexUintLit $1 }
         | floatLit { FloatLit $1 }
+        | doubleLit { DoubleLit $1 }
         | string { StringLit $1 }
         | charLit { CharLit $1 }
         | doubleParens { VoidLiteral $1 }
