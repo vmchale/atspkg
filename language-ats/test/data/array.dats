@@ -24,3 +24,6 @@ Completed    microlens-0.4.11.2 (lib)
 Configuring library for language-ats-1.7.7.2..
 Completed    toml-parser-0.1.0.0 (lib)
 Preprocessing library for language-ats-1.7.7.2..
+Building library for language-ats-1.7.7.2..
+[1 of 8] Compiling Language.ATS.Lexer ( /Users/vmchale/dev/forks/atspkg/dist-newstyle/build/x86_64-osx/ghc-8.6.5/language-ats-1.7.7.2/opt/build/Language/ATS/Lexer.hs, /Users/vmchale/dev/forks/atspkg/dist-newstyle/build/x86_64-osx/ghc-8.6.5/language-ats-1.7.7.2/opt/build/Language/ATS/Lexer.o )
+[2 of 8] Compiling Language.ATS.Types ( src/Language/ATS/Types.hs, /Users/vmchale/dev/forks/atspkg/dist-newstyle/build/x86_64-osx/ghc-8.6.5/language-ats-1.7.7.2/opt/build/Language/ATS/Types.o )
