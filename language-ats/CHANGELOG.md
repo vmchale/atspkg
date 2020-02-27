@@ -1,5 +1,7 @@
 # language-ats
 
+# 1.7.8.0
+
   * Add support for unsigned hexadecimal literals
 
 ## 1.7.7.2
