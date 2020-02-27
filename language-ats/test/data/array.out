@@ -256,4 +256,3 @@ val crc32_table = $arrpsz{uint}( 0x00000000u
                                , 0x5A05DF1Bu
                                , 0x2D02EF8Du
                                )
-
