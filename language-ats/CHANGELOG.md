@@ -1,5 +1,9 @@
 # language-ats
 
+# 1.7.9.0
+
+  * Support float literals as something other than double literals
+
 # 1.7.8.0
 
   * Add support for unsigned hexadecimal literals
