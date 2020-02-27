@@ -1,5 +1,7 @@
 # language-ats
 
+  * Add support for unsigned hexadecimal literals
+
 ## 1.7.7.2
 
   * Fix error when parsing `absvt@ype` declarations

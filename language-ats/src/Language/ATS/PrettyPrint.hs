@@ -136,6 +136,7 @@ instance Eq a => Pretty (Expression a) where
         a (UintLitF u)                  = pretty (fromIntegral u :: Integer) <> "u"
         a (IntLitF i)                   = pretty i
         a (HexLitF hi)                  = "0x" <> text hi
+        a (HexUintLitF hi)              = "0x" <> text hi <> "u"
         a (LambdaF _ lt p e)            = prettyLam "lam" p lt e
         a (LinearLambdaF _ lt p e)      = prettyLam "llam" p lt e
         a (FloatLitF f)                 = pretty f

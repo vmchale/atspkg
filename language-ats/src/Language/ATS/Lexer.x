@@ -280,6 +280,7 @@ tokens :-
     <0> @unsigned_lit            { tok (\p s -> alex $ UintTok p (read $ init s)) }
     <0> @integer                 { tok (\p s -> alex $ IntTok p (read s)) } -- FIXME shouldn't fail silenty on overflow
     <0> "0x" $hex+               { tok (\p s -> alex $ HexIntTok p (drop 2 s)) }
+    <0> "0x" $hex+ u             { tok (\p s -> alex $ HexUintTok p (drop 2 (init s))) }
     <0> @float                   { tok (\p s -> alex $ FloatTok p (read s)) }
     <0> @char_lit                { tok (\p s -> alex $ CharTok p (toChar s)) }
     <0> @string                  { tok (\p s -> alex $ StringTok p s) }
@@ -431,6 +432,7 @@ data Token = Identifier AlexPosn String
            | Keyword AlexPosn Keyword
            | IntTok AlexPosn Integer
            | HexIntTok AlexPosn String
+           | HexUintTok AlexPosn String
            | FloatTok AlexPosn Float
            | CharTok AlexPosn Char
            | StringTok AlexPosn String
@@ -561,6 +563,7 @@ instance Pretty Token where
     pretty (Keyword _ kw) = pretty kw
     pretty (IntTok _ i) = pretty i
     pretty (HexIntTok _ hi) = "0x" <> text hi
+    pretty (HexUintTok _ hi) = "0x" <> text hi <> "u"
     pretty (FloatTok _ x) = pretty x
     pretty (CharTok _ c) = squotes (pretty c)
     pretty (StringTok _ s) = text s
@@ -617,6 +620,7 @@ token_posn (CommentContents p _) = p
 token_posn (CommentBegin p) = p
 token_posn (CommentEnd p) = p
 token_posn (HexIntTok p _) = p
+token_posn (HexUintTok p _) = p
 token_posn End = undefined
 
 toChar :: String -> Char

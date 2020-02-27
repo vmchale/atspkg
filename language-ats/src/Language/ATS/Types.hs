@@ -363,6 +363,7 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                   | FloatLit Float
                   | IntLit Integer
                   | HexLit String
+                  | HexUintLit String
                   | UnderscoreLit a
                   | Lambda a (LambdaType a) (Pattern a) (Expression a) -- TODO: Fix
                   | LinearLambda a (LambdaType a) (Pattern a) (Expression a)
@@ -416,6 +417,7 @@ data ExpressionF a x = LetF a (ATS a) (Maybe x)
                      | FloatLitF Float
                      | IntLitF Integer
                      | HexLitF String
+                     | HexUintLitF String
                      | UnderscoreLitF a
                      | LambdaF a (LambdaType a) (Pattern a) x
                      | LinearLambdaF a (LambdaType a) (Pattern a) x
