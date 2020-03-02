@@ -1,5 +1,9 @@
 # language-ats
 
+# 1.7.10.0
+
+  * Add support for left/right shift operators in expressions
+
 # 1.7.9.0
 
   * Support float literals as something other than double literals

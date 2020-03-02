@@ -216,6 +216,7 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     doubleBraces { DoubleBracesTok $$ }
     doubleBrackets { DoubleBracketTok $$ }
     prfTransform { Operator $$ ">>" } -- For types like &a >> a?!
+    leftShift { Operator $$ "<<" }
     refType { Special $$ "&" } -- For types like &a
     maybeProof { Operator $$ "?" } -- For types like a?
     fromVT { Operator $$ "?!" } -- For types like a?!
@@ -557,7 +558,6 @@ PreExpression :: { Expression AlexPosn }
               | var {% left $ Expected $1 "Expression" "var" }
               | Termetric {% left $ Expected (fst $1) "Expression" "termetric" }
               | fromVT {% left $ Expected $1 "Expression" "?!" }
-              | prfTransform {% left $ Expected $1 "Expression" ">>" }
               | maybeProof {% left $ Expected $1 "Expression" "?" }
               | let openParen {% left $ Expected $1 "Expression" "let (" }
               | let ATS in Expression lineComment {% left $ Expected (token_posn $5) "end" (take 2 $ to_string $5) }
@@ -743,6 +743,8 @@ BinOp :: { BinOp AlexPosn }
       | mutateEq { Mutate }
       | at { At }
       | mutateArrow { SpearOp }
+      | prfTransform { RShift }
+      | leftShift { LShift }
       | customOperator { SpecialInfix (token_posn $1) (to_string $1) }
       | backslash identifierSpace { SpecialInfix $1 ('\\' : to_string $2) }
 

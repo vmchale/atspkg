@@ -296,6 +296,8 @@ data BinOp a = Add
              | Mutate -- ^ @:=@
              | At
              | SpearOp -- ^ @->@
+             | LShift
+             | RShift
              | SpecialInfix a String
              deriving (Show, Eq, Generic, NFData)
 

@@ -75,6 +75,8 @@ getFixity _ NotEq                 = infix_ 30
 getFixity _ StaticEq              = infix_ 30
 getFixity _ Mod                   = leftFix 60
 getFixity _ LessThan              = infix_ 40
+getFixity _ LShift                = leftFix 0
+getFixity _ RShift                = rightFix 0
 getFixity st (SpecialInfix _ op') =
     case M.lookup op' st of
         (Just f) -> f
