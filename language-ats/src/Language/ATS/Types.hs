@@ -408,6 +408,7 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                   | ParenExpr a (Expression a)
                   | CommentExpr String (Expression a)
                   | MacroVar a String
+                  | ArrayLit a (Type a) (Maybe (StaticExpression a)) [Expression a]
                   deriving (Show, Eq, Generic, NFData, Recursive, Corecursive)
 
 data ExpressionF a x = LetF a (ATS a) (Maybe x)
@@ -457,6 +458,7 @@ data ExpressionF a x = LetF a (ATS a) (Maybe x)
                      | ParenExprF a x
                      | CommentExprF String x
                      | MacroVarF a String
+                     | ArrayLitF a (Type a) (Maybe (StaticExpression a)) [x]
                      deriving (Generic, Functor)
 
 type instance Base (Expression a) = (ExpressionF a)

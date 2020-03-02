@@ -552,6 +552,9 @@ PreExpression :: { Expression AlexPosn }
               | lineComment PreExpression { CommentExpr (to_string $1) $2 }
               | comma parens(identifier) { MacroVar $1 (to_string $2) }
               | PreExpression where braces(ATS) { WhereExp $1 $3 }
+              | at sqbrackets(Type) sqbrackets(StaticExpression) parens(comma_sep(PreExpression)) { ArrayLit $1 $2 (Just $3) (toList $4) }
+              | at sqbrackets(Type) parens(comma_sep(PreExpression)) { ArrayLit $1 $2 Nothing (toList $3) }
+              | at sqbrackets(Type) sqbrackets(StaticExpression) doubleParens { ArrayLit $1 $2 (Just $3) [] }
               | include {% left $ Expected $1 "Expression" "include" }
               | staload {% left $ Expected (token_posn $1) "Expression" "staload" }
               | overload {% left $ Expected $1 "Expression" "overload" }

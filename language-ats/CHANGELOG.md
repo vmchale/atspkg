@@ -3,6 +3,7 @@
 # 1.7.10.0
 
   * Add support for left/right shift operators in expressions
+  * Add support for array literals
 
 # 1.7.9.0
 
