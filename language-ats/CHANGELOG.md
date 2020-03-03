@@ -4,7 +4,7 @@
 
   * Add support for left/right shift operators in expressions
   * Add support for array literals
-  * Fix bug in `absvt@ype` pretty-printing
+  * Fix bug in `absvt@ype` and `abst@ype` pretty-printing
 
 # 1.7.9.0
 
