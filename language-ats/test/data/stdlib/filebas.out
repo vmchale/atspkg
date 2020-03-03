@@ -242,7 +242,6 @@ macdef fileref_get_exnloc(inp) = fileref_get_exnmsg(,(inp), $mylocation)
 // end of [fileref_get_exnloc]
 (* ****** ****** *)
 typedef charlst = List0(char)
-
 vtypedef charlst_vt = List0_vt(char)
 
 (* ****** ****** *)

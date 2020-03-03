@@ -414,6 +414,20 @@ isVal PrVar{}   = True
 isVal AndDecl{} = True
 isVal _         = False
 
+isTyDecl :: Declaration a -> Bool
+isTyDecl ViewTypeDef{} = True
+isTyDecl TypeDef{}     = True
+isTyDecl ViewDef{}     = True
+isTyDecl _             = False
+
+isAbsTyDecl :: Declaration a -> Bool
+isAbsTyDecl AbsView{}     = True
+isAbsTyDecl AbsViewType{} = True
+isAbsTyDecl AbsVT0p{}     = True
+isAbsTyDecl AbsT0p{}      = True
+isAbsTyDecl AbsType{}     = True
+isAbsTyDecl _             = False
+
 isOverload :: Declaration a -> Bool
 isOverload OverloadOp{}    = True
 isOverload OverloadIdent{} = True
@@ -430,18 +444,14 @@ glue :: Declaration a -> Declaration a -> Bool
 glue x y
     | isVal x && isVal y = True
     | isOverload x && isOverload y = True
+    | isTyDecl x && isTyDecl y = True
+    | isAbsTyDecl x && isAbsTyDecl y = True
 glue Stadef{} Stadef{}             = True
 glue Load{} Load{}                 = True
 glue Define{} Define{}             = True
 glue Include{} Include{}           = True
 glue FixityDecl{} FixityDecl{}     = True
-glue ViewTypeDef{} ViewTypeDef{}   = True
-glue AbsViewType{} AbsViewType{}   = True
-glue AbsType{} AbsType{}           = True
-glue AbsType{} AbsViewType{}       = True
-glue AbsViewType{} AbsType{}       = True
 glue AbsImpl{} AbsImpl{}           = True
-glue TypeDef{} TypeDef{}           = True
 glue Comment{} _                   = True
 glue (Func _ Fnx{}) (Func _ And{}) = True
 glue Assume{} Assume{}             = True
