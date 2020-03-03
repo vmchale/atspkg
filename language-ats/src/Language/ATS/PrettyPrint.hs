@@ -696,7 +696,8 @@ instance Eq a => Pretty (Declaration a) where
     pretty (AbsView _ i as t)               = "absview" <+> text i <> prettySortArgs as <> prettyMaybeType t
     pretty (AbsVT0p _ i as t)               = "absvt@ype" <+> text i <> prettySortArgs as <> prettyMaybeType t
     pretty (AbsT0p _ i Nothing t)           = "abst@ype" <+> text i <+> "=" <+> pretty t
-    pretty (AbsT0p _ i as t)                = "abst@ype" <+> text i <> prettySortArgs as <> "=" <+> pretty t
+    pretty (AbsT0p _ i as Nothing)          = "abst@ype" <+> text i <> prettySortArgs as
+    pretty (AbsT0p _ i as (Just t))         = "abst@ype" <+> text i <> prettySortArgs as <> "=" <+> pretty t
     pretty (ViewDef _ s as t)               = "viewdef" <+> text s <> prettySortArgs as <+> "=" <#> pretty t
     pretty (TKind _ n s)                    = pretty n <+> "=" <+> text s
     pretty (SortDef _ s t)                  = "sortdef" <+> text s <+> "=" <+> either pretty pretty t
