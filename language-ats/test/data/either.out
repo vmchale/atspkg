@@ -14,7 +14,6 @@ fun {a:t@ype}{b:t@ype+} neq_either_either ( x : either(a, INV(b))
                                           ) : bool
 
 overload = with eq_either_either
-
 overload != with neq_either_either
 
 fun lefts {a:t@ype}{b:t@ype+}{n:int} (x : list(either(a,b), n)) :

@@ -133,9 +133,7 @@ fprint_stamped_vt(out: FILEref, x: &stamped_vt(a)): void
 *)
 //
 overload print with print_stamped_t
-
 overload prerr with prerr_stamped_t
-
 overload fprint with fprint_stamped_t
 
 //

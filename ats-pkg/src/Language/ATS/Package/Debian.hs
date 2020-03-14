@@ -29,12 +29,14 @@ data Debian = Debian { package     :: Text
                      , binaries    :: [Text]
                      , libraries   :: [Text]
                      , headers     :: [Text]
-                     -- , license     :: Maybe Text
-                     -- , changelog   :: Maybe Text
+                     , license     :: Maybe Text
+                     , changelog   :: Maybe Text
                      }
-                     deriving (Generic, Binary, Interpret)
+                     -- TODO: section https://www.debian.org/doc/debian-policy/ch-archive.html#s-subsections
+                     -- TODO: priority https://www.debian.org/doc/debian-policy/ch-archive.html#s-priorities
+                     deriving (Generic, Binary, FromDhall)
 
-deriving newtype instance Interpret Version
+deriving newtype instance FromDhall Version
 
 control :: Debian -> String
 control Debian{..} = intercalate "\n"

@@ -49,7 +49,8 @@ import           Development.Shake.Cabal
 import           Development.Shake.FilePath
 import           Development.Shake.Version
 import           Language.ATS
-import           System.Directory                  (createDirectoryIfMissing, doesFileExist)
+import           Language.C.Dependency             (getIncludesStr)
+import           System.Directory                  (doesFileExist)
 import           System.Environment                (getEnv)
 import           System.Exit                       (ExitCode (ExitSuccess))
 
@@ -89,14 +90,6 @@ withPF act = do
 gcFlag :: Bool -> String
 gcFlag False = "-DATS_MEMALLOC_LIBC"
 gcFlag True  = "-DATS_MEMALLOC_GCBDW"
-
--- Copy source files to the appropriate place. This is necessary because
--- @#include@s in ATS are weird.
-copySources :: ATSToolConfig -> [FilePath] -> Action ()
-copySources ATSToolConfig{..} sources =
-    forM_ sources $ \dep -> do
-        liftIO $ createDirectoryIfMissing True (_patsHome </> takeDirectory dep)
-        copyFile' dep (_patsHome </> dep)
 
 makeCFlags :: [String] -- ^ Inputs
            -> [ForeignCabal] -- ^ Haskell libraries
@@ -216,12 +209,10 @@ cgen :: ATSToolConfig
 cgen toolConfig' extras atsGens atsSrc cFiles =
     cFiles %> \out -> do
 
-        -- tell shake which files to track and copy them to the appropriate
-        -- directory
+        -- tell shake which files to track
         need extras
         sources <- transitiveDeps atsGens [atsSrc]
         need sources
-        copySources toolConfig' sources
 
         atsCommand toolConfig' atsSrc out
 
@@ -241,6 +232,16 @@ transitiveDeps gen ps = fmap fold $ forM ps $ \p -> if p `elem` gen then pure me
     let (ats, err) = (fromRight mempty &&& id) . parseM $ contents
     maybeError p err
     let dir = takeDirectory p
-    deps <- filterM (\f -> ((f `elem` gen) ||) <$> (liftIO . doesFileExist) f) $ fixDir dir . trim <$> getDependencies ats
+    let (atsDeps, cBlocks) = getDependenciesC ats
+    preCDeps <- filterM doesFileExist' $ cIncls cBlocks
+    cDeps <- filterM doesFileExist' =<< foldMapA (getAll ["."]) preCDeps
+    deps <- filterM existsAndNotGen $ fixDir dir . trim <$> atsDeps
     deps' <- transitiveDeps gen deps
-    pure $ (p:deps) ++ deps'
+    pure $ (p:deps) ++ deps' ++ preCDeps ++ cDeps
+
+    where existsAndNotGen f = liftIO $
+            do { b <- doesFileExist f ; pure (f `elem` gen || b) }
+          cIncls cBlocks = concat $ fromRight [] $
+                traverse getIncludesStr cBlocks
+          foldMapA = (fmap fold .) . traverse
+          doesFileExist' = liftIO . doesFileExist

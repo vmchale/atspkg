@@ -176,7 +176,6 @@ castfn ptr1_vtake {a:vt0p}{l:addr} (p0 : ptr(l)) :<> ( a @ l
 
 //
 overload ptr_vtake with ptr0_vtake of 0
-
 overload ptr_vtake with ptr1_vtake of 10
 
 //
@@ -246,11 +245,8 @@ symintr ptr0_set_at
 
 //
 overload ptr0_get_at with ptr0_get_at_int
-
 overload ptr0_set_at with ptr0_set_at_int
-
 overload ptr0_get_at with ptr0_get_at_size
-
 overload ptr0_set_at with ptr0_set_at_size
 
 //

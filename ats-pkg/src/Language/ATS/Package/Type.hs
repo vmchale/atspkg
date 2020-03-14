@@ -32,9 +32,9 @@ import           Quaalude
 data ATSConstraint = ATSConstraint { lower :: Maybe Version
                                    , upper :: Maybe Version
                                    }
-                deriving (Eq, Show, Generic, Binary, Interpret)
+                deriving (Eq, Show, Generic, Binary, FromDhall)
 
-deriving newtype instance Inject Version
+deriving newtype instance ToDhall Version
 
 type LibDep = (Text, ATSConstraint)
 
@@ -53,7 +53,7 @@ data ATSDependency = ATSDependency { libName     :: Text -- ^ Library name, e.g.
                                    , libCDeps    :: [LibDep] -- ^ C dependencies to be built
                                    , script      :: [Text] -- ^ Optional build script for C library
                                    }
-                   deriving (Generic, Interpret, Binary)
+                   deriving (Generic, FromDhall, Binary)
 
 dirLens :: Lens' ATSDependency Text
 dirLens f s = fmap (\x -> s { dir = x }) (f (dir s))
@@ -62,18 +62,18 @@ dirLens f s = fmap (\x -> s { dir = x }) (f (dir s))
 data TargetPair = TargetPair { hs    :: Text
                              , ats   :: Text
                              , cpphs :: Bool
-                             } deriving (Generic, Interpret, Binary)
+                             } deriving (Generic, FromDhall, Binary)
 
-deriving instance Interpret ForeignCabal
+deriving instance FromDhall ForeignCabal
 
-deriving instance Interpret Solver
+deriving instance FromDhall Solver
 
 data Src = Src { atsSrc  :: Text
                , cTarget :: Text
                , atsGen  :: [TargetPair]
                , extras  :: [Text]
                }
-         deriving (Generic, Interpret, Binary)
+         deriving (Generic, FromDhall, Binary)
 
 data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
                , target :: Text -- ^ Binary to be built
@@ -83,7 +83,7 @@ data Bin = Bin { src    :: Text -- ^ Source file (should end with @.dats@)
                , gcBin  :: Bool -- ^ Whether to use the garbage collector
                , extras :: [Text] -- ^ Extra source files the build depends on
                }
-         deriving (Generic, Interpret, Binary)
+         deriving (Generic, FromDhall, Binary)
 
 data Lib = Lib { name      :: Text -- ^ Name of library being provided
                , src       :: [Text] -- ^ Source files (should end with @.dats@) to be compiled to object files
@@ -96,11 +96,12 @@ data Lib = Lib { name      :: Text -- ^ Name of library being provided
                , extras    :: [Text] -- ^ Other source files the build depends on
                , static    :: Bool -- ^ Whether to make a static library
                }
-         deriving (Generic, Interpret, Binary)
+         deriving (Generic, FromDhall, Binary)
 
 -- | Data type associated with @atspkg.dhall@ file.
 data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , test         :: [Bin] -- ^ List of test suites
+               , bench        :: [Bin] -- ^ List of benchmarks
                , libraries    :: [Lib] -- ^ List of libraries to be built
                , man          :: Maybe Text -- ^ Optional (markdown) manpages to be converted using @pandoc@.
                , completions  :: Maybe Text -- ^ Optional @compleat@ completions to be installed alongside package.
@@ -118,4 +119,4 @@ data Pkg = Pkg { bin          :: [Bin] -- ^ List of binaries to be built
                , debPkg       :: Maybe Debian -- ^ Optional specificiation as a debian package.
                , atsLib       :: Bool -- ^ Whether to link/build @atslib@.
                }
-         deriving (Generic, Interpret, Binary)
+         deriving (Generic, FromDhall, Binary)

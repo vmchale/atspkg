@@ -18,6 +18,7 @@ import           Data.Foldable                (toList)
 import           Data.List                    (isPrefixOf)
 import           Data.List.NonEmpty           (NonEmpty (..))
 import qualified Data.List.NonEmpty           as NE
+import           Data.These                   (These (..))
 import           Language.ATS.Types
 import           Lens.Micro
 import           Prelude                      hiding ((<$>))
@@ -77,6 +78,8 @@ instance Pretty (BinOp a) where
     pretty Mutate             = ":="
     pretty SpearOp            = "->"
     pretty At                 = "@"
+    pretty RShift             = ">>"
+    pretty LShift             = ">>"
     pretty (SpecialInfix _ s) = text s
 
 splits :: BinOp a -> Bool
@@ -132,12 +135,14 @@ instance Eq a => Pretty (Expression a) where
         a (LetF _ e e')          = flatAlt
             ("let" <$> indent 2 (pretty e) <$> endLet e')
             ("let" <+> pretty e <$> endLet e')
-        a (UintLitF u)                  = pretty u <> "u"
+        a (UintLitF u)                  = pretty (fromIntegral u :: Integer) <> "u"
         a (IntLitF i)                   = pretty i
         a (HexLitF hi)                  = "0x" <> text hi
+        a (HexUintLitF hi)              = "0x" <> text hi <> "u"
         a (LambdaF _ lt p e)            = prettyLam "lam" p lt e
         a (LinearLambdaF _ lt p e)      = prettyLam "llam" p lt e
-        a (FloatLitF f)                 = pretty f
+        a (FloatLitF f)                 = pretty f <> "f"
+        a (DoubleLitF f)                = pretty f
         a (StringLitF s)                = text s -- FIXME escape indentation in multi-line strings.
         a (ParenExprF _ e)              = parens e
         a (UnaryF op e) = pretty op <> pretty e
@@ -172,10 +177,14 @@ instance Eq a => Pretty (Expression a) where
         a (CharLitF '\n')              = "'\\n'"
         a (CharLitF '\t')              = "'\\t'"
         a (CharLitF '\0')              = "'\\0'"
+        a (CharLitF '\'')              = "'\\''"
+        a (CharLitF '{')               = "'\\{'"
         a (CharLitF c)                 = "'" <> char c <> "'"
         a (ProofExprF _ es e')         = "(" <> prettyProofExpr es <+> "|" <+> e' <> ")"
         a (TypeSignatureF e t)         = e <+> ":" <+> pretty t
         a (WhereExpF e d)              = prettyWhere e d
+        a (ArrayLitF _ ty (Just se) e) = "@[" <> pretty ty <> "][" <> pretty se <> "]" <> prettyArgs e
+        a (ArrayLitF _ ty Nothing e)   = "@[" <> pretty ty <> "]" <> prettyArgs e
         a (TupleExF _ es)              = parens (mconcat $ punctuate ", " (toList $ NE.reverse es))
         a (BoxTupleExF _ es)           = "'(" <> mconcat (punctuate ", " (toList $ NE.reverse es)) <> ")"
         a (WhileF _ e e')              = "while" <> parens e <> e'
@@ -216,28 +225,28 @@ patternHelper ps = mconcat (punctuate ", " ps)
 
 instance Eq a => Pretty (Pattern a) where
     pretty = cata a where
-        a (PSumF s x)                  = string s <+> x
-        a (PLiteralF e)                = pretty e
-        a (PNameF s [])                = pretty s
-        a (PNameF s [x])               = pretty s <> parens x
-        a (PNameF s ps)                = pretty s <> parens (patternHelper ps)
-        a (FreeF p)                    = "~" <> p
-        a (GuardedF _ e p)             = p <+> "when" <+> pretty e
-        a (ProofF _ p p')              = parens (patternHelper p <+> "|" <+> patternHelper p')
-        a (TuplePatternF ps)           = parens (patternHelper ps)
-        a (BoxTuplePatternF _ ps)      = "'(" <> patternHelper ps <> ")"
-        a (AtPatternF _ p)             = "@" <> p
+        a (PSumF s x)                         = string s <+> x
+        a (PLiteralF e)                       = pretty e
+        a (PNameF s [])                       = pretty s
+        a (PNameF s [x])                      = pretty s <> parens x
+        a (PNameF s ps)                       = pretty s <> parens (patternHelper ps)
+        a (FreeF p)                           = "~" <> p
+        a (GuardedF _ e p)                    = p <+> "when" <+> pretty e
+        a (ProofF _ p p')                     = parens (patternHelper p <+> "|" <+> patternHelper p')
+        a (TuplePatternF ps)                  = parens (patternHelper ps)
+        a (BoxTuplePatternF _ ps)             = "'(" <> patternHelper ps <> ")"
+        a (AtPatternF _ p)                    = "@" <> p
         a (UniversalPatternF _ n us (Just p)) = text n <> prettyArgsU "" "" us <> p
-        a (UniversalPatternF _ n us Nothing) = text n <> prettyArgsU "" "" us
-        a (ExistentialPatternF e p)    = pretty e <> p
-        a (AsF _ p p')                 = p <+> "as" <+> p'
-        a (BinPatternF _ op p p')      = p <+> pretty op <+> p'
+        a (UniversalPatternF _ n us Nothing)  = text n <> prettyArgsU "" "" us
+        a (ExistentialPatternF e p)           = pretty e <> p
+        a (AsF _ p p')                        = p <+> "as" <+> p'
+        a (BinPatternF _ op p p')             = p <+> pretty op <+> p'
 
 argHelper :: Eq a => (Doc -> Doc -> Doc) -> Arg a -> Doc
-argHelper _ (Arg (First s))   = pretty s
-argHelper _ (Arg (Second t))  = pretty t
-argHelper op (Arg (Both s t)) = pretty s `op` colon `op` pretty t
-argHelper op (PrfArg a a')    = prettyArgs' ", " mempty mempty a </> "|" `op` pretty a'
+argHelper _ (Arg (This s))     = pretty s
+argHelper _ (Arg (That t))     = pretty t
+argHelper op (Arg (These s t)) = pretty s `op` colon `op` pretty t
+argHelper op (PrfArg a a')     = prettyArgs' ", " mempty mempty a </> "|" `op` pretty a'
 
 instance Eq a => Pretty (SortArg a) where
     pretty (SortArg n st) = text n <> ":" <+> pretty st
@@ -278,14 +287,18 @@ instance Eq a => Pretty (StaticExpression a) where
         a (StaticHexF h)               = text h
         a StaticVoidF{}                = "()"
         a (SifF e e' e'')              = "sif" <+> e <+> "then" <$> indent 2 e' <$> "else" <$> indent 2 e''
-        a (SCallF n [] [] ["()"])      = pretty n <> "()"
-        a (SCallF n [] us ["()"])      = pretty n <> prettyTypes us <> "()"
-        a (SCallF n [] [] cs)          = pretty n <> parens (mconcat (punctuate "," . fmap pretty $ cs))
-        a (SCallF n [] us cs)          = pretty n <> prettyTypes us <> parens (mconcat (punctuate "," . fmap pretty $ cs))
-        a (SCallF n is [] ["()"])      = pretty n <> prettyImplicits is <> "()"
-        a (SCallF n is us ["()"])      = pretty n <> prettyImplicits is <> prettyTypes us <> "()"
-        a (SCallF n is [] cs)          = pretty n <> prettyImplicits is <> parens (mconcat (punctuate "," . fmap pretty $ cs))
-        a (SCallF n is us cs)          = pretty n <> prettyImplicits is <> prettyTypes us <> parens (mconcat (punctuate "," . fmap pretty $ cs))
+        a (SCallF n [] [] ["()"] Nothing)      = pretty n <> "()"
+        a (SCallF n [] us ["()"] Nothing)      = pretty n <> prettyTypes us <> "()"
+        a (SCallF n [] [] cs Nothing)          = pretty n <> parens (mconcat (punctuate "," . fmap pretty $ cs))
+        a (SCallF n [] us cs Nothing)          = pretty n <> prettyTypes us <> parens (commaTight cs)
+        a (SCallF n is [] ["()"] Nothing)      = pretty n <> prettyImplicits is <> "()"
+        a (SCallF n is us ["()"] Nothing)      = pretty n <> prettyImplicits is <> prettyTypes us <> "()"
+        a (SCallF n is [] cs Nothing)          = pretty n <> prettyImplicits is <> parens (commaTight cs)
+        a (SCallF n is us cs Nothing)          = pretty n <> prettyImplicits is <> prettyTypes us <> parens (commaTight cs)
+        a (SCallF n [] [] cs (Just ds))        = pretty n <> parens (commaTight cs <+> "|" <+> commaTightDyn ds)
+        a (SCallF n [] us cs (Just ds))        = pretty n <> prettyTypes us <> parens (commaTight cs <+> "|" <+> commaTightDyn ds)
+        a (SCallF n is [] cs (Just ds))        = pretty n <> prettyImplicits is <> parens (commaTight cs <+> "|" <+> commaTightDyn ds)
+        a (SCallF n is us cs (Just ds))        = pretty n <> prettyImplicits is <> prettyTypes us <> parens (commaTight cs <+> "|" <+> commaTightDyn ds)
         a (SPrecedeF e e')             = e <> ";" <+> e'
         a (SPrecedeListF es)           = lineAlt (prettyArgsList "; " "(" ")" es) ("(" <> mconcat (punctuate " ; " es) <> ")")
         a (SParensF e)                 = parens e
@@ -299,6 +312,12 @@ instance Eq a => Pretty (StaticExpression a) where
         a (ProofLambdaF _ lt p e)       = prettyLam "lam" p lt e
         a (ProofLinearLambdaF _ lt p e) = prettyLam "llam" p lt e
         a (WhereStaExpF e ds) = prettyWhere e ds
+
+        commaTight :: [Doc] -> Doc
+        commaTight = mconcat . punctuate ","
+
+        commaTightDyn :: Pretty b => [b] -> Doc
+        commaTightDyn = commaTight . fmap pretty
 
 instance Eq a => Pretty (Sort a) where
     pretty = cata a where
@@ -353,10 +372,10 @@ withHashtag _    = lbracket
 
 instance Eq a => Pretty (Existential a) where
     pretty (Existential [] b (Just st) (Just e')) = withHashtag b <> pretty st <> pretty e' <> rbracket
-    pretty (Existential [] b Nothing (Just e')) = withHashtag b <> pretty e' <> rbracket
-    pretty (Existential [e] b (Just st) Nothing) = withHashtag b <> text e <> ":" <> pretty st <> rbracket
-    pretty (Existential bs b st Nothing) = withHashtag b <+> mconcat (punctuate ", " (fmap pretty bs)) <> gan st <+> rbracket
-    pretty (Existential bs b st (Just e)) = withHashtag b <+> mconcat (punctuate ", " (fmap pretty bs)) <> gan st <> "|" <+> pretty e <+> rbracket
+    pretty (Existential [] b Nothing (Just e'))   = withHashtag b <> pretty e' <> rbracket
+    pretty (Existential [e] b (Just st) Nothing)  = withHashtag b <> text e <> ":" <> pretty st <> rbracket
+    pretty (Existential bs b st Nothing)          = withHashtag b <+> mconcat (punctuate ", " (fmap pretty bs)) <> gan st <+> rbracket
+    pretty (Existential bs b st (Just e))         = withHashtag b <+> mconcat (punctuate ", " (fmap pretty bs)) <> gan st <> "|" <+> pretty e <+> rbracket
 
 instance Eq a => Pretty (Universal a) where
     pretty (Universal [x] Nothing []) = lbrace <> text x <> rbrace
@@ -395,6 +414,25 @@ isVal PrVar{}   = True
 isVal AndDecl{} = True
 isVal _         = False
 
+isTyDecl :: Declaration a -> Bool
+isTyDecl ViewTypeDef{} = True
+isTyDecl TypeDef{}     = True
+isTyDecl ViewDef{}     = True
+isTyDecl _             = False
+
+isAbsTyDecl :: Declaration a -> Bool
+isAbsTyDecl AbsView{}     = True
+isAbsTyDecl AbsViewType{} = True
+isAbsTyDecl AbsVT0p{}     = True
+isAbsTyDecl AbsT0p{}      = True
+isAbsTyDecl AbsType{}     = True
+isAbsTyDecl _             = False
+
+isOverload :: Declaration a -> Bool
+isOverload OverloadOp{}    = True
+isOverload OverloadIdent{} = True
+isOverload _               = False
+
 -- isTypeDef :: Declaration a -> Bool
 -- isTypeDef ViewTypeDef{} = True
 -- isTypeDef TypeDef{} = True
@@ -405,17 +443,15 @@ notDefine = not . ("#define" `isPrefixOf`)
 glue :: Declaration a -> Declaration a -> Bool
 glue x y
     | isVal x && isVal y = True
+    | isOverload x && isOverload y = True
+    | isTyDecl x && isTyDecl y = True
+    | isAbsTyDecl x && isAbsTyDecl y = True
 glue Stadef{} Stadef{}             = True
 glue Load{} Load{}                 = True
 glue Define{} Define{}             = True
 glue Include{} Include{}           = True
-glue ViewTypeDef{} ViewTypeDef{}   = True
-glue AbsViewType{} AbsViewType{}   = True
-glue AbsType{} AbsType{}           = True
-glue AbsType{} AbsViewType{}       = True
-glue AbsViewType{} AbsType{}       = True
+glue FixityDecl{} FixityDecl{}     = True
 glue AbsImpl{} AbsImpl{}           = True
-glue TypeDef{} TypeDef{}           = True
 glue Comment{} _                   = True
 glue (Func _ Fnx{}) (Func _ And{}) = True
 glue Assume{} Assume{}             = True
@@ -551,8 +587,12 @@ prettySig = prettySigG space space
 prettyTermetric :: Pretty a => a -> Doc
 prettyTermetric t = softline <> ".<" <> pretty t <> ">." <> softline
 
-prettyMTermetric :: Pretty a => Maybe a -> Doc
-prettyMTermetric = maybe mempty prettyTermetric
+prettyETermetric :: Pretty a => Maybe a -> Doc
+prettyETermetric Nothing  = softline <> ".<>." <> softline
+prettyETermetric (Just t) = softline <> ".<" <> pretty t <> ">." <> softline
+
+prettyMTermetric :: Pretty a => Maybe (Maybe a) -> Doc
+prettyMTermetric = maybe mempty prettyETermetric
 
 -- FIXME figure out a nicer algorithm for when/how to split lines.
 instance (Eq a, Pretty (ek a)) => Pretty (PreFunction ek a) where
@@ -605,9 +645,9 @@ instance Eq a => Pretty (Declaration a) where
     pretty (DataSort _ s ls)                = "datasort" <+> text s <+> "=" <$> prettyDSL (toList ls)
     pretty (Impl as i)                      = "implement" <+> prettyArgsNil as <> pretty i
     pretty (ProofImpl as i)                 = "primplmnt" <+> prettyArgsNil as <> pretty i
-    pretty (PrVal p (Just e) Nothing)       = "prval" <+> pretty p <+> "=" <+> pretty e
-    pretty (PrVal p Nothing (Just t))       = "prval" <+> pretty p <+> ":" <+> pretty t
-    pretty (PrVal p (Just e) (Just t))      = "prval" <+> pretty p <+> ":" <+> pretty t <+> "=" <+> pretty e
+    pretty (PrVal us p (Just e) Nothing)    = "prval" <> prettyUsNil us <> pretty p <+> "=" <+> pretty e
+    pretty (PrVal us p Nothing (Just t))    = "prval" <> prettyUsNil us <> pretty p <+> ":" <+> pretty t
+    pretty (PrVal us p (Just e) (Just t))   = "prval" <> prettyUsNil us <> pretty p <+> ":" <+> pretty t <+> "=" <+> pretty e
     pretty PrVal{}                          = undefined
     pretty (PrVar p (Just e) Nothing)       = "prvar" <+> pretty p <+> "=" <+> pretty e
     pretty (PrVar p Nothing (Just t))       = "prvar" <+> pretty p <+> ":" <+> pretty t
@@ -665,8 +705,10 @@ instance Eq a => Pretty (Declaration a) where
     pretty (AndD d (Stadef i as (Left (se, mt)))) = pretty d <+> "and" <+> text i <+> prettySortArgs as <+> "=" <+> pretty se <> maybeT mt
     pretty (AbsView _ i as t)               = "absview" <+> text i <> prettySortArgs as <> prettyMaybeType t
     pretty (AbsVT0p _ i as t)               = "absvt@ype" <+> text i <> prettySortArgs as <> prettyMaybeType t
-    pretty (AbsT0p _ i Nothing t)           = "abst@ype" <+> text i <+> "=" <+> pretty t
-    pretty (AbsT0p _ i as t)                = "abst@ype" <+> text i <> prettySortArgs as <> "=" <+> pretty t
+    pretty (AbsT0p _ i Nothing Nothing)     = "abst@ype" <+> text i
+    pretty (AbsT0p _ i Nothing (Just t))    = "abst@ype" <+> text i <+> "=" <+> pretty t
+    pretty (AbsT0p _ i as Nothing)          = "abst@ype" <+> text i <> prettySortArgs as
+    pretty (AbsT0p _ i as (Just t))         = "abst@ype" <+> text i <> prettySortArgs as <> "=" <+> pretty t
     pretty (ViewDef _ s as t)               = "viewdef" <+> text s <> prettySortArgs as <+> "=" <#> pretty t
     pretty (TKind _ n s)                    = pretty n <+> "=" <+> text s
     pretty (SortDef _ s t)                  = "sortdef" <+> text s <+> "=" <+> either pretty pretty t

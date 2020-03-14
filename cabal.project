@@ -7,25 +7,17 @@ packages: language-ats
         , shake-cabal
         , shake-c
 
-allow-newer:
-  base
-  template-haskell
-
--- documentation: true
-
--- allow-boot-library-installs: true
-
 constraints:
-  ats-format +development -static -profile,
+  ats-format -development -static -profile,
   ats-pkg +development -eventlog -profile,
-  shake-ext +development, 
+  shake-ext -development,
   language-ats +development,
-  shake-ats +development,
+  shake-ats -development,
   ats-setup +development,
-  dependency +development,
   hs2ats +development,
   shake-cabal +development,
-  shake-c +development
+  shake-c +development,
+  zlib +pkg-config
 
 executable-stripping: true
 

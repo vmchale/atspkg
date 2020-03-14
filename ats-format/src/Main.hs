@@ -1,16 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell   #-}
 
 module Main where
 
-import           Control.Arrow
+import           Control.Exception            (displayException)
 import           Control.Monad                (unless, (<=<))
-import           Data.FileEmbed               (embedStringFile)
-import qualified Data.HashMap.Lazy            as HM
+import           Data.Bifunctor               (first)
+import           Data.List                    (lookup)
 import           Data.Maybe                   (fromMaybe)
 import           Data.Monoid                  ((<>))
 import qualified Data.Text.IO                 as TIO
-import           Data.Version
+import           Data.Version                 (showVersion)
 import           Language.ATS
 import           Options.Applicative
 import           Paths_ats_format
@@ -18,9 +17,8 @@ import           System.Directory             (doesFileExist)
 import           System.Exit                  (exitFailure)
 import           System.IO                    (hPutStr, stderr)
 import           System.Process               (readCreateProcess, shell)
-import           Text.Megaparsec              (errorBundlePretty)
 import           Text.PrettyPrint.ANSI.Leijen (pretty)
-import           Text.Toml
+import           TOML
 
 data Program = Program { _path          :: Maybe FilePath
                        , _inplace       :: Bool
@@ -65,7 +63,7 @@ file = Program
         <> help "Generate default configuration file in the current directory")
 
 versionInfo :: Parser (a -> a)
-versionInfo = infoOption ("atsfmt version: " ++ showVersion version) (short 'V' <> long "version" <> help "Show version")
+versionInfo = infoOption ("atsfmt version: " ++ showVersion version ++ "\nlanguage-ats version: " ++ showVersion languageATSVersion) (short 'V' <> long "version" <> help "Show version")
 
 wrapper :: ParserInfo Program
 wrapper = info (helper <*> versionInfo <*> file)
@@ -80,34 +78,36 @@ printFail :: String -> IO a
 printFail = pure exitFailure <=< hPutStr stderr
 
 defaultConfig :: FilePath -> IO ()
-defaultConfig = flip writeFile $(embedStringFile ".atsfmt.toml")
+defaultConfig = flip writeFile $
+    "ribbon = 0.6 # maximum ribbon fraction\n"
+    ++ "width = 120 # maximum width\n"
+    ++ "clang-format = false # call clang-format on inline code"
 
-asFloat :: Node -> Maybe Float
-asFloat (VFloat d) = Just (realToFrac d)
+asFloat :: Value -> Maybe Float
+asFloat (Double d) = Just (realToFrac d)
 asFloat _          = Nothing
 
-asInt :: Node -> Maybe Int
-asInt (VInteger i) = Just (fromIntegral i)
-asInt _            = Nothing
+asInt :: Value -> Maybe Int
+asInt (Integer i) = Just (fromIntegral i)
+asInt _           = Nothing
 
-asBool :: Node -> Maybe Bool
-asBool (VBoolean True)  = Just True
-asBool (VBoolean False) = Just False
-asBool _                = Nothing
+asBool :: Value -> Maybe Bool
+asBool (Bool x) = Just x
+asBool _        = Nothing
 
 defaults :: (Float, Int, Bool)
 defaults = (0.6, 120, False)
 
-parseToml :: String -> IO (Float, Int, Bool)
-parseToml p = do
-    f <- TIO.readFile p
-    case parseTomlDoc p f of
-        Right x -> pure . fromMaybe defaults $ do
-            r <- asFloat =<< HM.lookup "ribbon" x
-            w <- asInt =<< HM.lookup "width" x
-            cf <- asBool =<< HM.lookup "clang-format" x
+parseToml :: FilePath -> IO (Float, Int, Bool)
+parseToml fp = do
+    f <- TIO.readFile fp
+    case parseTOML f of
+        Right x -> pure $ fromMaybe defaults $ do
+            r <- asFloat =<< lookup "ribbon" x
+            w <- asInt =<< lookup "width" x
+            cf <- asBool =<< lookup "clang-format" x
             pure (r, w, cf)
-        Left e  -> printFail $ errorBundlePretty e
+        Left err -> printFail $ displayException err
 
 printCustom :: Eq a => ATS a -> IO String
 printCustom ats = do

@@ -162,9 +162,7 @@ fun fprint_size : fprint_type(size_t) =
   "mac#%"
 
 overload print with print_size
-
 overload prerr with prerr_size
-
 overload fprint with fprint_size
 
 //
@@ -178,9 +176,7 @@ fun fprint_ssize : fprint_type(ssize_t) =
   "mac#%"
 
 overload print with print_ssize
-
 overload prerr with prerr_ssize
-
 overload fprint with fprint_ssize
 
 //
@@ -554,14 +550,12 @@ macdef u2ssz(x) = g1uint2int_uint_ssize(,(x))
 symintr sz2i
 
 overload sz2i with g0uint2int_size_int of 0
-
 overload sz2i with g1uint2int_size_int of 10
 
 //
 symintr sz2u
 
 overload sz2u with g0uint2uint_size_uint of 0
-
 overload sz2u with g1uint2uint_size_uint of 10
 
 //

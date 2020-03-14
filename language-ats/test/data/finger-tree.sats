@@ -1,0 +1,30 @@
+datatype list(a: t@ype+) =
+  | cons of (a, list(a))
+  | nil
+
+fun concat {a:t@ype+} (list(a), list(a)) : list(a)
+
+typedef digit(a: t@ype+) = list(a)
+
+datatype node(a: t@ype) =
+  | node2 of (a, a)
+  | node3 of (a, a, a)
+
+datatype finger_tree(a: t@ype+) =
+  | empty
+  | single of (a)
+  | deep of (digit(a), finger_tree(node(a)), digit(a))
+
+symintr <| |>
+
+infixr 5 <|
+
+infixl 5 |>
+
+fun lcons {a:t@ype+} (a, finger_tree(a)) : finger_tree(a)
+
+fun rcons {a:t@ype+} (finger_tree(a), a) : finger_tree(a)
+
+overload <| with lcons
+
+overload |> with rcons

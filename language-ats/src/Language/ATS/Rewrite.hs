@@ -7,7 +7,6 @@ module Language.ATS.Rewrite ( rewriteDecl
 
 import           Control.Composition
 import           Control.Recursion
-import           Data.Function           (on)
 import qualified Data.Map                as M
 import           Data.Maybe              (isJust)
 import           Language.ATS.Types
@@ -76,6 +75,8 @@ getFixity _ NotEq                 = infix_ 30
 getFixity _ StaticEq              = infix_ 30
 getFixity _ Mod                   = leftFix 60
 getFixity _ LessThan              = infix_ 40
+getFixity _ LShift                = leftFix 0
+getFixity _ RShift                = rightFix 0
 getFixity st (SpecialInfix _ op') =
     case M.lookup op' st of
         (Just f) -> f
@@ -87,7 +88,7 @@ compareFixity st = (== GT) .* on compare (getFixity st)
 
 rewriteStaATS :: Eq a => FixityState a -> StaticExpression a -> StaticExpression a
 rewriteStaATS st = cata a where
-    a (SCallF n is ts [StaticVoid{}]) = SCall n is ts []
+    a (SCallF n is ts [StaticVoid{}] dyn) = SCall n is ts [] dyn
     a (StaticBinaryF op (StaticBinary op' e e') e'')
         | compareFixity st op op'  = StaticBinary op e (StaticBinary op' e' e'')
     a (WhereStaExpF se (ATS ds))   = WhereStaExp se (ATS (rewriteDecl st <$> ds))

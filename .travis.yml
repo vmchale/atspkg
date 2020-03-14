@@ -1,32 +1,34 @@
 ---
-sudo: false
+sudo: true
 language: c
-cache:
-  directories:
-  - $HOME/.cabal
-  - $HOME/.ghc
-  - $HOME/.atspkg
 addons:
   apt:
     packages:
     - libgmp3-dev
     - xz-utils
     - liblzma-dev
-    - libarchive-dev
-    - bzip2
 matrix:
   include:
 
-  - env: TARGET=x86_64-unknown-linux GHC=8.6.4
+  - env: TARGET=x86_64-unknown-linux GHC=8.8.1
     addons:
       apt:
         update: true
         sources:
         - hvr-ghc
         packages:
-        - ghc-8.6.4
-        - cabal-install-2.4
-        - libarchive-dev
+        - ghc-8.8.1
+        - cabal-install-3.0
+
+  - env: TARGET=x86_64-unknown-linux GHC=8.6.5
+    addons:
+      apt:
+        update: true
+        sources:
+        - hvr-ghc
+        packages:
+        - ghc-8.6.5
+        - cabal-install-3.0
 
   - env: TARGET=x86_64-unknown-linux GHC=8.4.4
     addons:
@@ -36,33 +38,37 @@ matrix:
         - hvr-ghc
         packages:
         - ghc-8.4.4
-        - cabal-install-2.2
-        - libarchive-dev
+        - cabal-install-3.0
 
   # OS X
-  - env: TARGET=x86_64-apple-darwin GHC=8.6.4
+  - env: TARGET=x86_64-apple-darwin GHC=8.8.1
     os: osx
 
 before_install:
 - |
   if [ `uname` = "Darwin" ]
   then
-    brew install lzlib
     brew install xz
-    brew install bzip2
-    brew install libarchive
     brew install cabal-install
-    export PKG_CONFIG_PATH="/usr/local/opt/libarchive/lib/pkgconfig"
-    cabal new-update
+    brew install wget
+    cabal update
   else
     export PATH=/opt/ghc/bin:$PATH
-    cabal new-update
+    cabal update
   fi
 
 script:
-- curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s ats-format ats-pkg dependency hs2ats language-ats shake-ats
-- cabal new-update
-- travis_wait 40 cabal new-build all
+- |
+  wget https://www.libarchive.org/downloads/libarchive-3.4.2.tar.gz
+  tar xvf libarchive-3.4.2.tar.gz
+  cd libarchive-3.4.2
+  ./configure
+  make -j
+  sudo make install
+  cd ..
+- curl -sL https://raw.github.com/ndmitchell/hlint/master/misc/travis.sh | sh -s ats-format ats-pkg dependency hs2ats language-ats shake-ats shake-c shake-cabal
+- cabal update
+- travis_wait 40 cabal build all
 - |
   if [ `uname` = "Darwin" ]
   then
@@ -87,7 +93,7 @@ script:
 - cd ats-pkg/test/data/hello-world
 - ../../../../atspkg-$TARGET clean
 - ../../../../atspkg-$TARGET nuke
-- ../../../../atspkg-$TARGET run -vv
+- ../../../../atspkg-$TARGET run -vvv
 - cd -
 
 deploy:

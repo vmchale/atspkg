@@ -210,9 +210,7 @@ fun fprint_lint : fprint_type(lint) =
   "mac#%"
 
 overload print with print_lint
-
 overload prerr with prerr_lint
-
 overload fprint with fprint_lint
 
 //
@@ -226,9 +224,7 @@ fun fprint_ulint : fprint_type(ulint) =
   "mac#%"
 
 overload print with print_ulint
-
 overload prerr with prerr_ulint
-
 overload fprint with fprint_ulint
 
 //
@@ -242,9 +238,7 @@ fun fprint_llint : fprint_type(llint) =
   "mac#%"
 
 overload print with print_llint
-
 overload prerr with prerr_llint
-
 overload fprint with fprint_llint
 
 //
@@ -258,9 +252,7 @@ fun fprint_ullint : fprint_type(ullint) =
   "mac#%"
 
 overload print with print_ullint
-
 overload prerr with prerr_ullint
-
 overload fprint with fprint_ullint
 
 //

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -e
+
+cabal build exe:atsfmt -w ghc-8.8.2 --enable-profiling
+cp "$(fd -t x '^atsfmt$' -I)" ~/.local/bin/atsfmt-prof

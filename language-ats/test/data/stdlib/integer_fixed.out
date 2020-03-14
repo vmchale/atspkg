@@ -410,9 +410,7 @@ fun fprint_int8 : fprint_type(int8) =
   "mac#%"
 
 overload print with print_int8
-
 overload prerr with prerr_int8
-
 overload fprint with fprint_int8
 
 fun print_int16(int16) : void =
@@ -425,9 +423,7 @@ fun fprint_int16 : fprint_type(int16) =
   "mac#%"
 
 overload print with print_int16
-
 overload prerr with prerr_int16
-
 overload fprint with fprint_int16
 
 fun print_int32(int32) : void =
@@ -440,9 +436,7 @@ fun fprint_int32 : fprint_type(int32) =
   "mac#%"
 
 overload print with print_int32
-
 overload prerr with prerr_int32
-
 overload fprint with fprint_int32
 
 fun print_int64(int64) : void =
@@ -455,9 +449,7 @@ fun fprint_int64 : fprint_type(int64) =
   "mac#%"
 
 overload print with print_int64
-
 overload prerr with prerr_int64
-
 overload fprint with fprint_int64
 
 (* ****** ****** *)
@@ -830,9 +822,7 @@ fun fprint_uint8 : fprint_type(uint8) =
   "mac#%"
 
 overload print with print_uint8
-
 overload prerr with prerr_uint8
-
 overload fprint with fprint_uint8
 
 fun print_uint16(uint16) : void =
@@ -845,9 +835,7 @@ fun fprint_uint16 : fprint_type(uint16) =
   "mac#%"
 
 overload print with print_uint16
-
 overload prerr with prerr_uint16
-
 overload fprint with fprint_uint16
 
 fun print_uint32(uint32) : void =
@@ -860,9 +848,7 @@ fun fprint_uint32 : fprint_type(uint32) =
   "mac#%"
 
 overload print with print_uint32
-
 overload prerr with prerr_uint32
-
 overload fprint with fprint_uint32
 
 fun print_uint64(uint64) : void =
@@ -875,9 +861,7 @@ fun fprint_uint64 : fprint_type(uint64) =
   "mac#%"
 
 overload print with print_uint64
-
 overload prerr with prerr_uint64
-
 overload fprint with fprint_uint64
 
 (* ****** ****** *)

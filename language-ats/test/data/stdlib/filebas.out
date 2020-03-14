@@ -182,7 +182,6 @@ fun fileref_putc_char(out : FILEref, c : char) : void =
 symintr fileref_putc
 
 overload fileref_putc with fileref_putc_int
-
 overload fileref_putc with fileref_putc_char
 
 //
@@ -243,7 +242,6 @@ macdef fileref_get_exnloc(inp) = fileref_get_exnmsg(,(inp), $mylocation)
 // end of [fileref_get_exnloc]
 (* ****** ****** *)
 typedef charlst = List0(char)
-
 vtypedef charlst_vt = List0_vt(char)
 
 (* ****** ****** *)

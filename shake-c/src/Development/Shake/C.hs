@@ -56,7 +56,7 @@ pkgConfig pkg = do
 mkQualified :: Monoid a => Maybe a -> Maybe a -> a -> a
 mkQualified pre suff = h [f suff, g pre]
     where g = maybe id mappend
-          f = maybe id (flip mappend)
+          f = maybe id (mappend -$)
           h = thread
 
 -- | The target triple of the host machine.

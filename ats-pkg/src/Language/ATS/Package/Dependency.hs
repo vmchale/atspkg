@@ -7,10 +7,8 @@ module Language.ATS.Package.Dependency ( -- * Functions
                                        , SetupScript
                                        ) where
 
--- import           Codec.Archive                        as Archive
-import qualified Codec.Archive.Tar                    as Tar
+import qualified Archive
 import           Codec.Archive.Zip                    (ZipOption (..), extractFilesFromArchive, toArchive)
-import qualified Codec.Compression.BZip               as Bzip
 import qualified Codec.Compression.GZip               as Gzip
 import qualified Codec.Compression.Lzma               as Lzma
 import           Control.Concurrent.ParallelIO.Global
@@ -102,14 +100,13 @@ getCompressor s
     | ".tar.gz" `TL.isSuffixOf` s || ".tgz" `TL.isSuffixOf` s = pure Gzip.decompress
     | ".tar" `TL.isSuffixOf` s = pure id
     | ".tar.xz" `TL.isSuffixOf` s = pure Lzma.decompress
-    | ".tar.bz2" `TL.isSuffixOf` s = pure Bzip.decompress
     | otherwise = unrecognized (unpack s)
 
 tarResponse :: Text -> FilePath -> ByteString -> IO ()
 tarResponse url' dirName response = do
     compress <- getCompressor url'
-    -- let f = Archive.unpackToDir dirName . BSL.toStrict . compress
-    let f = Tar.unpack dirName . Tar.read . compress
+    let f = Archive.unpackToDir dirName . compress
+    -- let f = Tar.unpack dirName . Tar.read . compress
     f response
 
 zipResponse :: FilePath -> ByteString -> IO ()

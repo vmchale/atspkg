@@ -1,5 +1,68 @@
 # language-ats
 
+# 1.7.10.0
+
+  * Add support for left/right shift operators in expressions
+  * Add support for array literals
+  * Fix bug in `absvt@ype` and `abst@ype` pretty-printing
+
+# 1.7.9.0
+
+  * Support float literals as something other than double literals
+
+# 1.7.8.0
+
+  * Add support for unsigned hexadecimal literals
+
+## 1.7.7.2
+
+  * Fix error when parsing `absvt@ype` declarations
+
+## 1.7.7.1
+
+  * Use `these-skinny`
+
+## 1.7.7.0
+
+  * Improved parse errors
+  * Add `getDependenciesC`
+
+## 1.7.6.2
+
+  * Fix bug in handling of char literals
+
+## 1.7.6.1
+
+  * Bugfix in pretty-printer/lexer
+
+## 1.7.6.0
+
+  * Use `Natural`/`Integer` for literals
+
+## 1.7.5.0
+
+  * Fix `StaticExpression` to allow calls with dynamic components
+
+## 1.7.4.1
+
+  * Improve pretty-printer
+
+## 1.7.4.0
+
+  * Add `languageATSVersion`
+
+## 1.7.3.1
+
+  * Fix bug in parse order for `symintr` declarations
+
+## 1.7.3.0
+
+  * Update `PrVal` to include a field for universal quantifiers
+
+## 1.7.2.0
+
+  * Update `termetric` field type to allow empty termetrics
+
 ## 1.7.1.2
 
   * Add `cross` flag to cabal file

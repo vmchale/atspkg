@@ -15,9 +15,11 @@ import Control.DeepSeq (NFData)
 import qualified Data.Map as M
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
+import Data.Bifunctor (second)
 import Data.Char (toLower)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Foldable (toList)
+import Data.These (These (..))
 import GHC.Generics (Generic)
 import Language.ATS.Types
 import Language.ATS.Types.Lens
@@ -149,7 +151,9 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     uintLit { UintTok _ $$ }
     intLit { IntTok _ $$ }
     hexLit { HexIntTok _ $$ }
+    hexULit { HexUintTok _ $$ }
     floatLit { FloatTok _ $$ }
+    doubleLit { DoubleTok _ $$ }
     specialIdentifier { $$@SpecialIdentifier{} }
     foldAt { Identifier $$ "fold@" }
     identifier { $$@Identifier{} }
@@ -167,6 +171,7 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     neq { Operator $$ "!=" }
     openTermetric { Operator $$ ".<" }
     closeTermetric { Operator $$ ">." }
+    emptyTermetric { Operator $$ ".<>." }
     mutateArrow { FuncType $$ "->" }
     mutateEq { Operator $$ ":=" }
     lbracket { Special $$ "<" }
@@ -211,6 +216,7 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     doubleBraces { DoubleBracesTok $$ }
     doubleBrackets { DoubleBracketTok $$ }
     prfTransform { Operator $$ ">>" } -- For types like &a >> a?!
+    leftShift { Operator $$ "<<" }
     refType { Special $$ "&" } -- For types like &a
     maybeProof { Operator $$ "?" } -- For types like a?
     fromVT { Operator $$ "?!" } -- For types like a?!
@@ -330,21 +336,23 @@ Args :: { [Arg AlexPosn] }
      | { [] }
 
 TypeArg :: { Arg AlexPosn }
-        : IdentifierOr { Arg (First $1) }
-        | IdentifierOr colon Type { Arg (Both $1 $3) }
-        | Type { Arg (Second $1) }
+        : IdentifierOr { Arg (This $1) }
+        | IdentifierOr colon Type { Arg (These $1 $3) }
+        | Type { Arg (That $1) }
         | exclamation IdentifierOr colon {% left $ OneOf $3 [",", ")"] ":" }
 
 Arg :: { Arg AlexPosn }
     : TypeArg { $1 }
-    | StaticExpression { Arg (Second (ConcreteType $1)) } -- TODO: have some sort of state showing bound variables that we can use to disambiguate types vs. static expressions?
+    | StaticExpression { Arg (That (ConcreteType $1)) } -- TODO: have some sort of state showing bound variables that we can use to disambiguate types vs. static expressions?
 
 -- | Parse a literal
 Literal :: { Expression AlexPosn }
         : uintLit { UintLit $1 }
         | intLit { IntLit $1 }
         | hexLit { HexLit $1 }
+        | hexULit { HexUintLit $1 }
         | floatLit { FloatLit $1 }
+        | doubleLit { DoubleLit $1 }
         | string { StringLit $1 }
         | charLit { CharLit $1 }
         | doubleParens { VoidLiteral $1 }
@@ -413,6 +421,7 @@ CaseArrow :: { LambdaType AlexPosn }
           | minus {% left $ Expected $1 "Arrow" "-" }
           | eq {% left $ Expected $1 "Arrow" "=" }
           | minus {% left $ Expected $1 "Arrow" "-" }
+          | customOperator {% left $ Expected (token_posn $1) "Arrow" ((\(Operator _ s) -> s) $1) }
           | CaseArrow vbar {% left $ Expected $2 "Expression" "|" }
 
 LambdaArrow :: { LambdaType AlexPosn }
@@ -463,8 +472,9 @@ Call :: { Expression AlexPosn }
      | Name openParen ExpressionPrf end {% left $ Expected $4 ")" "end"}
      | Name openParen ExpressionPrf else {% left $ Expected $4 ")" "else"}
 
-StaticArgs :: { [StaticExpression AlexPosn] }
-           : comma_sep(StaticExpression) { reverse (toList $1) }
+StaticArgs :: { ([StaticExpression AlexPosn], Maybe [Expression AlexPosn]) }
+           : comma_sep(StaticExpression) { (reverse (toList $1), Nothing) }
+           | comma_sep(StaticExpression) vbar comma_sep(Expression) { (reverse (toList $1), Just $ reverse (toList $3)) }
 
 StaticDecls :: { [Declaration AlexPosn] }
             : StaticDeclaration { [$1] }
@@ -481,15 +491,15 @@ StaticExpression :: { StaticExpression AlexPosn }
                  | doubleParens { StaticVoid $1 } -- TODO: static tuple?
                  | sif StaticExpression then StaticExpression else StaticExpression { Sif $2 $4 $6 }
                  | identifierSpace { StaticVal (Unqualified $ to_string $1) }
-                 | identifierSpace StaticExpression { SCall (Unqualified $ to_string $1) [] [] [$2] }
-                 | Name parens(StaticArgs) { SCall $1 [] [] $2 }
-                 | Name Implicits parens(StaticArgs) { SCall $1 $2 [] $3 }
-                 | Name TypeArgs parens(StaticArgs) { SCall $1 [] $2 $3 }
-                 | Name TypeArgs doubleParens { SCall $1 [] $2 [] }
-                 | Name doubleParens { SCall $1 [] [] [] }
-                 | identifierSpace TypeArgs parens(StaticArgs) { SCall (Unqualified $ to_string $1) [] $2 $3 }
-                 | identifierSpace parens(StaticArgs) { SCall (Unqualified $ to_string $1) [] [] $2 }
-                 | identifierSpace doubleParens { SCall (Unqualified $ to_string $1) [] [] [] } -- TODO: this causes an ambiguity because we might have SCall void instead!
+                 | identifierSpace StaticExpression { SCall (Unqualified $ to_string $1) [] [] [$2] Nothing }
+                 | Name parens(StaticArgs) { SCall $1 [] [] (fst $2) (snd $2) }
+                 | Name Implicits parens(StaticArgs) { SCall $1 $2 [] (fst $3) (snd $3) }
+                 | Name TypeArgs parens(StaticArgs) { SCall $1 [] $2 (fst $3) (snd $3) }
+                 | Name TypeArgs doubleParens { SCall $1 [] $2 [] Nothing }
+                 | Name doubleParens { SCall $1 [] [] [] Nothing }
+                 | identifierSpace TypeArgs parens(StaticArgs) { SCall (Unqualified $ to_string $1) [] $2 (fst $3) (snd $3) }
+                 | identifierSpace parens(StaticArgs) { SCall (Unqualified $ to_string $1) [] [] (fst $2) (snd $2) }
+                 | identifierSpace doubleParens { SCall (Unqualified $ to_string $1) [] [] [] Nothing } -- TODO: this causes an ambiguity because we might have SCall void instead!
                  | StaticExpression semicolon StaticExpression { SPrecede $1 $3 }
                  | UnOp StaticExpression { SUnary $1 $2 }
                  | let StaticDecls comment_after(in) end { SLet $1 (reverse $2) Nothing }
@@ -536,19 +546,21 @@ PreExpression :: { Expression AlexPosn }
               | braces(ATS) { Actions $1 }
               | while parens(PreExpression) PreExpression { While $1 $2 $3 }
               | for parens(PreExpression) PreExpression { For $1 $2 $3 }
-              | whileStar Universals Termetric parens(Args) plainArrow Expression Expression { WhileStar $1 $2 (snd $3) $4 $6 $7 Nothing }
-              | whileStar Universals Termetric parens(Args) colon openParen Args closeParen plainArrow Expression Expression { WhileStar $1 $2 (snd $3) $4 $10 $11 (Just $7) }
-              | forStar Universals Termetric parens(Args) plainArrow Expression Expression { ForStar $1 $2 (snd $3) $4 $6 $7 }
+              | whileStar Universals PreTermetric parens(Args) plainArrow Expression Expression { WhileStar $1 $2 (snd $3) $4 $6 $7 Nothing }
+              | whileStar Universals PreTermetric parens(Args) colon openParen Args closeParen plainArrow Expression Expression { WhileStar $1 $2 (snd $3) $4 $10 $11 (Just $7) }
+              | forStar Universals PreTermetric parens(Args) plainArrow Expression Expression { ForStar $1 $2 (snd $3) $4 $6 $7 }
               | lineComment PreExpression { CommentExpr (to_string $1) $2 }
               | comma parens(identifier) { MacroVar $1 (to_string $2) }
               | PreExpression where braces(ATS) { WhereExp $1 $3 }
+              | at sqbrackets(Type) sqbrackets(StaticExpression) parens(comma_sep(PreExpression)) { ArrayLit $1 $2 (Just $3) (toList $4) }
+              | at sqbrackets(Type) parens(comma_sep(PreExpression)) { ArrayLit $1 $2 Nothing (toList $3) }
+              | at sqbrackets(Type) sqbrackets(StaticExpression) doubleParens { ArrayLit $1 $2 (Just $3) [] }
               | include {% left $ Expected $1 "Expression" "include" }
               | staload {% left $ Expected (token_posn $1) "Expression" "staload" }
               | overload {% left $ Expected $1 "Expression" "overload" }
               | var {% left $ Expected $1 "Expression" "var" }
               | Termetric {% left $ Expected (fst $1) "Expression" "termetric" }
               | fromVT {% left $ Expected $1 "Expression" "?!" }
-              | prfTransform {% left $ Expected $1 "Expression" ">>" }
               | maybeProof {% left $ Expected $1 "Expression" "?" }
               | let openParen {% left $ Expected $1 "Expression" "let (" }
               | let ATS in Expression lineComment {% left $ Expected (token_posn $5) "end" (take 2 $ to_string $5) }
@@ -563,10 +575,14 @@ PreExpression :: { Expression AlexPosn }
               | begin Expression implement {% left $ Expected $3 "end" "implement" }
 
 -- | Parse a termetric
-Termetric :: { (AlexPosn, StaticExpression AlexPosn) }
-          : openTermetric StaticExpression closeTermetric { ($1, $2) }
-          | underscore {% left $ Expected $1 "_" "Termination metric" }
-          | dollar {% left $ Expected $1 "$" "Termination metric" }
+PreTermetric :: { (AlexPosn, (StaticExpression AlexPosn)) }
+             : openTermetric StaticExpression closeTermetric { ($1, $2) }
+             | underscore {% left $ Expected $1 "_" "Termination metric" }
+             | dollar {% left $ Expected $1 "$" "Termination metric" }
+
+Termetric :: { (AlexPosn, Maybe (StaticExpression AlexPosn)) }
+          : PreTermetric { second Just $1 }
+          | emptyTermetric { ($1, Nothing) }
 
 Sort :: { Sort AlexPosn }
      : t0pPlain { T0p None }
@@ -699,7 +715,7 @@ Universals :: { [Universal AlexPosn] }
            : PreUniversals { reverse $1 }
 
 -- | Optionally parse a termetric
-OptTermetric :: { Maybe (StaticExpression AlexPosn) }
+OptTermetric :: { Maybe (Maybe (StaticExpression AlexPosn)) }
              : { Nothing }
              | Termetric { Just (snd $1) }
 
@@ -730,6 +746,8 @@ BinOp :: { BinOp AlexPosn }
       | mutateEq { Mutate }
       | at { At }
       | mutateArrow { SpearOp }
+      | prfTransform { RShift }
+      | leftShift { LShift }
       | customOperator { SpecialInfix (token_posn $1) (to_string $1) }
       | backslash identifierSpace { SpecialInfix $1 ('\\' : to_string $2) }
 
@@ -904,7 +922,7 @@ TypeDecl : typedef IdentifierOr SortArgs eq Type MaybeAnnot { TypeDef $1 $2 $3 $
          | extern vtypedef string SortArgs eq Type { Extern $1 $ ViewTypeDef $2 $3 $4 $6 }
          | abst0p IdentifierOr SortArgs MaybeType { AbsT0p $1 $2 $3 $4 }
          | viewdef IdentifierOr SortArgs eq Type { ViewDef $1 $2 $3 $5 }
-         | absvt0p IdentifierOr SortArgs eq Type { AbsVT0p $1 $2 $3 (Just $5) }
+         | absvt0p IdentifierOr SortArgs MaybeType { AbsVT0p $1 $2 $3 $4 }
          | absview IdentifierOr SortArgs MaybeType { AbsView $1 $2 $3 $4 }
          | abstype IdentifierOr SortArgs MaybeType { AbsType $1 $2 $3 $4 }
          | absvtype IdentifierOr SortArgs MaybeType { AbsViewType $1 $2 $3 $4 }
@@ -924,7 +942,7 @@ TypeDecl : typedef IdentifierOr SortArgs eq Type MaybeAnnot { TypeDef $1 $2 $3 $
          | dataprop IdentifierOr SortArgs vbar {% left $ Expected $4 "=" "|" }
 
 EitherInt :: { Fix }
-          : intLit { Left $1 }
+          : intLit { Left (fromIntegral $1) }
           | parens(Operator) { Right $1 }
 
 Fixity :: { Fixity AlexPosn }
@@ -975,9 +993,9 @@ ValDecl :: { [Declaration AlexPosn] }
         | val Pattern eq colon {% left $ Expected $4 "Expression" ":" }
 
 StaticDeclaration :: { Declaration AlexPosn }
-                  : prval Pattern eq StaticExpression { PrVal $2 (Just $4) Nothing } -- FIXME: prval should use static expressions as well.
-                  | prval Pattern colon Type { PrVal $2 Nothing (Just $4) }
-                  | prval Pattern colon Type eq StaticExpression { PrVal $2 (Just $6) (Just $4) }
+                  : prval Universals Pattern eq StaticExpression { PrVal $2 $3 (Just $5) Nothing } -- FIXME: prval should use static expressions as well.
+                  | prval Universals Pattern colon Type { PrVal $2 $3 Nothing (Just $5) }
+                  | prval Universals Pattern colon Type eq StaticExpression { PrVal $2 $3 (Just $7) (Just $5) }
                   | prvar Pattern eq StaticExpression { PrVar $2 (Just $4) Nothing }
                   | prvar Pattern colon Type { PrVar $2 Nothing (Just $4) }
                   | prvar Pattern colon Type eq StaticExpression { PrVar $2 (Just $6) (Just $4) }
@@ -1051,13 +1069,13 @@ Declaration : include string { Include $2 }
             | overload doubleSqBrackets with IdentifierOr { OverloadIdent $1 "[]" (Unqualified $4) Nothing }
             | overload BinOp with Name { OverloadOp $1 $2 $4 Nothing }
             | overload BinOp with customOperator { OverloadOp $1 $2 (Unqualified $ to_string $4) Nothing }
-            | overload BinOp with identifierSpace of intLit { OverloadOp $1 $2 (Unqualified $ to_string $4) (Just $6) }
+            | overload BinOp with identifierSpace of intLit { OverloadOp $1 $2 (Unqualified $ to_string $4) (Just $ fromIntegral $6) }
             | overload identifierSpace with Name { OverloadIdent $1 (to_string $2) $4 Nothing }
             | overload identifierSpace with identifierSpace { OverloadIdent $1 (to_string $2) (Unqualified $ to_string $4) Nothing }
-            | overload identifierSpace with identifierSpace of intLit { OverloadIdent $1 (to_string $2) (Unqualified $ to_string $4) (Just $6) }
+            | overload identifierSpace with identifierSpace of intLit { OverloadIdent $1 (to_string $2) (Unqualified $ to_string $4) (Just $ fromIntegral $6) }
             | overload tilde with identifier { OverloadIdent $1 "~" (Unqualified $ to_string $4) Nothing } -- FIXME figure out a general solution.
-            | overload tilde with identifierSpace of intLit { OverloadIdent $1 "~" (Unqualified $ to_string $4) (Just $6) }
-            | overload doubleSqBrackets with identifierSpace of intLit { OverloadIdent $1 "[]" (Unqualified $ to_string $4) (Just $6) }
+            | overload tilde with identifierSpace of intLit { OverloadIdent $1 "~" (Unqualified $ to_string $4) (Just $ fromIntegral $6) }
+            | overload doubleSqBrackets with identifierSpace of intLit { OverloadIdent $1 "[]" (Unqualified $ to_string $4) (Just $ fromIntegral $6) }
             | overload dot identifierSpace with Name { OverloadIdent $1 ('.' : (to_string $3)) $5 Nothing }
             | assume identifierSpace SortArgs eq Type { Assume (Unqualified (to_string $2)) $3 $5 }
             | assume Name SortArgs eq Type { Assume $2 $3 $5 }
@@ -1065,7 +1083,7 @@ Declaration : include string { Include $2 }
             | absimpl Name SortArgs eq Type { AbsImpl $1 $2 $3 $5 }
             | tkindef IdentifierOr eq string { TKind $1 (Unqualified $2) $4 }
             | TypeDecl { $1 }
-            | symintr Names { SymIntr $1 $2 }
+            | symintr Names { SymIntr $1 (reverse $2) }
             | stacst IdentifierOr colon Type OptStaticExpression { Stacst $1 (Unqualified $2) $4 $5 }
             | propdef IdentifierOr openParen Args closeParen eq Type { PropDef $1 $2 (Just $4) $7 }
             | exception identifierSpace of doubleParens { Exception (to_string $2) (Tuple $4 mempty) }
@@ -1124,7 +1142,7 @@ left :: ATSError -> ParseSt b
 left = lift . Left
 
 parseError :: [Token] -> ParseSt a
-parseError [] = left Exhausted
-parseError x = left . Unknown . head $ x
+parseError []    = left Exhausted
+parseError (x:_) = left $ Unknown x
 
 }

@@ -188,9 +188,7 @@ fun fprint_intptr : fprint_type(intptr) =
   "mac#%"
 
 overload print with print_intptr
-
 overload prerr with prerr_intptr
-
 overload fprint with fprint_intptr
 
 //
@@ -287,9 +285,7 @@ fun fprint_uintptr : fprint_type(uintptr) =
   "mac#%"
 
 overload print with print_uintptr
-
 overload prerr with prerr_uintptr
-
 overload fprint with fprint_uintptr
 
 //

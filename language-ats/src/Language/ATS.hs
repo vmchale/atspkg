@@ -14,6 +14,7 @@ module Language.ATS ( -- * Functions for working with syntax
                     , defaultFixityState
                     -- * Library functions
                     , getDependencies
+                    , getDependenciesC
                     -- * Syntax Tree
                     , ATS (..)
                     , Declaration (..)
@@ -36,7 +37,6 @@ module Language.ATS ( -- * Functions for working with syntax
                     , PreFunction (..)
                     , StaticExpression (..)
                     , StackFunction (..)
-                    , Paired (..)
                     , Fixity (..)
                     , SortArg (..)
                     , Sort (..)
@@ -59,11 +59,15 @@ module Language.ATS ( -- * Functions for working with syntax
                     , constructorUniversals
                     , typeCall
                     , typeCallArgs
+                    -- * Misecellany
+                    , languageATSVersion
                     ) where
 
+import           Control.Composition          ((-$))
 import           Control.Monad
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.State
+import           Data.Version                 (Version)
 import           GHC.IO.Handle.FD             (stderr)
 import           Language.ATS.Lexer
 import           Language.ATS.Parser
@@ -72,7 +76,12 @@ import           Language.ATS.Rewrite
 import           Language.ATS.Types
 import           Language.ATS.Types.Lens
 import           Lens.Micro
+import           Paths_language_ats           (version)
 import           Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
+
+-- | @since 1.7.4.0
+languageATSVersion :: Version
+languageATSVersion = version
 
 rewriteATS' :: Eq a => (ATS a, FixityState a) -> ATS a
 rewriteATS' (ATS ds, st) = ATS (rewriteDecl st <$> ds)
@@ -108,7 +117,7 @@ stripComments = filter nc
 -- | Parse with some fixity declarations already in scope.
 parseWithCtx :: FixityState AlexPosn -> ([Token] -> [Token]) -> String -> Either ATSError (ATS AlexPosn)
 parseWithCtx st p = stateParse <=< lex'
-    where withSt = flip runStateT st
+    where withSt = runStateT -$ st
           lex' = lexErr . fmap p . lexATS
           stateParse = fmap rewriteATS' . withSt . parseATS
 
@@ -117,5 +126,21 @@ getDependencies :: ATS a -> [FilePath]
 getDependencies (ATS ds) = g =<< ds
     where g (Load _ _ _ s)   = [s]
           g (Include s)      = [s]
-          g (Local _ as as') = foldMap getDependencies [as, as']
+          g (Local _ as as') = getDependencies =<< [as, as']
           g _                = mempty
+
+-- | Extract a list of @#include#-ed filepaths, plus all external C blocks.
+--
+-- @since 1.7.7.0
+getDependenciesC :: ATS a -> ([FilePath], [String])
+getDependenciesC (ATS ds) = go (d <$> ds)
+    where
+        d (Load _ _ _ s)   = ([s], [])
+        d (Include s)      = ([s], [])
+        d (Local _ as as') = appendBoth (getDependenciesC as) (getDependenciesC as')
+        d (CBlock str)     = ([],[str])
+        d _                = ([],[])
+        appendBoth :: ([a], [b]) -> ([a], [b]) -> ([a], [b])
+        appendBoth (x, y) (x', y') = (x ++ x', y ++ y')
+        go :: [([a], [b])] -> ([a], [b])
+        go xs = (concat (fst <$> xs), concat (snd <$> xs))

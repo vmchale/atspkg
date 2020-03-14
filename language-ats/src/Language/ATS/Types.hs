@@ -34,7 +34,6 @@ module Language.ATS.Types
     , Addendum (..)
     , DataPropLeaf (..)
     , PreFunction (..)
-    , Paired (..)
     , Leaf (..)
     , StaticExpression (..)
     , StaticExpressionF (..)
@@ -55,8 +54,9 @@ import           Control.Recursion  hiding (Fix (..))
 import           Data.Function      (on)
 import           Data.List.NonEmpty (NonEmpty)
 import qualified Data.Map           as M
-import           Data.Semigroup     (Semigroup)
+import           Data.These         (These)
 import           GHC.Generics       (Generic)
+import           GHC.Natural        (Natural)
 import           Language.ATS.Lexer (Addendum (..))
 
 type Fix = Either Int String
@@ -85,7 +85,7 @@ data Declaration a = Func { pos :: a, _fun :: Function a }
                    | ProofImpl { implArgs :: Args a, _impl :: Implementation a }
                    | Val { add :: Addendum, valT :: Maybe (Type a), valPat :: Maybe (Pattern a), _valExpression :: Maybe (Expression a) }
                    | StaVal [Universal a] String (Type a)
-                   | PrVal { prvalPat :: Pattern a, _prValExpr :: Maybe (StaticExpression a), prValType :: Maybe (Type a) }
+                   | PrVal { valUniversals :: [Universal a], prvalPat :: Pattern a, _prValExpr :: Maybe (StaticExpression a), prValType :: Maybe (Type a) }
                    | PrVar { prvarPat :: Pattern a, _prVarExpr :: Maybe (StaticExpression a), prVarType :: Maybe (Type a) }
                    | Var { varT :: Maybe (Type a), varPat :: Pattern a, _varExpr1 :: Maybe (Expression a), _varExpr2 :: Maybe (Expression a) }
                    | AndDecl { andT :: Maybe (Type a), andPat :: Pattern a, _andExpr :: Expression a }
@@ -232,17 +232,12 @@ data PatternF a x = PNameF (Name a) [x]
 
 type instance Base (Pattern a) = PatternF a
 
-data Paired a b = Both a b
-                | First a
-                | Second b
-                deriving (Show, Eq, Generic, NFData)
-
 data SortArg a = SortArg String (Sort a)
                | Anonymous (Sort a)
     deriving (Show, Eq, Generic, NFData)
 
 -- | An argument to a function.
-data Arg a = Arg (Paired String (Type a))
+data Arg a = Arg (These String (Type a))
            | PrfArg [Arg a] (Arg a)
            deriving (Show, Eq, Generic, NFData)
 
@@ -301,6 +296,8 @@ data BinOp a = Add
              | Mutate -- ^ @:=@
              | At
              | SpearOp -- ^ @->@
+             | LShift
+             | RShift
              | SpecialInfix a String
              deriving (Show, Eq, Generic, NFData)
 
@@ -309,13 +306,13 @@ pattern Con l = SpecialInfix l "::"
 
 data StaticExpression a = StaticVal (Name a)
                         | StaticBinary (BinOp a) (StaticExpression a) (StaticExpression a)
-                        | StaticInt Int
+                        | StaticInt Integer
                         | StaticHex String
                         | SPrecede (StaticExpression a) (StaticExpression a)
                         | SPrecedeList { _sExprs :: [StaticExpression a] }
                         | StaticVoid a
                         | Sif { scond :: StaticExpression a, whenTrue :: StaticExpression a, selseExpr :: StaticExpression a } -- Static if (for proofs)
-                        | SCall (Name a) [[Type a]] [[Type a]] [StaticExpression a]
+                        | SCall (Name a) [[Type a]] [[Type a]] [StaticExpression a] (Maybe [Expression a])
                         | SUnary (UnOp a) (StaticExpression a)
                         | SLet a [Declaration a] (Maybe (StaticExpression a))
                         | SCase Addendum (StaticExpression a) [(Pattern a, LambdaType a, StaticExpression a)]
@@ -329,13 +326,13 @@ data StaticExpression a = StaticVal (Name a)
 
 data StaticExpressionF a x = StaticValF (Name a)
                            | StaticBinaryF (BinOp a) x x
-                           | StaticIntF Int
+                           | StaticIntF Integer
                            | StaticHexF String
                            | SPrecedeF x x
                            | SPrecedeListF [x]
                            | StaticVoidF a
                            | SifF x x x
-                           | SCallF (Name a) [[Type a]] [[Type a]] [x]
+                           | SCallF (Name a) [[Type a]] [[Type a]] [x] (Maybe [Expression a])
                            | SUnaryF (UnOp a) x
                            | SLetF a [Declaration a] (Maybe x)
                            | SCaseF Addendum x [(Pattern a, LambdaType a, x)]
@@ -364,10 +361,12 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                        , whenTrue :: Expression a -- ^ Expression to be returned when true
                        , elseExpr :: Maybe (Expression a) -- ^ Expression to be returned when false
                        }
-                  | UintLit Word -- ^ E.g. @1000u@
+                  | UintLit Natural -- ^ E.g. @1000u@
                   | FloatLit Float
-                  | IntLit Int
+                  | DoubleLit Double
+                  | IntLit Integer
                   | HexLit String
+                  | HexUintLit String
                   | UnderscoreLit a
                   | Lambda a (LambdaType a) (Pattern a) (Expression a) -- TODO: Fix
                   | LinearLambda a (LambdaType a) (Pattern a) (Expression a)
@@ -409,6 +408,7 @@ data Expression a = Let a (ATS a) (Maybe (Expression a))
                   | ParenExpr a (Expression a)
                   | CommentExpr String (Expression a)
                   | MacroVar a String
+                  | ArrayLit a (Type a) (Maybe (StaticExpression a)) [Expression a]
                   deriving (Show, Eq, Generic, NFData, Recursive, Corecursive)
 
 data ExpressionF a x = LetF a (ATS a) (Maybe x)
@@ -417,10 +417,12 @@ data ExpressionF a x = LetF a (ATS a) (Maybe x)
                      | NamedValF (Name a)
                      | ListLiteralF a String (Type a) [x]
                      | IfF x x (Maybe x)
-                     | UintLitF Word
+                     | UintLitF Natural
                      | FloatLitF Float
-                     | IntLitF Int
+                     | DoubleLitF Double
+                     | IntLitF Integer
                      | HexLitF String
+                     | HexUintLitF String
                      | UnderscoreLitF a
                      | LambdaF a (LambdaType a) (Pattern a) x
                      | LinearLambdaF a (LambdaType a) (Pattern a) x
@@ -456,6 +458,7 @@ data ExpressionF a x = LetF a (ATS a) (Maybe x)
                      | ParenExprF a x
                      | CommentExprF String x
                      | MacroVarF a String
+                     | ArrayLitF a (Type a) (Maybe (StaticExpression a)) [x]
                      deriving (Generic, Functor)
 
 type instance Base (Expression a) = (ExpressionF a)
@@ -499,7 +502,7 @@ data PreFunction ek a = PreF { fname         :: Name a -- ^ Function name
                              , universals    :: [Universal a] -- ^ (Universal a) quantifiers/refinement type
                              , args          :: Args a -- ^ Actual function arguments
                              , returnType    :: Maybe (Type a) -- ^ Return type
-                             , termetric     :: Maybe (StaticExpression a) -- ^ Optional termination metric
+                             , termetric     :: Maybe (Maybe (StaticExpression a)) -- ^ Optional termination metric, which may be empty
                              , _expression   :: Maybe (ek a) -- ^ Expression holding the actual function body (not present in static templates)
                              }
                              deriving (Show, Eq, Generic, NFData)

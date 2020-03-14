@@ -23,6 +23,7 @@ import Data.Char (chr)
 import Data.Bool (bool)
 import Control.DeepSeq (NFData)
 import GHC.Generics (Generic)
+import GHC.Natural (Natural)
 import Text.PrettyPrint.ANSI.Leijen hiding (line, bool, column, (<$>))
 
 }
@@ -39,7 +40,7 @@ $special = [\+\-\*\&\|\[\]\{\}\(\)\_\=\!\%\^\$\@\;\~\,\.\\\#\<\>\:\?]
 $alpha = [a-zA-Z]
 $terminal = $printable # $white
 $esc_char = \27
-@escape_ch = \\ ([nrt\'\\] | $octal+)
+@escape_ch = \\ ([nrt\'\\\{] | $octal+)
 @escape_str = \\ ([nrt\"\\] | $octal+)
 @char = ($terminal # [\\\']) | " " | @escape_ch | $esc_char
 @char_lit = \' @char \'
@@ -52,7 +53,8 @@ $br = [\<\>]
 
 -- Floats
 @decimals = $digit+
-@float = @decimals \. @decimals ("f" | "")
+@float = @decimals \. @decimals "f"
+@double = @decimals \. @decimals
 
 -- Strings
 @string = \" ($printable # [\"\\] | @escape_str | $esc_char | \\ \n | \n)* \"
@@ -279,7 +281,9 @@ tokens :-
     <0> @unsigned_lit            { tok (\p s -> alex $ UintTok p (read $ init s)) }
     <0> @integer                 { tok (\p s -> alex $ IntTok p (read s)) } -- FIXME shouldn't fail silenty on overflow
     <0> "0x" $hex+               { tok (\p s -> alex $ HexIntTok p (drop 2 s)) }
-    <0> @float                   { tok (\p s -> alex $ FloatTok p (read s)) }
+    <0> "0x" $hex+ u             { tok (\p s -> alex $ HexUintTok p (drop 2 (init s))) }
+    <0> @float                   { tok (\p s -> alex $ FloatTok p (read (init s))) }
+    <0> @double                  { tok (\p s -> alex $ DoubleTok p (read s)) }
     <0> @char_lit                { tok (\p s -> alex $ CharTok p (toChar s)) }
     <0> @string                  { tok (\p s -> alex $ StringTok p s) }
 
@@ -428,9 +432,11 @@ data Keyword = KwFun
 data Token = Identifier AlexPosn String
            | SpecialIdentifier AlexPosn String
            | Keyword AlexPosn Keyword
-           | IntTok AlexPosn Int
+           | IntTok AlexPosn Integer
            | HexIntTok AlexPosn String
+           | HexUintTok AlexPosn String
            | FloatTok AlexPosn Float
+           | DoubleTok AlexPosn Double
            | CharTok AlexPosn Char
            | StringTok AlexPosn String
            | Special AlexPosn String
@@ -444,7 +450,7 @@ data Token = Identifier AlexPosn String
            | CommentEnd AlexPosn
            | CommentContents AlexPosn String
            | MacroBlock AlexPosn String
-           | UintTok AlexPosn Word
+           | UintTok AlexPosn Natural
            | SignatureTok AlexPosn String
            | DoubleParenTok AlexPosn
            | DoubleBracesTok AlexPosn
@@ -560,7 +566,9 @@ instance Pretty Token where
     pretty (Keyword _ kw) = pretty kw
     pretty (IntTok _ i) = pretty i
     pretty (HexIntTok _ hi) = "0x" <> text hi
+    pretty (HexUintTok _ hi) = "0x" <> text hi <> "u"
     pretty (FloatTok _ x) = pretty x
+    pretty (DoubleTok _ x) = pretty x
     pretty (CharTok _ c) = squotes (pretty c)
     pretty (StringTok _ s) = text s
     pretty (Special _ s) = text s
@@ -571,7 +579,7 @@ instance Pretty Token where
     pretty CommentEnd{} = "*)"
     pretty (CommentContents _ s) = text s
     pretty (FuncType _ s) = text s
-    pretty (UintTok _ u) = pretty u
+    pretty (UintTok _ u) = pretty (fromIntegral u :: Integer)
     pretty (SignatureTok _ s) = ":" <> text s
     pretty (Operator _ s) = text s
     pretty (MacroBlock _ s) = "#"
@@ -596,6 +604,7 @@ token_posn (IdentifierSpace p _) = p
 token_posn (Keyword p _) = p
 token_posn (IntTok p _) = p
 token_posn (FloatTok p _) = p
+token_posn (DoubleTok p _) = p
 token_posn (StringTok p _) = p
 token_posn (Special p _) = p
 token_posn (CBlockLex p _) = p
@@ -616,14 +625,17 @@ token_posn (CommentContents p _) = p
 token_posn (CommentBegin p) = p
 token_posn (CommentEnd p) = p
 token_posn (HexIntTok p _) = p
+token_posn (HexUintTok p _) = p
 token_posn End = undefined
 
 toChar :: String -> Char
-toChar "'\\n'" = '\n'
-toChar "'\\t'" = '\t'
+toChar "'\\n'"  = '\n'
+toChar "'\\t'"  = '\t'
 toChar "'\\\\'" = '\\'
-toChar "'\\0'" = '\0'
-toChar x = x !! 1
+toChar "'\\0'"  = '\0'
+toChar "'\\''"  = '\''
+toChar "'\\{'"  = '{'
+toChar x        = x !! 1
 
 alexEOF :: Alex Token
 alexEOF = pure End

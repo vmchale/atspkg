@@ -25,6 +25,8 @@ atspkg - a build tool for ATS
 
 **test** - Run all tests listed in atspkg.dhall
 
+**bench** - Rull all benchmarks listed in atspkg.dhall
+
 **clean** - Clean current project directory
 
 **nuke** - Remove all local files installed by **atspkg**
@@ -47,9 +49,6 @@ to $HOME/.local/share/man/man1
 
 **list** - List all available packages in current package set.
 
-**pack** - Create a tarball suitable for packaging the compiler. Takes as an
-argument a directory containing the unpacked compiler.
-
 **setup** - Set up manpages and shell completions.
 
 # OPTIONS
@@ -63,9 +62,6 @@ argument a directory containing the unpacked compiler.
 **-\-pkg-args**
 :   Arguments to be passed to atspkg.dhall
 
-**-c** **-\-no-cache**
-:   Ignore cached configuration file
-
 **-r**, **-\-rebuild**
 :   Rebuild all binary targets.
 
@@ -78,8 +74,8 @@ argument a directory containing the unpacked compiler.
 **-v**, **-\-verbose**
 :   Turn up the verbosity
 
-**-d**, **-\-detailed**
-:   Enable detailed error messages when checking configuration files
+**-\-debug**
+:   Disable binary stripping and pass -g to the C compiler
 
 # CONFIGURATION
 
@@ -111,9 +107,8 @@ pi git vmchale/ats-haskell weird-project
 # BUGS
 
 Please report any bugs you may come across to
-https://github.com/vmchale/atspkg/issues (for issues in atspkg proper) or
-https://hub.darcs.net/vmchale/ats/issues (for issues in supporting libraries).
+https://github.com/vmchale/atspkg/issues.
 
 # COPYRIGHT
 
-Copyright 2018-2019. Vanessa McHale. All Rights Reserved.
+Copyright 2018-2020. Vanessa McHale. All Rights Reserved.

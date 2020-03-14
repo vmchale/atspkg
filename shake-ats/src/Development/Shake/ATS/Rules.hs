@@ -102,4 +102,4 @@ cleanATS :: Action ()
 cleanATS =
     zipWithM_ removeFilesAfter
         [".", ".atspkg", "ats-deps"]
-        [["//*.c", "//*_lats.dats", "//tags"], ["//*"], ["//*"]]
+        [["//*_dats.c", "//*_sats.c", "//*_lats.dats", "//tags"], ["//*"], ["//*"]]

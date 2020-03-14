@@ -8,7 +8,7 @@ darcs:
 
 
 approve FILE:
-    @cabal new-run atsfmt -- language-ats/test/data/{{ FILE }} -o > language-ats/test/data/$(echo {{ FILE }} | sed 's/\(dats\|hats\|sats\)/out/')
+    @cabal run atsfmt -w ghc-8.6.5 -- language-ats/test/data/{{ FILE }} -o > language-ats/test/data/$(echo {{ FILE }} | sed 's/\(dats\|hats\|sats\)/out/')
     sed -i '$d' language-ats/test/data/$(echo {{ FILE }} | sed 's/\(dats\|hats\|sats\)/out/')
 
 clean:
@@ -16,7 +16,7 @@ clean:
     rm -rf tags ats-pkg/docs/manual.out
 
 diff FILE:
-    @diff <(cabal new-run atsfmt -- language-ats/test/data/{{ FILE }} -o) language-ats/test/data/$(echo {{ FILE }} | sed 's/\(dats\|hats\|sats\)/out/') | perl -pe 's/\e\[?.*?[\@-~]//g'
+    @diff <(cabal run atsfmt -w ghc-8.8.3 -- language-ats/test/data/{{ FILE }} -o) language-ats/test/data/$(echo {{ FILE }} | sed 's/\(dats\|hats\|sats\)/out/') | perl -pe 's/\e\[?.*?[\@-~]//g'
 
 manpages:
     pandoc ats-format/man/MANPAGE.md -s -t man -o ats-format/man/atsfmt.1

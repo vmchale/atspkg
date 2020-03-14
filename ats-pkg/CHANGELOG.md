@@ -1,5 +1,73 @@
 # ats-pkg
 
+## 3.5.0.0
+
+  * Remove `packageCompiler`
+
+## 3.4.0.8
+
+  * Drop `.bz2` decompression; support GHC 8.8.1
+
+## 3.4.0.5
+
+  * Pin Dhall package
+  * More sensible verbosity flag
+
+## 3.4.0.3
+
+  * Support shake 0.18.4
+
+## 3.4.0.1
+
+  * Install manpages to `/usr/local/share/man/man1` on Mac
+  * Disable optimizations when running `--debug`
+
+## 3.4.0.0
+
+  * Add `--debug` flag to `test` and `build` subcommands
+
+## 3.3.0.6
+
+  * Only run `./autogen.sh` when installing the compiler if
+    `automake`/`autoconf` exist
+
+## 3.3.0.5
+
+  * Only run `cmake` when it exists
+
+## 3.3.0.4
+
+  * Fixes for Mac
+
+## 3.3.0.3
+
+  * Update manpages
+
+## 3.3.0.1
+
+  * Add `bench` subcommand to CLI
+
+## 3.3.0.0
+
+  * Add `bench` field to `Pkg` type
+
+## 3.2.6.4
+
+  * Upgrade to latest `dhall`
+
+## 3.2.6.3
+
+  * Better `clean` command
+
+## 3.2.6.1
+
+  * Display `language-ats` version when `--version` flag is passed
+
+## 3.2.6.0
+
+  * Add `license` and `changelog` field to `Debian` type
+  * `lintian` doesn't object to debianizations anymore
+
 ## 3.2.5.14
 
   * Update for new Dhall library

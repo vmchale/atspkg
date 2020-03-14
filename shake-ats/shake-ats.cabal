@@ -1,46 +1,47 @@
-cabal-version: 1.18
-name: shake-ats
-version: 1.10.2.2
-license: BSD3
-license-file: LICENSE
-copyright: Copyright: (c) 2018-2019 Vanessa McHale
-maintainer: vamchale@gmail.com
-author: Vanessa McHale
-tested-with: ghc ==8.4.4 ghc ==8.6.5
-synopsis: Utilities for building ATS projects with shake
+cabal-version:   1.18
+name:            shake-ats
+version:         1.10.4.1
+license:         BSD3
+license-file:    LICENSE
+copyright:       Copyright: (c) 2018-2019 Vanessa McHale
+maintainer:      vamchale@gmail.com
+author:          Vanessa McHale
+tested-with:     ghc ==8.4.4 ghc ==8.6.5
+synopsis:        Utilities for building ATS projects with shake
 description:
     Various helper functions for building [ATS](http://www.ats-lang.org/) with the [shake](http://shakebuild.com/) library
-category: Development, Build, ATS, Shake
-build-type: Simple
-extra-doc-files: README.md
-                 CHANGELOG.md
+
+category:        Development, Build, ATS, Shake
+build-type:      Simple
+extra-doc-files:
+    README.md
+    CHANGELOG.md
 
 source-repository head
-    type: git
+    type:     git
     location: git@github.com:vmchale/atspkg.git
-    subdir: shake-ats
+    subdir:   shake-ats
 
 flag development
-    description:
-        Enable `-Werror`
-    default: False
-    manual: True
+    description: Enable `-Werror`
+    default:     False
+    manual:      True
 
 library
-    exposed-modules:
-        Development.Shake.ATS
-    hs-source-dirs: src
+    exposed-modules:  Development.Shake.ATS
+    hs-source-dirs:   src
     other-modules:
         Development.Shake.ATS.Type
         Development.Shake.ATS.Rules
         Development.Shake.ATS.Environment
         Development.Shake.ATS.Generate
+
     default-language: Haskell2010
     other-extensions: RecordWildCards DeriveGeneric DeriveAnyClass
-    ghc-options: -Wall
+    ghc-options:      -Wall
     build-depends:
         base >=4.9 && <5,
-        language-ats -any,
+        language-ats >=1.7.7.0,
         shake-ext >=3.0.0.0,
         hs2ats >=0.5.0.0,
         directory -any,
@@ -50,7 +51,8 @@ library
         shake >=0.14,
         binary -any,
         shake-cabal -any,
-        shake-c >=0.4.0.0
+        shake-c >=0.4.0.0,
+        cdeps >=0.1.3.0
 
     if flag(development)
         ghc-options: -Werror

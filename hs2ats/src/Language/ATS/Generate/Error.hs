@@ -15,7 +15,6 @@ module Language.ATS.Generate.Error ( -- * Types
                                    , malformed
                                    ) where
 
-import           Control.Composition
 import           Control.DeepSeq              (NFData)
 import           GHC.Generics                 (Generic)
 import           Language.Haskell.Exts        hiding (Pretty, loc)
@@ -30,7 +29,7 @@ displayErr = hPutDoc stderr . pretty
 type ErrM a = Either GenerateError a
 
 syntaxError :: SrcLoc -> String -> ErrM a
-syntaxError = Left .* HaskellSyntaxError
+syntaxError = (Left .) . HaskellSyntaxError
 
 unsupported :: String -> ErrM a
 unsupported = Left . Unsupported
