@@ -79,7 +79,7 @@ instance Pretty (BinOp a) where
     pretty SpearOp            = "->"
     pretty At                 = "@"
     pretty RShift             = ">>"
-    pretty LShift             = ">>"
+    pretty LShift             = "<<"
     pretty (SpecialInfix _ s) = text s
 
 splits :: BinOp a -> Bool
