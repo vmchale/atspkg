@@ -1,5 +1,9 @@
 # language-ats
 
+# 1.7.10.11
+
+  * Fix bug where left shift was printed as right shift
+
 # 1.7.10.0
 
   * Add support for left/right shift operators in expressions
