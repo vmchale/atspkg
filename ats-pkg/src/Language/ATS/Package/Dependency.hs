@@ -7,7 +7,7 @@ module Language.ATS.Package.Dependency ( -- * Functions
                                        , SetupScript
                                        ) where
 
-import qualified Archive
+import qualified Archive.Compression                  as Archive
 import           Codec.Archive.Zip                    (ZipOption (..), extractFilesFromArchive, toArchive)
 import qualified Codec.Compression.GZip               as Gzip
 import qualified Codec.Compression.Lzma               as Lzma

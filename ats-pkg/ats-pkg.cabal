@@ -88,7 +88,7 @@ library
         ansi-wl-pprint -any,
         dependency >=1.2.0.0,
         quaalude -any,
-        archive-sig -any,
+        archive-sig >=1.0.1.0,
         archive-libarchive,
         unix-compat -any
 

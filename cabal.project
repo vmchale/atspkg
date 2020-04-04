@@ -19,6 +19,13 @@ constraints:
   shake-c +development,
   zlib +pkg-config
 
+allow-newer:
+  haskeline:base
+  cborg-json:base
+  dhall:template-haskell
+  serialise:ghc-prim
+  cborg:ghc-prim
+
 executable-stripping: true
 
 optimization: 2

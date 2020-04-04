@@ -47,7 +47,7 @@ listDeps :: Bool -- ^ Whether to sort dependencies
          -> IO ATSPackageSet
 listDeps b = fmap s . input auto . T.pack
     where s = bool id s' b
-          s' = over atsPkgSet (sortBy (compare `on` libName))
+          s' = over atsPkgSet (sortBy (compare &: libName))
 
 setBuildPlan :: FilePath -- ^ Filepath for cache inside @.atspkg@
              -> DepSelector

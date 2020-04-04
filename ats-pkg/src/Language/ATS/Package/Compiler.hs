@@ -12,7 +12,7 @@ module Language.ATS.Package.Compiler
     , SetupScript
     ) where
 
-import qualified Archive
+import qualified Archive.Compression     as Archive
 import           Codec.Compression.GZip  (decompress)
 import           Control.Monad
 import           Data.Dependency

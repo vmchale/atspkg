@@ -49,6 +49,7 @@ module Quaalude ( hex
                 , (.**)
                 , thread
                 , bisequence'
+                , (&:)
                 -- * Dhall reëxports
                 , FromDhall
                 , ToDhall
