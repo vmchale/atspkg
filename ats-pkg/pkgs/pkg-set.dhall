@@ -3,8 +3,8 @@ let prelude =
       ../dhall/atspkg-prelude.dhall sha256:33e41e509b6cfd0b075d1a8a5210ddfd1919372f9d972c2da783c6187d2298ba
 
 let makeGnuPkg =
-        λ(rec : { version : List Natural, name : Text })
-      →   prelude.dep
+      λ(rec : { version : List Natural, name : Text }) →
+          prelude.dep
         ⫽ { libName = rec.name
           , dir = "${rec.name}-${prelude.showVersion rec.version}"
           , url =
@@ -14,8 +14,8 @@ let makeGnuPkg =
           }
 
 let atsIncludes =
-        λ(x : List Natural)
-      →   prelude.dep
+      λ(x : List Natural) →
+          prelude.dep
         ⫽ { libName = "ats-includes"
           , dir = "${prelude.patsHome}/ats-includes-${prelude.showVersion x}"
           , url =
@@ -25,8 +25,8 @@ let atsIncludes =
           }
 
 let curl =
-        λ(x : List Natural)
-      →   prelude.dep
+      λ(x : List Natural) →
+          prelude.dep
         ⫽ { libName = "curl"
           , dir = "curl-${prelude.showVersion x}"
           , url =
@@ -43,24 +43,18 @@ let fastArithmetic =
       https://raw.githubusercontent.com/vmchale/hs-ats/master/fast-arithmetic/pkg.dhall sha256:97c8c051e9a7bc7875c38225a32a2af99518627f7cd52c0fccec5678cc8b019a
 
 let gmp =
-        λ(x : List Natural)
-      → prelude.makeNpmPkg
-          { x = x
-          , name = "atscntrb-hx-libgmp"
-          , unpackDir = "atscntrb-hx-libgmp"
-          }
+      λ(x : List Natural) →
+        prelude.makeNpmPkg
+          { x, name = "atscntrb-hx-libgmp", unpackDir = "atscntrb-hx-libgmp" }
 
 let parcomb =
-        λ(x : List Natural)
-      → prelude.makeNpmPkg
-          { x = x
-          , name = "atscntrb-hx-parcomb"
-          , unpackDir = "atscntrb-hx-parcomb"
-          }
+      λ(x : List Natural) →
+        prelude.makeNpmPkg
+          { x, name = "atscntrb-hx-parcomb", unpackDir = "atscntrb-hx-parcomb" }
 
 let atomicOps =
-        λ(v : List Natural)
-      →   prelude.dep
+      λ(v : List Natural) →
+          prelude.dep
         ⫽ { libName = "atomic-ops"
           , dir = "atomic-ops-${prelude.showVersion v}"
           , url =
@@ -71,8 +65,8 @@ let atomicOps =
           }
 
 let gc =
-        λ(v : List Natural)
-      →   prelude.dep
+      λ(v : List Natural) →
+          prelude.dep
         ⫽ { libName = "gc"
           , dir = "gc-${prelude.showVersion v}"
           , url =
@@ -84,9 +78,9 @@ let gc =
           }
 
 let divideConquer =
-        λ(x : List Natural)
-      →   prelude.makeNpmPkg
-            { x = x
+      λ(x : List Natural) →
+          prelude.makeNpmPkg
+            { x
             , name = "atscntrb-hx-divideconquer"
             , unpackDir = "atscntrb-bucs320-divideconquer"
             }
@@ -96,35 +90,32 @@ let divideConquer =
           }
 
 let divideConquerPar =
-        λ(x : List Natural)
-      →   prelude.makeNpmPkg
-            { x = x
+      λ(x : List Natural) →
+          prelude.makeNpmPkg
+            { x
             , name = "atscntrb-hx-divideconquerpar"
             , unpackDir = "atscntrb-bucs320-divideconquerpar"
             }
         ⫽ { libDeps = prelude.mapPlainDeps [ "atscntrb-hx-divideconquer" ] }
 
 let fworkshop =
-        λ(x : List Natural)
-      → prelude.makeNpmPkg
-          { x = x
+      λ(x : List Natural) →
+        prelude.makeNpmPkg
+          { x
           , name = "atscntrb-hx-fworkshop"
           , unpackDir = "atscntrb-hx-fworkshop"
           }
 
 let intinf =
-        λ(x : List Natural)
-      →   prelude.makeNpmPkg
-            { x = x
-            , name = "atscntrb-hx-intinf"
-            , unpackDir = "atscntrb-hx-intinf"
-            }
+      λ(x : List Natural) →
+          prelude.makeNpmPkg
+            { x, name = "atscntrb-hx-intinf", unpackDir = "atscntrb-hx-intinf" }
         ⫽ { libDeps = prelude.mapPlainDeps [ "atscntrb-hx-libgmp" ] }
 
 let threadkit =
-        λ(x : List Natural)
-      →   prelude.makeNpmPkg
-            { x = x
+      λ(x : List Natural) →
+          prelude.makeNpmPkg
+            { x
             , name = "atscntrb-hx-threadkit"
             , unpackDir = "atscntrb-hx-threadkit"
             }
