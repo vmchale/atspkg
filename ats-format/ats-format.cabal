@@ -39,7 +39,7 @@ executable atsfmt
     other-modules:    Paths_ats_format
     default-language: Haskell2010
     other-extensions: OverloadedStrings
-    ghc-options:      -Wall
+    ghc-options:      -Wall -rtsopts -with-rtsopts=-A9M
     build-depends:
         base >=4.9 && <5,
         language-ats >=1.7.4.0,

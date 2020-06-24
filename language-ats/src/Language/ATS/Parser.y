@@ -12,6 +12,7 @@
 
 import Control.Composition
 import Control.DeepSeq (NFData)
+import Control.Exception (Exception)
 import qualified Data.Map as M
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
@@ -1114,7 +1115,7 @@ data ATSError = Expected AlexPosn String String
               | Unknown Token
               | LexError String
               | Exhausted
-              deriving (Eq, Show, Generic, NFData)
+              deriving (Eq, Show, Generic, NFData, Exception)
 
 unmatched :: AlexPosn -> String -> Doc
 unmatched l chr = "unmatched" <+> squotes (text chr) <+> "at" <+> pretty l <> linebreak
