@@ -1,5 +1,7 @@
 # shake-ats
 
+  * Use `traced` when writing files
+
 ## 1.10.4.1
 
   * Only track C dependencies that exist

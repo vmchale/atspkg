@@ -95,7 +95,7 @@ atsLex latsIn fp =
     fp %> \out -> do
         lats <- liftIO $ readFile latsIn
         (Stdout contents) <- command [Stdin lats] "atslex" []
-        liftIO $ writeFile out contents
+        traced "atsLex" $ writeFile out contents
 
 -- | Clean up after an ATS build.
 cleanATS :: Action ()
