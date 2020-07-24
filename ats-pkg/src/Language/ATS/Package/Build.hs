@@ -143,12 +143,8 @@ dhallFile = "atspkg.dhall"
 getConfig :: MonadIO m => Maybe String -> Maybe FilePath -> m Pkg
 getConfig mStr dir' = liftIO $ do
     d <- fromMaybe <$> fmap (</> dhallFile) getCurrentDirectory <*> pure dir'
-    b <- not <$> doesFileExist cfgFile
     let go = case mStr of { Just x -> (<> (" " <> parens x)) ; Nothing -> id }
-    b' <- shouldWrite mStr cfgArgs
-    if b || b'
-        then input auto (T.pack (go d))
-        else fmap (decode . BSL.fromStrict) . BS.readFile $ cfgFile
+    input auto (T.pack (go d))
 
 manTarget :: Text -> FilePath
 manTarget m = unpack m -<.> "1"
