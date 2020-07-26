@@ -1,5 +1,9 @@
 # shake-c
 
+## 0.4.4.0
+
+  * Add `Pgi` constructor
+
 ## 0.4.3.0
 
   * Add `preprocessA` and `preprocessR`

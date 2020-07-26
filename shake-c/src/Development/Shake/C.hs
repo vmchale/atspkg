@@ -74,6 +74,7 @@ ccToString (GCC pre suff) = mkQualified pre suff "gcc"
 ccToString (GHC pre suff) = mkQualified pre suff "ghc"
 ccToString CompCert       = "ccomp"
 ccToString TCC            = "tcc"
+ccToString Pgi            = "pgcc"
 
 stripToString :: CCompiler -> String
 stripToString (GCC pre _) = mkQualified pre Nothing "strip"
@@ -95,6 +96,7 @@ isCross _              = False
 ccFromString :: String -> CCompiler
 ccFromString "icc" = ICC
 ccFromString "gcc" = GCC Nothing Nothing
+ccFromString "pgcc" = Pgi
 ccFromString "ccomp" = CompCert
 ccFromString "clang" = Clang
 ccFromString "ghc" = GHC Nothing Nothing
@@ -119,6 +121,7 @@ data CCompiler = GCC { _prefix  :: Maybe String -- ^ Usually the target triple
                | CompCert
                | ICC
                | TCC
+               | Pgi
                | Other String
                deriving (Generic, Binary, Show, Typeable, Eq, Hashable, NFData)
 
