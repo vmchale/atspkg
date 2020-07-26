@@ -9,22 +9,15 @@ packages: language-ats
 
 constraints:
   ats-format -development -static -profile,
-  ats-pkg +development -eventlog -profile,
+  ats-pkg -development -eventlog -profile,
   shake-ext -development,
   language-ats +development,
   shake-ats -development,
   ats-setup +development,
   hs2ats +development,
-  shake-cabal +development,
-  shake-c +development,
+  shake-cabal -development,
+  shake-c -development,
   zlib +pkg-config
-
-allow-newer:
-  haskeline:base
-  cborg-json:base
-  dhall:template-haskell
-  serialise:ghc-prim
-  cborg:ghc-prim
 
 executable-stripping: true
 
