@@ -17,7 +17,7 @@ let ForeignCabal =
 
 let TargetPair = { hs : Text, ats : Text, cpphs : Bool }
 
-let CCompiler = < CompCert | Clang | GCC | ICC | CC >
+let CCompiler = < CompCert | Clang | GCC | ICC | Pgi | CC >
 
 let Bin =
       { src : Text
@@ -66,16 +66,16 @@ let Debian =
       }
 
 let script =
-        λ(x : { dir : Text, target : Optional Text })
-      →   { configure = Some "./configure --prefix=${x.dir}"
+      λ(x : { dir : Text, target : Optional Text }) →
+          { configure = Some "./configure --prefix=${x.dir}"
           , build = "make -j6"
           , install = "make install"
           }
         : Script
 
 let src =
-        λ(x : { atsSrc : Text, cTarget : Text })
-      → { atsSrc = x.atsSrc
+      λ(x : { atsSrc : Text, cTarget : Text }) →
+        { atsSrc = x.atsSrc
         , cTarget = x.cTarget
         , atsGen = [] : List TargetPair
         , extras = [] : List Text
@@ -84,8 +84,8 @@ let src =
 let iccFlags = [ "-D__PURE_INTEL_C99_HEADERS__" ]
 
 let mapSrc =
-        λ(x : List { atsSrc : Text, cTarget : Text })
-      → map { atsSrc : Text, cTarget : Text } Src src x
+      λ(x : List { atsSrc : Text, cTarget : Text }) →
+        map { atsSrc : Text, cTarget : Text } Src src x
 
 let patsHome = ".atspkg/contrib"
 
@@ -96,16 +96,16 @@ let none = None (List Natural)
 let plainDeps = λ(x : Text) → { _1 = x, _2 = { lower = none, upper = none } }
 
 let eqDeps =
-        λ(x : { name : Text, version : List Natural })
-      → { _1 = x.name, _2 = { lower = Some x.version, upper = Some x.version } }
+      λ(x : { name : Text, version : List Natural }) →
+        { _1 = x.name, _2 = { lower = Some x.version, upper = Some x.version } }
 
 let lowerDeps =
-        λ(x : { name : Text, version : List Natural })
-      → { _1 = x.name, _2 = { lower = Some x.version, upper = none } }
+      λ(x : { name : Text, version : List Natural }) →
+        { _1 = x.name, _2 = { lower = Some x.version, upper = none } }
 
 let upperDeps =
-        λ(x : { name : Text, version : List Natural })
-      → { _1 = x.name, _2 = { lower = none, upper = Some x.version } }
+      λ(x : { name : Text, version : List Natural }) →
+        { _1 = x.name, _2 = { lower = none, upper = Some x.version } }
 
 let mapPlainDeps = λ(x : List Text) → map Text LibDep plainDeps x
 
@@ -166,8 +166,8 @@ let default =
       }
 
 let debian =
-        λ(project : Text)
-      → { package = project
+      λ(project : Text) →
+        { package = project
         , target = "target/${project}.deb"
         , manpage = None Text
         , binaries = [] : List Text
@@ -178,8 +178,8 @@ let debian =
         }
 
 let makePkg =
-        λ(rec : { x : List Natural, name : Text, githubUsername : Text })
-      →   dep
+      λ(rec : { x : List Natural, name : Text, githubUsername : Text }) →
+          dep
         ⫽ { libName = rec.name
           , dir = "${patsHome}"
           , url =
@@ -189,8 +189,8 @@ let makePkg =
           }
 
 let makeNpmPkg =
-        λ(rec : { x : List Natural, name : Text, unpackDir : Text })
-      →   dep
+      λ(rec : { x : List Natural, name : Text, unpackDir : Text }) →
+          dep
         ⫽ { libName = rec.name
           , dir = "${patsHome}/${rec.unpackDir}"
           , url =
@@ -200,8 +200,8 @@ let makeNpmPkg =
           }
 
 let makeHsPkg =
-        λ(rec : { x : List Natural, name : Text })
-      →   dep
+      λ(rec : { x : List Natural, name : Text }) →
+          dep
         ⫽ { libName = rec.name
           , dir = "${patsHome}"
           , url =
@@ -212,14 +212,14 @@ let makeHsPkg =
           }
 
 let makePkgDescr =
-        λ ( x
-          : { x : List Natural
-            , name : Text
-            , githubUsername : Text
-            , description : Text
-            }
-          )
-      →   makePkg { x = x.x, name = x.name, githubUsername = x.githubUsername }
+      λ ( x
+        : { x : List Natural
+          , name : Text
+          , githubUsername : Text
+          , description : Text
+          }
+        ) →
+          makePkg { x = x.x, name = x.name, githubUsername = x.githubUsername }
         ⫽ { description = Some x.description }
 
 let cabalDir = "dist-newstyle/lib"
@@ -251,68 +251,66 @@ let icc = CCompiler.ICC
 let cc = CCompiler.CC
 
 let printCompiler =
-        λ(cc : CCompiler)
-      → merge
+      λ(cc : CCompiler) →
+        merge
           { CompCert = "ccomp"
           , Clang = "clang"
           , GCC = "gcc"
           , ICC = "icc"
+          , Pgi = "pgcc"
           , CC = "cc"
           }
           cc
 
 let ccFlags =
-        λ(cc : CCompiler)
-      → merge
+      λ(cc : CCompiler) →
+        merge
           { CompCert = [ "-O2", "-fstruct-passing" ]
           , Clang = [ "-O2", "-mtune=native", "-flto" ]
           , GCC = [ "-O2", "-mtune=native", "-flto" ]
           , ICC =
-              [ "-O2"
-              , "-mtune=native"
-              , "-flto"
-              , "-D__PURE_INTEL_C99_HEADERS__"
-              ]
+            [ "-O2", "-mtune=native", "-flto", "-D__PURE_INTEL_C99_HEADERS__" ]
           , CC = [ "-O2" ]
+          , Pgi = [ "-O2", "-mtune=native" ]
           }
           cc
 
 let iccFlags = [ "-D__PURE_INTEL_C99_HEADERS__" ]
 
-in  { mkDeb = mkDeb
-    , emptySrc = emptySrc
-    , emptyBin = emptyBin
-    , emptyLib = emptyLib
-    , showVersion = showVersion
-    , makePkg = makePkg
-    , bin = bin
-    , lib = lib
-    , dep = dep
-    , staticLib = staticLib
-    , default = default
-    , plainDeps = plainDeps
-    , lowerDeps = lowerDeps
-    , upperDeps = upperDeps
-    , eqDeps = eqDeps
-    , mapPlainDeps = mapPlainDeps
-    , src = src
-    , mapSrc = mapSrc
-    , makePkgDescr = makePkgDescr
-    , makeHsPkg = makeHsPkg
-    , makeNpmPkg = makeNpmPkg
-    , patsHome = patsHome
-    , cabalDir = cabalDir
-    , solver = solver
-    , ignore = ignore
-    , debian = debian
-    , noPrelude = noPrelude
-    , atsProject = atsProject
-    , gcc = gcc
-    , clang = clang
-    , compCert = compCert
-    , icc = icc
-    , cc = cc
-    , printCompiler = printCompiler
-    , ccFlags = ccFlags
-    , iccFlags = iccFlags
+in  { mkDeb
+    , emptySrc
+    , emptyBin
+    , emptyLib
+    , showVersion
+    , makePkg
+    , bin
+    , lib
+    , dep
+    , staticLib
+    , default
+    , plainDeps
+    , lowerDeps
+    , upperDeps
+    , eqDeps
+    , mapPlainDeps
+    , src
+    , mapSrc
+    , makePkgDescr
+    , makeHsPkg
+    , makeNpmPkg
+    , patsHome
+    , cabalDir
+    , solver
+    , ignore
+    , debian
+    , noPrelude
+    , atsProject
+    , gcc
+    , clang
+    , compCert
+    , icc
+    , cc
+    , printCompiler
+    , ccFlags
+    , iccFlags
     }
