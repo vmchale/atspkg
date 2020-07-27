@@ -51,6 +51,8 @@ let Src =
 
 let Script = { configure : Optional Text, build : Text, install : Text }
 
+let Solver = < PatsSolve | Z3 | Ignore >
+
 let Debian =
       { package : Text
       , version : List Natural
@@ -65,7 +67,29 @@ let Debian =
       , changelog : Optional Text
       }
 
-let script =
+let AtsPkg =
+      { bin : List Bin
+      , test : List Bin
+      , bench : List Bin
+      , libraries : List Lib
+      , man : Optional Text
+      , completions : Optional Text
+      , version : List Natural
+      , compiler : List Natural
+      , dependencies : List LibDep
+      , clib : List LibDep
+      , buildDeps : List LibDep
+      , ccompiler : Text
+      , cflags : List Text
+      , atsFlags : List Text
+      , atsSource : List Src
+      , dynLink : Bool
+      , extSolve : Solver
+      , debPkg : Optional Debian
+      , atsLib : Bool
+      }
+
+let autoconfScript =
       λ(x : { dir : Text, target : Optional Text }) →
           { configure = Some "./configure --prefix=${x.dir}"
           , build = "make -j6"
@@ -80,8 +104,6 @@ let src =
         , atsGen = [] : List TargetPair
         , extras = [] : List Text
         }
-
-let iccFlags = [ "-D__PURE_INTEL_C99_HEADERS__" ]
 
 let mapSrc =
       λ(x : List { atsSrc : Text, cTarget : Text }) →
@@ -137,33 +159,32 @@ let lib =
 
 let staticLib = lib ⫽ { static = True }
 
-let Solver = < PatsSolve | Z3 | Ignore >
-
 let solver = Solver.PatsSolve
 
 let ignore = Solver.Ignore
 
 let default =
-      { bin = [] : List Bin
-      , test = [] : List Bin
-      , bench = [] : List Bin
-      , libraries = [] : List Lib
-      , man = None Text
-      , completions = None Text
-      , version = [ 0, 3, 13 ]
-      , compiler = [ 0, 3, 13 ]
-      , dependencies = [] : List LibDep
-      , clib = [] : List LibDep
-      , buildDeps = [] : List LibDep
-      , ccompiler = "gcc"
-      , cflags = [ "-O2" ]
-      , atsFlags = [] : List Text
-      , atsSource = [] : List Src
-      , dynLink = True
-      , extSolve = solver
-      , debPkg = None Debian
-      , atsLib = True
-      }
+        { bin = [] : List Bin
+        , test = [] : List Bin
+        , bench = [] : List Bin
+        , libraries = [] : List Lib
+        , man = None Text
+        , completions = None Text
+        , version = [ 0, 3, 13 ]
+        , compiler = [ 0, 3, 13 ]
+        , dependencies = [] : List LibDep
+        , clib = [] : List LibDep
+        , buildDeps = [] : List LibDep
+        , ccompiler = "gcc"
+        , cflags = [ "-O2" ]
+        , atsFlags = [] : List Text
+        , atsSource = [] : List Src
+        , dynLink = True
+        , extSolve = solver
+        , debPkg = None Debian
+        , atsLib = True
+        }
+      : AtsPkg
 
 let debian =
       λ(project : Text) →
@@ -248,6 +269,8 @@ let compCert = CCompiler.CompCert
 
 let icc = CCompiler.ICC
 
+let pgi = CCompiler.Pgi
+
 let cc = CCompiler.CC
 
 let printCompiler =
@@ -276,6 +299,11 @@ let ccFlags =
           cc
 
 let iccFlags = [ "-D__PURE_INTEL_C99_HEADERS__" ]
+
+let compilerMod =
+      λ(cc : CCompiler) →
+      λ(x : AtsPkg) →
+        x ⫽ { ccompiler = printCompiler cc, cflags = x.cflags # ccFlags cc }
 
 in  { mkDeb
     , emptySrc
@@ -309,8 +337,11 @@ in  { mkDeb
     , clang
     , compCert
     , icc
+    , pgi
     , cc
     , printCompiler
     , ccFlags
     , iccFlags
+    , autoconfScript
+    , compilerMod
     }
