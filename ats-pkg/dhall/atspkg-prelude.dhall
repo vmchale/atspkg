@@ -294,7 +294,7 @@ let ccFlags =
           , ICC =
             [ "-O2", "-mtune=native", "-flto", "-D__PURE_INTEL_C99_HEADERS__" ]
           , CC = [ "-O2" ]
-          , Pgi = [ "-O2", "-mtune=native" ]
+          , Pgi = [ "-O2" ]
           }
           cc
 
