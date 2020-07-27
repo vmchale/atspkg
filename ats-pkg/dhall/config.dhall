@@ -1,9 +1,10 @@
-let commit = "c0ab1d0f37385b8bb762a3d73d9e44388601eefe"
+let commit = "96d6d6d5e29c4d8bafdc46725095e38a7c77d686"
 
-let hash = ""
+let hash =
+      "sha256:c04fe26a86f2e2bd5c67c17f213ee30379d520f5fad11254a8f17e936250e27e"
 
 in  { defaultPkgs =
-        "https://raw.githubusercontent.com/vmchale/atspkg/${commit}/ats-pkg/pkgs/pkg-set.dhall sha256:a16dc6b6d4d803a90682ec4e105a568a3c57bea8369fab6befccb9e6d203c615"
+        "https://raw.githubusercontent.com/vmchale/atspkg/${commit}/ats-pkg/pkgs/pkg-set.dhall ${hash}"
     , path = None Text
     , githubUsername = ""
     , filterErrors = False
