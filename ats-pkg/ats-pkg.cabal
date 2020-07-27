@@ -92,7 +92,7 @@ library
         archive-libarchive >=1.0.0.0,
         unix-compat -any
 
-    mixins: archive-libarchive (Archive.FFI as Archive)
+    mixins:             archive-libarchive (Archive.FFI as Archive)
 
     if flag(development)
         ghc-options: -Werror
