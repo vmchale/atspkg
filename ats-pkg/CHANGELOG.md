@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.5.0.1
+
+  * Bump config files
+
 ## 3.5.0.0
 
   * Remove `packageCompiler`
