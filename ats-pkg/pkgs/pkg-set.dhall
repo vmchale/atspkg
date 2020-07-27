@@ -120,54 +120,51 @@ let threadkit =
             }
         ⫽ { libDeps = prelude.mapPlainDeps [ "atscntrb-hx-libgmp" ] }
 
-in  let pkgset =
-          [ divideConquer [ 1, 0, 5 ]
-          , divideConquerPar [ 1, 0, 9 ]
-          , fworkshop [ 1, 0, 2 ]
-          , intinf [ 1, 0, 8 ]
-          , threadkit [ 1, 0, 3 ]
-          , gmp [ 1, 0, 1 ]
-          , atomicOps [ 7, 6, 10 ]
-          , gc [ 8, 0, 4 ]
-          , gc [ 7, 6, 8 ]
-          , gc [ 7, 6, 10 ]
-          , gc [ 7, 6, 12 ]
-          , fastArithmetic [ 0, 6, 4, 2 ]
-          , unistring [ 0, 9, 10 ]
-          , atsIncludes [ 0, 3, 12 ]
-          , atsIncludes [ 0, 3, 13 ]
-          , curl [ 7, 60, 0 ]
-          , parcomb [ 1, 0, 7 ]
-          , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall
-              [ 0, 3, 3 ]
-          , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall
-              [ 0, 4, 8 ]
-          , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall
-              [ 0, 4, 3 ]
-          , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall
-              [ 0, 1, 8 ]
-          , https://raw.githubusercontent.com/vmchale/either/master/pkg.dhall
-              [ 0, 2, 5 ]
-          , https://raw.githubusercontent.com/vmchale/ats-linecount/master/pkg.dhall
-              [ 0, 2, 5 ]
-          , https://raw.githubusercontent.com/vmchale/specats/master/pkg.dhall
-              [ 0, 2, 3 ]
-          , https://raw.githubusercontent.com/vmchale/specats/master/pkg.dhall
-              [ 0, 4, 0 ]
-          , https://raw.githubusercontent.com/vmchale/edit-distance/master/pkg.dhall
-              [ 0, 1, 0 ]
-          , https://raw.githubusercontent.com/vmchale/edit-distance/master/pkg.dhall
-              [ 0, 3, 3 ]
-          , https://raw.githubusercontent.com/vmchale/edit-distance/master/pkg.dhall
-              [ 0, 4, 0 ]
-          , https://raw.githubusercontent.com/vmchale/edit-distance/master/pkg.dhall
-              [ 0, 5, 0 ]
-          , https://raw.githubusercontent.com/vmchale/monads/master/pkg.dhall
-              [ 0, 1, 0 ]
-          , https://raw.githubusercontent.com/vmchale/monads/master/pkg.dhall
-              [ 0, 2, 0 ]
-          , https://raw.githubusercontent.com/vmchale/recursion/master/pkg.dhall
-              [ 0, 1, 0 ]
-          ]
-
-    in  pkgset
+in  [ divideConquer [ 1, 0, 5 ]
+    , divideConquerPar [ 1, 0, 9 ]
+    , fworkshop [ 1, 0, 2 ]
+    , intinf [ 1, 0, 8 ]
+    , threadkit [ 1, 0, 3 ]
+    , gmp [ 1, 0, 1 ]
+    , atomicOps [ 7, 6, 10 ]
+    , gc [ 8, 0, 4 ]
+    , gc [ 7, 6, 8 ]
+    , gc [ 7, 6, 10 ]
+    , gc [ 7, 6, 12 ]
+    , fastArithmetic [ 0, 6, 4, 2 ]
+    , unistring [ 0, 9, 10 ]
+    , atsIncludes [ 0, 3, 12 ]
+    , atsIncludes [ 0, 3, 13 ]
+    , curl [ 7, 60, 0 ]
+    , parcomb [ 1, 0, 7 ]
+    , https://raw.githubusercontent.com/vmchale/ats-bench/master/pkg.dhall
+        [ 0, 3, 3 ]
+    , https://raw.githubusercontent.com/vmchale/ats-concurrency/master/pkg.dhall
+        [ 0, 4, 8 ]
+    , https://raw.githubusercontent.com/vmchale/hs-bind/master/pkg.dhall
+        [ 0, 4, 3 ]
+    , https://raw.githubusercontent.com/vmchale/nproc-ats/master/pkg.dhall
+        [ 0, 1, 8 ]
+    , https://raw.githubusercontent.com/vmchale/either/master/pkg.dhall
+        [ 0, 2, 5 ]
+    , https://raw.githubusercontent.com/vmchale/ats-linecount/master/pkg.dhall
+        [ 0, 2, 5 ]
+    , https://raw.githubusercontent.com/vmchale/specats/master/pkg.dhall
+        [ 0, 2, 3 ]
+    , https://raw.githubusercontent.com/vmchale/specats/master/pkg.dhall
+        [ 0, 4, 0 ]
+    , https://raw.githubusercontent.com/vmchale/edit-distance/master/pkg.dhall
+        [ 0, 1, 0 ]
+    , https://raw.githubusercontent.com/vmchale/edit-distance/master/pkg.dhall
+        [ 0, 3, 3 ]
+    , https://raw.githubusercontent.com/vmchale/edit-distance/master/pkg.dhall
+        [ 0, 4, 0 ]
+    , https://raw.githubusercontent.com/vmchale/edit-distance/master/pkg.dhall
+        [ 0, 5, 0 ]
+    , https://raw.githubusercontent.com/vmchale/monads/master/pkg.dhall
+        [ 0, 1, 0 ]
+    , https://raw.githubusercontent.com/vmchale/monads/master/pkg.dhall
+        [ 0, 2, 0 ]
+    , https://raw.githubusercontent.com/vmchale/recursion/master/pkg.dhall
+        [ 0, 1, 0 ]
+    ]
