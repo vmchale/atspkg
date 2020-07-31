@@ -17,7 +17,8 @@ constraints:
   hs2ats +development,
   shake-cabal -development,
   shake-c -development,
-  zlib +pkg-config
+  zlib +pkg-config,
+  libarchive +static
 
 executable-stripping: true
 
