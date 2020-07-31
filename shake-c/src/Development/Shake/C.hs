@@ -104,7 +104,7 @@ ccFromString "tcc"   = TCC
 ccFromString s
     | "gcc" `isSuffixOf` s   = GCC (Just (reverse . drop 3 . reverse $ s)) Nothing
     | "ghc" `isSuffixOf` s   = GHC (Just (reverse . drop 3 . reverse $ s)) Nothing
-    | "clang" `isPrefixOf` s = Clang (Just (drop 3 s))
+    | "clang" `isPrefixOf` s = Clang (Just (drop 5 s))
     | "ghc" `isPrefixOf` s   = GHC Nothing (Just (drop 3 s))
     | "gcc" `isPrefixOf` s   = GCC Nothing (Just (drop 3 s))
 ccFromString _ = Other "cc"
