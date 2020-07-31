@@ -68,7 +68,7 @@ host = arch ++ withManufacturer os
 -- | Get the executable name for a 'CCompiler'
 ccToString :: CCompiler -> String
 ccToString ICC            = "icc"
-ccToString Clang          = "clang"
+ccToString (Clang suff)   = mkQualified Nothing suff "clang"
 ccToString (Other s)      = s
 ccToString (GCC pre suff) = mkQualified pre suff "gcc"
 ccToString (GHC pre suff) = mkQualified pre suff "ghc"
@@ -94,18 +94,19 @@ isCross _              = False
 -- | Attempt to parse a string as a 'CCompiler', defaulting to @cc@ if parsing
 -- fails.
 ccFromString :: String -> CCompiler
-ccFromString "icc" = ICC
-ccFromString "gcc" = GCC Nothing Nothing
-ccFromString "pgcc" = Pgi
+ccFromString "icc"   = ICC
+ccFromString "gcc"   = GCC Nothing Nothing
+ccFromString "pgcc"  = Pgi
 ccFromString "ccomp" = CompCert
-ccFromString "clang" = Clang
-ccFromString "ghc" = GHC Nothing Nothing
-ccFromString "tcc" = TCC
+ccFromString "clang" = Clang Nothing
+ccFromString "ghc"   = GHC Nothing Nothing
+ccFromString "tcc"   = TCC
 ccFromString s
-    | "gcc" `isSuffixOf` s = GCC (Just (reverse . drop 3 . reverse $ s)) Nothing
-    | "ghc" `isSuffixOf` s = GHC (Just (reverse . drop 3 . reverse $ s)) Nothing
-    | "ghc" `isPrefixOf` s = GHC Nothing (Just (drop 3 s))
-    | "gcc" `isPrefixOf` s = GCC Nothing (Just (drop 3 s))
+    | "gcc" `isSuffixOf` s   = GCC (Just (reverse . drop 3 . reverse $ s)) Nothing
+    | "ghc" `isSuffixOf` s   = GHC (Just (reverse . drop 3 . reverse $ s)) Nothing
+    | "clang" `isPrefixOf` s = Clang (Just (drop 3 s))
+    | "ghc" `isPrefixOf` s   = GHC Nothing (Just (drop 3 s))
+    | "gcc" `isPrefixOf` s   = GCC Nothing (Just (drop 3 s))
 ccFromString _ = Other "cc"
 
 -- ALSO consider using Haskell -> C -> ICC ??
@@ -114,7 +115,8 @@ ccFromString _ = Other "cc"
 data CCompiler = GCC { _prefix  :: Maybe String -- ^ Usually the target triple
                      , _postfix :: Maybe String -- ^ The compiler version
                      }
-               | Clang
+               | Clang { _postfix :: Maybe String -- ^ The compiler version
+                       }
                | GHC { _prefix  :: Maybe String -- ^ The target triple
                      , _postfix :: Maybe String -- ^ The compiler version
                      }

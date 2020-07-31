@@ -1,5 +1,9 @@
 # shake-c
 
+## 0.4.5.0
+
+  * Add `suff` to `Clang` constructor
+
 ## 0.4.4.0
 
   * Add `Pgi` constructor
