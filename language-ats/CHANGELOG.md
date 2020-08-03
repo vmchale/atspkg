@@ -1,5 +1,7 @@
 # language-ats
 
+  * Add `Exception` instance for parse errors
+
 # 1.7.10.11
 
   * Fix bug where left shift was printed as right shift
