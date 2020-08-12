@@ -184,6 +184,7 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
     rbrace { Special $$ "}" }
     funcArrow { FuncType _ $$ }
     plainArrow { Arrow $$ "=>" }
+    clorefArrow { Arrow $$ "=<cloref>" }
     cloref1Arrow { Arrow $$ "=<cloref1>" }
     cloptr1Arrow { Arrow $$ "=<cloptr1>" }
     lincloptr1Arrow { Arrow $$ "=<lincloptr1>" }
@@ -427,6 +428,7 @@ CaseArrow :: { LambdaType AlexPosn }
 
 LambdaArrow :: { LambdaType AlexPosn }
             : plainArrow { Plain $1 }
+            | clorefArrow { Full $1 "cloref" }
             | cloref1Arrow { Full $1 "cloref1" } -- FIXME this is a bad heuristic
             | cloptr1Arrow { Full $1 "cloptr1" }
             | lincloptr1Arrow { Full $1 "lincloptr1" }
