@@ -168,5 +168,5 @@ in  [ divideConquer [ 1, 0, 5 ]
     , https://raw.githubusercontent.com/vmchale/recursion/master/pkg.dhall
         [ 0, 1, 0 ]
     , https://raw.githubusercontent.com/vmchale/ccompiler/master/pkg.dhall
-        [ 0, 2, 0 ]
+        [ 0, 2, 1 ]
     ]
