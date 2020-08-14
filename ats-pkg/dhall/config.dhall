@@ -1,7 +1,7 @@
-let commit = "6c11f86a1c847379eb7414f2a1a42b7318e588d6"
+let commit = "71dc4637adcb11863a0010b6bcde64cf5c0e38d7"
 
 let hash =
-      "sha256:38298d16f3b5e34d93e4401ce5395c00af3eb24644b012deceb19ef8a0973311"
+      "sha256:d680b2c6b8228d6179c6121d2b2e936e7e99d59f00f8f3bdc8f2fdbf0acafbc7"
 
 in  { defaultPkgs =
         "https://raw.githubusercontent.com/vmchale/atspkg/${commit}/ats-pkg/pkgs/pkg-set.dhall ${hash}"
