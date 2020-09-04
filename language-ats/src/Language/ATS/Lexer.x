@@ -91,10 +91,10 @@ $br = [\<\>]
 @box_tuple = \' ($white | @block_comment)* \(
 @box_record = \' ($white | @block_comment)* \{
 
-$in_operator = $special # [\)\(\}\{\_\[\]\,]
+$in_operator = $special # [\)\(\}\{\_\[\]\,\&]
 $in_l = $in_operator # [\<]
 $in_r = $in_operator # [\>]
-@operator = "+" | "-" | "*" | "/" | "<" | ">" | "=" | "~" | "!" | "?" | "%" | "#[" | $in_r{2,} | $in_l{2,} | $in_r{2,} $in_l+
+@operator = "+" | "-" | "*" | "/" | "<" | ">" | "=" | "~" | "!" | "?" | "%" | "#[" | "&&" | $in_r{2,} | $in_l{2,} | $in_r{2,} $in_l+
 
 @double_parens = "(" (@block_comment | $white+ | \n | "//".*)+ ")" | "()"
 @double_braces = "{" @block_comment "}" | "{}"

@@ -1,5 +1,7 @@
 # language-ats
 
+  * Fix bug whereby `&$GMP.mpz >> _` was parsed incorrectly.
+
 # 1.7.10.12
 
   * Add `Exception` instance for parse errors
