@@ -253,7 +253,7 @@ runHelper rba lint tim rs mStr tgt dbg v = g . bool x y . (&& isNothing tgt) =<<
           x = [buildAll v mStr tgt Nothing]
 
 run :: Command -> IO ()
-run List                               = displayList "https://raw.githubusercontent.com/vmchale/atspkg/baac3c7bdcb0d617fba43818dbb66da554092039/ats-pkg/pkgs/pkg-set.dhall sha256:a16dc6b6d4d803a90682ec4e105a568a3c57bea8369fab6befccb9e6d203c615"
+run List                               = displayList "https://raw.githubusercontent.com/vmchale/atspkg/137c57c95135591c6627fffcc1ba75864b4c0918/ats-pkg/pkgs/pkg-set.dhall sha256:fa901519fa579dbb5ee187bc2c43c20b3c1f8ad2ff9129f393f1066a174b413d"
 run (Check p b)                            = void $ ($ Version [0,1,0]) <$> checkPkg p b
 run (CheckSet p b)                         = void $ checkPkgSet p b
 run Upgrade                                = upgradeBin "vmchale" "atspkg"
