@@ -1,5 +1,9 @@
 # ats-pkg
 
+## 3.5.0.2
+
+  * Compat with Dhall >= 1.35.0
+
 ## 3.5.0.1
 
   * Bump config files

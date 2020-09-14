@@ -152,7 +152,7 @@ import           Debug.Trace                  (traceShow, traceShowId)
 #endif
 import           Development.Shake            hiding (doesFileExist, getEnv)
 import           Development.Shake.FilePath
-import           Dhall                        hiding (Text, bool, void)
+import           Dhall                        hiding (Text, bool, void, newManager)
 import           Lens.Micro
 import           Lens.Micro.Extras
 import           Network.HTTP.Client
