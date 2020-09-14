@@ -6,22 +6,22 @@ let concat =
       https://raw.githubusercontent.com/dhall-lang/dhall-lang/master/Prelude/List/concat sha256:54e43278be13276e03bd1afa89e562e94a0a006377ebea7db14c7562b0de292b
 
 let prelude =
-      https://raw.githubusercontent.com/vmchale/atspkg/master/ats-pkg/dhall/atspkg-prelude.dhall sha256:33e41e509b6cfd0b075d1a8a5210ddfd1919372f9d972c2da783c6187d2298ba
+      https://raw.githubusercontent.com/vmchale/atspkg/master/ats-pkg/dhall/atspkg-prelude.dhall sha256:69bdde38a8cc01c91a1808ca3f45c29fe754c9ac96e91e6abd785508466399b4
 
 let mapDir =
-        λ(rec : { dir : Text, xs : List Text })
-      → map Text Text (λ(x : Text) → "${rec.dir}/DATS/${x}.dats") rec.xs
+      λ(rec : { dir : Text, xs : List Text }) →
+        map Text Text (λ(x : Text) → "${rec.dir}/DATS/${x}.dats") rec.xs
 
-let mapPre = λ(xs : List Text) → mapDir { dir = "prelude", xs = xs }
+let mapPre = λ(xs : List Text) → mapDir { dir = "prelude", xs }
 
-let mapC = λ(xs : List Text) → mapDir { dir = "libats/libc", xs = xs }
+let mapC = λ(xs : List Text) → mapDir { dir = "libats/libc", xs }
 
-let mapML = λ(xs : List Text) → mapDir { dir = "libats/ML", xs = xs }
+let mapML = λ(xs : List Text) → mapDir { dir = "libats/ML", xs }
 
 let atslib =
-        λ(compilerVersion : List Natural)
-      → λ(libVersion : List Natural)
-      →   prelude.default
+      λ(compilerVersion : List Natural) →
+      λ(libVersion : List Natural) →
+          prelude.default
         ⫽ { libraries =
             [   prelude.staticLib
               ⫽ { libTarget = "target/libatslib.a"
