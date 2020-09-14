@@ -1,13 +1,15 @@
 # language-ats
 
+# 1.7.10.3
+
   * Fix bug whereby `&$GMP.mpz >> _` was parsed incorrectly.
 
-# 1.7.10.12
+# 1.7.10.2
 
   * Add `Exception` instance for parse errors
   * Work with `cloref` arrows
 
-# 1.7.10.11
+# 1.7.10.1
 
   * Fix bug where left shift was printed as right shift
 
