@@ -1,5 +1,9 @@
 # shake-cabal
 
+## 0.2.2.2
+
+  * Cabal version `>3.6`
+
 ## 0.2.2.1
 
   * Support `shake` 0.18.4

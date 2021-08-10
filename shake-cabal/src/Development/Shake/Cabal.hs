@@ -29,9 +29,7 @@ import           Distribution.ModuleName
 import           Distribution.PackageDescription
 import           Distribution.PackageDescription.Parsec
 import           Distribution.Pretty
-import           Distribution.Types.CondTree
-import           Distribution.Types.ForeignLib
-import           Distribution.Types.PackageId
+import           Distribution.Utils.Path                (getSymbolicPath)
 import           Distribution.Verbosity                 as Distribution
 import           Distribution.Version
 import           System.Directory                       (doesFileExist)
@@ -123,7 +121,7 @@ getCabalDepsV v p = do
         benchSrc = extractHelper benchToFiles benches
         foreignSrc = extractHelper foreignToFiles foreigns
 
-        dirHelper f xs = (fmap (++ [pathSeparator]) . hsSourceDirs . f <=< extract) =<< xs
+        dirHelper f xs = (fmap ((++ [pathSeparator]) . getSymbolicPath) . hsSourceDirs . f <=< extract) =<< xs
 
         dir = dirHelper libBuildInfo libs
         exeDir = dirHelper buildInfo exes
