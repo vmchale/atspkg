@@ -39,7 +39,8 @@ let unistring =
       λ(x : List Natural) → makeGnuPkg { version = x, name = "unistring" }
 
 let fastArithmetic =
-      https://raw.githubusercontent.com/vmchale/hs-ats/master/fast-arithmetic/pkg.dhall sha256:97c8c051e9a7bc7875c38225a32a2af99518627f7cd52c0fccec5678cc8b019a
+      https://raw.githubusercontent.com/vmchale/hs-ats/master/fast-arithmetic/pkg.dhall
+        sha256:97c8c051e9a7bc7875c38225a32a2af99518627f7cd52c0fccec5678cc8b019a
 
 let gmp =
       λ(x : List Natural) →
@@ -165,6 +166,8 @@ in  [ divideConquer [ 1, 0, 5 ]
         [ 0, 1, 0 ]
     , https://raw.githubusercontent.com/vmchale/monads/master/pkg.dhall
         [ 0, 2, 0 ]
+    , https://raw.githubusercontent.com/vmchale/stack/master/pkg.dhall
+        [ 0, 1, 1 ]
     , https://raw.githubusercontent.com/vmchale/recursion/master/pkg.dhall
         [ 0, 1, 0 ]
     , https://raw.githubusercontent.com/vmchale/ccompiler/master/pkg.dhall
