@@ -1,12 +1,15 @@
 {- Dhall prelude imports -}
 let map =
-      https://raw.githubusercontent.com/dhall-lang/dhall-lang/master/Prelude/List/map sha256:dd845ffb4568d40327f2a817eb42d1c6138b929ca758d50bc33112ef3c885680
+      https://prelude.dhall-lang.org/v21.1.0/List/map.dhall
+        sha256:dd845ffb4568d40327f2a817eb42d1c6138b929ca758d50bc33112ef3c885680
 
 let concat =
-      https://raw.githubusercontent.com/dhall-lang/dhall-lang/master/Prelude/List/concat sha256:54e43278be13276e03bd1afa89e562e94a0a006377ebea7db14c7562b0de292b
+      https://prelude.dhall-lang.org/v21.1.0/List/concat.dhall
+        sha256:54e43278be13276e03bd1afa89e562e94a0a006377ebea7db14c7562b0de292b
 
 let prelude =
-      https://raw.githubusercontent.com/vmchale/atspkg/master/ats-pkg/dhall/atspkg-prelude.dhall sha256:69bdde38a8cc01c91a1808ca3f45c29fe754c9ac96e91e6abd785508466399b4
+      https://raw.githubusercontent.com/vmchale/atspkg/master/ats-pkg/dhall/atspkg-prelude.dhall
+        sha256:69bdde38a8cc01c91a1808ca3f45c29fe754c9ac96e91e6abd785508466399b4
 
 let mapDir =
       λ(rec : { dir : Text, xs : List Text }) →

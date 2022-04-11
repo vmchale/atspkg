@@ -1,9 +1,11 @@
 {- Dhall prelude functions -}
 let concatMapSep =
-      https://raw.githubusercontent.com/dhall-lang/dhall-lang/9f259cd68870b912fbf2f2a08cd63dc3ccba9dc3/Prelude/Text/concatMapSep sha256:c272aca80a607bc5963d1fcb38819e7e0d3e72ac4d02b1183b1afb6a91340840
+      https://prelude.dhall-lang.org/v21.1.0/Text/concatMapSep.dhall
+        sha256:c272aca80a607bc5963d1fcb38819e7e0d3e72ac4d02b1183b1afb6a91340840
 
 let map =
-      https://raw.githubusercontent.com/dhall-lang/dhall-lang/9f259cd68870b912fbf2f2a08cd63dc3ccba9dc3/Prelude/List/map sha256:dd845ffb4568d40327f2a817eb42d1c6138b929ca758d50bc33112ef3c885680
+      https://prelude.dhall-lang.org/v21.1.0/List/map.dhall
+        sha256:dd845ffb4568d40327f2a817eb42d1c6138b929ca758d50bc33112ef3c885680
 
 let ATSConstraint =
       { lower : Optional (List Natural), upper : Optional (List Natural) }
