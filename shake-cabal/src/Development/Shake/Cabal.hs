@@ -26,6 +26,7 @@ import           Development.Shake                      hiding (doesFileExist)
 import qualified Development.Shake                      as Shake
 import           Development.Shake.Cabal.Oracles
 import           Distribution.ModuleName
+import           Distribution.Simple.PackageDescription (readGenericPackageDescription)
 import           Distribution.PackageDescription
 import           Distribution.PackageDescription.Parsec
 import           Distribution.Pretty
